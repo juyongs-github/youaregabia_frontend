@@ -1,0 +1,219 @@
+/* ==================================================
+   전체 배경 (기존)
+================================================== */
+.auth-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0f0f0f, #121212);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  /* ✅ [추가] 모바일 여백 확보 (웹/앱 공통 안정화) */
+  padding: 16px;
+}
+
+/* ==================================================
+   카드 (기존)
+================================================== */
+.auth-box {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto; /* 🔑 이 한 줄이 체감 차이를 만든다 */
+  margin-top: 35px;
+  padding: 48px 44px;
+  background: #181818;
+  border-radius: 12px;
+  color: #fff;
+}
+
+/* ==================================================
+   제목 (기존)
+================================================== */
+.auth-box h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* ==================================================
+   설명 (기존)
+================================================== */
+.auth-desc {
+  font-size: 32px;
+  color: white;
+  line-height: 1.6;
+  margin-bottom: 36px;
+}
+
+/* ==================================================
+   input 영역 (기존)
+================================================== */
+.auth-field {
+  margin-bottom: 28px;
+}
+
+.auth-field label {
+  display: block;
+  font-size: 13px;
+  color: #aaa;
+  margin-bottom: 6px;
+}
+
+.auth-field input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid #2a2a2a;
+  padding: 10px 0;
+  font-size: 15px;
+  color: #fff;
+}
+
+.auth-field input::placeholder {
+  color: #666;
+}
+
+.auth-field input:focus {
+  outline: none;
+  border-bottom-color: #ff0000;
+}
+
+/* ==================================================
+   버튼 (기존)
+================================================== */
+.auth-button {
+  margin-top: 36px;
+  width: 140px;
+  padding: 12px 0;
+  background: #ff0000;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.auth-button:hover {
+  background: #e60000;
+}
+
+/* ✅ [기존] 회원가입 Disabled */
+.auth-button:disabled {
+  background: #444;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ==================================================
+   소셜 로그인 가로 정렬 (기존)
+================================================== */
+.social-login-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin: 24px 0 8px;
+}
+
+.social-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.social-icon img {
+  width: 26px;
+  height: 26px;
+}
+
+/* 개별 플랫폼 컬러 (기존) */
+.social-icon.google {
+  background: #ffffff;
+}
+
+.social-icon.kakao {
+  background: #fee500;
+}
+
+.social-icon.naver {
+  background: #03c75a;
+}
+
+/* hover 효과 (기존) */
+.social-icon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* ==================================================
+   주소 / 휴대폰 공통 (기존)
+================================================== */
+.address-row,
+.phone-row,
+.phone-auth-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.sub-button {
+  padding: 8px 12px;
+  background: #2a2a2a;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sub-button:hover {
+  background: #3a3a3a;
+}
+
+.detail-address {
+  margin-top: 10px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid #2a2a2a;
+  padding: 10px 0;
+  font-size: 15px;
+  color: #fff;
+}
+
+/* ==================================================
+   ✅ [추가] 반응형 – 웹에서 더 넓게
+   (모바일/App 기준은 그대로 유지)
+================================================== */
+
+/* 태블릿 이상 */
+@media (min-width: 768px) {
+  .auth-box {
+    width: 520px; /* 웹에서 살짝 여유 */
+  }
+}
+
+/* 데스크톱 */
+@media (min-width: 1024px) {
+  .auth-box {
+    width: 640px;
+  }
+}
+
+/* 대형 모니터 */
+@media (min-width: 1440px) {
+  .auth-box {
+    width: 720px;
+  }
+}
