@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { boardApi } from '../api/boardApi';
 import type { Board } from '../types/board';
 
 const BoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const [board, setBoard] = useState<Board | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!boardId) return;
@@ -18,9 +19,16 @@ const BoardDetailPage = () => {
   return (
     <div>
       <h2>{board.title}</h2>
-      <p>{board.content}</p>
       <p>작성자: {board.writerNickname}</p>
-
+      <p>{board.content}</p>
+      <form action="">
+        <button
+          type="button"
+          onClick={() => navigate(`/boards/${board.boardId}/update`)}
+        >
+          수정
+        </button>
+      </form>
       <hr />
 
       <h3>댓글</h3>
