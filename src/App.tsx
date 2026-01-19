@@ -1,10 +1,14 @@
-import "./App.css";
+import { Routes, Route } from "react-router-dom";
+import MainLayout from "./layout/MainLayout";
+import HomePage from "./pages/HomePage";
 
 function App() {
   return (
-    <div className="bg-sky-300">
-      <h1 className="text-xl font-bold">tailwindCSS 적용 테스트</h1>
-    </div>
+    <Routes>
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<HomePage />} />
+      </Route>
+    </Routes>
   );
 }
 
