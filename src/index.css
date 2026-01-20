@@ -19,20 +19,19 @@ body {
 ========================= */
 .layout {
   display: flex;
-  height: 120vh;
+  min-height: 100vh;
 }
 
 /* =========================
-   NavBar (왼쪽)
+   NavBar (왼쪽) -미완
 ========================= */
 .nav {
-  width: 360px;
+  width: 240px;
   background: #121212;
-
   padding: 20px;
 
   position: fixed;
-  top: 0;
+  top: 120px;
   left: 0;
   bottom: 0;
 
@@ -44,7 +43,7 @@ body {
 .nav a {
   color: #b3b3b3;
   text-decoration: none;
-  font-size: 36px;
+  font-size: 18px;
 }
 
 .nav a:hover {
@@ -52,34 +51,34 @@ body {
 }
 
 /* =========================
-   오른쪽 영역 (Header + Content)
+   오른쪽 영역 
 ========================= */
 .right {
-  margin-left: 360px; /* NavBar 폭 */
-  width: calc(100% - 200px);
+  margin-left: 240px;
+  width: calc(100% - 240px);
 }
 
 /* =========================
-   Header (상단 고정)
+   Header (상단 고정) -미완
 ========================= */
 .header {
   position: fixed;
   top: 0;
-  left: 360px; /* NavBar 만큼 밀기 */
+  left: 240px;
   right: 0;
 
-  height: 180px;
+  height: 120px;
   background: #181818;
 
   display: flex;
   align-items: center;
+  padding: 0 24px;
 
-  padding: 0 20px;
   z-index: 1000;
 }
 
 /* =========================
-   검색창
+   검색창 -미완
 ========================= */
 .search {
   position: relative;
@@ -88,117 +87,26 @@ body {
 
 .search-icon {
   position: absolute;
-  left: 12px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 16px;
+  font-size: 18px;
   color: #b3b3b3;
 }
 
 .search input {
   width: 100%;
-  height: 72px;
+  height: 48px;
 
-  border-radius: 20px;
+  border-radius: 24px;
   border: none;
   outline: none;
 
-  padding-left: 38px;
+  padding-left: 42px;
   padding-right: 16px;
 
   background: #2a2a2a;
   color: white;
-  font-size: 28px;
-}
-
-/* =========================
-   Content (페이지 영역)
-========================= */
-/* =========================
-   Home Page (메인 페이지)
-========================= */
-/* 메인 페이지 전체 */
-.home {
-  display: flex;
-  flex-direction: column;
-  gap: 60px;
-  margin-top: 180px;
-  margin-left: 20px;
-}
-
-.page-title {
-  font-size: 40px;
-}
-/* 위 섹션 */
-.top-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.playlist-row {
-  display: flex;
-  gap: 24px;
-  font-size: 30px;
-}
-.playlist-card {
-  min-width: 120px;
-  padding: 8px;
-}
-
-.playlist-card img {
-  aspect-ratio: 1 / 1;
-  max-height: 240px;
-  border-radius: 24px;
-}
-
-/* 아래 섹션 */
-.bottom-section {
-  margin-top: 0px;
-}
-
-/* 랭킹 섹션 3개 */
-.rank-sections {
-  display: flex;
-  gap: 16px;
-}
-
-/* 각각의 랭킹 박스 */
-.rank-section {
-  flex: 1;
-  background: #181818;
-  border-radius: 24px;
-  padding: 16px;
-}
-
-/* 제목 */
-.rank-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 12px;
-}
-
-/* 리스트 */
-.rank-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-/* 아이템 */
-.rank-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-}
-
-.rank-number {
-  width: 20px;
-  font-weight: bold;
-  color: #1db954;
-}
-
-.rank-item:hover {
-  background: #222;
-  border-radius: 6px;
+  font-size: 16px;
+  text-align: center;
 }
