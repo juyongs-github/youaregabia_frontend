@@ -6,8 +6,12 @@ export const boardApi = {
   getBoards: () =>
     axiosInstance.get<Board[]>('/boards').then((res) => res.data),
 
-  getBoardDetail: (boardId: number) =>
-    axiosInstance.get<Board>(`/boards/${boardId}`).then((res) => res.data),
+  getBoardDetail: (boardId: number, userId: number) =>
+    axiosInstance
+      .get<Board>(`/boards/${boardId}`, {
+        params: { userId },
+      })
+      .then((res) => res.data),
 
   createBoard: async (data: {
     title: string;

@@ -1,8 +1,10 @@
 export interface Reply {
   replyId: number;
   content: string;
+  writer: string;
   likeCount: number;
-  userNickname: string;
+  likedByMe: boolean; // ✅ 이 속성 추가
+  createdAt: string;
 }
 
 export interface Board {
