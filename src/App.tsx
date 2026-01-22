@@ -1,6 +1,8 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 import Layout from "./layout/Layout";
+import LoginForm from "./Components/auth/LoginForm";
+import RegisterForm from "./Components/auth/RegisterForm";
 // import SearchResult from "./pages/SearchResult";
 // import Home from "./pages/Home";
 
@@ -13,6 +15,9 @@ function App() {
         <Route path="/search" element={<SearchResult />} /> */}
       </Route>
       {/* 아닌 것들은 여기 밑으로 Route 추가 */}
+      <Route path="/" element={<Navigate to="/login" />} />
+      <Route path="/login" element={<LoginForm />} />
+      <Route path="/register" element={<RegisterForm />} />
     </Routes>
   );
 }
