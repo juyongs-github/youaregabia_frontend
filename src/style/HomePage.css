@@ -2,7 +2,7 @@
    Home Page
 ========================= */
 .home {
-  margin-top: 120px;
+  margin-top: 0px;
   width: 100%;
 }
 
@@ -32,7 +32,7 @@
 }
 
 .page-title {
-  font-size: 28px;
+  font-size: 36px;
   font-weight: bold;
 }
 
