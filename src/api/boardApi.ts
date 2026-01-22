@@ -1,14 +1,14 @@
 // src/api/boardApi.ts
-import axiosInstance from './axios';
 import type { Board } from '../types/board';
+import api from './axios';
 
 export const boardApi = {
   getBoards: () =>
-    axiosInstance.get<Board[]>('/boards').then((res) => res.data),
+    api.get<Board[]>('/community/share').then((res) => res.data),
 
   getBoardDetail: (boardId: number, userId: number) =>
-    axiosInstance
-      .get<Board>(`/boards/${boardId}`, {
+    api
+      .get<Board>(`/community/share/${boardId}`, {
         params: { userId },
       })
       .then((res) => res.data),
@@ -17,18 +17,18 @@ export const boardApi = {
     title: string;
     content: string;
   }): Promise<number> => {
-    const res = await axiosInstance.post('/boards', data, {
+    const res = await api.post('/community/share', data, {
       params: { userId: 1 },
     });
     return res.data;
   },
   updateBoard: (boardId: number, data: { title: string; content: string }) =>
-    axiosInstance.put(`/boards/${boardId}`, data, {
+    api.put(`/community/share/${boardId}`, data, {
       params: { userId: 1 }, // 🔥 임시
     }),
 
   deleteBoard: (boardId: number) =>
-    axiosInstance.delete(`/boards/${boardId}`, {
+    api.delete(`/community/share/${boardId}`, {
       params: { userId: 1 }, // 🔥 임시
     }),
 };

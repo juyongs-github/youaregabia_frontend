@@ -20,7 +20,7 @@ const BoardListPage = () => {
         {boards.map((board) => (
           <li key={board.boardId}>
             <Link
-              to={`/boards/${board.boardId}`}
+              to={`/community/share/${board.boardId}`}
               className="block px-4 py-3 hover:bg-neutral-800"
             >
               <span className="text-indigo-400">{board.title}</span>
@@ -36,7 +36,7 @@ const BoardListPage = () => {
       <button
         type="button"
         className="mt-4 rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-500"
-        onClick={() => Navigate('/boards/new')}
+        onClick={() => Navigate('/community/share/new')}
       >
         글쓰기
       </button>

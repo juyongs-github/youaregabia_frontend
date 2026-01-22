@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { boardApi } from '../api/boardApi';
 
+
 const BoardUpdate = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const navigate = useNavigate();
+
+  const userId = 1;
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -13,7 +16,7 @@ const BoardUpdate = () => {
   useEffect(() => {
     if (!boardId) return;
 
-    boardApi.getBoardDetail(Number(boardId)).then((board) => {
+    boardApi.getBoardDetail(Number(boardId), userId).then((board) => {
       setTitle(board.title);
       setContent(board.content ?? '');
     });
@@ -28,7 +31,7 @@ const BoardUpdate = () => {
       content,
     });
 
-    navigate(`/boards/${boardId}`);
+    navigate(`/community/share/${boardId}`);
   };
 
   // 3️⃣ 삭제
@@ -38,7 +41,7 @@ const BoardUpdate = () => {
     if (!confirm('정말 삭제할까요?')) return;
 
     await boardApi.deleteBoard(Number(boardId));
-    navigate('/boards');
+    navigate('/community/share');
   };
 
   return (

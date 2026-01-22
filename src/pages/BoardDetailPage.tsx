@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { boardApi } from '../api/boardApi';
 import type { Board } from '../types/board';
@@ -9,18 +9,36 @@ const BoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const [board, setBoard] = useState<Board | null>(null);
   const [replyContent, setReplyContent] = useState('');
+  // 정렬 
+  const [sortBy, setSortBy] = useState<'latest' | 'likes'>('latest');
+
   const navigate = useNavigate();
+  //임시 아이디
   const currentUserId = 1;
 
   useEffect(() => {
     if (!boardId) return;
-
+    
     // 게시글 가져오기
     boardApi.getBoardDetail(Number(boardId), currentUserId).then(setBoard);
   }, [boardId]);
-  // 오류 시 로딩중 이라고 보여주기
-  if (!board) return <div>로딩 중...</div>;
-
+  
+  //  댓글 정렬
+  // Memo -> board.replies가 바뀌거나 sortBy가 바뀔 때만 실행
+  const sortedReplies = useMemo(() => {
+    if (!board?.replies) return [];
+    
+    // 원본 배열을 복사해서 정렬 (sort는 원본을 변경하기 때문)
+    return [...board.replies].sort((a, b) => {
+      if (sortBy === 'likes') {
+        // 좋아요순: 좋아요 수 내림차순 -> 같으면 최신순
+        if (b.likeCount !== a.likeCount) return b.likeCount - a.likeCount;
+      }
+      // 최신순: 생성일 내림차순
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [board?.replies, sortBy]);
+  
   // 댓글 작성
   const createReply = async () => {
     if (!boardId || !replyContent.trim()) return;
@@ -46,6 +64,9 @@ const BoardDetailPage = () => {
     );
     setBoard(updated);
   };
+  
+  // 오류 시 로딩중 이라고 보여주기
+  if (!board) return <div>로딩 중...</div>;
 
   return (
     <div>
@@ -55,7 +76,7 @@ const BoardDetailPage = () => {
 
       <button
         type="button"
-        onClick={() => navigate(`/boards/${board.boardId}/update`)}
+        onClick={() => navigate(`/community/share/${board.boardId}/update`)}
       >
         수정
       </button>
@@ -63,12 +84,22 @@ const BoardDetailPage = () => {
       <hr />
 
       <h3>댓글</h3>
+        <div>
+          <button 
+            onClick={() => setSortBy('latest')} 
+            style={{ fontWeight: sortBy === 'latest' ? 'bold' : 'normal' }}
+          >최신순</button>
+          <button 
+            onClick={() => setSortBy('likes')} 
+            style={{ fontWeight: sortBy === 'likes' ? 'bold' : 'normal', marginLeft: '10px' }}
+          >추천순</button>
+        </div>
 
       {board.replies.length === 0 ? (
         <p>댓글이 없습니다.</p>
       ) : (
         <ul>
-          {board.replies.map((reply) => (
+          {sortedReplies.map((reply) => (
             <ReplyItem key={reply.replyId} reply={reply} onRefresh={refresh} />
           ))}
         </ul>

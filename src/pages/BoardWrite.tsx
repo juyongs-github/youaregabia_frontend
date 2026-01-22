@@ -9,7 +9,7 @@ const BoardWrite = () => {
 
   const submit = async () => {
     const boardId = await boardApi.createBoard({ title, content });
-    navigate(`/boards/${boardId}`);
+    navigate(`/community/share/${boardId}`);
   };
 
   return (

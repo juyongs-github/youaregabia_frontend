@@ -1,14 +1,13 @@
 import TopBanner from './TopBanner';
-import Header from './Header';
-import SideNav from './SideNav';
-import FooterSearch from './FooterSearch';
+import SideNav from './Sidebar';
 import { Outlet } from 'react-router-dom';
+import Header from './Header';
 
 const AppLayout = () => {
   return (
     <div className="flex min-h-screen flex-col bg-gray-100">
       {/* 최상단 배너 */}
-      <TopBanner />
+      {/* <TopBanner /> */}
 
       {/* 헤더 */}
       <Header />
@@ -27,9 +26,6 @@ const AppLayout = () => {
           </main>
         </div>
       </div>
-
-      {/* 하단 검색 */}
-      <FooterSearch />
     </div>
   );
 };

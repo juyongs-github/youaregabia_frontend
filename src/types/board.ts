@@ -3,7 +3,7 @@ export interface Reply {
   content: string;
   writer: string;
   likeCount: number;
-  likedByMe: boolean; // ✅ 이 속성 추가
+  likedByMe: boolean; 
   createdAt: string;
 }
 
