@@ -1,0 +1,271 @@
+/* =========================
+   Home Page
+========================= */
+.home {
+  margin-top: 0px;
+  width: 100%;
+}
+
+.home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+/* =========================
+   상단 섹션
+========================= */
+.top-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page-title {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+/* + 버튼 */
+.add-playlist-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #2a2a2a;
+  color: white;
+  cursor: pointer;
+}
+
+.add-playlist-btn:hover {
+  background: white;
+  color: black;
+}
+
+/* =========================
+   슬라이더
+========================= */
+.playlist-slider {
+  position: relative;
+  overflow: hidden;
+}
+
+.top-playlist-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: nowrap;
+
+  overflow-x: scroll;
+  scroll-behavior: smooth;
+}
+
+.top-playlist-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* 페이드 */
+.playlist-slider::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+
+  width: 40px;
+  height: 100%;
+
+  pointer-events: none;
+  background: linear-gradient(to right, rgba(18, 18, 18, 0), rgba(18, 18, 18, 0.85));
+}
+
+.playlist-slider::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+
+  width: 24px;
+  height: 100%;
+
+  pointer-events: none;
+  background: linear-gradient(to left, rgba(18, 18, 18, 0), rgba(18, 18, 18, 0.85));
+}
+
+/* 화살표 */
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  cursor: pointer;
+
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.playlist-slider:hover .slider-btn {
+  opacity: 1;
+}
+
+.slider-btn.left {
+  left: 8px;
+  width: 36px;
+}
+
+.slider-btn.right {
+  right: 8px;
+  width: 36px;
+}
+
+/* =========================
+   카드
+========================= */
+.top-playlist-card {
+  width: 260px;
+  flex-shrink: 0;
+}
+
+.playlist-image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.playlist-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 재생 버튼 */
+.play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.play-button svg {
+  color: black;
+}
+
+/* 제목 */
+.playlist-title {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  font-size: 13px;
+  font-weight: bold;
+  color: white;
+
+  background: rgba(0, 0, 0, 0.6);
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+/* hover */
+.top-playlist-card:hover img {
+  filter: brightness(0.7);
+}
+
+.top-playlist-card:hover .play-button {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* =========================
+   아래 섹션 (공동 플레이리스트)
+========================= */
+.bottom-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rank-sections {
+  display: flex;
+  gap: 20px;
+}
+
+.rank-section {
+  flex: 1;
+  background: #000;
+  border-radius: 24px;
+  padding: 16px;
+}
+
+.rank-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.rank-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.rank-item:hover {
+  background: #222;
+  border-radius: 6px;
+}
+
+.rank-number {
+  width: 20px;
+  font-weight: bold;
+  color: #1db954;
+}
