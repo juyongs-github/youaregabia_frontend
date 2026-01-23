@@ -3,7 +3,7 @@ import { FaPause, FaPlay, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
 import Slider from "@mui/material/Slider";
 import Box from "@mui/material/Box";
 import { GoDotFill } from "react-icons/go";
-import type { Song } from "../../ui/SongListItem";
+import type { Song } from "../ui/SongListItem";
 
 interface MusicPlayerProps {
   song: Song;

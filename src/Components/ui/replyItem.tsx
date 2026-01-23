@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { replyApi } from '../api/replyApi';
+import { replyApi } from '../../api/replyApi';
 
 interface Props {
   reply: {

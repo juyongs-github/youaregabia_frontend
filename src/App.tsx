@@ -4,13 +4,13 @@ import "./App.css";
 import SearchResult from "./pages/SearchResult";
 import RecommendPlaylistResult from "./pages/RecommendPlaylistResult";
 import HomePage from "./pages/HomePage";
-import LoginForm from "./Components/auth/LoginForm";
-import RegisterForm from "./Components/auth/RegisterForm";
-import Layout from "./component/layout/Layout";
 import BoardListPage from "./pages/BoardListPage";
 import BoardDetailPage from "./pages/BoardDetailPage";
 import BoardWrite from "./pages/BoardWrite";
 import BoardUpdate from "./pages/BoardUpdate";
+import Layout from "./components/layout/Layout";
+import LoginForm from "./components/auth/LoginForm";
+import RegisterForm from "./components/auth/RegisterForm";
 
 function App() {
   return (

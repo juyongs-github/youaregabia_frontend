@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { boardApi } from '../api/boardApi';
 import type { Board } from '../types/board';
 import { replyApi } from '../api/replyApi';
-import ReplyItem from '../component/replyItem';
+import ReplyItem from '../components/ui/replyItem';
 
 const BoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();
