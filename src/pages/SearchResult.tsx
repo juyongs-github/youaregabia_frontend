@@ -5,7 +5,7 @@ import api from "../api/axios";
 import Spinner from "../ui/Spinner";
 import { BsQuestionCircleFill } from "react-icons/bs";
 import { IoWarning } from "react-icons/io5";
-import MusicPlayer from "../layout/MusicPlayer";
+import MusicPlayer from "../component/layout/MusicPlayer";
 
 interface Song {
   id: number;

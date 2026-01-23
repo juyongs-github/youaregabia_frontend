@@ -1,4 +1,3 @@
-import { Routes, Route } from 'react-router-dom';
 import './App.css';
 import Layout from './component/layout/Layout';
 import BoardListPage from './pages/BoardListPage';
@@ -9,9 +8,7 @@ import BoardUpdate from './pages/BoardUpdate';
 // import Home from "./pages/Home";
 import { Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
-import Layout from "./layout/Layout";
 import SearchResult from "./pages/SearchResult";
-import Home from "./pages/Home";
 import RecommendPlaylistResult from "./pages/RecommendPlaylistResult";
 import HomePage from "./pages/HomePage";
 import LoginForm from "./Components/auth/LoginForm";

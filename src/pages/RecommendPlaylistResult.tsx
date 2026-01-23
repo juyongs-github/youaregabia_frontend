@@ -7,9 +7,9 @@ import Spinner from "../ui/Spinner";
 import { IoWarning } from "react-icons/io5";
 import { useLocation } from "react-router-dom";
 import { HiPencil } from "react-icons/hi2";
-import MusicPlayer from "../layout/MusicPlayer";
 import { BsQuestionCircleFill } from "react-icons/bs";
 import { RiPlayList2Fill } from "react-icons/ri";
+import MusicPlayer from "../component/layout/MusicPlayer";
 
 // 플레이리스트 추천 결과 페이지
 function RecommendPlaylistResult() {
