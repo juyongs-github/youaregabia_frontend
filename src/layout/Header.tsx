@@ -61,7 +61,17 @@ function Header() {
                 return;
               }
 
-              navigate(`/search?q=${encodeURIComponent(searchValue)}`);
+              const url = `/search?q=${encodeURIComponent(searchValue)}`;
+
+              // 이전 검색어로 재검색 할 경우 새로고침
+              if (location.pathname + location.search === url) {
+                navigate(url, {
+                  replace: true,
+                  state: { refresh: Date.now() },
+                });
+              } else {
+                navigate(url);
+              }
             }
           }}
           className="px-16 py-3 text-white bg-gray-800 rounded-full w-[50rem] focus:outline-none focus:ring-2 focus:ring-white"

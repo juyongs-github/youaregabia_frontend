@@ -1,16 +1,18 @@
 import { Routes, Route } from "react-router-dom";
 import "./App.css";
 import Layout from "./layout/Layout";
-// import SearchResult from "./pages/SearchResult";
-// import Home from "./pages/Home";
+import SearchResult from "./pages/SearchResult";
+import Home from "./pages/Home";
+import RecommendPlaylistResult from "./pages/RecommendPlaylistResult";
 
 function App() {
   return (
     <Routes>
       {/* Layout 적용 화면만 Layout Route 안에 Route 추가 */}
       <Route element={<Layout />}>
-        {/* <Route path="/" element={<Home />} />
-        <Route path="/search" element={<SearchResult />} /> */}
+        <Route path="/" element={<Home />} />
+        <Route path="/search" element={<SearchResult />} />
+        <Route path="/recommend/result" element={<RecommendPlaylistResult />} />
       </Route>
       {/* 아닌 것들은 여기 밑으로 Route 추가 */}
     </Routes>
