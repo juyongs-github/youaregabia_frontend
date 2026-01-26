@@ -20,11 +20,11 @@ function Sidebar() {
   const [isCommunityMenuOpen, setIsCommunityMenuOpen] = useState<boolean>(false);
 
   return (
-    <aside className="border-r border-gray-800 min-w-80">
+    <aside className="fixed left-0 border-r border-gray-800 w-80 top-20 h-[calc(100vh-5rem)]">
       <nav className="flex flex-col p-5 pt-10 text-xl font-bold gap-7">
         <button
           className="flex items-center gap-5 px-3 py-2 text-white rounded-lg hover:bg-gray-800"
-          onClick={() => goPage("/")}
+          onClick={() => goPage("/home")}
         >
           <FaHome size={24} />
           <span>홈</span>
