@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import "../../styles/auth.css";
 import { register, checkEmailDuplicate } from "../../api/auth";
-import { sendSmsCode, verifySmsCode } from "../../api/sms";
+// [CI-TEMP-OFF] SMS 인증(Mock) -> CI 인증으로 교체하므로 일단 주석/삭제 대상
+// import { sendSmsCode, verifySmsCode } from "../../api/sms";
 import { useNavigate } from "react-router-dom";
 
 interface RegisterFormValues {
@@ -15,12 +16,27 @@ interface RegisterFormValues {
   // 주소 관련
   address: string;
   detailAddress: string;
+
+  // [CI-ADD] CI 값 (본인인증 완료 시 생성)
+  ci?: string;
 }
 
 function RegisterForm() {
-  const [isCodeSent, setIsCodeSent] = useState(false);
-  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
-  const [verificationCode, setVerificationCode] = useState("");
+  // [CI-TEMP-OFF] SMS 인증(Mock) 관련 state -> CI 인증으로 교체하므로 삭제/주석 대상
+  // const [isCodeSent, setIsCodeSent] = useState(false);
+  // const [verificationCode, setVerificationCode] = useState("");
+  // const [smsError, setSmsError] = useState<string | null>(null);
+  const [resendSeconds, setResendSeconds] = useState(0);
+  const canResend = resendSeconds === 0;
+
+
+
+  // [CI-ADD] CI 본인인증 완료 여부 (기존 isPhoneVerified 역할)
+  const [isCiVerified, setIsCiVerified] = useState(false);
+
+  // [CI-ADD] 생성된 CI 값 저장
+  const [ciValue, setCiValue] = useState<string | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [emailMessage, setEmailMessage] = useState<string | null>(null);
@@ -31,21 +47,6 @@ function RegisterForm() {
 
   const latestEmailRef = useRef("");
   const [emailTimer, setEmailTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
-
-  const [smsError, setSmsError] = useState<string | null>(null);
-
-  const formatBirthDate = (value: string) => {
-    const digits = value.replace(/\D/g, "").slice(0, 8);
-
-    if (digits.length <= 4) return digits;
-    if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
-
-    return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
-  };
-
-  // [FIX/ADD] 재전송 쿨다운(연타 방지)
-  const [resendSeconds, setResendSeconds] = useState(0);
-  const canResend = resendSeconds === 0;
 
   /* ===============================
   주소 관련
@@ -71,6 +72,7 @@ function RegisterForm() {
     birthDate?: string;
     password?: string;
     passwordcheck?: string;
+    phone?: string; // [CI-ADD] phone 즉시검증 표시용
   }>({});
 
   const [form, setForm] = useState<RegisterFormValues>({
@@ -82,9 +84,19 @@ function RegisterForm() {
     phone: "",
     address: "",
     detailAddress: "",
+    ci: undefined, // [CI-ADD]
   });
 
   const navigate = useNavigate();
+
+  const formatBirthDate = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 8);
+
+    if (digits.length <= 4) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+
+    return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
+  };
 
   /* ==================================================
   [UTIL] 휴대폰 번호 자동 포맷
@@ -103,6 +115,12 @@ function RegisterForm() {
     // 11자리 초과 방지
     return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
   }
+
+  // [CI-ADD] 숫자만 뽑은 phone (모달로 전달/검증용)
+  const phoneDigits = form.phone.replace(/\D/g, "");
+
+  // [CI-ADD] phone 간단 검증(010 계열 + 10~11자리)
+  const isPhoneValid = /^01[016789]\d{7,8}$/.test(phoneDigits);
 
   /* ======================================================
   1. 카카오 우편번호 스크립트 동적 로딩
@@ -169,13 +187,6 @@ function RegisterForm() {
     };
   }, [emailTimer]);
 
-  // [ADD] SMS 재전송 카운트다운
-  useEffect(() => {
-    if (resendSeconds <= 0) return;
-    const t = setTimeout(() => setResendSeconds((s) => s - 1), 1000);
-    return () => clearTimeout(t);
-  }, [resendSeconds]);
-
   const isPasswordMatch =
     form.password !== "" && form.passwordcheck !== "" && form.password === form.passwordcheck;
 
@@ -183,9 +194,10 @@ function RegisterForm() {
     !clientErrors.email &&
     !clientErrors.name &&
     !clientErrors.password &&
+    !clientErrors.phone &&
     isEmailValid &&
     isPasswordMatch &&
-    isPhoneVerified &&
+    isCiVerified &&
     !isSubmitting;
 
   function getFieldStatusClass(
@@ -234,6 +246,18 @@ function RegisterForm() {
 
         return undefined;
       }
+
+      // [ADD] phone 즉시검증(숫자만 기준)
+      case "phone": {
+        if (!value) return "휴대폰 번호를 입력하세요.";
+        const digits = value.replace(/\D/g, "");
+        if (!/^01[016789]\d{7,8}$/.test(digits))
+          return "휴대폰 번호 형식이 올바르지 않습니다. (예: 010-1234-5678)";
+        return undefined;
+      }
+
+      default:
+        return undefined;
     }
   }
 
@@ -248,7 +272,7 @@ function RegisterForm() {
     const error = validateField("birthDate", formatted);
     setClientErrors((prev) => ({
       ...prev,
-      birthDate: error, // ✅ [ADD]
+      birthDate: error,
     }));
   };
 
@@ -258,7 +282,13 @@ function RegisterForm() {
     // 휴대폰 자동 하이픈
     if (name === "phone") {
       const formatted = formatPhoneNumber(value);
-      setForm((prev) => ({ ...prev, phone: formatted }));
+
+      // [CI-ADD] 폰 바꾸면 인증 무효 처리
+      setIsCiVerified(false);
+      setCiValue(null);
+
+      setForm((prev) => ({ ...prev, phone: formatted, ci: undefined }));
+      setClientErrors((prev) => ({ ...prev, phone: validateField("phone", formatted) }));
       return;
     }
 
@@ -321,6 +351,76 @@ function RegisterForm() {
     }
   }
 
+  // =========================================================
+  // [CI-ADD] CI 본인인증 모달 상태/로직
+  // =========================================================
+  const [isCiModalOpen, setIsCiModalOpen] = useState(false);
+
+  const [ciName, setCiName] = useState("");
+  const [ciBirth, setCiBirth] = useState(""); // YYYYMMDD 입력 -> 내부에서 정리
+  const [ciPhone, setCiPhone] = useState(""); // 모달에서 보여줄 전화번호(하이픈 포함)
+  const [ciModalError, setCiModalError] = useState<string | null>(null);
+
+  // [CI-ADD] 모달 열기 (회원가입 폼의 phone 값을 가져와서 이어받음)
+  const openCiModal = () => {
+    // 폰 유효성 먼저 체크
+    const phoneErr = validateField("phone", form.phone);
+    setClientErrors((prev) => ({ ...prev, phone: phoneErr }));
+
+    if (phoneErr) return;
+
+    setCiModalError(null);
+    setCiName(form.name || ""); // 이름이 이미 입력돼있으면 편의로 채움
+    setCiBirth(form.birthDate ? form.birthDate.replace(/\D/g, "") : ""); // YYYYMMDD로 정리
+    setCiPhone(form.phone); // 화면에 보이는 값 그대로
+    setIsCiModalOpen(true);
+  };
+
+  // [CI-ADD] CI 생성(재현 가능 Mock)
+  const makeMockCi = (name: string, birthYYYYMMDD: string, phoneDigitsOnly: string) => {
+    const raw = `${name}|${birthYYYYMMDD}|${phoneDigitsOnly}`;
+    // btoa는 한글에 약하므로 encodeURIComponent로 감싸서 안전하게 처리
+    const encoded = btoa(unescape(encodeURIComponent(raw)));
+    return `MOCK-CI-${encoded}`;
+  };
+
+  const validateCiModal = () => {
+    if (!ciName || ciName.trim().length < 2) return "이름은 2자 이상 입력하세요.";
+    const birthDigits = ciBirth.replace(/\D/g, "");
+    if (!/^\d{8}$/.test(birthDigits)) return "생년월일은 YYYYMMDD 8자리로 입력하세요.";
+    const phoneDigitsOnly = ciPhone.replace(/\D/g, "");
+    if (!/^01[016789]\d{7,8}$/.test(phoneDigitsOnly)) return "휴대폰 번호 형식이 올바르지 않습니다.";
+    return null;
+  };
+
+  const completeCiAuth = () => {
+    const err = validateCiModal();
+    if (err) {
+      setCiModalError(err);
+      return;
+    }
+
+    const birthDigits = ciBirth.replace(/\D/g, "");
+    const phoneDigitsOnly = ciPhone.replace(/\D/g, "");
+
+    const newCi = makeMockCi(ciName.trim(), birthDigits, phoneDigitsOnly);
+
+    // 부모 폼에 CI 주입 + 인증 완료 처리
+    setCiValue(newCi);
+    setIsCiVerified(true);
+
+    setForm((prev) => ({
+      ...prev,
+      // CI 인증에서 사용한 이름/생년월일/폰을 "실제 본인정보"로 확정시키고 싶으면 여기서 동기화
+      name: prev.name || ciName.trim(),
+      birthDate: prev.birthDate || `${birthDigits.slice(0, 4)}-${birthDigits.slice(4, 6)}-${birthDigits.slice(6, 8)}`,
+      phone: prev.phone || ciPhone,
+      ci: newCi,
+    }));
+
+    setIsCiModalOpen(false);
+  };
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -334,8 +434,8 @@ function RegisterForm() {
       return;
     }
 
-    if (!isPhoneVerified) {
-      alert("휴대폰 인증을 완료해주세요");
+    if (!isCiVerified || !ciValue) {
+      alert("본인인증을 완료해주세요");
       return;
     }
 
@@ -350,10 +450,13 @@ function RegisterForm() {
       await register({
         email: form.email,
         name: form.name,
-        birthDate: form.birthDate, // ✅ 추가
+        birthDate: form.birthDate,
         password: form.password,
         phoneNumber: form.phone,
         address: fullAddress,
+
+        // [CI-ADD] DB NOT NULL(ci) 때문에 반드시 전송
+        ci: ciValue,
       });
 
       alert("회원가입이 완료되었습니다.");
@@ -363,7 +466,7 @@ function RegisterForm() {
       if (data?.code === "BUSINESS_ERROR") {
         setFieldErrors((prev) => ({
           ...prev,
-          birthDate: data.message, // ✅ 서버 범위 에러 연결
+          birthDate: data.message,
         }));
         return;
       }
@@ -379,202 +482,259 @@ function RegisterForm() {
   }
 
   return (
-    <form className="auth-box" onSubmit={handleSubmit}>
-      <h1>회원가입</h1>
-      <p className="auth-desc">Create your account to start streaming.</p>
+    <>
+      <form className="auth-box" onSubmit={handleSubmit}>
+        <h1>회원가입</h1>
+        <p className="auth-desc">Create your account to start streaming.</p>
 
-      <div className="auth-field">
-        <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          placeholder="이메일"
-          value={form.email}
-          onChange={handleChange}
-          className={getFieldStatusClass("email")}
-        />
-        {clientErrors.email && <p className="auth-message error">{clientErrors.email}</p>}
-
-        {/* [ADD] 확인중 표시 */}
-        {!clientErrors.email && isCheckingEmail && (
-          <p className="auth-message">이메일 확인 중...</p>
-        )}
-
-        {!clientErrors.email && !isCheckingEmail && emailMessage && (
-          <p className={`auth-message ${isEmailValid ? "success" : "error"}`}>{emailMessage}</p>
-        )}
-      </div>
-
-      <div className="auth-field">
-        <label htmlFor="name">Name</label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          placeholder="이름"
-          value={form.name}
-          onChange={handleChange}
-          className={getFieldStatusClass("name")}
-        />
-        {clientErrors.name && <p className="auth-message error">{clientErrors.name}</p>}
-        {fieldErrors.name && <p className="auth-message error">{fieldErrors.name}</p>}
-      </div>
-
-      <div className="auth-field">
-        <label htmlFor="birthDate">생년월일</label>
-        <input
-          id="birthDate"
-          name="birthDate"
-          type="text"
-          value={form.birthDate}
-          placeholder="YYYYMMDD"
-          onChange={handleBirthDateChange}
-          className={getFieldStatusClass("birthDate")} // ✅ [FIX]
-          maxLength={10}
-        />
-        {clientErrors.birthDate && <p className="auth-message error">{clientErrors.birthDate}</p>}
-
-        {fieldErrors.birthDate && <p className="auth-message error">{fieldErrors.birthDate}</p>}
-      </div>
-
-      <div className="auth-field">
-        <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          placeholder="비밀번호"
-          value={form.password}
-          onChange={handleChange}
-          className={getFieldStatusClass("password")}
-        />
-        {clientErrors.password && <p className="auth-message error">{clientErrors.password}</p>}
-        {fieldErrors.password && <p className="auth-message error">{fieldErrors.password}</p>}
-      </div>
-
-      <div className="auth-field">
-        <label>Password Check</label>
-        <input
-          name="passwordcheck"
-          type="password"
-          placeholder="비밀번호 확인"
-          value={form.passwordcheck}
-          onChange={handleChange}
-          className={form.passwordcheck ? (isPasswordMatch ? "input-success" : "input-error") : ""}
-        />
-        {form.passwordcheck && !isPasswordMatch && (
-          <p className="auth-message error">비밀번호가 일치하지 않습니다.</p>
-        )}
-      </div>
-
-      <div className="auth-field">
-        <label htmlFor="phone">Phone</label>
-
-        <div className="phone-row">
+        <div className="auth-field">
+          <label htmlFor="email">Email</label>
           <input
-            id="phone"
-            name="phone"
-            type="tel"
-            placeholder="010-1234-5678 "
-            value={form.phone}
+            id="email"
+            name="email"
+            type="email"
+            placeholder="이메일"
+            value={form.email}
             onChange={handleChange}
-            disabled={isPhoneVerified}
-            className={isPhoneVerified ? "input-success" : form.phone ? "input-error" : ""}
+            className={getFieldStatusClass("email")}
           />
+          {clientErrors.email && <p className="auth-message error">{clientErrors.email}</p>}
 
-          <button
-            type="button"
-            className={`sub-button ${isPhoneVerified ? "success" : isCodeSent ? "disabled" : ""}`}
-            disabled={isPhoneVerified || (isCodeSent && !canResend)}
-            onClick={async () => {
-              if (!form.phone) {
-                setSmsError("휴대폰 번호를 입력하세요.");
-                return;
-              }
+          {/* [ADD] 확인중 표시 */}
+          {!clientErrors.email && isCheckingEmail && <p className="auth-message">이메일 확인 중...</p>}
 
-              try {
-                const res = await sendSmsCode(form.phone);
-
-                setIsCodeSent(true);
-                setSmsError(null);
-
-                // [ADD] 30초 재전송 쿨다운
-                setResendSeconds(30);
-
-                if (res.mockCode) console.log("MOCK CODE:", res.mockCode);
-              } catch {
-                setSmsError("인증번호 전송에 실패했습니다.");
-              }
-            }}
-          >
-            {isPhoneVerified
-              ? "인증완료"
-              : isCodeSent
-                ? canResend
-                  ? "재전송"
-                  : `전송됨(${resendSeconds}s)`
-                : "인증번호 요청"}
-          </button>
+          {!clientErrors.email && !isCheckingEmail && emailMessage && (
+            <p className={`auth-message ${isEmailValid ? "success" : "error"}`}>{emailMessage}</p>
+          )}
         </div>
 
-        {isCodeSent && !isPhoneVerified && (
-          <div className="phone-auth-row">
+        <div className="auth-field">
+          <label htmlFor="name">Name</label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            placeholder="이름"
+            value={form.name}
+            onChange={handleChange}
+            className={getFieldStatusClass("name")}
+            disabled={isCiVerified} // [CI-ADD] 본인인증 완료 후 잠금(원하면 제거)
+          />
+          {clientErrors.name && <p className="auth-message error">{clientErrors.name}</p>}
+          {fieldErrors.name && <p className="auth-message error">{fieldErrors.name}</p>}
+        </div>
+
+        <div className="auth-field">
+          <label htmlFor="birthDate">생년월일</label>
+          <input
+            id="birthDate"
+            name="birthDate"
+            type="text"
+            value={form.birthDate}
+            placeholder="YYYYMMDD"
+            onChange={handleBirthDateChange}
+            className={getFieldStatusClass("birthDate")}
+            maxLength={10}
+            disabled={isCiVerified} // [CI-ADD] 본인인증 완료 후 잠금(원하면 제거)
+          />
+          {clientErrors.birthDate && <p className="auth-message error">{clientErrors.birthDate}</p>}
+          {fieldErrors.birthDate && <p className="auth-message error">{fieldErrors.birthDate}</p>}
+        </div>
+
+        <div className="auth-field">
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="비밀번호"
+            value={form.password}
+            onChange={handleChange}
+            className={getFieldStatusClass("password")}
+          />
+          {clientErrors.password && <p className="auth-message error">{clientErrors.password}</p>}
+          {fieldErrors.password && <p className="auth-message error">{fieldErrors.password}</p>}
+        </div>
+
+        <div className="auth-field">
+          <label>Password Check</label>
+          <input
+            name="passwordcheck"
+            type="password"
+            placeholder="비밀번호 확인"
+            value={form.passwordcheck}
+            onChange={handleChange}
+            className={form.passwordcheck ? (isPasswordMatch ? "input-success" : "input-error") : ""}
+          />
+          {form.passwordcheck && !isPasswordMatch && (
+            <p className="auth-message error">비밀번호가 일치하지 않습니다.</p>
+          )}
+        </div>
+
+        <div className="auth-field">
+          <label htmlFor="phone">Phone</label>
+
+          <div className="phone-row">
             <input
-              placeholder="인증번호"
-              value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
-              className={smsError ? "input-error" : ""}
+              id="phone"
+              name="phone"
+              type="tel"
+              placeholder="010-1234-5678 "
+              value={form.phone}
+              onChange={handleChange}
+              disabled={isCiVerified}
+              className={
+                isCiVerified ? "input-success" : clientErrors.phone ? "input-error" : form.phone ? "" : ""
+              }
             />
+
             <button
               type="button"
-              className="sub-button"
-              onClick={async () => {
-                const res = await verifySmsCode(form.phone, verificationCode);
-                if (res.success) setIsPhoneVerified(true);
-                else setSmsError("인증 실패");
-              }}
+              className={`sub-button ${isCiVerified ? "success" : !isPhoneValid ? "disabled" : ""}`}
+              disabled={isCiVerified || !isPhoneValid}
+              onClick={openCiModal}
             >
-              확인
+              {isCiVerified ? "인증완료" : "본인인증하기"}
             </button>
           </div>
-        )}
 
-        {isPhoneVerified && <p className="auth-message success">휴대폰 인증이 완료되었습니다.</p>}
-        {smsError && <p className="auth-message error">{smsError}</p>}
-      </div>
+          {clientErrors.phone && <p className="auth-message error">{clientErrors.phone}</p>}
 
-      <div className="auth-field">
-        <label htmlFor="address">Address</label>
-
-        <div className="address-row">
-          <input
-            value={form.address}
-            readOnly
-            placeholder="주소"
-            className={form.address ? "input-success" : ""}
-          />
-          <button type="button" className="sub-button" onClick={openAddressSearch}>
-            주소검색
-          </button>
+          {/* [CI-ADD] 인증 완료 시, 인증번호 입력란 없애고 문구만 노출 */}
+          {isCiVerified && <p className="auth-message success">본인인증이 완료되었습니다.</p>}
         </div>
-        <input
-          ref={detailAddressRef}
-          name="detailAddress"
-          value={form.detailAddress}
-          onChange={handleChange}
-          placeholder="상세주소"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") e.preventDefault();
-          }}
-          className={form.detailAddress ? "input-success" : ""}
-        />
-      </div>
 
-      <button type="submit" className="auth-button" disabled={!isFormValid}>
-        회원가입
-      </button>
-    </form>
+        <div className="auth-field">
+          <label htmlFor="address">Address</label>
+
+          <div className="address-row">
+            <input value={form.address} readOnly placeholder="주소" className={form.address ? "input-success" : ""} />
+            <button type="button" className="sub-button" onClick={openAddressSearch}>
+              주소검색
+            </button>
+          </div>
+          <input
+            ref={detailAddressRef}
+            name="detailAddress"
+            value={form.detailAddress}
+            onChange={handleChange}
+            placeholder="상세주소"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.preventDefault();
+            }}
+            className={form.detailAddress ? "input-success" : ""}
+          />
+        </div>
+
+        <button type="submit" className="auth-button" disabled={!isFormValid}>
+          회원가입
+        </button>
+      </form>
+
+      {/* =========================================================
+          [CI-ADD] CI 본인인증 모달 (오버레이)
+          - 실제 본인인증 API처럼 "별도 인증창" 느낌
+          ========================================================= */}
+      {isCiModalOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+          }}
+          onClick={() => setIsCiModalOpen(false)}
+        >
+          <div
+            style={{
+              width: "min(520px, 92vw)",
+              background: "#111",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 12,
+              padding: 20,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h2 style={{ margin: 0, fontSize: 18 }}>본인인증</h2>
+              <button
+                type="button"
+                className="sub-button"
+                onClick={() => setIsCiModalOpen(false)}
+              >
+                닫기
+              </button>
+            </div>
+
+            <p style={{ marginTop: 10, marginBottom: 16, opacity: 0.8, fontSize: 13 }}>
+              (Mock) 실제 CI 본인인증 화면처럼 이름/생년월일/휴대폰을 확인합니다.
+            </p>
+
+            <div className="auth-field">
+              <label>이름</label>
+              <input
+                type="text"
+                placeholder="이름"
+                value={ciName}
+                onChange={(e) => setCiName(e.target.value)}
+                className={ciName.trim().length >= 2 ? "input-success" : ""}
+              />
+            </div>
+
+            <div className="auth-field">
+              <label>생년월일</label>
+              <input
+                type="text"
+                placeholder="YYYYMMDD"
+                value={ciBirth}
+                onChange={(e) => {
+                  // 숫자만, 8자리 제한
+                  const digits = e.target.value.replace(/\D/g, "").slice(0, 8);
+                  setCiBirth(digits);
+                }}
+                className={/^\d{8}$/.test(ciBirth.replace(/\D/g, "")) ? "input-success" : ""}
+              />
+            </div>
+
+            <div className="auth-field">
+              <label>휴대폰 번호</label>
+              <input
+                type="tel"
+                placeholder="010-1234-5678"
+                value={ciPhone}
+                onChange={(e) => setCiPhone(formatPhoneNumber(e.target.value))}
+                className={/^01[016789]\d{7,8}$/.test(ciPhone.replace(/\D/g, "")) ? "input-success" : ""}
+              />
+            </div>
+
+            {ciModalError && <p className="auth-message error">{ciModalError}</p>}
+
+            <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+              <button type="button" className="auth-button" onClick={completeCiAuth}>
+                인증완료
+              </button>
+              <button
+                type="button"
+                className="sub-button"
+                onClick={() => setIsCiModalOpen(false)}
+              >
+                취소
+              </button>
+            </div>
+
+            {/* 개발 확인용 (필요하면 지워) */}
+            {ciValue && (
+              <p style={{ marginTop: 12, fontSize: 12, opacity: 0.7, wordBreak: "break-all" }}>
+                생성된 CI: {ciValue}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

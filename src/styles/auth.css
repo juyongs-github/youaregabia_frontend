@@ -251,3 +251,33 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
+
+/* =========================
+   CI 본인인증 모달
+========================= */
+
+.ci-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ci-modal {
+  width: 420px;
+  background: #111;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+.ci-modal h2 {
+  margin-bottom: 16px;
+}
