@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import type { Song } from "../ui/SongListItem";
+import type { Song } from "../Components/ui/SongListItem";
 import api from "../api/axios";
 import { FaMusic, FaSave } from "react-icons/fa";
-import SongListItem from "../ui/SongListItem";
-import Spinner from "../ui/Spinner";
+import SongListItem from "../Components/ui/SongListItem";
+import Spinner from "../Components/ui/Spinner";
 import { IoWarning } from "react-icons/io5";
 import { useLocation } from "react-router-dom";
 import { HiPencil } from "react-icons/hi2";
 import { BsQuestionCircleFill } from "react-icons/bs";
 import { RiPlayList2Fill } from "react-icons/ri";
-import MusicPlayer from "../component/layout/MusicPlayer";
+import MusicPlayer from "../Components/layout/MusicPlayer";
 
 // 플레이리스트 추천 결과 페이지
 function RecommendPlaylistResult() {
