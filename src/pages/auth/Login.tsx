@@ -1,4 +1,4 @@
-import LoginFrom from "../../Components/auth/LoginForm";
+import LoginFrom from "./LoginForm";
 
 function Login(): React.ReactElement {
   return (

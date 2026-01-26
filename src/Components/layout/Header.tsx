@@ -40,7 +40,7 @@ function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-20 px-10 py-5 bg-black border-b border-gray-800 gap-7">
       {/* 로고 부분 */}
       <div className="flex items-center flex-shrink-0 gap-8">
-        <button className="flex items-center gap-3" onClick={() => goPage("/")}>
+        <button className="flex items-center gap-3" onClick={() => goPage("/home")}>
           <div className="flex items-center justify-center w-8 h-8 bg-red-600 rounded-full">
             <FaHeadphones size={20} color="white" />
           </div>
@@ -61,7 +61,17 @@ function Header() {
                 return;
               }
 
-              navigate(`/search?q=${encodeURIComponent(searchValue)}`);
+              const url = `/search?q=${encodeURIComponent(searchValue)}`;
+
+              // 이전 검색어로 재검색 할 경우 새로고침
+              if (location.pathname + location.search === url) {
+                navigate(url, {
+                  replace: true,
+                  state: { refresh: Date.now() },
+                });
+              } else {
+                navigate(url);
+              }
             }
           }}
           className="px-16 py-3 text-white bg-gray-800 rounded-full w-[50rem] focus:outline-none focus:ring-2 focus:ring-white"

@@ -1,4 +1,4 @@
-import RegisterForm from "../../Components/auth/RegisterForm";
+import RegisterForm from "./RegisterForm";
 
 function Register() {
   return (
