@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FaTimes, FaPlus } from "react-icons/fa";
-import "../styles/PlaylistCreateModal.css";
+import "../../styles/PlaylistCreateModal.css";
 
 interface Props {
   onClose: () => void;

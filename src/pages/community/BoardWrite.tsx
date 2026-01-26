@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { boardApi } from '../api/boardApi';
+import { boardApi } from '../../api/boardApi';
 
 const BoardWrite = () => {
   const [title, setTitle] = useState('');

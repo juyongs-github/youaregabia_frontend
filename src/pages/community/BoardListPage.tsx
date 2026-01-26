@@ -1,7 +1,7 @@
 // pages/BoardListPage.tsx
 import { useEffect, useState } from 'react';
-import { boardApi } from '../api/boardApi';
-import type { Board } from '../types/board';
+import { boardApi } from '../../api/boardApi';
+import type { Board } from '../../types/board';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 const BoardListPage = () => {

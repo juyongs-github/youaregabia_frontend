@@ -1,23 +1,23 @@
 import "./App.css";
 import { Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
-import SearchResult from "./pages/SearchResult";
-import RecommendPlaylistResult from "./pages/RecommendPlaylistResult";
-import HomePage from "./pages/HomePage";
-import BoardListPage from "./pages/BoardListPage";
-import BoardDetailPage from "./pages/BoardDetailPage";
-import BoardWrite from "./pages/BoardWrite";
-import BoardUpdate from "./pages/BoardUpdate";
+import SearchResult from "./pages/home/SearchResult";
+import RecommendPlaylistResult from "./pages/recommend/RecommendPlaylistResult";
+import HomePage from "./pages/home/HomePage";
+import BoardListPage from "./pages/community/BoardListPage";
+import BoardDetailPage from "./pages/community/BoardDetailPage";
+import BoardWrite from "./pages/community/BoardWrite";
+import BoardUpdate from "./pages/community/BoardUpdate";
 import Layout from "./components/layout/Layout";
-import LoginForm from "./components/auth/LoginForm";
-import RegisterForm from "./components/auth/RegisterForm";
+import LoginForm from "./pages/auth/LoginForm";
+import RegisterForm from "./pages/auth/RegisterForm";
 
 function App() {
   return (
     <Routes>
       {/* Layout 적용 화면만 Layout Route 안에 Route 추가 */}
       <Route element={<Layout />}>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/search" element={<SearchResult />} />
         <Route path="/recommend/result" element={<RecommendPlaylistResult />} />
         <Route path="/community/share" element={<BoardListPage />} />

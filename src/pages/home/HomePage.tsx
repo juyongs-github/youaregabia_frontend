@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import { FaPlus, FaChevronLeft, FaChevronRight, FaPlay } from "react-icons/fa";
-import PlaylistCreateModal from "./PlaylistCreateModal";
-import "../styles/HomePage.css";
-import RankSection from "../components/ui/RankSection";
+import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
+import "../../styles/HomePage.css";
+import RankSection from "../../components/layout/RankSection";
 
 function HomePage() {
   const rowRef = useRef<HTMLDivElement>(null); // Slider

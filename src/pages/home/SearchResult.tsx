@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import SongListItem from "../components/ui/SongListItem";
+import SongListItem from "../../components/ui/SongListItem";
 import { useLocation, useSearchParams } from "react-router-dom";
-import api from "../api/axios";
-import Spinner from "../components/ui/Spinner";
+import api from "../../api/axios";
+import Spinner from "../../components/ui/Spinner";
 import { BsQuestionCircleFill } from "react-icons/bs";
 import { IoWarning } from "react-icons/io5";
-import MusicPlayer from "../components/layout/MusicPlayer";
+import MusicPlayer from "../../components/layout/MusicPlayer";
 
 interface Song {
   id: number;
@@ -60,14 +60,14 @@ function SearchResult() {
 
       {/* 로딩 중인 상태 */}
       {isLoading && (
-        <div className="flex items-center justify-center py-72">
+        <div className="flex items-center justify-center py-48">
           <Spinner />
         </div>
       )}
 
       {/* 에러인 상태 */}
       {isError && !isLoading && (
-        <div className="flex flex-col items-center justify-center gap-5 py-56">
+        <div className="flex flex-col items-center justify-center gap-5 py-32">
           <div className="flex flex-col items-center justify-center gap-4">
             <IoWarning size={60} />
             <p className="text-lg font-bold text-white">검색 중 문제가 발생 했습니다.</p>
@@ -83,7 +83,7 @@ function SearchResult() {
 
       {/* 검색 결과 없는 상태 */}
       {!isLoading && !isError && data.length === 0 && query && (
-        <div className="flex flex-col items-center justify-center gap-5 text-gray-400 py-72">
+        <div className="flex flex-col items-center justify-center gap-5 py-48 text-gray-400">
           <BsQuestionCircleFill size={60} />
           <p className="mb-2 text-lg">
             <span className="font-bold tracking-tight">"{query}"</span>

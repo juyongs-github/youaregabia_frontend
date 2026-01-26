@@ -5,13 +5,15 @@ import Sidebar from './Sidebar';
 // 공통 Layout
 function Layout() {
   return (
-    <div className="flex min-h-screen flex-col bg-black text-white">
+    <div className="flex flex-col min-h-screen text-white bg-black">
       <Header />
       <div className="flex flex-1">
         <Sidebar />
-        <main className="ml-80 mt-20 w-full">
-          <div className="p-32">
-            <Outlet />
+        <main className="flex-1 mt-20 overflow-hidden">
+          <div className="flex justify-center">
+            <div className="w-full p-20 max-w-7xl">
+              <Outlet />
+            </div>
           </div>
         </main>
       </div>

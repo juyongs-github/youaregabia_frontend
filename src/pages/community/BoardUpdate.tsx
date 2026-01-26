@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { boardApi } from '../api/boardApi';
+import { boardApi } from '../../api/boardApi';
 
 
 const BoardUpdate = () => {

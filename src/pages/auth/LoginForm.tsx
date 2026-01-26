@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { login } from "../../api/auth";
 import "../../styles/auth.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function LoginForm() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   // 소셜로그인 버튼 핸들러
@@ -34,6 +35,7 @@ function LoginForm() {
       setIsSubmitting(true);
       await login({ email: form.email, password: form.password });
       alert("로그인 성공");
+      navigate("/home"); // 로그인 성공 후 홈페이지로 이동
     } catch (error: any) {
       alert(error.response?.data?.message || "로그인에 실패했습니다.");
     } finally {

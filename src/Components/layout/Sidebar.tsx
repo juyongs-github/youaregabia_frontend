@@ -20,7 +20,7 @@ function Sidebar() {
   const [isCommunityMenuOpen, setIsCommunityMenuOpen] = useState<boolean>(false);
 
   return (
-    <aside className="border-r border-gray-800 fixed top-20 left-0 h-[calc(100vh-5rem)] w-80">
+    <aside className="border-r border-gray-800 min-w-80">
       <nav className="flex flex-col p-5 pt-10 text-xl font-bold gap-7">
         <button
           className="flex items-center gap-5 px-3 py-2 text-white rounded-lg hover:bg-gray-800"
