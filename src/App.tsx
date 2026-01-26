@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 import Layout from "./layout/Layout";
 import SearchResult from "./pages/SearchResult";
-import Home from "./pages/Home";
 import RecommendPlaylistResult from "./pages/RecommendPlaylistResult";
 import HomePage from "./pages/HomePage";
 import LoginForm from "./Components/auth/LoginForm";
@@ -13,7 +12,7 @@ function App() {
     <Routes>
       {/* Layout 적용 화면만 Layout Route 안에 Route 추가 */}
       <Route element={<Layout />}>
-        <Route path="/" element={<Home />} />
+        {/* <Route path="/" element={<Home />} /> */}
         <Route path="/search" element={<SearchResult />} />
         <Route path="/recommend/result" element={<RecommendPlaylistResult />} />
         <Route path="/" element={<HomePage />} />
