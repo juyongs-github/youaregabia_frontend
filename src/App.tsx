@@ -1,6 +1,5 @@
 import "./App.css";
 import { Routes, Route, Navigate } from "react-router-dom";
-import "./App.css";
 import SearchResult from "./pages/home/SearchResult";
 import RecommendPlaylistResult from "./pages/recommend/RecommendPlaylistResult";
 import HomePage from "./pages/home/HomePage";
@@ -11,6 +10,8 @@ import BoardUpdate from "./pages/community/BoardUpdate";
 import Layout from "./Components/layout/Layout";
 import LoginForm from "./pages/auth/LoginForm";
 import RegisterForm from "./pages/auth/RegisterForm";
+import MyPlaylistPage from "./pages/playlist/MyPlaylistPage";
+import PlaylistDetailPage from "./pages/playlist/PlaylistDetailPage";
 
 function App() {
   return (
@@ -20,6 +21,8 @@ function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/search" element={<SearchResult />} />
         <Route path="/recommend/result" element={<RecommendPlaylistResult />} />
+        <Route path="/playlist/me" element={<MyPlaylistPage />} />
+        <Route path="/playlist/me/:playlistId" element={<PlaylistDetailPage />} />
         <Route path="/community/share" element={<BoardListPage />} />
         <Route path="/community/share/:boardId" element={<BoardDetailPage />} />
         <Route path="/community/share/new" element={<BoardWrite />} />

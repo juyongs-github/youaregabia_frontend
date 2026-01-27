@@ -1,12 +1,23 @@
-import axios from "axios";
+import api from "./axios";
 
+export const playlistApi = {
+  createPlaylist: (formData: FormData) => {
+    return api.post("/playlist", formData);
+  },
 
-export const API_SERVER_HOST = "http://localhost:8080/api/playlists";
+  getAllPlaylist: () => {
+    return api.get("/playlist/all");
+  },
 
+  getPlaylist: (playlistId: string | undefined) => {
+    return api.get(`/playlist/me/${playlistId}`);
+  },
 
+  //   updatePlaylist: () => {
+  //     return api.post("/");
+  //   },
 
-export const fetchPlaylists = async (): Promise<Playlist[]> => {
-    const res= await axios.get(API_SERVER_HOST);
-    console.log('플레이리스트 목록', res.data);
-    return res.data;
-}
+  //   deletePlaylist: () => {
+  //     api.get("/").then((res) => res.data);
+  //   },
+};
