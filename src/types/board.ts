@@ -11,7 +11,24 @@ export interface Board {
   boardId: number;
   title: string;
   content: string;
-  writerNickname: string;
+  writer: string;
   createdAt: string;
-  replies: Reply[];
+  replies?: PageResult<Reply>;
+}
+
+export interface PageResult<T> {
+  dtoList: T[];
+  pageNumList: number[];
+  prev: boolean;
+  next: boolean;
+  prevPage?: number;
+  nextPage?: number;
+  totalPage: number;
+  totalCount: number;
+  current: number;
+}
+
+export interface PageRequest {
+  page: number;
+  size: number;
 }

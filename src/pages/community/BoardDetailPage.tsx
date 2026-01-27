@@ -4,11 +4,13 @@ import { boardApi } from '../../api/boardApi';
 import type { Board } from '../../types/board';
 import { replyApi } from '../../api/replyApi';
 import ReplyItem from '../../components/ui/replyItem';
+import Pagination from '../../components/ui/Pagination';
 
 const BoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const [board, setBoard] = useState<Board | null>(null);
   const [replyContent, setReplyContent] = useState('');
+  const [replyPage, setReplyPage] = useState(1); // 댓글 페이지
   // 정렬 
   const [sortBy, setSortBy] = useState<'latest' | 'likes'>('latest');
 
@@ -16,20 +18,31 @@ const BoardDetailPage = () => {
   //임시 아이디
   const currentUserId = 1;
 
-  useEffect(() => {
-    if (!boardId) return;
     
     // 게시글 가져오기
-    boardApi.getBoardDetail(Number(boardId), currentUserId).then(setBoard);
+      const loadBoard = async (page: number = 1) => {
+    if (!boardId) return;
+    
+    const data = await boardApi.getBoardDetail(
+      Number(boardId), 
+      currentUserId,
+      { page, size: 10 }  // 댓글 페이징
+    );
+    setBoard(data);
+    setReplyPage(page);
+  };
+
+  useEffect(() => {
+    loadBoard(1);
   }, [boardId]);
   
   //  댓글 정렬
   // Memo -> board.replies가 바뀌거나 sortBy가 바뀔 때만 실행
   const sortedReplies = useMemo(() => {
-    if (!board?.replies) return [];
+    if (!board?.replies?.dtoList) return [];
     
     // 원본 배열을 복사해서 정렬 (sort는 원본을 변경하기 때문)
-    return [...board.replies].sort((a, b) => {
+    return [...board.replies.dtoList].sort((a, b) => {
       if (sortBy === 'likes') {
         // 좋아요순: 좋아요 수 내림차순 -> 같으면 최신순
         if (b.likeCount !== a.likeCount) return b.likeCount - a.likeCount;
@@ -64,6 +77,11 @@ const BoardDetailPage = () => {
     );
     setBoard(updated);
   };
+
+  const handleReplyPageChange = (page: number) => {
+    loadBoard(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
   
   // 오류 시 로딩중 이라고 보여주기
   if (!board) return <div>로딩 중...</div>;
@@ -71,7 +89,7 @@ const BoardDetailPage = () => {
   return (
     <div>
       <h2>{board.title}</h2>
-      <p>작성자: {board.writerNickname}</p>
+      <p>작성자: {board.writer}</p>
       <p>{board.content}</p>
 
       <button
@@ -95,15 +113,29 @@ const BoardDetailPage = () => {
           >추천순</button>
         </div>
 
-      {board.replies.length === 0 ? (
+      {!board.replies || board.replies?.dtoList.length === 0 ? (
         <p>댓글이 없습니다.</p>
       ) : (
+        <>
         <ul>
           {sortedReplies.map((reply) => (
             <ReplyItem key={reply.replyId} reply={reply} onRefresh={refresh} />
           ))}
         </ul>
-      )}
+        {/* 댓글 페이지네이션 추가 */}
+          {board.replies.pageNumList.length > 0 && (
+            <Pagination
+              pageNumList={board.replies.pageNumList}
+              current={board.replies.current}
+              prev={board.replies.prev}
+              next={board.replies.next}
+              prevPage={board.replies.prevPage}
+              nextPage={board.replies.nextPage}
+              onPageChange={handleReplyPageChange}
+            />
+          )}
+          </>
+)}
 
       <textarea
         value={replyContent}
