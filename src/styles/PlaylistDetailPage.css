@@ -1,0 +1,172 @@
+/* =========================
+   전체 레이아웃
+========================= */
+.playlist-detail-page {
+  display: flex;
+  height: 100vh;
+  background: black;
+  color: white;
+}
+
+
+/* =========================
+   왼쪽 패널
+========================= */
+.playlist-left {
+  position: fixed;
+  top: 160px;
+  left: 420px;
+
+  width: 340px;
+  height: 100vh;
+  padding: 24px;
+
+  display: flex;
+  justify-content: center;
+  background: black;
+  z-index: 10;
+}
+
+.playlist-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+}
+
+/* 커버 이미지 */
+.playlist-cover-large {
+  width: 220px;
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.playlist-cover-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 제목 */
+.playlist-title-large {
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+/* 메타 정보 */
+.playlist-meta {
+  font-size: 13px;
+  color: #aaa;
+}
+
+/* =========================
+   액션 영역 (▶ + ⋯)
+========================= */
+.playlist-actions {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* 재생 버튼 */
+.primary-play.large {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+
+  background: white;
+  color: black;
+  font-size: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  transition: transform 0.15s ease;
+}
+
+.primary-play.large:hover {
+  transform: scale(1.08);
+}
+
+/* dots 버튼 */
+.more-button.inline {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================
+   오른쪽 트랙 리스트
+========================= */
+.playlist-right {
+  margin-left: 340px; /* 왼쪽 패널만큼 밀기 */
+  flex: 1;
+  padding: 24px 32px;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.track-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* 트랙 아이템 */
+.track-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 10px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.track-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* 썸네일 */
+.track-thumb {
+  width: 42px;
+  height: 42px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+/* 트랙 정보 */
+.track-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.track-title {
+  font-size: 14px;
+}
+
+.track-artist {
+  font-size: 12px;
+  color: #aaa;
+}
+
+/* 재생 시간 */
+.track-duration {
+  font-size: 12px;
+  color: #aaa;
+}

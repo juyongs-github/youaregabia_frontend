@@ -33,19 +33,19 @@ function MyPlaylistPage() {
     fetchData();
   }, []);
 
+  
+    
+
   return (
     <div>
-      <h1>내 플레이리스트</h1>
-      <ul className="flex gap-7">
-        <li>내 등록</li>
-        <li>추천</li>
-        <li>공동</li>
-      </ul>
+      <h1 className="page-title py-5">내 플레이리스트</h1>
+
+
       <div className="flex flex-wrap gap-7">
         {data.map((item) => (
           <div
             key={item.id}
-            className="playlist-card top-playlist-card"
+            className="playlist-card top-playlist-card top-playlist-card-small"
             onClick={() => {
               navigate(`/playlist/me/${item.id}`);
             }}
@@ -55,7 +55,7 @@ function MyPlaylistPage() {
               <button className="play-button">
                 <FaPlay />
               </button>
-              <span className="playlist-title">{item.title}</span>
+              <span className="playlist-title playlist-title-small">{item.title}</span>
             </div>
           </div>
         ))}
