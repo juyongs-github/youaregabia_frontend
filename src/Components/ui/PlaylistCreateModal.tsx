@@ -8,7 +8,9 @@ interface Props {
 }
 
 function PlaylistCreateModal({ onClose, onCreated }: Props) {
+
   const [image, setImage] = useState<File | null>(null);
+  
   const [preview, setPreview] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");

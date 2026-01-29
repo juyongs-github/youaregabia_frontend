@@ -4,6 +4,7 @@ import RankSection from "../../Components/layout/RankSection";
 import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
 import { playlistApi } from "../../api/playlistApi";
 import type { Playlist } from "../../types/playlist";
+import { useNavigate } from "react-router-dom";
 
 
 function HomePage() {
@@ -11,10 +12,14 @@ function HomePage() {
 const [data, setData] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
+  
+  const navigate = useNavigate();
+  
 
   const fetchData = async () => {
      setIsLoading(true);
   setIsError(false);
+
 
   try {
     const res = await playlistApi.getAllPlaylist();
@@ -69,7 +74,9 @@ const [data, setData] = useState<Playlist[]>([]);
 
               <div className="playlist-row top-playlist-row" ref={rowRef}>
             {data.map((item)=> (
-              <div className="playlist-card top-playlist-card">
+              <div className="playlist-card top-playlist-card"  onClick={() => {
+              navigate(`/playlist/me/${item.id}`);
+            }}>
                 <div className="playlist-image-wrapper">
                   <img src="/images/playlist1.jpg" />
                   <button className="play-button">

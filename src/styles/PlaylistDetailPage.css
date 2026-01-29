@@ -63,19 +63,22 @@
 }
 
 /* =========================
-   액션 영역 (▶ + ⋯)
+   액션 영역
 ========================= */
 .playlist-actions {
-  margin-top: 14px;
+  position: relative;
+  width: 100%;
+  margin-top: 20px;
+
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 14px;
 }
 
-/* 재생 버튼 */
+/* 재생 버튼 (정중앙) */
 .primary-play.large {
-  width: 56px;
-  height: 56px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   border: none;
 
@@ -86,8 +89,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
 
+  cursor: pointer;
   transition: transform 0.15s ease;
 }
 
@@ -95,19 +98,59 @@
   transform: scale(1.08);
 }
 
+/* dots 묶음 (오른쪽 고정) */
+.more-wrapper {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 /* dots 버튼 */
-.more-button.inline {
+.more-button {
   background: none;
   border: none;
   color: white;
   font-size: 22px;
   cursor: pointer;
-
-  padding: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
+
+/* 드롭다운 메뉴 */
+.playlist-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 6px;
+
+  padding: 4px 0;
+  min-width: 90px;
+  z-index: 20;
+}
+
+.playlist-menu button {
+  width: 100%;
+  padding: 6px 12px;
+  background: none;
+  border: none;
+
+  color: white;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.playlist-menu button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.playlist-menu .danger {
+  color: #ff5c5c;
+}
+
 
 /* =========================
    오른쪽 트랙 리스트
