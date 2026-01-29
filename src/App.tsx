@@ -11,6 +11,8 @@ import BoardUpdate from "./pages/community/BoardUpdate";
 import Layout from "./components/layout/Layout";
 import LoginForm from "./pages/auth/LoginForm";
 import RegisterForm from "./pages/auth/RegisterForm";
+import TermsAgreement from "./pages/auth/TermsAgreement";
+import CiVerifyPage from "./pages/auth/CiVerifyPage";
 
 function App() {
   return (
@@ -28,7 +30,9 @@ function App() {
       {/* 아닌 것들은 여기 밑으로 Route 추가 */}
       <Route path="/" element={<Navigate to="/login" />} />
       <Route path="/login" element={<LoginForm />} />
-      <Route path="/register" element={<RegisterForm />} />
+      <Route path="/register" element={<TermsAgreement />} />
+      <Route path="/auth/ci" element={<CiVerifyPage />} />
+      <Route path="/auth/" element={<RegisterForm />} />
     </Routes>
   );
 }

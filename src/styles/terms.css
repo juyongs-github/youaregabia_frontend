@@ -1,0 +1,239 @@
+/* ==================================================
+   YouTube Music Theme Variables (Terms Only)
+   ================================================== */
+   :root {
+    --yt-bg-main: #000000;
+    --yt-bg-card: #181818;
+    --yt-bg-input: #212121;
+    --yt-text-primary: #FFFFFF;
+    --yt-text-secondary: #AAAAAA;
+
+    --yt-red: #FF2222;           /* 메인 포인트 (레드) */
+    --yt-red-hover: #E61E1E;
+
+    --yt-border: #333333;
+  }
+
+  /* ==================================================
+     전체 레이아웃
+     ================================================== */
+  .terms-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--yt-bg-main);
+    color: var(--yt-text-primary);
+    padding: 20px;
+  }
+
+  .terms-box {
+    background-color: var(--yt-bg-card);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 440px;
+    border: 1px solid var(--yt-border);
+  }
+
+  .terms-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    color: var(--yt-text-primary);
+    text-align: left;
+  }
+
+  .terms-desc {
+    font-size: 14px;
+    color: var(--yt-text-secondary);
+    margin-bottom: 30px;
+    line-height: 1.5;
+  }
+
+  .terms-sub-desc {
+    font-size: 13px;
+    color: var(--yt-text-secondary);
+    margin-top: 4px;
+    margin-left: 34px; /* 체크박스 너비만큼 들여쓰기 */
+  }
+
+  .terms-divider {
+    height: 1px;
+    background-color: var(--yt-border);
+    margin: 20px 0;
+  }
+
+  /* ==================================================
+     체크박스 및 항목 스타일
+     ================================================== */
+  .terms-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    font-size: 15px;
+  }
+
+  .terms-item.all {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .terms-item label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    color: var(--yt-text-primary);
+    width: 100%;
+  }
+
+  /* 브라우저 기본 체크박스 커스텀 (Accent Color 활용) */
+  .terms-item input[type="checkbox"] {
+    accent-color: var(--yt-red); /* 체크 시 빨간색 */
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    margin: 0;
+  }
+
+  /* 필수/선택 태그 */
+  .required {
+    color: var(--yt-red);
+    font-weight: 700;
+    font-size: 13px;
+    margin-right: 4px;
+  }
+
+  .optional {
+    color: var(--yt-text-secondary);
+    font-weight: 700;
+    font-size: 13px;
+    margin-right: 4px;
+  }
+
+  /* 보기 버튼 */
+  .term-view-button {
+    background: none;
+    border: none;
+    color: var(--yt-text-secondary);
+    text-decoration: underline;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-left: 8px;
+  }
+
+  .term-view-button:hover {
+    color: var(--yt-text-primary);
+  }
+
+  /* ==================================================
+     다음 버튼
+     ================================================== */
+  .terms-next {
+    width: 100%;
+    padding: 16px;
+    margin-top: 24px;
+    background-color: var(--yt-red);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .terms-next:hover:not(:disabled) {
+    background-color: var(--yt-red-hover);
+  }
+
+  .terms-next:disabled {
+    background-color: #333333;
+    color: #777777;
+    cursor: not-allowed;
+  }
+
+  /* ==================================================
+     약관 상세 모달 (TermsDetailModal)
+     ================================================== */
+  .term-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7); /* 배경 어둡게 */
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .term-modal {
+    background: #181818; /* 다크 모드 배경 */
+    border: 1px solid #333;
+    width: 100%;
+    max-width: 500px;
+    max-height: 80vh;
+    border-radius: 12px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    color: #fff;
+  }
+
+  .term-modal h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+    color: var(--yt-text-primary);
+  }
+
+  .term-content {
+    flex: 1;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #ccc;
+    margin-bottom: 20px;
+    padding-right: 10px; /* 스크롤바 여백 */
+  }
+
+  /* 스크롤바 커스텀 */
+  .term-content::-webkit-scrollbar {
+    width: 6px;
+  }
+  .term-content::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 3px;
+  }
+  .term-content::-webkit-scrollbar-track {
+    background: #222;
+  }
+
+  .term-content p {
+    margin-bottom: 10px;
+  }
+
+  .term-close-button {
+    padding: 14px;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .term-close-button:hover {
+    background: #444;
+  }
