@@ -1,14 +1,19 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { boardApi } from '../../api/boardApi';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../store';
 
 const BoardWrite = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const navigate = useNavigate();
+  // 이메일 가져오
+  const userEmail = useSelector((state: RootState) => state.auth.user?.email);
 
   const submit = async () => {
-    const boardId = await boardApi.createBoard({ title, content });
+    if (!userEmail) return;
+    const boardId = await boardApi.createBoard({ title, content }, userEmail);
     navigate(`/community/share/${boardId}`);
   };
 

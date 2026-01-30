@@ -1,22 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { boardApi } from '../../api/boardApi';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../store';
 
 
 const BoardUpdate = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const navigate = useNavigate();
-
-  const userId = 1;
+  const userEmail = useSelector((state: RootState) => state.auth.user?.email);
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
   // 1️⃣ 기존 게시글 불러오기
   useEffect(() => {
-    if (!boardId) return;
+    if (!boardId || !userEmail) return;
 
-    boardApi.getBoardDetail(Number(boardId), userId).then((board) => {
+    boardApi.getBoardDetail(Number(boardId), userEmail).then((board) => {
       setTitle(board.title);
       setContent(board.content ?? '');
     });
@@ -24,23 +25,23 @@ const BoardUpdate = () => {
 
   // 2️⃣ 수정
   const update = async () => {
-    if (!boardId) return;
+    if (!boardId || !userEmail) return;
 
     await boardApi.updateBoard(Number(boardId), {
       title,
       content,
-    });
+    }, userEmail);
 
     navigate(`/community/share/${boardId}`);
   };
 
   // 3️⃣ 삭제
   const remove = async () => {
-    if (!boardId) return;
+    if (!boardId || !userEmail) return;
 
     if (!confirm('정말 삭제할까요?')) return;
 
-    await boardApi.deleteBoard(Number(boardId));
+    await boardApi.deleteBoard(Number(boardId), userEmail);
     navigate('/community/share');
   };
 
