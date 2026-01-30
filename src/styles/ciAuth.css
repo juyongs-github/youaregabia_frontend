@@ -1,0 +1,201 @@
+/* --- YouTube Music Style (Dark & Red) + Validation Colors --- */
+:root {
+  --yt-bg-main: #000000;
+  --yt-bg-card: #181818;
+  --yt-bg-input: #212121;
+  --yt-text-primary: #FFFFFF;
+  --yt-text-secondary: #AAAAAA;
+
+  --yt-red: #FF2222;           /* 메인 포인트 (레드) */
+  --yt-red-hover: #E61E1E;
+
+  /* ✅ 요청하신 검증 컬러 */
+  --yt-success: #2ecc71;       /* 성공 (연두색) */
+  --yt-error: #e74c3c;         /* 에러 (빨간색) */
+
+  --yt-border: #333333;
+}
+
+.ci-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--yt-bg-main);
+  color: var(--yt-text-primary);
+  padding: 20px;
+}
+
+.ci-card {
+  background-color: var(--yt-bg-card);
+  padding: 40px; /* 내부 여백 넉넉하게 */
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 440px; /* 너비 살짝 키움 */
+  border: 1px solid var(--yt-border);
+}
+
+.ci-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  text-align: center;
+  color: var(--yt-text-primary);
+}
+
+.ci-desc {
+  text-align: center;
+  color: var(--yt-text-secondary);
+  margin-bottom: 40px; /* 타이틀과 입력창 사이 간격 확보 */
+  font-size: 15px;
+}
+
+/* ✅ 입력 필드 간격 넓힘 */
+.ci-field {
+  margin-bottom: 30px; /* 기존 20px -> 30px */
+}
+
+.ci-field label {
+  display: block;
+  margin-bottom: 10px; /* 라벨과 입력창 사이 간격 */
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--yt-text-secondary);
+}
+
+.ci-field input {
+  width: 100%;
+  padding: 16px; /* 내부 패딩 키워서 터치감 향상 */
+  border: 1px solid var(--yt-border);
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: var(--yt-bg-input);
+  color: var(--yt-text-primary);
+  transition: all 0.2s;
+  box-sizing: border-box; /* 패딩 포함 너비 계산 */
+}
+
+.ci-field input::placeholder {
+  color: #555;
+}
+
+.ci-field input:focus {
+  border-color: var(--yt-text-primary); /* 기본 포커스는 흰색/회색 */
+  outline: none;
+}
+
+/* ✅ 유효성 검사 스타일 (핵심) */
+/* 성공 (조건 충족) -> 연두색 */
+.ci-field input.input-success {
+  border-color: var(--yt-success) !important;
+  box-shadow: 0 0 0 1px rgba(46, 204, 113, 0.2);
+}
+
+/* 에러 (조건 미달) -> 빨간색 */
+.ci-field input.input-error {
+  border-color: var(--yt-error) !important;
+  box-shadow: 0 0 0 1px rgba(231, 76, 60, 0.2);
+}
+
+/* ✅ 휴대폰 번호 & 인증번호 행 디자인 개선 */
+.ci-phone-row,
+.ci-sms-row {
+  display: flex;
+  gap: 12px; /* 버튼과 입력창 사이 간격 넓힘 */
+  align-items: stretch; /* 높이 강제 통일 */
+}
+
+/* 입력창이 남은 공간 차지 */
+.ci-phone-row input,
+.ci-sms-row input {
+  flex: 1;
+}
+
+/* 서브 버튼 (인증요청 등) */
+.ci-sub-btn {
+  padding: 0 20px;
+  border: 1px solid var(--yt-border);
+  background-color: #333333;
+  color: var(--yt-text-primary);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  /* 높이는 flex align-items: stretch 덕분에 input과 자동 일치됨 */
+}
+
+.ci-sub-btn:hover:not(:disabled) {
+  background-color: #444444;
+  border-color: var(--yt-text-secondary);
+}
+
+.ci-sub-btn:disabled {
+  background-color: #252525;
+  color: #555;
+  cursor: not-allowed;
+}
+
+/* 인증 완료된 버튼 스타일 */
+.ci-sub-btn.success {
+  border-color: var(--yt-success);
+  color: var(--yt-success);
+  background-color: transparent;
+}
+
+/* 하단 메인 버튼 영역 */
+.ci-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 40px; /* 폼과 버튼 사이 간격 넓힘 */
+}
+
+.ci-main-btn {
+  width: 100%;
+  padding: 18px;
+  background-color: var(--yt-red); /* 메인은 여전히 유튜브 레드 */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.ci-main-btn:hover:not(:disabled) {
+  background-color: var(--yt-red-hover);
+}
+
+.ci-main-btn:disabled {
+  background-color: #333;
+  color: #777;
+}
+
+.ci-cancel-btn {
+  width: 100%;
+  padding: 16px;
+  background-color: transparent;
+  border: 1px solid var(--yt-border);
+  color: var(--yt-text-secondary);
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ci-cancel-btn:hover {
+  border-color: var(--yt-text-primary);
+  color: var(--yt-text-primary);
+}
+
+.ci-msg {
+  margin-top: 8px;
+  font-size: 13px;
+  padding-left: 4px;
+}
+.ci-msg.success { color: var(--yt-success); }
+.ci-msg.error { color: var(--yt-error); }
