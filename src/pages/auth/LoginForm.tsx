@@ -2,9 +2,13 @@ import { useState } from "react";
 import { login } from "../../api/auth";
 import "../../styles/auth.css";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../../store/authSlice";
 
 function LoginForm() {
+
   const navigate = useNavigate();
+  const dispatch = useDispatch(); // ✅ 3. 이 줄이 빠져있어서 에러가 난 거예요!
   const [form, setForm] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   // 소셜로그인 버튼 핸들러
@@ -34,10 +38,27 @@ function LoginForm() {
     try {
       setIsSubmitting(true);
       await login({ email: form.email, password: form.password });
-      alert("로그인 성공");
-      navigate("/home"); // 로그인 성공 후 홈페이지로 이동
+
+      // 1. 서버에 로그인 요청 (기존 API 형식 확인 필요)
+      const response = await login({ email: form.email, password: form.password });
+          console.log("서버 응답 데이터 전체 : ", response.data)
+      // 2. 서버 응답 성공 시 (보통 200번대)
+        if (response) {
+
+          // ✅ Redux 상태 업데이트 (객체 형태로 전달)
+          dispatch(loginSuccess({
+            email: form.email,
+            name: response?.data?.name || "사용자", // 서버 데이터가 없다면 기본값
+            createDate: response?.data?.createDate || new Date().toISOString()
+          }));
+
+          alert("로그인 성공");
+          navigate("/home"); // 로그인 성공 후 홈페이지로 이동
+      }
     } catch (error: any) {
-      alert(error.response?.data?.message || "로그인에 실패했습니다.");
+    // 400 에러 발생 시 서버가 보내준 메시지 확인
+    console.error("Login Error Details:", error.response?.data);
+    alert(error.response?.data?.message || "로그인 정보가 올바르지 않습니다.");
     } finally {
       setIsSubmitting(false);
     }
