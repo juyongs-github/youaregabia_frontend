@@ -5,6 +5,7 @@ import { playlistApi } from "../../api/playlistApi";
 import { FaPlay } from "react-icons/fa";
 
 function MyPlaylistPage() {
+  const baseURL: string = "http://localhost:8080";
   const navigate = useNavigate();
 
   const [data, setData] = useState<Playlist[]>([]);
@@ -51,7 +52,7 @@ function MyPlaylistPage() {
             }}
           >
             <div className="playlist-image-wrapper">
-              <img src="/images/playlist1.jpg" />
+              <img src={`${baseURL}${item.imageUrl}`} />
               <button className="play-button">
                 <FaPlay />
               </button>

@@ -10,6 +10,12 @@ import { HiPencil } from "react-icons/hi2";
 import { BsQuestionCircleFill } from "react-icons/bs";
 import { RiPlayList2Fill } from "react-icons/ri";
 import MusicPlayer from "../../components/layout/MusicPlayer";
+import { RiResetLeftFill } from "react-icons/ri";
+import PlaylistReviewModal from "../../components/ui/PlaylistReviewModal";
+import Checkbox from "@mui/material/Checkbox";
+import { playlistApi } from "../../api/playlistApi";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Box from "@mui/material/Box";
 
 // 플레이리스트 추천 결과 페이지
 function RecommendPlaylistResult() {
@@ -22,6 +28,13 @@ function RecommendPlaylistResult() {
 
   // 곡 정보 UI에서 선택한 곡(미리듣기, 유사 곡 추천)
   const [selectSong, setSelectSong] = useState<Song | null>(null);
+
+  // 리뷰 작성 Modal
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const [checkedSongIds, setCheckedSongIds] = useState<number[]>([]);
+  const isAllChecked = data.length > 0 && checkedSongIds.length === data.length;
+  const isIndeterminate = checkedSongIds.length > 0 && !isAllChecked;
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -52,30 +65,31 @@ function RecommendPlaylistResult() {
     <div>
       {/* 로딩 중인 상태 */}
       {isLoading && (
-        <div className="flex items-center justify-center py-72">
+        <div className="flex items-center justify-center py-48">
           <Spinner />
         </div>
       )}
 
       {/* 에러인 상태 */}
       {isError && !isLoading && (
-        <div className="flex flex-col items-center justify-center gap-5 py-56">
+        <div className="flex flex-col items-center justify-center gap-5 py-32">
           <div className="flex flex-col items-center justify-center gap-4">
             <IoWarning size={60} />
             <p className="text-lg font-bold text-white">추천 중 문제가 발생 했습니다.</p>
           </div>
           <button
-            className="px-5 py-3 font-semibold text-white transition-colors bg-red-600 rounded-full hover:bg-red-700"
             onClick={() => fetchData()}
+            className="flex items-center gap-2 px-5 py-3 font-semibold text-white transition-colors bg-red-600 rounded-full hover:bg-red-700"
           >
-            다시 시도
+            <RiResetLeftFill size={25} />
+            <span>다시 시도</span>
           </button>
         </div>
       )}
 
       {/* 추천 결과 없는 상태 */}
       {!isLoading && !isError && data.length === 0 && trackName && artistName && (
-        <div className="flex flex-col items-center justify-center gap-5 text-gray-400 py-72">
+        <div className="flex flex-col items-center justify-center gap-5 py-48 text-gray-400">
           <BsQuestionCircleFill size={60} />
           <p className="mb-2 text-lg">
             <span className="font-bold tracking-tight">
@@ -102,11 +116,44 @@ function RecommendPlaylistResult() {
             </div>
             <p className="text-lg">플레이리스트 설명</p>
             <div className="flex gap-5">
-              <button className="flex items-center gap-3 p-4 font-bold text-white border rounded-xl hover:bg-gray-800 text-[17px]">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center gap-3 p-4 font-bold text-white border rounded-xl hover:bg-gray-800 text-[17px]"
+              >
                 <HiPencil size={25} />
                 <span>리뷰 작성</span>
               </button>
-              <button className="flex items-center gap-3 p-4 font-bold text-white border rounded-xl hover:bg-gray-800 text-[17px]">
+              <button
+                onClick={() => {
+                  if (!confirm("플레이리스트를 저장 하시겠습니까?")) {
+                    return;
+                  }
+
+                  // 테스트용 formData (수정 필요)
+                  const formData = new FormData();
+                  formData.append("file", "");
+                  formData.append("title", "플레이리스트 제목");
+                  formData.append("description", "플레이리스트 설명");
+
+                  // 선택 곡들 Controller에 List로 보내기 위한 작업
+                  checkedSongIds.forEach((id) => {
+                    formData.append("songIds", String(id));
+                  });
+
+                  playlistApi
+                    .createPlaylist(formData)
+                    .then((res) => {
+                      if (res.status === 200) {
+                        alert("플레이리스트가 저장되었습니다.");
+                      }
+                    })
+                    .catch((error) => {
+                      console.error(error);
+                      alert("플레이리스트 저장에 실패했습니다.");
+                    });
+                }}
+                className="flex items-center gap-3 p-4 font-bold text-white border rounded-xl hover:bg-gray-800 text-[17px]"
+              >
                 <FaSave size={25} />
                 <span>플레이리스트 저장</span>
               </button>
@@ -114,8 +161,45 @@ function RecommendPlaylistResult() {
           </div>
           {/* 추천 곡 리스트 */}
           <div className="w-[70%]">
+            <FormControlLabel
+              label={
+                <span className="text-lg">
+                  전체 선택 ({checkedSongIds.length} / {data.length})
+                </span>
+              }
+              control={
+                <Checkbox
+                  size="large"
+                  checked={isAllChecked}
+                  indeterminate={isIndeterminate}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setCheckedSongIds(data.map((song) => song.id)); // 전체 선택
+                    } else {
+                      setCheckedSongIds([]); // 전체 해제
+                    }
+                  }}
+                  sx={{ color: "white" }}
+                />
+              }
+            />
             {data.map((item) => (
-              <SongListItem key={item.id} song={item} setSelectSong={setSelectSong} />
+              <Box key={item.id} sx={{ display: "flex", alignItems: "center" }}>
+                <Checkbox
+                  size="large"
+                  checked={checkedSongIds.includes(item.id)}
+                  onChange={(e) => {
+                    setCheckedSongIds((prev) =>
+                      e.target.checked ? [...prev, item.id] : prev.filter((id) => id !== item.id)
+                    );
+                  }}
+                  sx={{ color: "white" }}
+                />
+
+                <Box sx={{ flex: 1 }}>
+                  <SongListItem song={item} setSelectSong={setSelectSong} />
+                </Box>
+              </Box>
             ))}
           </div>
         </div>
@@ -127,6 +211,9 @@ function RecommendPlaylistResult() {
           <MusicPlayer song={selectSong} />
         </div>
       )}
+
+      {/* 추천 플레이리스트 리뷰 작성 */}
+      {isModalOpen && <PlaylistReviewModal onClose={() => setIsModalOpen(false)} />}
     </div>
   );
 }

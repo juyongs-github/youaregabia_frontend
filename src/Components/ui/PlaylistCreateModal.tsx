@@ -30,7 +30,7 @@ function PlaylistCreateModal({ onClose }: Props) {
             playlistApi
               .createPlaylist(formData)
               .then((res) => {
-                if (res.data) {
+                if (res.status === 200) {
                   alert("플레이리스트가 생성되었습니다.");
                 }
               })

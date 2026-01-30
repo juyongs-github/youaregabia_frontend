@@ -6,6 +6,7 @@ import Spinner from "../../components/ui/Spinner";
 import { BsQuestionCircleFill } from "react-icons/bs";
 import { IoWarning } from "react-icons/io5";
 import MusicPlayer from "../../components/layout/MusicPlayer";
+import { RiResetLeftFill } from "react-icons/ri";
 
 interface Song {
   id: number;
@@ -74,9 +75,10 @@ function SearchResult() {
           </div>
           <button
             onClick={() => fetchData()}
-            className="px-5 py-3 font-semibold text-white transition-colors bg-red-600 rounded-full hover:bg-red-700"
+            className="flex items-center gap-2 px-5 py-3 font-semibold text-white transition-colors bg-red-600 rounded-full hover:bg-red-700"
           >
-            다시 시도
+            <RiResetLeftFill size={25} />
+            <span>다시 시도</span>
           </button>
         </div>
       )}
