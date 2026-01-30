@@ -1,19 +1,18 @@
-import { useState } from "react";
-import { FaTimes, FaPlus } from "react-icons/fa";
-import { playlistApi } from "../../api/playlistApi";
+import { useState } from 'react';
+import { FaTimes, FaPlus } from 'react-icons/fa';
+import { playlistApi } from '../../api/playlistApi';
 
 interface Props {
   onClose: () => void;
-  onCreated: () => void; 
+  onCreated: () => void;
 }
 
 function PlaylistCreateModal({ onClose, onCreated }: Props) {
-
   const [image, setImage] = useState<File | null>(null);
-  
+
   const [preview, setPreview] = useState<string | null>(null);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
 
   return (
     <div className="modal-overlay">
@@ -23,27 +22,27 @@ function PlaylistCreateModal({ onClose, onCreated }: Props) {
           e.preventDefault();
 
           if (!title.trim()) {
-            alert("제목을 입력해주세요.");
+            alert('제목을 입력해주세요.');
             return;
           }
 
           const formData = new FormData();
-          formData.append("title", title);
-          formData.append("description", description);
+          formData.append('title', title);
+          formData.append('description', description);
 
           if (image) {
-            formData.append("file", image);
+            formData.append('file', image);
           }
 
           playlistApi
             .createPlaylist(formData)
             .then((res) => {
-              alert("플레이리스트가 생성되었습니다.");
-              onCreated(); 
+              alert('플레이리스트가 생성되었습니다.');
+              onCreated();
               onClose();
             })
             .catch((error) => {
-              alert("플레이리스트 생성에 실패했습니다.");
+              alert('플레이리스트 생성에 실패했습니다.');
               console.error(error);
             });
         }}
@@ -58,7 +57,10 @@ function PlaylistCreateModal({ onClose, onCreated }: Props) {
         {/* 썸네일 */}
         <label className="thumbnail-box">
           {preview ? (
-            <img src={preview} className="absolute inset-0 w-full h-full rounded-[18px]" />
+            <img
+              src={preview}
+              className="absolute inset-0 h-full w-full rounded-[18px]"
+            />
           ) : (
             <>
               <FaPlus size={20} />
@@ -87,7 +89,8 @@ function PlaylistCreateModal({ onClose, onCreated }: Props) {
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="플레이리스트 제목"
+          maxLength={10}
+          placeholder="플레이리스트 제목(10자 이내)"
         />
 
         {/* 설명 */}

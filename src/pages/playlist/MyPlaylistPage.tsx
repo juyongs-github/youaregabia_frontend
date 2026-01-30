@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import type { Playlist } from "../../types/playlist";
-import { playlistApi } from "../../api/playlistApi";
-import { FaPlay } from "react-icons/fa";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import type { Playlist } from '../../types/playlist';
+import { playlistApi } from '../../api/playlistApi';
+import { FaPlay, FaPlus } from 'react-icons/fa';
+import PlaylistCreateModal from '../../Components/ui/PlaylistCreateModal';
 
 function MyPlaylistPage() {
   const navigate = useNavigate();
@@ -10,6 +11,8 @@ function MyPlaylistPage() {
   const [data, setData] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false); // Create Modal
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -33,13 +36,9 @@ function MyPlaylistPage() {
     fetchData();
   }, []);
 
-  
-    
-
   return (
     <div>
       <h1 className="page-title py-5">내 플레이리스트</h1>
-
 
       <div className="flex flex-wrap gap-7">
         {data.map((item) => (
@@ -51,14 +50,32 @@ function MyPlaylistPage() {
             }}
           >
             <div className="playlist-image-wrapper">
-              <img src="/images/playlist1.jpg" />
+              <img src={`http://localhost:8080${item.imageUrl}`} />
               <button className="play-button">
                 <FaPlay />
               </button>
-              <span className="playlist-title playlist-title-small">{item.title}</span>
+              <span className="playlist-title playlist-title-small">
+                {item.title}
+              </span>
             </div>
           </div>
         ))}
+        <div
+          className="playlist-card top-playlist-card top-playlist-card-small add-playlist-card"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <div className="add-playlist-inner">
+            <FaPlus />
+            <span>플레이리스트 추가</span>
+          </div>
+        </div>
+        {/* ===== 모달 ===== */}
+        {isModalOpen && (
+          <PlaylistCreateModal
+            onClose={() => setIsModalOpen(false)}
+            onCreated={fetchData}
+          />
+        )}
       </div>
     </div>
   );

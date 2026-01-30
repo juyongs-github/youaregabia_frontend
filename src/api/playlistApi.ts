@@ -13,8 +13,11 @@ export const playlistApi = {
     return api.get(`/playlist/${playlistId}`);
   },
 
-    updatePlaylist: (playlistId:number , formData:FormData) => {
-      return api.put(`/playlist/${playlistId}`);
+    updatePlaylist: (playlistId:number , data: {
+      title:string;
+      description:string;
+    }) => {
+      return api.put(`/playlist/${playlistId}`,data);
     },
 
     deletePlaylist: (playlistId:number) => {
