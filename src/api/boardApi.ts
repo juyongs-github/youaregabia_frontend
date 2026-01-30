@@ -3,32 +3,38 @@ import type { Board,PageResult, PageRequest } from '../types/board';
 import api from './axios';
 
 export const boardApi = {
-  getBoards: (params: PageRequest) =>
+  
+  // 전체 조회
+  getBoards: (params: PageRequest & {keyword?: string}) =>
     api.get<PageResult<Board>>('/community/share', { params }).then((res) => res.data),
 
-  getBoardDetail: (boardId: number, userId: number, pageRequest: PageRequest = { page: 1, size: 10 }
-  ) =>
+  // 상세 조회
+  getBoardDetail: (boardId: number, userId: number, pageRequest: PageRequest = { page: 1, size: 10 }) =>
     api.get<Board>(`/community/share/${boardId}`, {
       params: { userId, ...pageRequest }
       })
       .then((res) => res.data),
-
+  
+  // 게시글 추가
   createBoard: async (data: {
     title: string;
     content: string;
   }): Promise<number> => {
-    const res = await api.post('/community/share', data, {
+    const res = await api.post('/community/share/add', data, {
       params: { userId: 1 },
     });
     return res.data;
   },
+
+  // 게시글 수정
   updateBoard: (boardId: number, data: { title: string; content: string }) =>
-    api.put(`/community/share/${boardId}`, data, {
+    api.put(`/community/share/update/${boardId}`, data, {
       params: { userId: 1 }, // 임시
     }),
-
+  
+  // 게시글 삭제
   deleteBoard: (boardId: number) =>
-    api.delete(`/community/share/${boardId}`, {
+    api.delete(`/community/share/delete/${boardId}`, {
       params: { userId: 1 }, // 임시
     }),
 };

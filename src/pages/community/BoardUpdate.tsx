@@ -55,15 +55,19 @@ const BoardUpdate = () => {
       />
 
       <textarea
-        className="mb-3 w-full rounded border px-3 py-2"
+        className="mb-4 w-full min-h-[400px] resize-y rounded border px-4 py-3 leading-normal"
         rows={6}
         value={content}
         onChange={(e) => setContent(e.target.value)}
       />
 
       <div className="flex gap-2">
-        <button onClick={update}>수정</button>
-        <button onClick={remove}>삭제</button>
+        <button onClick={update}
+        className="rounded bg-neutral-600 px-2  text-white hover:bg-neutral-500"
+        >수정</button>
+        <button onClick={remove}
+        className="rounded bg-red-600 px-2  text-white hover:bg-red-500"
+        >삭제</button>
       </div>
     </div>
   );

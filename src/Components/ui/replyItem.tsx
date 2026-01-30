@@ -7,6 +7,8 @@ interface Props {
     content: string;
     likeCount: number;
     likedByMe: boolean;
+    createdAt: string;
+    writer: string;
   };
   onRefresh: () => void;
 }
@@ -31,7 +33,7 @@ const ReplyItem = ({ reply, onRefresh }: Props) => {
     onRefresh();
   };
 
-  // ✅ 좋아요 토글
+  // 좋아요 토글
   const toggleLike = async () => {
     await replyApi.toggleLike(reply.replyId, currentUserId);
     onRefresh(); // 서버 기준 상태로 다시 동기화
@@ -42,20 +44,30 @@ const ReplyItem = ({ reply, onRefresh }: Props) => {
       {isEdit ? (
         <>
           <input value={content} onChange={(e) => setContent(e.target.value)} />
-          <button onClick={update}>저장</button>
-          <button onClick={() => setIsEdit(false)}>취소</button>
+          <button onClick={update}
+          className="rounded bg-neutral-600 px-2  text-white hover:bg-neutral-500"
+          >저장</button>
+          <button onClick={() => setIsEdit(false)}
+          className="rounded bg-red-600 px-2  text-white hover:bg-red-500">
+          취소</button>
         </>
       ) : (
         <>
           <span>{reply.content}</span>
 
-          {/* ❤️ 좋아요 버튼 */}
-          <button onClick={toggleLike} style={{ marginLeft: '8px' }}>
+          {/* 좋아요 버튼 */}
+          <button onClick={toggleLike} className='px-3'>
             {reply.likedByMe ? '❤️' : '🤍'} {reply.likeCount}
           </button>
 
-          <button onClick={() => setIsEdit(true)}>수정</button>
-          <button onClick={remove}>삭제</button>
+          <button onClick={() => setIsEdit(true)}
+            className="rounded bg-neutral-600 px-1  text-white hover:bg-neutral-500">
+            수정</button>
+          <button onClick={remove}
+          className="rounded bg-red-600 px-2  text-white hover:bg-red-500"
+          >
+          삭제</button>
+          <span className='text-sm font-semibold text-neutral-500'>{reply.writer}{reply.createdAt}</span>
         </>
       )}
     </li>

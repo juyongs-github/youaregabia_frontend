@@ -8,13 +8,23 @@ import Pagination from '../../components/ui/Pagination';
 
 
 const BoardListPage = () => {
+  // 페이징 관리
   const [pageData, setPageData] = useState<PageResult<Board> | null>(null);
+  // 검색기능
+  const [keyword, setKeyword] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');
   const navigate = useNavigate();
 
   // 페이지 데이터 불러오기
-  const loadPage = async (page: number) => {
+  const loadPage = async (page: number, search?:string) => {
     try {
-      const data = await boardApi.getBoards({ page, size: 10 });
+      const params: {page: number; size:number ; keyword?: string} = {
+        page, size: 10
+      }
+      if (search) {
+        params.keyword = search;
+      }
+      const data = await boardApi.getBoards(params);
       console.log(' 백엔드 응답:', data)
       console.log(' dtoList:', data.dtoList);
       setPageData(data);
@@ -34,14 +44,43 @@ const BoardListPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // 검색
+  const handleSearch = ()=> {
+    setSearchKeyword(keyword);
+    loadPage(1,keyword);
+  };
+
+  // 엔터키 검색
+  const handleEnter = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    };
+  };
+
+  // 검색 후 초기화
+  const handleKeyReset = () => {
+    setKeyword('');
+    setSearchKeyword('');
+    loadPage(1);
+  };
+
   //  로딩 중
   if (!pageData) {
     return <div className="p-4 text-center">로딩 중...</div>;
-  }
+  };
 
   return (
     <div className="mx-auto max-w-4xl p-4">
-      <h2 className="mb-4 text-2xl font-bold">게시판</h2>
+      <div className="mt-6 flex items-center justify-between border-b pb-4">
+      <h2 className="mb-4 text-2xl font-bold">플레이리스트 공유</h2>
+            {/* 글쓰기 버튼 */}
+        <button
+          className="rounded bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-500"
+          onClick={() => navigate('/community/share/new')}
+        >
+          글쓰기
+        </button>
+      </div>
 
       {/* 게시글 목록, 삼항연산자 사용 */}
       <ul className="divide-y divide-neutral-700 rounded border border-neutral-700">
@@ -71,6 +110,37 @@ const BoardListPage = () => {
         )}
       </ul>
 
+        {/* 검색바 */}
+        <div className="mb-4 flex gap-2">
+        <input
+            type="text"
+            placeholder="제목으로 검색..."
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onKeyDown={handleEnter}
+            className="flex-1 rounded border border-neutral-700 bg-neutral-900 px-4 py-2 text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+          />
+          <button
+            onClick={handleSearch}
+            className="rounded bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-500"
+          >
+            검색
+          </button>
+          {searchKeyword && (
+            <button
+              onClick={handleKeyReset}
+              className="rounded border border-neutral-700 px-4 py-2 text-gray-400 hover:bg-neutral-800"
+            >
+              전체글
+            </button>
+          )}
+        </div>
+          {/* 검색 결과 표시 */}
+        {searchKeyword && (
+          <div className="mb-2 text-sm text-gray-400">
+            '{searchKeyword}' 검색 결과: {pageData.totalCount}개
+          </div>
+        )}
       {/* 페이지네이션 */}
       {pageData.pageNumList.length > 0 && (
         <div className="mt-6">
@@ -89,16 +159,6 @@ const BoardListPage = () => {
       {/* 페이지 정보 */}
       <div className="mt-4 text-center text-sm text-gray-400">
         전체 {pageData.totalCount}개 · {pageData.current} 페이지
-      </div>
-
-      {/* 글쓰기 버튼 */}
-      <div className="mt-6 text-center">
-        <button
-          className="rounded bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-500"
-          onClick={() => navigate('/community/share/new')}
-        >
-          글쓰기
-        </button>
       </div>
     </div>
   );

@@ -24,7 +24,7 @@ const BoardWrite = () => {
       />
 
       <textarea
-        className="mb-3 w-full rounded border px-3 py-2"
+        className="mb-4 w-full min-h-[400px] resize-y rounded border px-4 py-3 leading-normal"
         placeholder="내용"
         rows={6}
         value={content}

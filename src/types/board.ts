@@ -31,4 +31,6 @@ export interface PageResult<T> {
 export interface PageRequest {
   page: number;
   size: number;
+  keyword?: string;
+  sort?: string;
 }
