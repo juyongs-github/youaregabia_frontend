@@ -26,7 +26,7 @@ interface SongProps {
 }
 
 // 곡 리스트 UI
-function Song({ song, setSelectSong }: SongProps) {
+function SongListItem({ song, setSelectSong }: SongProps) {
   const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -124,4 +124,4 @@ function Song({ song, setSelectSong }: SongProps) {
   );
 }
 
-export default Song;
+export default SongListItem;

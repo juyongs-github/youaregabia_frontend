@@ -12,6 +12,8 @@ import LoginForm from "./pages/auth/LoginForm";
 import RegisterForm from "./pages/auth/RegisterForm";
 import MyPlaylistPage from "./pages/playlist/MyPlaylistPage";
 import PlaylistDetailPage from "./pages/playlist/PlaylistDetailPage";
+import CollaboPlaylistPage from "./pages/community/CollaboPlaylistPage";
+import CollaboPlaylistDetailPage from "./pages/community/CollaboPlaylistDetailPage";
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
         <Route path="/community/share/:boardId" element={<BoardDetailPage />} />
         <Route path="/community/share/new" element={<BoardWrite />} />
         <Route path="/community/share/:boardId/update" element={<BoardUpdate />} />
+        <Route path="/community/collabo" element={<CollaboPlaylistPage />} />
+        <Route path="/community/collabo/detail/:id" element={<CollaboPlaylistDetailPage />} />
       </Route>
       {/* 아닌 것들은 여기 밑으로 Route 추가 */}
       <Route path="/" element={<Navigate to="/login" />} />

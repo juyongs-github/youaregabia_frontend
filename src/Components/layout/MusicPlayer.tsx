@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { FaPause, FaPlay, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
+import { FaChevronDown, FaPause, FaPlay, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
 import Slider from "@mui/material/Slider";
 import Box from "@mui/material/Box";
 import { GoDotFill } from "react-icons/go";
@@ -7,10 +7,11 @@ import type { Song } from "../ui/SongListItem";
 
 interface MusicPlayerProps {
   song: Song;
+  setIsPlayerVisible: () => void;
 }
 
 // 음악 재생 바 UI
-function MusicPlayer({ song }: MusicPlayerProps) {
+function MusicPlayer({ song, setIsPlayerVisible }: MusicPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false); // 재생 중 여부
   const [progress, setProgress] = useState<number>(0); // 곡 재생 진행바(%)
@@ -120,43 +121,49 @@ function MusicPlayer({ song }: MusicPlayerProps) {
             </div>
           </div>
         </div>
-        {/* 볼륨 부분 */}
-        <div className="flex items-center w-40 gap-7">
-          <button
-            onClick={() => {
-              if (!audioRef.current) return;
-
-              if (isMute) {
-                audioRef.current.muted = false;
-                setVolume(audioRef.current.volume * 100);
-              } else {
-                audioRef.current.muted = true;
-                setVolume(0);
-              }
-              setIsMute(audioRef.current.muted);
-            }}
-          >
-            {isMute ? (
-              <FaVolumeMute size={30} color="white" />
-            ) : (
-              <FaVolumeUp size={30} color="white" />
-            )}
-          </button>
-          <Box sx={{ width: "100%", display: "flex" }}>
-            <Slider
-              value={volume}
-              onChange={(e, value) => {
+        <div className="flex items-center gap-7">
+          {/* 볼륨 부분 */}
+          <div className="flex items-center w-40 gap-7">
+            <button
+              onClick={() => {
                 if (!audioRef.current) return;
 
-                audioRef.current.volume = value / 100;
-                setVolume(value);
-                setIsMute(value === 0);
+                if (isMute) {
+                  audioRef.current.muted = false;
+                  setVolume(audioRef.current.volume * 100);
+                } else {
+                  audioRef.current.muted = true;
+                  setVolume(0);
+                }
+                setIsMute(audioRef.current.muted);
               }}
-              sx={{
-                color: "grey",
-              }}
-            />
-          </Box>
+            >
+              {isMute ? (
+                <FaVolumeMute size={30} color="white" />
+              ) : (
+                <FaVolumeUp size={30} color="white" />
+              )}
+            </button>
+            <Box sx={{ width: "100%", display: "flex" }}>
+              <Slider
+                value={volume}
+                onChange={(e, value) => {
+                  if (!audioRef.current) return;
+
+                  audioRef.current.volume = value / 100;
+                  setVolume(value);
+                  setIsMute(value === 0);
+                }}
+                sx={{
+                  color: "grey",
+                }}
+              />
+            </Box>
+          </div>
+          {/* 숨기기 버튼 */}
+          <button onClick={setIsPlayerVisible}>
+            <FaChevronDown size={20} />
+          </button>
         </div>
       </div>
     </div>

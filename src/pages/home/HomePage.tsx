@@ -35,7 +35,7 @@ function HomePage() {
             <div className="playlist-row top-playlist-row" ref={rowRef}>
               <div className="playlist-card top-playlist-card">
                 <div className="playlist-image-wrapper">
-                  <img src="/images/playlist1.jpg" />
+                  <img src="/images/default-pagelist.png" />
                   <button className="play-button">
                     <FaPlay />
                   </button>
@@ -44,7 +44,7 @@ function HomePage() {
               </div>
               <div className="playlist-card top-playlist-card">
                 <div className="playlist-image-wrapper">
-                  <img src="/images/playlist2.jpg" />
+                  <img src="/images/default-pagelist.png" />
                   <button className="play-button">
                     <FaPlay />
                   </button>
@@ -53,7 +53,7 @@ function HomePage() {
               </div>
               <div className="playlist-card top-playlist-card">
                 <div className="playlist-image-wrapper">
-                  <img src="/images/playlist1.jpg" />
+                  <img src="/images/default-pagelist.png" />
                   <button className="play-button">
                     <FaPlay />
                   </button>
@@ -62,7 +62,7 @@ function HomePage() {
               </div>
               <div className="playlist-card top-playlist-card">
                 <div className="playlist-image-wrapper">
-                  <img src="/images/playlist2.jpg" />
+                  <img src="/images/default-pagelist.png" />
                   <button className="play-button">
                     <FaPlay />
                   </button>
@@ -71,7 +71,7 @@ function HomePage() {
               </div>
               <div className="playlist-card top-playlist-card">
                 <div className="playlist-image-wrapper">
-                  <img src="/images/playlist1.jpg" />
+                  <img src="/images/default-pagelist.png" />
                   <button className="play-button">
                     <FaPlay />
                   </button>
@@ -80,7 +80,7 @@ function HomePage() {
               </div>
               <div className="playlist-card top-playlist-card">
                 <div className="playlist-image-wrapper">
-                  <img src="/images/playlist2.jpg" />
+                  <img src="/images/default-pagelist.png" />
                   <button className="play-button">
                     <FaPlay />
                   </button>
