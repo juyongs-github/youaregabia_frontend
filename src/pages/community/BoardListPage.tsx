@@ -14,15 +14,19 @@ const BoardListPage = () => {
   const [keyword, setKeyword] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
   const navigate = useNavigate();
+  const [genre, setGenre] = useState<string | undefined>(undefined);
 
   // 페이지 데이터 불러오기
-  const loadPage = async (page: number, search?:string) => {
+  const loadPage = async (page: number, search?:string, currentGenre?: string) => {
     try {
-      const params: {page: number; size:number ; keyword?: string} = {
-        page, size: 10
+      const params: {page: number; size:number ; keyword?: string; genre?: string} = {
+        page, size: 10,
       }
       if (search) {
         params.keyword = search;
+      }
+      if (currentGenre) {
+        params.genre = currentGenre;  // 클로저 대신 파라미터 사용
       }
       const data = await boardApi.getBoards(params);
       console.log(' 백엔드 응답:', data)
@@ -35,19 +39,19 @@ const BoardListPage = () => {
 
   //  처음 로드
   useEffect(() => {
-    loadPage(1);
-  }, []);
+    loadPage(1, searchKeyword, genre);  // genre를 파라미터로 전달
+  }, [genre]);
 
   //  페이지 변경
   const handlePageChange = (page: number) => {
-    loadPage(page);
+    loadPage(page,searchKeyword, genre);  // genre를 파라미터로 전달  
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // 검색
   const handleSearch = ()=> {
     setSearchKeyword(keyword);
-    loadPage(1,keyword);
+    loadPage(1,keyword, genre);
   };
 
   // 엔터키 검색
@@ -61,7 +65,7 @@ const BoardListPage = () => {
   const handleKeyReset = () => {
     setKeyword('');
     setSearchKeyword('');
-    loadPage(1);
+    loadPage(1, undefined, genre);
   };
 
   //  로딩 중
@@ -80,6 +84,54 @@ const BoardListPage = () => {
         >
           글쓰기
         </button>
+        {/* 장르 필터 */}
+    <div className="mt-4 mb-4 flex gap-2 flex-wrap">
+
+    <button
+      onClick={() => setGenre(undefined)}
+      className={`px-3 py-1 rounded ${
+        genre === undefined
+          ? 'bg-indigo-600 text-white'
+          : 'bg-neutral-800 text-gray-300'
+      }`}
+    >
+      전체
+    </button>
+
+    <button
+      onClick={() => setGenre("JPOP")}
+      className={`px-3 py-1 rounded ${
+        genre === "JPOP"
+          ? 'bg-indigo-600 text-white'
+          : 'bg-neutral-800 text-gray-300'
+      }`}
+    >
+      JPOP
+    </button>
+
+    <button
+      onClick={() => setGenre("POP")}
+      className={`px-3 py-1 rounded ${
+        genre === "POP"
+          ? 'bg-indigo-600 text-white'
+          : 'bg-neutral-800 text-gray-300'
+      }`}
+    >
+      POP
+    </button>
+
+    <button
+      onClick={() => setGenre("KPOP")}
+      className={`px-3 py-1 rounded ${
+        genre === "KPOP"
+          ? 'bg-indigo-600 text-white'
+          : 'bg-neutral-800 text-gray-300'
+      }`}
+    >
+      KPOP
+    </button>
+
+    </div>
       </div>
 
       {/* 게시글 목록, 삼항연산자 사용 */}
@@ -92,7 +144,7 @@ const BoardListPage = () => {
                 onClick={() => navigate(`/community/share/${board.boardId}`)}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-indigo-400">{board.title}</span>
+                  <span className="text-indigo-400">  [{board.boardGenre}]{board.title}</span>
                   <span className="text-sm text-gray-500">
                     {board.writer}
                   </span>

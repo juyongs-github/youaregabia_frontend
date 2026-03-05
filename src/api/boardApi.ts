@@ -5,7 +5,7 @@ import api from './axios';
 export const boardApi = {
   
   // 전체 조회
-  getBoards: (params: PageRequest & {keyword?: string}) =>
+  getBoards: (params: PageRequest & {keyword?: string; genre?: string}) =>
     api.get<PageResult<Board>>('/community/share', { params }).then((res) => res.data),
 
   // 상세 조회
@@ -19,6 +19,8 @@ export const boardApi = {
   createBoard: async (data: {
     title: string;
     content: string;
+    boardType: string;
+    boardGenre: string;
   },email: string): Promise<number> => {
     const res = await api.post('/community/share/add', data, {
       params: { email },
@@ -27,7 +29,7 @@ export const boardApi = {
   },
 
   // 게시글 수정
-  updateBoard: (boardId: number, data: { title: string; content: string }, email: string) =>
+  updateBoard: (boardId: number, data: { title: string; content: string; boardGenre: string }, email: string) =>
     api.put(`/community/share/update/${boardId}`, data, {
       params: { email },
     }),

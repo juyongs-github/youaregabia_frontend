@@ -1,4 +1,4 @@
-import { use, useEffect, useMemo, useState } from 'react';
+import { use, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { boardApi } from '../../api/boardApi';
 import type { Board } from '../../types/board';
@@ -29,6 +29,7 @@ const BoardDetailPage = () => {
     const data = await boardApi.getBoardDetail(
       Number(boardId), 
       userEmail ?? '',
+      
       { page, size: 10,
         sort: sort,
        }  // 댓글 페이징
@@ -38,16 +39,21 @@ const BoardDetailPage = () => {
     console.log('board 응답 전체:', data);
     console.log('replies:', data.replies);
   };
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-     console.log('boardId:', boardId);
-  console.log('userEmail:', userEmail);
+    console.log('boardId:', boardId);
+    console.log('userEmail:', userEmail);
     if (boardId) {
     loadBoard(1);
   }}, [boardId, userEmail]);
 
   // sortBy가 변경될 때마다 1페이지로 이동하며 새로고침
   useEffect(() => {
+    if (isFirstRender.current) {
+    isFirstRender.current = false;
+    return;  // 초기 마운트는 건너뜀
+  }
     if (boardId) {
       loadBoard(1, sortBy)
     }
@@ -103,6 +109,9 @@ const BoardDetailPage = () => {
         </span>
       <div className='text-sm font-semibold text-neutral-500'>
         생성일시: {board.createdAt}
+        </div>
+      <div className='text-sm font-semibold text-neutral-500'>
+        장르: {board.boardGenre}
         </div>
       </div>
       <div className='mb-8 min-h-[100px] whitespace-pre-wrap break-words leading-[1.3] text-white'>

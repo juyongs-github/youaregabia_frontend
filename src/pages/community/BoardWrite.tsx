@@ -8,12 +8,15 @@ const BoardWrite = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const navigate = useNavigate();
+  const [boardGenre, setBoardGenre] = useState("HIPHOP");
+const [boardType] = useState("PLAYLIST_SHARE");
   // 이메일 가져오
   const userEmail = useSelector((state: RootState) => state.auth.user?.email);
 
   const submit = async () => {
     if (!userEmail) return;
-    const boardId = await boardApi.createBoard({ title, content }, userEmail);
+    const boardId = await boardApi.createBoard({ title, content,boardType,
+      boardGenre, }, userEmail);
     navigate(`/community/share/${boardId}`);
   };
 
@@ -27,7 +30,17 @@ const BoardWrite = () => {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
-
+      <select
+        className="mb-3 w-full rounded border px-3 py-2"
+        value={boardGenre}
+        onChange={(e) => setBoardGenre(e.target.value)}
+      >
+        <option value="HIPHOP">HIPHOP</option>
+        <option value="POP">POP</option>
+        <option value="ROCK">KPOP</option>
+        <option value="BALLAD">JPOP</option>
+        <option value="JAZZ">ROCK</option>
+      </select>
       <textarea
         className="mb-4 w-full min-h-[400px] resize-y rounded border px-4 py-3 leading-normal"
         placeholder="내용"

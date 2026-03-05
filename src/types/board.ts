@@ -11,6 +11,8 @@ export interface Board {
   boardId: number;
   title: string;
   content: string;
+  boardType: string;
+  boardGenre: string;
   writer: string;
   createdAt: string;
   replies?: PageResult<Reply>;
