@@ -47,7 +47,7 @@ const BoardUpdate = () => {
 
   return (
     <div>
-      <h2 className="mb-4 text-2xl font-bold">게시글 수정</h2>
+      <h2 className="mb-4 text-2xl font-bold">플레이리스트 공유 수정</h2>
 
       <input
         className="mb-3 w-full rounded border px-3 py-2"

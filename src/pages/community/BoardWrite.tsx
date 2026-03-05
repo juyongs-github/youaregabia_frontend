@@ -19,7 +19,7 @@ const BoardWrite = () => {
 
   return (
     <div>
-      <h2 className="mb-4 text-2xl font-bold">글쓰기</h2>
+      <h2 className="mb-4 text-2xl font-bold">플레이리스트 공유</h2>
 
       <input
         className="mb-3 w-full rounded border px-3 py-2"
