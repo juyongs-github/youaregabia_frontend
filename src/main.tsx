@@ -7,11 +7,18 @@ import "./styles/homepage.css";
 import "./styles/MyplaylistPage.css"
 import "./styles/PlaylistDetailPage.css"
 import App from './App.tsx';
+import { Provider } from "react-redux";
+import { store, persistor } from "./store/index";
+import { PersistGate } from "redux-persist/integration/react";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Router>
-      <App />
-    </Router>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}> {/*새로고침 시 데이터 유지*/}
+        <Router>
+          <App />
+        </Router>
+      </PersistGate>
+    </Provider>
   </StrictMode>,
 );
