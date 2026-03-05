@@ -15,11 +15,12 @@ import Layout from "./Components/layout/Layout";
 import LoginForm from "./pages/auth/LoginForm";
 import RegisterForm from "./pages/auth/RegisterForm";
 import TermsAgreement from "./pages/auth/TermsAgreement";
-import CiVerifyPage from "./pages/auth/CiVerifyPage";
+import CiVerifyPage from "./pages/auth/CiverifyPage";
 import MyPlaylistPage from "./pages/playlist/MyPlaylistPage";
 import PlaylistDetailPage from "./pages/playlist/PlaylistDetailPage";
 import CollaboPlaylistPage from "./pages/community/CollaboPlaylistPage";
 import CollaboPlaylistDetailPage from "./pages/community/CollaboPlaylistDetailPage";
+import MyPage from "./pages/auth/MyPage";
 
 function App() {
   // 2. Redux Store에서 로그인 여부 가져오기
@@ -40,6 +41,7 @@ function App() {
         <Route path="/community/share/:boardId/update" element={<BoardUpdate />} />
         <Route path="/community/collabo" element={<CollaboPlaylistPage />} />
         <Route path="/community/collabo/detail/:id" element={<CollaboPlaylistDetailPage />} />
+        <Route path="/profile/me" element={<MyPage />} />
       </Route>
       {/* 아닌 것들은 여기 밑으로 Route 추가 */}
       {/* 4. 로그인하지 않은 사용자만 접근 가능한 경로 (이미 로그인했다면 홈으로 이동) */}
