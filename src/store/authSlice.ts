@@ -1,11 +1,11 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-// 1. 유저 정보의 타입을 정의합니다.
+// 1. 유저 정보
 interface UserInfo {
   email: string;
   name?: string;
   createDate?: string;
-  // 필요한 필드를 더 추가할 수 있습니다.
+  imgUrl?: string;
 }
 
 interface AuthState {
@@ -34,9 +34,14 @@ const authSlice = createSlice({
     // (선택) 회원 정보만 나중에 업데이트할 때 사용
     updateUserInfo: (state, action: PayloadAction<UserInfo>) => {
       state.user = { ...state.user, ...action.payload };
-    }
+    },
+    updateProfile: (state, action: PayloadAction<{ name?: string; imgUrl?: string }>) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
+    },
   },
 });
 
-export const { loginSuccess, logout, updateUserInfo } = authSlice.actions;
+export const { loginSuccess, logout, updateProfile } = authSlice.actions;
 export default authSlice.reducer;

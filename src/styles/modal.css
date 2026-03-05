@@ -10,14 +10,14 @@
 }
 
 .modal-container {
-  width: 420px;
+  width: 520px;
   background: #0a1a2a;
-  border-radius: 20px;
-  padding: 24px;
+  border-radius: 24px;
+  padding: 32px;
 
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 20px;
   color: white;
 }
 
@@ -26,6 +26,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: bold;
 }
 
 .close-btn {
@@ -37,17 +43,19 @@
 
 /* 썸네일 */
 .thumbnail-box {
-  height: 140px;
+  position: relative;
+  height: 400px;
   border: 2px dashed #3a4a5a;
-  border-radius: 16px;
+  border-radius: 18px;
 
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 10px;
 
   cursor: pointer;
+  overflow: hidden;
 }
 
 /* 입력 */
@@ -55,32 +63,34 @@ input,
 textarea,
 select {
   width: 100%;
-  padding: 10px;
-  border-radius: 10px;
+  padding: 14px;
+  border-radius: 12px;
   border: none;
   background: #1b2b3b;
   color: white;
+  font-size: 15px;
 }
 
 textarea {
   resize: none;
-  height: 80px;
+  height: 110px;
 }
 
 /* 버튼 */
 .modal-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 10px;
+  gap: 14px;
+  margin-top: 16px;
 }
 
 .cancel-btn,
 .submit-btn {
   flex: 1;
-  padding: 10px;
-  border-radius: 12px;
+  padding: 14px;
+  border-radius: 14px;
   border: none;
   cursor: pointer;
+  font-size: 15px;
 }
 
 .cancel-btn {
