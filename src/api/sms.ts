@@ -1,11 +1,6 @@
 import api from "./axios";
 
-/**
- * [FIX]
- * - 기존에는 sms.ts만 axios를 따로 생성해서 씀.
- * - 그러면 나중에 JWT/인터셉터/공통 에러처리 붙일 때 SMS만 따로 놀게 됨.
- * - 그래서 api 인스턴스로 통일.
- */
+// src/api/sms.ts
 export interface SmsSendResponse {
   success: boolean;
   message: string;
@@ -17,14 +12,37 @@ export interface SmsVerifyResponse {
   message: string;
 }
 
-// 인증번호 전송
-export const sendSmsCode = async (phoneNumber: string) => {
-  const res = await api.post<SmsSendResponse>("/api/auth/sms/send", { phoneNumber });
-  return res.data;
-};
+export async function sendSmsCode(phoneNumber: string): Promise<SmsSendResponse> {
+  const res = await fetch("/api/auth/sms/send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ phoneNumber }),
+  });
 
-// 인증번호 검증
-export const verifySmsCode = async (phoneNumber: string, code: string) => {
-  const res = await api.post<SmsVerifyResponse>("/api/auth/sms/verify", { phoneNumber, code });
-  return res.data;
+  // ✅ 백엔드에서 JSON이 아닐 가능성 방지(에러 디버깅에 도움)
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : null;
+
+  if (!res.ok) {
+    throw new Error(data?.message || "인증번호 요청 실패");
+  }
+
+  return data as SmsSendResponse;
+}
+
+export async function verifySmsCode(phoneNumber: string, code: string): Promise<SmsVerifyResponse> {
+  const res = await fetch("/api/auth/sms/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ phoneNumber, code }),
+  });
+
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : null;
+
+  if (!res.ok) {
+    throw new Error(data?.message || "인증 실패");
+  }
+
+  return data as SmsVerifyResponse;
 };

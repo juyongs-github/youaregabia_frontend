@@ -26,7 +26,7 @@ interface SongProps {
 }
 
 // 곡 리스트 UI
-function Song({ song, setSelectSong }: SongProps) {
+function SongListItem({ song, setSelectSong }: SongProps) {
   const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -42,7 +42,7 @@ function Song({ song, setSelectSong }: SongProps) {
     <div className="flex items-center justify-between p-5 border-b border-gray-800">
       <div className="flex items-center gap-7">
         {/* 곡 이미지 부분 */}
-        <div className="flex items-center justify-center w-24 h-24 overflow-hidden bg-slate-500 rounded-2xl">
+        <div className="flex items-center justify-center w-24 h-24 overflow-hidden shrink-0 bg-slate-500 rounded-2xl">
           {song.imgUrl ? (
             <img src={song.imgUrl} alt="" className="object-cover w-full h-full" />
           ) : (
@@ -124,4 +124,4 @@ function Song({ song, setSelectSong }: SongProps) {
   );
 }
 
-export default Song;
+export default SongListItem;

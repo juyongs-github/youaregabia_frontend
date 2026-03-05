@@ -1,68 +1,92 @@
-import { useEffect, useMemo, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { boardApi } from '../../api/boardApi';
 import type { Board } from '../../types/board';
 import { replyApi } from '../../api/replyApi';
 import ReplyItem from '../../components/ui/replyItem';
+import Pagination from '../../components/ui/Pagination';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../store';
 
 const BoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const [board, setBoard] = useState<Board | null>(null);
   const [replyContent, setReplyContent] = useState('');
+  const [replyPage, setReplyPage] = useState(1); // 댓글 페이지
   // 정렬 
   const [sortBy, setSortBy] = useState<'latest' | 'likes'>('latest');
 
   const navigate = useNavigate();
-  //임시 아이디
-  const currentUserId = 1;
+  
+  const userEmail = useSelector((state: RootState) => state.auth.user?.email);
 
-  useEffect(() => {
-    if (!boardId) return;
     
     // 게시글 가져오기
-    boardApi.getBoardDetail(Number(boardId), currentUserId).then(setBoard);
-  }, [boardId]);
-  
-  //  댓글 정렬
-  // Memo -> board.replies가 바뀌거나 sortBy가 바뀔 때만 실행
-  const sortedReplies = useMemo(() => {
-    if (!board?.replies) return [];
+      const loadBoard = async (page: number = 1, sort: 'latest' | 'likes' = sortBy) => {
+    if (!boardId) return;
+    console.log('loadBoard 호출:', { boardId, userEmail, page, sort });
     
-    // 원본 배열을 복사해서 정렬 (sort는 원본을 변경하기 때문)
-    return [...board.replies].sort((a, b) => {
-      if (sortBy === 'likes') {
-        // 좋아요순: 좋아요 수 내림차순 -> 같으면 최신순
-        if (b.likeCount !== a.likeCount) return b.likeCount - a.likeCount;
-      }
-      // 최신순: 생성일 내림차순
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-  }, [board?.replies, sortBy]);
+    const data = await boardApi.getBoardDetail(
+      Number(boardId), 
+      userEmail ?? '',
+      { page, size: 10,
+        sort: sort,
+       }  // 댓글 페이징
+    );
+    setBoard(data);
+    setReplyPage(page);
+    console.log('board 응답 전체:', data);
+    console.log('replies:', data.replies);
+  };
+
+  useEffect(() => {
+     console.log('boardId:', boardId);
+  console.log('userEmail:', userEmail);
+    if (boardId) {
+    loadBoard(1);
+  }}, [boardId, userEmail]);
+
+  // sortBy가 변경될 때마다 1페이지로 이동하며 새로고침
+  useEffect(() => {
+    if (boardId) {
+      loadBoard(1, sortBy)
+    }
+  },[sortBy]);
+  
+
   
   // 댓글 작성
   const createReply = async () => {
     if (!boardId || !replyContent.trim()) return;
+    if (!userEmail) {
+    alert('로그인이 필요합니다.');
+    return;
+  }
 
     await replyApi.createReply(Number(boardId), {
       content: replyContent,
-    });
+    }, userEmail);
 
     setReplyContent('');
-    const updated = await boardApi.getBoardDetail(
-      Number(boardId),
-      currentUserId,
-    );
-    setBoard(updated);
+    // 댓글 작성 후에는 1페이지로 이동
+    loadBoard(1);
   };
 
   // 댓글 기능 이후 자동 새로고침
   const refresh = async () => {
-    if (!boardId) return;
-    const updated = await boardApi.getBoardDetail(
+  if (!boardId || !userEmail) return;
+  // 현재 페이지 정렬 유지하면서 새로고침
+  const updated = await boardApi.getBoardDetail(
       Number(boardId),
-      currentUserId,
+      userEmail,
+      { page: replyPage, size: 10, sort:sortBy }
     );
     setBoard(updated);
+  };
+
+  const handleReplyPageChange = (page: number) => {
+    loadBoard(page,sortBy);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
   // 오류 시 로딩중 이라고 보여주기
@@ -70,21 +94,35 @@ const BoardDetailPage = () => {
 
   return (
     <div>
-      <h2>{board.title}</h2>
-      <p>작성자: {board.writerNickname}</p>
-      <p>{board.content}</p>
-
-      <button
-        type="button"
-        onClick={() => navigate(`/community/share/${board.boardId}/update`)}
-      >
-        수정
-      </button>
+      <div className='mb-6 border-b border-neutral-700 pb-6'>
+      <h1 className='text-4xl font-extrabold tracking-tight text-white mb-3'>
+        {board.title}
+      </h1>
+      <span className='text-sm font-semibold text-neutral-500'>
+        작성자: {board.writer}
+        </span>
+      <div className='text-sm font-semibold text-neutral-500'>
+        생성일시: {board.createdAt}
+        </div>
+      </div>
+      <div className='mb-8 min-h-[100px] whitespace-pre-wrap break-words leading-[1.3] text-white'>
+        {board.content}
+      </div>
+        <div className='flex items-center justify-end'>
+          <button
+          type="button"
+          onClick={() => navigate(`/community/share/${board.boardId}/update`)}
+          className="rounded bg-neutral-600 px-2  text-white hover:bg-neutral-500"
+          >
+          수정
+          </button>
+        </div>
 
       <hr />
 
       <h3>댓글</h3>
-        <div>
+        <div 
+        className='min-h-[50px]'>
           <button 
             onClick={() => setSortBy('latest')} 
             style={{ fontWeight: sortBy === 'latest' ? 'bold' : 'normal' }}
@@ -95,15 +133,29 @@ const BoardDetailPage = () => {
           >추천순</button>
         </div>
 
-      {board.replies.length === 0 ? (
+      {!board.replies || board.replies?.dtoList.length === 0 ? (
         <p>댓글이 없습니다.</p>
       ) : (
+        <>
         <ul>
-          {sortedReplies.map((reply) => (
+          {board.replies.dtoList.map((reply) => (
             <ReplyItem key={reply.replyId} reply={reply} onRefresh={refresh} />
           ))}
         </ul>
-      )}
+        {/* 댓글 페이지네이션 추가 */}
+          {board.replies.pageNumList.length > 0 && (
+            <Pagination
+              pageNumList={board.replies.pageNumList}
+              current={board.replies.current}
+              prev={board.replies.prev}
+              next={board.replies.next}
+              prevPage={board.replies.prevPage}
+              nextPage={board.replies.nextPage}
+              onPageChange={handleReplyPageChange}
+            />
+          )}
+          </>
+        )}
 
       <textarea
         value={replyContent}
@@ -111,7 +163,10 @@ const BoardDetailPage = () => {
         rows={3}
       />
 
-      <button onClick={createReply}>댓글 작성</button>
+      <button 
+      onClick={createReply}
+      className="rounded bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-500">
+        댓글 작성</button>
     </div>
   );
 };

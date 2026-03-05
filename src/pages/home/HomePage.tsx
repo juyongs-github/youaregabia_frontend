@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
-import { FaPlus, FaChevronLeft, FaChevronRight, FaPlay } from 'react-icons/fa';
-import RankSection from '../../Components/layout/RankSection';
-import PlaylistCreateModal from '../../Components/ui/PlaylistCreateModal';
-import { playlistApi } from '../../api/playlistApi';
-import type { Playlist } from '../../types/playlist';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from "react";
+import { FaPlus, FaChevronLeft, FaChevronRight, FaPlay } from "react-icons/fa";
+import RankSection from "../../Components/layout/RankSection";
+import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
+import { playlistApi } from "../../api/playlistApi";
+import type { Playlist } from "../../types/playlist";
+import { useNavigate } from "react-router-dom";
 
 function HomePage() {
   const [data, setData] = useState<Playlist[]>([]);
-  const baseURL: string = 'http://localhost:8080';
+  const baseURL: string = "http://localhost:8080";
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
 
@@ -38,11 +38,11 @@ function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false); // Create Modal
 
   const scrollLeft = () => {
-    rowRef.current?.scrollBy({ left: -320, behavior: 'smooth' });
+    rowRef.current?.scrollBy({ left: -320, behavior: "smooth" });
   };
 
   const scrollRight = () => {
-    rowRef.current?.scrollBy({ left: 320, behavior: 'smooth' });
+    rowRef.current?.scrollBy({ left: 320, behavior: "smooth" });
   };
 
   return (
@@ -53,10 +53,7 @@ function HomePage() {
         <div className="top-section">
           <div className="section-header">
             <h1 className="page-title">내 플레이리스트</h1>
-            <button
-              className="add-playlist-btn"
-              onClick={() => setIsModalOpen(true)}
-            >
+            <button className="add-playlist-btn" onClick={() => setIsModalOpen(true)}>
               <FaPlus />
             </button>
           </div>
@@ -102,10 +99,7 @@ function HomePage() {
 
       {/* ===== 모달 ===== */}
       {isModalOpen && (
-        <PlaylistCreateModal
-          onClose={() => setIsModalOpen(false)}
-          onCreated={fetchData}
-        />
+        <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
       )}
     </div>
   );

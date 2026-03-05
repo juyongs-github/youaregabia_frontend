@@ -6,6 +6,7 @@ import Spinner from "../../components/ui/Spinner";
 import { BsQuestionCircleFill } from "react-icons/bs";
 import { IoWarning } from "react-icons/io5";
 import MusicPlayer from "../../components/layout/MusicPlayer";
+import { RiResetLeftFill } from "react-icons/ri";
 
 interface Song {
   id: number;
@@ -30,6 +31,7 @@ function SearchResult() {
 
   // 곡 정보 UI에서 선택한 곡(미리듣기, 유사 곡 추천)
   const [selectSong, setSelectSong] = useState<Song | null>(null);
+  const [isPlayerVisible, setIsPlayerVisible] = useState<boolean>(false);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -74,9 +76,10 @@ function SearchResult() {
           </div>
           <button
             onClick={() => fetchData()}
-            className="px-5 py-3 font-semibold text-white transition-colors bg-red-600 rounded-full hover:bg-red-700"
+            className="flex items-center gap-2 px-5 py-3 font-semibold text-white transition-colors bg-red-600 rounded-full hover:bg-red-700"
           >
-            다시 시도
+            <RiResetLeftFill size={25} />
+            <span>다시 시도</span>
           </button>
         </div>
       )}
@@ -104,7 +107,10 @@ function SearchResult() {
       {/* 음악 플레이어 (미리듣기용) */}
       {selectSong && (
         <div className="fixed bottom-0 left-0 z-50 w-full">
-          <MusicPlayer song={selectSong} />
+          <MusicPlayer
+            song={selectSong}
+            setIsPlayerVisible={() => setIsPlayerVisible(!isPlayerVisible)}
+          />
         </div>
       )}
     </div>
