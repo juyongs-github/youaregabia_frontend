@@ -19,6 +19,7 @@ function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -47,7 +48,8 @@ function Header() {
   };
 
   return (
-    <header className="flex items-center justify-between w-full h-16 px-8 bg-black border-b border-white/10">
+    <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-20 px-10 py-5 bg-black border-b border-gray-800 gap-7">
+      {/* 로고 부분 */}
       <div className="flex items-center flex-shrink-0 gap-8">
         <button className="flex items-center gap-3" onClick={() => goPage("/home")}>
           <div className="flex items-center justify-center w-8 h-8 bg-red-600 rounded-full">
@@ -56,41 +58,60 @@ function Header() {
           <span className="text-2xl font-semibold">GAP Music</span>
         </button>
       </div>
+      {/* 검색바 부분 */}
+      <div className="relative flex-shrink-0">
+        <input
+          type="text"
+          placeholder="검색"
+          value={searchValue}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              if (!searchValue.trim()) {
+                alert("검색어를 입력 해주세요.");
+                return;
+              }
 
-      <div className="flex items-center flex-1 max-w-xl px-10">
-        <div className="relative w-full group">
-          <FaSearch className="absolute text-gray-400 -translate-y-1/2 left-4 top-1/2 group-focus-within:text-white" />
-          <input
-            type="text"
-            placeholder="어떤 콘텐츠를 감상하고 싶으세요?"
-            className="w-full py-2.5 pl-12 pr-10 text-sm text-white transition-all bg-gray-800/50 border border-transparent rounded-full focus:bg-gray-800 focus:border-gray-600 outline-none placeholder:text-gray-500"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-          {searchValue && (
-            <button
-              onClick={() => setSearchValue("")}
-              className="absolute text-gray-400 -translate-y-1/2 right-4 top-1/2 hover:text-white"
-            >
-              <FaTimes />
-            </button>
-          )}
-        </div>
+              const url = `/search?q=${encodeURIComponent(searchValue)}`;
+
+              // 이전 검색어로 재검색 할 경우 새로고침
+              if (location.pathname + location.search === url) {
+                navigate(url, {
+                  replace: true,
+                  state: { refresh: Date.now() },
+                });
+              } else {
+                navigate(url);
+              }
+            }
+          }}
+          className="px-16 py-3 text-white bg-gray-800 rounded-full w-[50rem] focus:outline-none focus:ring-2 focus:ring-white"
+        />
+        <FaSearch className="absolute text-gray-400 left-6 top-3.5" size={20} />
+        {searchValue && (
+          <button
+            onClick={() => setSearchValue("")}
+            className="absolute text-gray-400 right-6 top-3.5 hover:text-white transition-colors"
+          >
+            <FaTimes size={20} />
+          </button>
+        )}
       </div>
-
-      {/* 로그인 버튼이 있던 자리를 삭제했습니다.
-          이제 이 Layout에 들어왔다는 것 자체가 로그인 상태임을 의미하므로
-          조건문 없이 바로 프로필 아바타를 보여줍니다.
-      */}
+      {/* 유저 프로필 부분 */}
       <div className="flex items-center gap-6">
-        <IconButton
-          onClick={handleClick}
-          size="small"
-          aria-controls={open ? "account-menu" : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? "true" : undefined}
-        >
-          <Avatar sx={{ width: 35, height: 35, bgcolor: "#3b82f6" }}>U</Avatar>
+        <IconButton onClick={handleClick} size="small">
+          <Avatar
+            // src에 Redux의 imgUrl 연결 (이미지가 있으면 표시)
+            src={user?.imgUrl ? `http://localhost:8080${user.imgUrl}` : undefined}
+            sx={{
+              width: 35,
+              height: 35,
+              bgcolor: user?.imgUrl ? "transparent" : "#3b82f6",
+            }}
+          >
+            {/* 이미지가 없을 때만 이름의 첫 글자 표시 (예: 김형준 -> '김') */}
+            {!user?.imgUrl && (user?.name ? user.name[0] : "U")}
+          </Avatar>
         </IconButton>
 
         <Menu
@@ -149,5 +170,121 @@ function Header() {
     </header>
   );
 }
+
+// return (
+//     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-20 px-10 py-5 bg-black border-b border-gray-800 gap-7">
+//       {/* 로고 부분 */}
+//       <div className="flex items-center flex-shrink-0 gap-8">
+//         <button className="flex items-center gap-3" onClick={() => goPage("/home")}>
+//           <div className="flex items-center justify-center w-8 h-8 bg-red-600 rounded-full">
+//             <FaHeadphones size={20} color="white" />
+//           </div>
+//           <span className="text-2xl font-semibold">GAP Music</span>
+//         </button>
+//       </div>
+//       {/* 검색바 부분 */}
+//       <div className="relative flex-shrink-0">
+//         <input
+//           type="text"
+//           placeholder="검색"
+//           value={searchValue}
+//           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value)}
+//           onKeyDown={(e) => {
+//             if (e.key === "Enter") {
+//               if (!searchValue.trim()) {
+//                 alert("검색어를 입력 해주세요.");
+//                 return;
+//               }
+
+//               const url = `/search?q=${encodeURIComponent(searchValue)}`;
+
+//               // 이전 검색어로 재검색 할 경우 새로고침
+//               if (location.pathname + location.search === url) {
+//                 navigate(url, {
+//                   replace: true,
+//                   state: { refresh: Date.now() },
+//                 });
+//               } else {
+//                 navigate(url);
+//               }
+//             }
+//           }}
+//           className="px-16 py-3 text-white bg-gray-800 rounded-full w-[50rem] focus:outline-none focus:ring-2 focus:ring-white"
+//         />
+//         <FaSearch className="absolute text-gray-400 left-6 top-3.5" size={20} />
+//         {searchValue && (
+//           <button
+//             onClick={() => setSearchValue("")}
+//             className="absolute text-gray-400 right-6 top-3.5 hover:text-white transition-colors"
+//           >
+//             <FaTimes size={20} />
+//           </button>
+//         )}
+//       </div>
+//       {/* 유저 프로필 부분 */}
+//       {isLogin ? (
+//         <div className="flex-shrink-0">
+//           <IconButton onClick={handleClick}>
+//             <Avatar alt="User" src="/profile.jpg" />
+//           </IconButton>
+//           <Menu
+//             anchorEl={anchorEl}
+//             open={open}
+//             onClose={handleClose}
+//             anchorOrigin={{
+//               vertical: "bottom",
+//               horizontal: "right",
+//             }}
+//             transformOrigin={{
+//               vertical: "top",
+//               horizontal: "right",
+//             }}
+//             slotProps={{
+//               paper: {
+//                 style: {
+//                   backgroundColor: "#2c2c2c",
+//                 },
+//               },
+//             }}
+//           >
+//             <MenuItem
+//               onClick={() => goPage("/profile/me")}
+//               sx={{
+//                 color: "white",
+//                 fontWeight: "bold",
+//                 py: 1.5,
+//               }}
+//             >
+//               <ListItemIcon sx={{ color: "white" }}>
+//                 <BiSolidUser size={20} />
+//               </ListItemIcon>
+//               <ListItemText>내 프로필</ListItemText>
+//             </MenuItem>
+//             <MenuItem
+//               onClick={() => goPage("/logout")}
+//               sx={{
+//                 color: "white",
+//                 fontWeight: "bold",
+//                 py: 1.5,
+//               }}
+//             >
+//               <ListItemIcon sx={{ color: "white" }}>
+//                 <RiLogoutBoxRLine size={20} />
+//               </ListItemIcon>
+//               <ListItemText>로그아웃</ListItemText>
+//             </MenuItem>
+//           </Menu>
+//         </div>
+//       ) : (
+//         <button
+//           className="flex-shrink-0 px-6 py-2 font-bold text-gray-200 transition-colors bg-gray-700 rounded-full hover:bg-gray-600"
+//           onClick={() => goPage("/login")}
+//         >
+//           로그인
+//         </button>
+//       )}
+//     </header>
+//   );
+// }
 
 export default Header;
