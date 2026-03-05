@@ -10,14 +10,17 @@ export const playlistApi = {
   },
 
   getPlaylist: (playlistId: string | undefined) => {
-    return api.get(`/playlist/me/${playlistId}`);
+    return api.get(`/playlist/${playlistId}`);
   },
 
-  //   updatePlaylist: () => {
-  //     return api.post("/");
-  //   },
+    updatePlaylist: (playlistId:number , data: {
+      title:string;
+      description:string;
+    }) => {
+      return api.put(`/playlist/${playlistId}`,data);
+    },
 
-  //   deletePlaylist: () => {
-  //     api.get("/").then((res) => res.data);
-  //   },
+    deletePlaylist: (playlistId:number) => {
+      return api.delete(`/playlist/${playlistId}`)
+    },
 };

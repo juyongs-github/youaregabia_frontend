@@ -1,9 +1,39 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaPlus, FaChevronLeft, FaChevronRight, FaPlay } from "react-icons/fa";
-import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
-import RankSection from "../../components/layout/RankSection";
+import RankSection from "../../Components/layout/RankSection";
+import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
+import { playlistApi } from "../../api/playlistApi";
+import type { Playlist } from "../../types/playlist";
+import { useNavigate } from "react-router-dom";
 
 function HomePage() {
+  const [data, setData] = useState<Playlist[]>([]);
+  const baseURL: string = "http://localhost:8080";
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isError, setIsError] = useState<boolean>(false);
+
+  const navigate = useNavigate();
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    setIsError(false);
+
+    try {
+      const res = await playlistApi.getAllPlaylist();
+      setData(res.data || []);
+    } catch (error) {
+      console.error(error);
+      setIsError(true);
+      setData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const rowRef = useRef<HTMLDivElement>(null); // Slider
   const [isModalOpen, setIsModalOpen] = useState(false); // Create Modal
 
@@ -19,6 +49,7 @@ function HomePage() {
     <div className="home">
       <div className="home-container">
         {/* ===== 내 플레이리스트 ===== */}
+
         <div className="top-section">
           <div className="section-header">
             <h1 className="page-title">내 플레이리스트</h1>
@@ -33,61 +64,22 @@ function HomePage() {
             </button>
 
             <div className="playlist-row top-playlist-row" ref={rowRef}>
-              <div className="playlist-card top-playlist-card">
-                <div className="playlist-image-wrapper">
-                  <img src="/images/default-pagelist.png" />
-                  <button className="play-button">
-                    <FaPlay />
-                  </button>
-                  <span className="playlist-title">플레이리스트 1</span>
+              {data.map((item) => (
+                <div
+                  className="playlist-card top-playlist-card"
+                  onClick={() => {
+                    navigate(`/playlist/me/${item.id}`);
+                  }}
+                >
+                  <div className="playlist-image-wrapper">
+                    <img src={`${baseURL}${item.imageUrl}`} />
+                    <button className="play-button">
+                      <FaPlay />
+                    </button>
+                    <span className="playlist-title">{item.title}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="playlist-card top-playlist-card">
-                <div className="playlist-image-wrapper">
-                  <img src="/images/default-pagelist.png" />
-                  <button className="play-button">
-                    <FaPlay />
-                  </button>
-                  <span className="playlist-title">플레이리스트 2</span>
-                </div>
-              </div>
-              <div className="playlist-card top-playlist-card">
-                <div className="playlist-image-wrapper">
-                  <img src="/images/default-pagelist.png" />
-                  <button className="play-button">
-                    <FaPlay />
-                  </button>
-                  <span className="playlist-title">플레이리스트 3</span>
-                </div>
-              </div>
-              <div className="playlist-card top-playlist-card">
-                <div className="playlist-image-wrapper">
-                  <img src="/images/default-pagelist.png" />
-                  <button className="play-button">
-                    <FaPlay />
-                  </button>
-                  <span className="playlist-title">플레이리스트 4</span>
-                </div>
-              </div>
-              <div className="playlist-card top-playlist-card">
-                <div className="playlist-image-wrapper">
-                  <img src="/images/default-pagelist.png" />
-                  <button className="play-button">
-                    <FaPlay />
-                  </button>
-                  <span className="playlist-title">플레이리스트 5</span>
-                </div>
-              </div>
-              <div className="playlist-card top-playlist-card">
-                <div className="playlist-image-wrapper">
-                  <img src="/images/default-pagelist.png" />
-                  <button className="play-button">
-                    <FaPlay />
-                  </button>
-                  <span className="playlist-title">플레이리스트 6</span>
-                </div>
-              </div>
-              =
+              ))}
             </div>
 
             <button className="slider-btn right" onClick={scrollRight}>
@@ -106,7 +98,9 @@ function HomePage() {
       </div>
 
       {/* ===== 모달 ===== */}
-      {isModalOpen && <PlaylistCreateModal onClose={() => setIsModalOpen(false)} />}
+      {isModalOpen && (
+        <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
+      )}
     </div>
   );
 }

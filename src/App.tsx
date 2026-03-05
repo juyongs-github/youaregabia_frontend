@@ -7,7 +7,7 @@ import BoardListPage from "./pages/community/BoardListPage";
 import BoardDetailPage from "./pages/community/BoardDetailPage";
 import BoardWrite from "./pages/community/BoardWrite";
 import BoardUpdate from "./pages/community/BoardUpdate";
-import Layout from "./components/layout/Layout";
+import Layout from "./Components/layout/Layout";
 import LoginForm from "./pages/auth/LoginForm";
 import RegisterForm from "./pages/auth/RegisterForm";
 import MyPlaylistPage from "./pages/playlist/MyPlaylistPage";
