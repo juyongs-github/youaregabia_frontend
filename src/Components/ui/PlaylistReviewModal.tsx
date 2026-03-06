@@ -2,14 +2,20 @@ import Box from "@mui/material/Box";
 import Rating from "@mui/material/Rating";
 import { useState } from "react";
 import { FaRegStar, FaStar, FaTimes } from "react-icons/fa";
+import { playlistApi } from "../../api/reviewApi";
+import { useSelector } from "react-redux";
 
 interface Props {
   onClose: () => void;
+  playlistId: number;
 }
 
-function PlaylistReviewModal({ onClose }: Props) {
+function PlaylistReviewModal({ onClose, playlistId }: Props) {
   const [rating, setRating] = useState<number | null>(0);
   const [review, setReview] = useState<string>("");
+  
+  // Redux에서 user 정보 가져오기
+  const user = useSelector((state: any) => state.auth.user);
 
   return (
     <div className="modal-overlay">
@@ -49,7 +55,53 @@ function PlaylistReviewModal({ onClose }: Props) {
           <button className="cancel-btn" onClick={onClose}>
             취소
           </button>
-          <button className="submit-btn">작성</button>
+          <button
+            className="submit-btn"
+            onClick={() => {
+              if (rating === 0) {
+                alert("별점을 선택해주세요.");
+                return;
+              }
+
+              if (!review.trim()) {
+                alert("한줄평을 작성해주세요.");
+                return;
+              }
+
+              if (!user?.email) {
+                alert("로그인이 필요합니다.");
+                return;
+              }
+
+              if (!playlistId) {
+                alert("플레이리스트 ID가 필요합니다.");
+                return;
+              }
+
+              // API 호출
+              playlistApi
+                .createReview({
+                  playlistId: playlistId,
+                  userEmail: user.email,
+                  rating: rating as number,
+                  content: review.trim(),
+                })
+                .then((res) => {
+                  if (res.status === 200 || res.status === 201) {
+                    alert("리뷰가 등록되었습니다.");
+                  } else {
+                    alert("리뷰 등록 중 문제가 발생했습니다.");
+                  }
+                })
+                .catch((err) => {
+                  console.error(err);
+                  alert("리뷰 등록에 실패했습니다.");
+                })
+                .finally(() => {
+                  onClose();
+                });
+            }}
+          >작성</button>
         </div>
       </div>
     </div>

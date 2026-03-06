@@ -98,26 +98,26 @@ function SongListItem({ song, setSelectSong }: SongProps) {
             </ListItemIcon>
             <ListItemText>미리듣기</ListItemText>
           </MenuItem>
-          <MenuItem
-            onClick={() => {
-              navigate("/recommend/result", {
-                state: {
-                  trackName: song.trackName,
-                  artistName: song.artistName,
-                },
-              });
-            }}
-            sx={{
-              color: "white",
-              fontWeight: "bold",
-              py: 1.5,
-            }}
-          >
-            <ListItemIcon sx={{ color: "white" }}>
-              <FaMusic size={20} />
-            </ListItemIcon>
-            <ListItemText>유사 곡 추천</ListItemText>
-          </MenuItem>
+            <MenuItem
+              onClick={() => {
+                navigate("/recommend/result", {
+                  state: {
+                    trackName: song.trackName,
+                    artistName: song.artistName,
+                  },
+                });
+              }}
+              sx={{
+                color: "white",
+                fontWeight: "bold",
+                py: 1.5,
+              }}
+            >
+              <ListItemIcon sx={{ color: "white" }}>
+                <FaMusic size={20} />
+              </ListItemIcon>
+              <ListItemText>유사 곡 추천</ListItemText>
+            </MenuItem>
         </Menu>
       </div>
     </div>

@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { Song } from "../../components/ui/SongListItem";
 import api from "../../api/axios";
 import { FaMusic, FaSave } from "react-icons/fa";
 import SongListItem from "../../components/ui/SongListItem";
 import Spinner from "../../components/ui/Spinner";
 import { IoWarning } from "react-icons/io5";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { HiPencil } from "react-icons/hi2";
 import { BsQuestionCircleFill } from "react-icons/bs";
-import { RiPlayList2Fill } from "react-icons/ri";
+import { RiArrowLeftLine, RiPlayList2Fill } from "react-icons/ri";
 import MusicPlayer from "../../components/layout/MusicPlayer";
 import { RiResetLeftFill } from "react-icons/ri";
 import PlaylistReviewModal from "../../components/ui/PlaylistReviewModal";
@@ -20,6 +20,7 @@ import Box from "@mui/material/Box";
 // 플레이리스트 추천 결과 페이지
 function RecommendPlaylistResult() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { trackName, artistName } = location.state || {};
 
   const [data, setData] = useState<Song[]>([]);
@@ -34,6 +35,28 @@ function RecommendPlaylistResult() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const [checkedSongIds, setCheckedSongIds] = useState<number[]>([]);
+  const [savedPlaylistId, setSavedPlaylistId] = useState<number | null>(null);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  
+  // 플레이리스트 제목과 설명
+  const [playlistTitle, setPlaylistTitle] = useState<string>("");
+  const [playlistDescription, setPlaylistDescription] = useState<string>("");
+  
+  // 수정 모드 상태
+  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
+  const [isEditingDescription, setIsEditingDescription] = useState<boolean>(false);
+
+  // 이전 제목 저장
+  const prevTitleRef = useRef<string>("");
+  // 제목 textarea ref
+  const titleTextareaRef = useRef<HTMLTextAreaElement>(null);
+  // 설명 textarea ref
+  const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // 플레이리스트 커버 이미지
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  
   const isAllChecked = data.length > 0 && checkedSongIds.length === data.length;
   const isIndeterminate = checkedSongIds.length > 0 && !isAllChecked;
 
@@ -60,14 +83,180 @@ function RecommendPlaylistResult() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [location]);
+
+  // 초기 플레이리스트 제목과 설명 설정
+  useEffect(() => {
+    if (trackName && artistName) {
+      setPlaylistTitle(`${trackName} - ${artistName} 유사곡 추천 플레이리스트`);
+      setPlaylistDescription(`"${trackName}" 곡과 유사한 음악들로 구성된 플레이리스트입니다.`);
+    }
+  }, [trackName, artistName]);
+
+  useEffect(() => {
+    const titleEl = titleTextareaRef.current;
+    if (titleEl) {
+      titleEl.style.height = "0";
+      titleEl.style.height = `${titleEl.scrollHeight}px`;
+    }
+
+    const descEl = descriptionTextareaRef.current;
+    if (descEl) {
+      descEl.style.height = "0";
+      descEl.style.height = `${descEl.scrollHeight}px`;
+    }
+  }, [data.length, playlistTitle, playlistDescription]);
+
+  // 데이터 로드 시 전체 곡 자동 선택
+  useEffect(() => {
+    if (data.length > 0) {
+      setCheckedSongIds(data.map((song) => song.id));
+    }
+  }, [data]);
+
+  // 이미지 파일 선택 시 미리보기 URL 생성
+  useEffect(() => {
+    if (selectedImageFile) {
+      const url = URL.createObjectURL(selectedImageFile);
+      setImagePreviewUrl(url);
+      
+      // 컴포넌트 언마운트 시 URL 정리
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setImagePreviewUrl(null);
+    }
+  }, [selectedImageFile]);
+
+  // 플레이리스트 제목 & 설명 수정 모드 시작 시 커서 끝으로 이동
+  useEffect(() => {
+    if (isEditingTitle && titleTextareaRef.current) {
+      const el = titleTextareaRef.current;
+      el.focus();
+      const len = el.value.length;
+      el.setSelectionRange(len, len);
+    }
+
+    if (isEditingDescription && descriptionTextareaRef.current) {
+      const el = descriptionTextareaRef.current;
+      el.focus();
+      const len = el.value.length;
+      el.setSelectionRange(len, len);
+    }
+  }, [isEditingTitle, isEditingDescription]);
+
+  // 이미지 파일 선택 핸들러
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // 이미지 파일 타입 검증
+      if (!file.type.startsWith('image/')) {
+        alert('이미지 파일만 선택할 수 있습니다.');
+        return;
+      }
+      
+      // 파일 크기 제한 (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('파일 크기는 10MB 이하여야 합니다.');
+        return;
+      }
+      
+      setSelectedImageFile(file);
+    }
+  };
+
+  // 이미지 초기화 핸들러
+  const handleImageReset = () => {
+    setSelectedImageFile(null);
+    setImagePreviewUrl(null);
+    
+    // 파일 초기화
+    const fileInput = document.getElementById('playlist-cover-input') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  // 커버 이미지 클릭 핸들러
+  const handleCoverClick = () => {
+    if (savedPlaylistId) return; // 저장 후에는 클릭 불가
+    const fileInput = document.getElementById('playlist-cover-input') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
+  };
+
+  // 플레이리스트 저장 핸들러
+  const handleSavePlaylist = async () => {
+    if (checkedSongIds.length === 0) {
+      alert("저장할 곡을 선택해주세요.");
+      return;
+    }
+
+    if (!playlistTitle.trim()) {
+      alert("플레이리스트 제목을 입력해주세요.");
+      return;
+    }
+
+    if (!confirm("플레이리스트를 저장 하시겠습니까?")) {
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const formData = new FormData();
+      
+      // 선택된 이미지 파일이 있으면 추가, 없으면 빈 문자열
+      if (selectedImageFile) {
+        formData.append("file", selectedImageFile);
+      } else {
+        formData.append("file", "");
+      }
+      
+      formData.append("title", playlistTitle.trim());
+      formData.append("description", playlistDescription.trim());
+
+      // 선택 곡들 Controller에 List로 보내기 위한 작업
+      checkedSongIds.forEach((id) => {
+        formData.append("songIds", String(id));
+      });
+
+      const res = await playlistApi.createPlaylist(formData);
+
+      if (res.status === 200 || res.status === 201) {
+        // 백엔드 응답에서 플레이리스트 ID 추출
+        const playlistId = res.data?.id || res.data?.playlistId;
+        if (playlistId) {
+          setSavedPlaylistId(playlistId);
+          alert("플레이리스트가 저장되었습니다.");
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      alert("플레이리스트 저장에 실패했습니다.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // 리뷰 작성 버튼 핸들러
+  const handleOpenReviewModal = () => {
+    if (!savedPlaylistId) {
+      alert("먼저 플레이리스트를 저장해주세요.");
+      return;
+    }
+    setIsModalOpen(true);
+  };
 
   return (
     <div>
       {/* 로딩 중인 상태 */}
       {isLoading && (
         <div className="flex items-center justify-center py-48">
-          <Spinner />
+          <div className="flex flex-col items-center justify-center py-48 space-y-4">
+            <div className="animate-bounce text-3xl">🎵</div>
+            <p className="text-white text-lg">유사 곡 추천 중입니다...</p>
+          </div>
         </div>
       )}
 
@@ -103,61 +292,186 @@ function RecommendPlaylistResult() {
 
       {/* 추천 플레이리스트 표시 */}
       {!isLoading && !isError && data.length > 0 && (
-        <div className="flex flex-col items-center justify-center gap-10">
+        <div className="flex flex-col items-center justify-center gap-12">
           {/* 플레이리스트 이미지 커버 부분 */}
-          <div className="flex items-center justify-center overflow-hidden w-60 h-60 bg-slate-500 rounded-2xl">
-            <RiPlayList2Fill size={100} className="text-white opacity-60" />
+          <div 
+            className={`relative overflow-hidden w-60 h-60 bg-slate-500 rounded-2xl cursor-pointer transition-all ${
+              savedPlaylistId 
+                ? 'cursor-not-allowed' 
+                : 'hover:bg-slate-400 hover:scale-105'
+            }`}
+            onClick={handleCoverClick}
+            title={savedPlaylistId ? '저장 후에는 변경할 수 없습니다' : '클릭하여 커버 이미지 선택'}
+          >
+            {imagePreviewUrl ? (
+              <>
+                <img 
+                  src={imagePreviewUrl} 
+                  alt="플레이리스트 커버" 
+                  className="w-full h-full object-cover"
+                />
+                {/* 이미지 초기화 버튼 (저장 전만) */}
+                {!savedPlaylistId && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleImageReset();
+                    }}
+                    className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70 transition-all"
+                    title="이미지 초기화"
+                  >
+                    ✕
+                  </button>
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center w-full h-full">
+                <RiPlayList2Fill size={80} className="text-white opacity-60 mb-2" />
+                <span className="text-white text-sm opacity-80">
+                  {!savedPlaylistId ? '커버 이미지 선택' : ''}
+                </span>
+              </div>
+            )}
           </div>
+          
+          {/* 파일 input 요소 */}
+          <input
+            id="playlist-cover-input"
+            type="file"
+            accept="image/*"
+            onChange={handleImageSelect}
+            className="hidden"
+            disabled={savedPlaylistId !== null}
+          />
+
           {/* 플레이리스트 제목, 설명, 버튼 부분 */}
-          <div className="flex flex-col items-center justify-center gap-5">
-            <h1 className="text-4xl font-bold">플레이리스트 제목</h1>
-            <div className="flex items-center gap-3 text-lg">
-              <FaMusic size={20} className="text-white" />
-              {data.length}곡
-            </div>
-            <p className="text-lg">플레이리스트 설명</p>
-            <div className="flex gap-5">
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="flex items-center gap-3 p-4 font-bold text-white border rounded-xl hover:bg-gray-800 text-[17px]"
-              >
-                <HiPencil size={25} />
-                <span>리뷰 작성</span>
-              </button>
-              <button
-                onClick={() => {
-                  if (!confirm("플레이리스트를 저장 하시겠습니까?")) {
-                    return;
-                  }
-
-                  // 테스트용 formData (수정 필요)
-                  const formData = new FormData();
-                  formData.append("file", "");
-                  formData.append("title", "플레이리스트 제목");
-                  formData.append("description", "플레이리스트 설명");
-
-                  // 선택 곡들 Controller에 List로 보내기 위한 작업
-                  checkedSongIds.forEach((id) => {
-                    formData.append("songIds", String(id));
-                  });
-
-                  playlistApi
-                    .createPlaylist(formData)
-                    .then((res) => {
-                      if (res.status === 200) {
-                        alert("플레이리스트가 저장되었습니다.");
-                      }
-                    })
-                    .catch((error) => {
-                      console.error(error);
-                      alert("플레이리스트 저장에 실패했습니다.");
-                    });
+          <div className="flex flex-col items-center justify-center w-full max-w-md relative gap-1">
+            {/* 제목 표시/수정 영역 */}
+            <div className="relative w-full flex items-center justify-center group">
+              <textarea
+                ref={titleTextareaRef}
+                value={playlistTitle}
+                onChange={(e) => {
+                  setPlaylistTitle(e.target.value);
                 }}
-                className="flex items-center gap-3 p-4 font-bold text-white border rounded-xl hover:bg-gray-800 text-[17px]"
-              >
-                <FaSave size={25} />
-                <span>플레이리스트 저장</span>
-              </button>
+                onBlur={() => {
+                  if (!playlistTitle.trim()) setPlaylistTitle(prevTitleRef.current);
+                  setIsEditingTitle(false);
+                }}
+                readOnly={!isEditingTitle || !!savedPlaylistId}
+                placeholder="플레이리스트 제목 입력.."
+                maxLength={100}
+                className={`
+                  text-4xl font-extrabold text-center text-white placeholder-gray-400
+                  w-full resize-none leading-tight p-1 overflow-hidden
+                  bg-transparent transition-colors duration-200
+                  ${isEditingTitle && !savedPlaylistId
+                    ? "border-b-2 border-blue-400 cursor-text"
+                    : `border-b-2 border-transparent ${!savedPlaylistId ? "cursor-pointer" : "cursor-default focus:outline-none"}`
+                  }
+                `}
+                onClick={() => {
+                  if (!savedPlaylistId) {
+                    prevTitleRef.current = playlistTitle;
+                    setIsEditingTitle(true);
+                  }
+                }}
+              />
+
+              {!savedPlaylistId && !isEditingTitle && (
+                <button
+                  onClick={() => {
+                    prevTitleRef.current = playlistTitle;
+                    setIsEditingTitle(true);
+                  }}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 p-1 text-white bg-black/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <HiPencil size={18} />
+                </button>
+              )}
+            </div>
+
+            {/* 곡 수 표시 */}
+            <div className="flex items-center gap-3 text-xl mt-5">
+              <FaMusic size={25} className="text-white" />
+              {savedPlaylistId ? (
+                <span>
+                  {checkedSongIds.length}곡
+                </span>
+              ) : (
+                <span>
+                  {data.length}곡
+                </span>
+              )}
+            </div>
+
+            {/* 설명 표시/수정 영역 */}
+            <div className="relative w-full flex items-center justify-center group mt-4">
+              <textarea
+                ref={descriptionTextareaRef}
+                value={playlistDescription}
+                onChange={(e) => {
+                  setPlaylistDescription(e.target.value);
+                }}
+                onBlur={() => setIsEditingDescription(false)}
+                readOnly={!isEditingDescription || !!savedPlaylistId}
+                placeholder="플레이리스트 설명 입력.."
+                maxLength={200}
+                className={`
+                  text-xl text-center text-white placeholder-gray-400
+                  w-full resize-none p-1 overflow-hidden break-all
+                  bg-transparent transition-colors duration-200
+                  ${isEditingDescription && !savedPlaylistId
+                    ? "border-2 border-blue-400 cursor-text"
+                    : `border-2 border-transparent ${!savedPlaylistId ? "cursor-pointer" : "cursor-default focus:outline-none"}`
+                  }
+                `}
+                onClick={() => {
+                  if (!savedPlaylistId) setIsEditingDescription(true);
+                }}
+              />
+
+              {!savedPlaylistId && !isEditingDescription && (
+                <button
+                  onClick={() => setIsEditingDescription(true)}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 p-1 text-white bg-black/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <HiPencil size={18} />
+                </button>
+              )}
+            </div>
+
+            {/* 버튼 영역 */}
+            <div className="flex gap-5 mt-8">
+              {/* 이전 버튼 */}
+                <button
+                  onClick={() => navigate(-1)}
+                  className="flex items-center gap-3 p-4 font-bold rounded-xl text-[17px] text-white border border-white hover:bg-gray-800 cursor-pointer transition-all"
+                >
+                  <RiArrowLeftLine size={25} />
+                  <span>이전</span>
+                </button>
+              {!savedPlaylistId ? (
+                /* 플레이리스트 저장 버튼 (저장 전만 표시) */
+                <button
+                  onClick={handleSavePlaylist}
+                  disabled={isSaving}
+                  className="flex items-center gap-3 p-4 font-bold rounded-xl text-[17px] text-white border border-white hover:bg-gray-800 cursor-pointer transition-all"
+                >
+                  <FaSave size={25} />
+                  <span>{isSaving ? "저장 중..." : "플레이리스트 저장"}</span>
+                </button>
+              ) : (
+                /* 리뷰 작성 버튼 (저장 후에만 표시) */
+                <button
+                  onClick={handleOpenReviewModal}
+                  disabled={isSaving}
+                  className="flex items-center gap-3 p-4 font-bold rounded-xl text-[17px] text-white border border-white hover:bg-gray-800 cursor-pointer transition-all"
+                >
+                  <HiPencil size={25} />
+                  <span>리뷰 작성</span>
+                </button>
+              )}
             </div>
           </div>
           {/* 추천 곡 리스트 */}
@@ -165,7 +479,7 @@ function RecommendPlaylistResult() {
             <FormControlLabel
               label={
                 <span className="text-lg">
-                  전체 선택 ({checkedSongIds.length} / {data.length})
+                  {savedPlaylistId ? '저장된 곡들' : `전체 선택 (${checkedSongIds.length} / ${data.length})`}
                 </span>
               }
               control={
@@ -180,22 +494,36 @@ function RecommendPlaylistResult() {
                       setCheckedSongIds([]); // 전체 해제
                     }
                   }}
+                  disabled={savedPlaylistId !== null}
                   sx={{ color: "white" }}
                 />
               }
             />
-            {data.map((item) => (
+            {(savedPlaylistId ? data.filter(song => checkedSongIds.includes(song.id)) : data).map((item) => (
               <Box key={item.id} sx={{ display: "flex", alignItems: "center" }}>
-                <Checkbox
-                  size="large"
-                  checked={checkedSongIds.includes(item.id)}
-                  onChange={(e) => {
-                    setCheckedSongIds((prev) =>
-                      e.target.checked ? [...prev, item.id] : prev.filter((id) => id !== item.id)
-                    );
+                <Box
+                  onClick={(e) => {
+                    if (savedPlaylistId) {
+                      return; // 저장 후에는 선택 불가
+                    }
+                    e.stopPropagation();
+                    setCheckedSongIds((prev) => {
+                      if (prev.includes(item.id)) {
+                        return prev.filter((id) => id !== item.id);
+                      } else {
+                        return [...prev, item.id];
+                      }
+                    });
                   }}
-                  sx={{ color: "white" }}
-                />
+                  sx={{ cursor: savedPlaylistId ? "not-allowed" : "pointer", pd: 0 }}
+                >
+                  <Checkbox
+                    size="large"
+                    checked={checkedSongIds.includes(item.id)}
+                    disabled={savedPlaylistId !== null}
+                    sx={{ color: "white" }}
+                  />
+                </Box>
 
                 <Box sx={{ flex: 1 }}>
                   <SongListItem song={item} setSelectSong={setSelectSong} />
@@ -216,8 +544,13 @@ function RecommendPlaylistResult() {
         </div>
       )}
 
-      {/* 추천 플레이리스트 리뷰 작성 */}
-      {isModalOpen && <PlaylistReviewModal onClose={() => setIsModalOpen(false)} />}
+      {/* 리뷰 작성 모달 */}
+      {isModalOpen && savedPlaylistId && (
+        <PlaylistReviewModal
+          onClose={() => setIsModalOpen(false)}
+          playlistId={savedPlaylistId}
+        />
+      )}
     </div>
   );
 }
