@@ -11,11 +11,13 @@ import { BsQuestionCircleFill } from "react-icons/bs";
 import { RiPlayList2Fill } from "react-icons/ri";
 import MusicPlayer from "../../components/layout/MusicPlayer";
 import { RiResetLeftFill } from "react-icons/ri";
-import PlaylistReviewModal from "../../components/ui/PlaylistReviewModal";
+
 import Checkbox from "@mui/material/Checkbox";
 import { playlistApi } from "../../api/playlistApi";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Box from "@mui/material/Box";
+import { useSelector } from "react-redux";
+import PlaylistReviewModal from "../../Components/ui/PlaylistReviewModal";
 
 // 플레이리스트 추천 결과 페이지
 function RecommendPlaylistResult() {
@@ -25,6 +27,9 @@ function RecommendPlaylistResult() {
   const [data, setData] = useState<Song[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
+
+  // 수정한 것 --
+  const email = useSelector((state: any) => state.auth.user?.email);
 
   // 곡 정보 UI에서 선택한 곡(미리듣기, 유사 곡 추천)
   const [selectSong, setSelectSong] = useState<Song | null>(null);
@@ -126,6 +131,11 @@ function RecommendPlaylistResult() {
               </button>
               <button
                 onClick={() => {
+                  if (!email) {
+                    alert("로그인이 필요합니다.");
+                    return;
+                  }
+
                   if (!confirm("플레이리스트를 저장 하시겠습니까?")) {
                     return;
                   }
@@ -135,6 +145,7 @@ function RecommendPlaylistResult() {
                   formData.append("file", "");
                   formData.append("title", "플레이리스트 제목");
                   formData.append("description", "플레이리스트 설명");
+                  formData.append("email", email);
 
                   // 선택 곡들 Controller에 List로 보내기 위한 작업
                   checkedSongIds.forEach((id) => {

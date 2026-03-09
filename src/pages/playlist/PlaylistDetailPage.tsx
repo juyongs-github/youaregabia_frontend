@@ -1,41 +1,62 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import type { Playlist } from '../../types/playlist';
-import { playlistApi } from '../../api/playlistApi';
-import '../../styles/MyplaylistPage.css';
-import { FaPlay } from 'react-icons/fa';
-import { BsThreeDots } from 'react-icons/bs';
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import type { Playlist } from "../../types/playlist";
+import { playlistApi } from "../../api/playlistApi";
+import "../../styles/MyplaylistPage.css";
+import { FaPlay } from "react-icons/fa";
+import { BsThreeDots } from "react-icons/bs";
+import { useSelector } from "react-redux";
 
 function PlaylistDetailPage() {
   const navigate = useNavigate();
   const { playlistId } = useParams<string>();
 
-  // 데이터
+  // 플레이리스트
   const [data, setData] = useState<Playlist | null>(null);
+  const [songs, setSongs] = useState<any[]>([]);
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
+
+  // 유저
+  const user = useSelector((state: any) => state.auth.user);
 
   //  ========== 메뉴 ==========
   const [menuOpen, setMenuOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   // 수정 모드
-  const [editTitle, setEditTitle] = useState('');
-  const [editDescription, setEditDescription] = useState('');
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [image, setImage] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
   // 수정 모드 저장
   const handleSave = async () => {
     if (!playlistId) return;
 
     try {
-      await playlistApi.updatePlaylist(Number(playlistId), {
+      const formData = new FormData();
+
+      const dto = {
         title: editTitle,
         description: editDescription,
-      });
-      alert('수정 완료');
+      };
+
+      formData.append("dto", new Blob([JSON.stringify(dto)], { type: "application/json" }));
+
+      if (image) {
+        formData.append("file", image);
+      }
+
+      await playlistApi.updatePlaylist(Number(playlistId), formData);
+
+      alert("수정 완료");
+
       setIsEditMode(false);
+
       fetchData();
     } catch (e) {
-      alert('수정 실패');
+      alert("수정 실패");
     }
   };
 
@@ -43,36 +64,46 @@ function PlaylistDetailPage() {
   const handleDelete = () => {
     if (!playlistId) return;
 
-    const ok = window.confirm('정말로 삭제하시겠습니까?');
+    const ok = window.confirm("정말로 삭제하시겠습니까?");
     if (!ok) return;
 
     playlistApi
       .deletePlaylist(Number(playlistId))
       .then(() => {
-        alert('삭제되었습니다.');
-        navigate('/playlist/me');
+        alert("삭제되었습니다.");
+        navigate("/playlist/me");
       })
       .catch((error) => {
         console.error(error);
-        alert('삭제에 실패하였습니다.');
+        alert("삭제에 실패하였습니다.");
       });
   };
 
-  // ========== 데이터 조회 ==========
+  // ========== 플레이리스트 정보 조회 ==========
   const fetchData = async () => {
+    //  email 없으면 API 호출 안함
+    if (!playlistId || !user.email) return;
+
     setIsLoading(true);
     setIsError(false);
+
     try {
-      playlistApi.getPlaylist(playlistId).then((res) => {
-        if (res.data) {
-          setData(res.data || []);
-          setEditTitle(res.data.title);
-          setEditDescription(res.data.description ?? '');
-        }
-      });
+      //  playlist 조회
+      const playlistRes = await playlistApi.getPlaylist(playlistId, user.email);
+      console.log("playlist data:", playlistRes.data);
+
+      if (playlistRes.data) {
+        setData(playlistRes.data);
+
+        setEditTitle(playlistRes.data.title);
+        setEditDescription(playlistRes.data.description ?? "");
+      }
+
+      //  songs 조회
+      const songsRes = await playlistApi.getPlaylistSongs(Number(playlistId));
+      setSongs(songsRes.data || []);
     } catch (error) {
       console.error(error);
-      setData(null);
       setIsError(true);
     } finally {
       setIsLoading(false);
@@ -81,18 +112,37 @@ function PlaylistDetailPage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [playlistId, user.email]);
 
   return (
     <div className="playlist-detail-page">
       {/* ================= 왼쪽 패널 ================= */}
       <aside className="playlist-left">
-        <div className={`playlist-center ${isEditMode ? 'editing' : ''}`}>
+        <div className={`playlist-center ${isEditMode ? "editing" : ""}`}>
           <div className="playlist-cover-large">
-            <img
-              src={`http://localhost:8080${data?.imageUrl}`}
-              alt="playlist cover"
-            />
+            {preview ? (
+              <img src={preview} alt="playlist cover" />
+            ) : (
+              <img src={`http://localhost:8080${data?.imageUrl}`} alt="playlist cover" />
+            )}
+            {isEditMode && (
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  setImage(file);
+
+                  if (preview) {
+                    URL.revokeObjectURL(preview);
+                  }
+
+                  setPreview(URL.createObjectURL(file));
+                }}
+              />
+            )}
 
             {/* ===== 액션 ===== */}
             {!isEditMode && (
@@ -102,10 +152,7 @@ function PlaylistDetailPage() {
                 </button>
 
                 <div className="more-wrapper">
-                  <button
-                    className="more-button"
-                    onClick={() => setMenuOpen((prev) => !prev)}
-                  >
+                  <button className="more-button" onClick={() => setMenuOpen((prev) => !prev)}>
                     <BsThreeDots />
                   </button>
 
@@ -150,16 +197,16 @@ function PlaylistDetailPage() {
           )}
           {/* ===== 메타 정보 ===== */}
           <div className="playlist-meta-bar">
-            <span className="meta-user">User</span>
+            <span className="meta-user">{user?.name}</span>
             <span className="meta-dot">•</span>
-            <span className="meta-count">SongCount</span>
+            <span className="meta-count">{data?.songCount}곡</span>
           </div>
 
           {/* ===== 설명 ===== */}
           <div className="playlist-description-box">
             {!isEditMode ? (
               <p className="playlist-description-text">
-                {data?.description || '플레이리스트 설명이 없습니다.'}
+                {data?.description || "플레이리스트 설명이 없습니다."}
               </p>
             ) : (
               <textarea
@@ -180,8 +227,8 @@ function PlaylistDetailPage() {
               <button
                 className="btn-cancel"
                 onClick={() => {
-                  setEditTitle(data?.title ?? '');
-                  setEditDescription(data?.description ?? '');
+                  setEditTitle(data?.title ?? "");
+                  setEditDescription(data?.description ?? "");
                   setIsEditMode(false);
                 }}
               >
@@ -195,16 +242,19 @@ function PlaylistDetailPage() {
       {/* ================= 오른쪽 트랙 리스트 ================= */}
       <section className="playlist-right">
         <ul className="track-list">
-          {Array.from({ length: 10 }).map((_, idx) => (
-            <li key={idx} className="track-item">
-              <img className="track-thumb" src="/images/playlist1.jpg" alt="" />
+          {songs.map((song) => (
+            <li key={song.id} className="track-item">
+              <img className="track-thumb" src={song.imgUrl} alt="" />
 
               <div className="track-info">
-                <span className="track-title">샘플 곡 {idx + 1}</span>
-                <span className="track-artist">아티스트</span>
+                <span className="track-title">{song.trackName}</span>
+                <span className="track-artist">{song.artistName}</span>
               </div>
 
-              <span className="track-duration">3:45</span>
+              <span className="track-duration">
+                {Math.floor(song.durationMs / 60000)}:
+                {String(Math.floor((song.durationMs % 60000) / 1000)).padStart(2, "0")}
+              </span>
             </li>
           ))}
         </ul>

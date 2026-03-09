@@ -4,11 +4,16 @@ import type { Playlist } from "../../types/playlist";
 import { playlistApi } from "../../api/playlistApi";
 import { FaPlay, FaPlus } from "react-icons/fa";
 import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
+import { useSelector } from "react-redux";
 
 function MyPlaylistPage() {
   const baseURL: string = "http://localhost:8080";
   const navigate = useNavigate();
 
+  // 유저 정보
+  const email = useSelector((state: any) => state.auth.user.email);
+
+  // 플레이리스트 정보
   const [data, setData] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
@@ -16,14 +21,13 @@ function MyPlaylistPage() {
   const [isModalOpen, setIsModalOpen] = useState(false); // Create Modal
 
   const fetchData = async () => {
+    if (!email) return;
+
     setIsLoading(true);
     setIsError(false);
     try {
-      playlistApi.getAllPlaylist().then((res) => {
-        if (res.data) {
-          setData(res.data || []);
-        }
-      });
+      const res = await playlistApi.getAllPlaylist(email);
+      setData(res.data || []);
     } catch (error) {
       console.error(error);
       setData([]);
@@ -34,8 +38,10 @@ function MyPlaylistPage() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (email) {
+      fetchData();
+    }
+  }, [email]);
 
   return (
     <div>
@@ -68,9 +74,13 @@ function MyPlaylistPage() {
             <span>플레이리스트 추가</span>
           </div>
         </div>
-        {/* ===== 모달 ===== */}
+        {/* ===== 플레이리스트 생성 모달 ===== */}
         {isModalOpen && (
-          <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
+          <PlaylistCreateModal
+            onClose={() => setIsModalOpen(false)}
+            onCreated={fetchData}
+            email={email}
+          />
         )}
       </div>
     </div>

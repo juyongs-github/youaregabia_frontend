@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaTimes, FaPlus } from "react-icons/fa";
 import { playlistApi } from "../../api/playlistApi";
 
 interface Props {
   onClose: () => void;
   onCreated: () => void;
+  email: string;
 }
 
-function PlaylistCreateModal({ onClose, onCreated }: Props) {
+function PlaylistCreateModal({ onClose, onCreated, email }: Props) {
   const [image, setImage] = useState<File | null>(null);
-
   const [preview, setPreview] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -29,6 +29,7 @@ function PlaylistCreateModal({ onClose, onCreated }: Props) {
           const formData = new FormData();
           formData.append("title", title);
           formData.append("description", description);
+          formData.append("email", email);
 
           if (image) {
             formData.append("file", image);
