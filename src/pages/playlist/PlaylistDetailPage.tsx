@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import type { Playlist } from "../../types/playlist";
 import { playlistApi } from "../../api/playlistApi";
 import "../../styles/MyplaylistPage.css";
-import { FaPlay } from "react-icons/fa";
+import { FaPlay, FaTrash } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
 import { useSelector } from "react-redux";
 
@@ -11,15 +11,14 @@ function PlaylistDetailPage() {
   const navigate = useNavigate();
   const { playlistId } = useParams<string>();
 
+  // 유저
+  const user = useSelector((state: any) => state.auth.user);
   // 플레이리스트
   const [data, setData] = useState<Playlist | null>(null);
   const [songs, setSongs] = useState<any[]>([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
-
-  // 유저
-  const user = useSelector((state: any) => state.auth.user);
 
   //  ========== 메뉴 ==========
   const [menuOpen, setMenuOpen] = useState(false);
@@ -60,7 +59,7 @@ function PlaylistDetailPage() {
     }
   };
 
-  // 삭제
+  // 플레이리스트 삭제
   const handleDelete = () => {
     if (!playlistId) return;
 
@@ -79,7 +78,24 @@ function PlaylistDetailPage() {
       });
   };
 
-  // ========== 플레이리스트 정보 조회 ==========
+  // 곡 삭제
+  const handleRemoveSong = async (playlistSongId: number) => {
+    if (!playlistId) return;
+
+    const ok = window.confirm("곡을 삭제하시겠습니까?");
+    if (!ok) return;
+
+    try {
+      await playlistApi.removeSongFromPlaylist(Number(playlistSongId));
+
+      alert("곡이 삭제되었습니다.");
+
+      setSongs((prev) => prev.filter((song) => song.playlistSongId !== playlistSongId));
+    } catch (e) {
+      alert("삭제 실패");
+    }
+  };
+  // 조회
   const fetchData = async () => {
     //  email 없으면 API 호출 안함
     if (!playlistId || !user.email) return;
@@ -199,7 +215,7 @@ function PlaylistDetailPage() {
           <div className="playlist-meta-bar">
             <span className="meta-user">{user?.name}</span>
             <span className="meta-dot">•</span>
-            <span className="meta-count">{data?.songCount}곡</span>
+            <span className="meta-count">{songs.length}곡</span>
           </div>
 
           {/* ===== 설명 ===== */}
@@ -243,7 +259,7 @@ function PlaylistDetailPage() {
       <section className="playlist-right">
         <ul className="track-list">
           {songs.map((song) => (
-            <li key={song.id} className="track-item">
+            <li key={song.playlistSongId} className="track-item">
               <img className="track-thumb" src={song.imgUrl} alt="" />
 
               <div className="track-info">
@@ -255,6 +271,14 @@ function PlaylistDetailPage() {
                 {Math.floor(song.durationMs / 60000)}:
                 {String(Math.floor((song.durationMs % 60000) / 1000)).padStart(2, "0")}
               </span>
+
+              <button
+                className="track-delete"
+                onClick={() => handleRemoveSong(song.playlistSongId)}
+                title="곡 삭제"
+              >
+                <FaTrash />
+              </button>
             </li>
           ))}
         </ul>

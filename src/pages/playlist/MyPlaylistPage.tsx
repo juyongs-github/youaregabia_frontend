@@ -18,7 +18,11 @@ function MyPlaylistPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
 
-  const [isModalOpen, setIsModalOpen] = useState(false); // Create Modal
+  // Create Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 정렬 State
+  const [sortType, setSortType] = useState("oldest");
 
   const fetchData = async () => {
     if (!email) return;
@@ -43,12 +47,43 @@ function MyPlaylistPage() {
     }
   }, [email]);
 
+  // 데이터 정렬
+  const sortedData = [...data].sort((a, b) => {
+    if (sortType === "latest") {
+      return b.id - a.id;
+    }
+
+    if (sortType === "oldest") {
+      return a.id - b.id;
+    }
+
+    if (sortType === "title") {
+      return a.title.localeCompare(b.title);
+    }
+
+    return 0;
+  });
+
   return (
     <div>
-      <h1 className="page-title py-5">내 플레이리스트</h1>
+      <div className="flex justify-between items-center py-3">
+        <h1 className="page-title">내 플레이리스트</h1>
+
+        <select
+          value={sortType}
+          onChange={(e) => setSortType(e.target.value)}
+          className="playlist-sort"
+        >
+          <option value="oldest">오래된순</option>
+          <option value="latest">최신순</option>
+          <option value="title">이름순</option>
+        </select>
+      </div>
 
       <div className="flex flex-wrap gap-7">
-        {data.map((item) => (
+        {/* 정렬 */}
+
+        {sortedData.map((item) => (
           <div
             key={item.id}
             className="playlist-card top-playlist-card top-playlist-card-small"

@@ -1,3 +1,13 @@
+/* 정렬 */
+.playlist-sort {
+  width: 120px;
+  background: #111;
+  color: white;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
 /* 카드  */
 .top-playlist-card-small {
   width: 160px;
