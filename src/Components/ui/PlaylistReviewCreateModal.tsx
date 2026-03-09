@@ -2,15 +2,16 @@ import Box from "@mui/material/Box";
 import Rating from "@mui/material/Rating";
 import { useState } from "react";
 import { FaRegStar, FaStar, FaTimes } from "react-icons/fa";
-import { playlistApi } from "../../api/reviewApi";
+import { reviewApi } from "../../api/reviewApi";
 import { useSelector } from "react-redux";
 
 interface Props {
   onClose: () => void;
   playlistId: number;
+  onSuccess?: () => void;
 }
 
-function PlaylistReviewModal({ onClose, playlistId }: Props) {
+function PlaylistReviewCreateModal({ onClose, playlistId, onSuccess }: Props) {
   const [rating, setRating] = useState<number | null>(0);
   const [review, setReview] = useState<string>("");
   
@@ -79,7 +80,7 @@ function PlaylistReviewModal({ onClose, playlistId }: Props) {
               }
 
               // API 호출
-              playlistApi
+              reviewApi
                 .createReview({
                   playlistId: playlistId,
                   userEmail: user.email,
@@ -89,6 +90,7 @@ function PlaylistReviewModal({ onClose, playlistId }: Props) {
                 .then((res) => {
                   if (res.status === 200 || res.status === 201) {
                     alert("리뷰가 등록되었습니다.");
+                    onSuccess?.();
                   } else {
                     alert("리뷰 등록 중 문제가 발생했습니다.");
                   }
@@ -108,4 +110,4 @@ function PlaylistReviewModal({ onClose, playlistId }: Props) {
   );
 }
 
-export default PlaylistReviewModal;
+export default PlaylistReviewCreateModal;

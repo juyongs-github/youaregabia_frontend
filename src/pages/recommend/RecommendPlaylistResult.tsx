@@ -3,25 +3,28 @@ import type { Song } from "../../components/ui/SongListItem";
 import api from "../../api/axios";
 import { FaMusic, FaSave } from "react-icons/fa";
 import SongListItem from "../../components/ui/SongListItem";
-import Spinner from "../../components/ui/Spinner";
 import { IoWarning } from "react-icons/io5";
 import { useLocation, useNavigate } from "react-router-dom";
 import { HiPencil } from "react-icons/hi2";
-import { BsQuestionCircleFill } from "react-icons/bs";
+import { BsQuestionCircleFill, BsFillCircleFill } from "react-icons/bs";
 import { RiArrowLeftLine, RiPlayList2Fill } from "react-icons/ri";
 import MusicPlayer from "../../components/layout/MusicPlayer";
 import { RiResetLeftFill } from "react-icons/ri";
-import PlaylistReviewModal from "../../components/ui/PlaylistReviewModal";
+import PlaylistReviewCreateModal from "../../components/ui/PlaylistReviewCreateModal";
+import PlaylistReviewViewModal from "../../components/ui/PlaylistReviewViewModal";
 import Checkbox from "@mui/material/Checkbox";
 import { playlistApi } from "../../api/playlistApi";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Box from "@mui/material/Box";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store";
 
 // 플레이리스트 추천 결과 페이지
 function RecommendPlaylistResult() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { trackName, artistName } = location.state || {};
+  const { trackName, artistName, coverImageUrl } = location.state || {};
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const [data, setData] = useState<Song[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -33,6 +36,10 @@ function RecommendPlaylistResult() {
 
   // 리뷰 작성 Modal
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  // 리뷰 등록 완료 여부
+  const [isReviewSubmitted, setIsReviewSubmitted] = useState<boolean>(false);
+  // 리뷰 보기/수정 Modal
+  const [isViewModalOpen, setIsViewModalOpen] = useState<boolean>(false);
 
   const [checkedSongIds, setCheckedSongIds] = useState<number[]>([]);
   const [savedPlaylistId, setSavedPlaylistId] = useState<number | null>(null);
@@ -59,6 +66,22 @@ function RecommendPlaylistResult() {
   
   const isAllChecked = data.length > 0 && checkedSongIds.length === data.length;
   const isIndeterminate = checkedSongIds.length > 0 && !isAllChecked;
+
+  const convertImageUrlToFile = async (url: string): Promise<File | null> => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) return null;
+
+      const blob = await response.blob();
+      if (!blob.type.startsWith("image/")) return null;
+
+      const ext = blob.type.split("/")[1]?.split(";")[0] || "jpg";
+      return new File([blob], `playlist-cover.${ext}`, { type: blob.type });
+    } catch (error) {
+      console.error("cover image conversion failed", error);
+      return null;
+    }
+  };
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -123,9 +146,9 @@ function RecommendPlaylistResult() {
       // 컴포넌트 언마운트 시 URL 정리
       return () => URL.revokeObjectURL(url);
     } else {
-      setImagePreviewUrl(null);
+      setImagePreviewUrl(coverImageUrl || null);
     }
-  }, [selectedImageFile]);
+  }, [selectedImageFile, coverImageUrl]);
 
   // 플레이리스트 제목 & 설명 수정 모드 시작 시 커서 끝으로 이동
   useEffect(() => {
@@ -167,7 +190,7 @@ function RecommendPlaylistResult() {
   // 이미지 초기화 핸들러
   const handleImageReset = () => {
     setSelectedImageFile(null);
-    setImagePreviewUrl(null);
+    setImagePreviewUrl(coverImageUrl || null);
     
     // 파일 초기화
     const fileInput = document.getElementById('playlist-cover-input') as HTMLInputElement;
@@ -205,16 +228,27 @@ function RecommendPlaylistResult() {
 
     try {
       const formData = new FormData();
+
+      if(!user) {
+        alert("로그인이 필요합니다.");
+        return;
+      }
       
       // 선택된 이미지 파일이 있으면 추가, 없으면 빈 문자열
-      if (selectedImageFile) {
-        formData.append("file", selectedImageFile);
+      let fileToUpload: File | null = selectedImageFile;
+      if (!fileToUpload && coverImageUrl) {
+        fileToUpload = await convertImageUrlToFile(coverImageUrl);
+      }
+
+      if (fileToUpload) {
+        formData.append("file", fileToUpload);
       } else {
         formData.append("file", "");
       }
       
       formData.append("title", playlistTitle.trim());
       formData.append("description", playlistDescription.trim());
+      formData.append("email", user.email);
 
       // 선택 곡들 Controller에 List로 보내기 위한 작업
       checkedSongIds.forEach((id) => {
@@ -231,9 +265,12 @@ function RecommendPlaylistResult() {
           alert("플레이리스트가 저장되었습니다.");
         }
       }
-    } catch (error) {
-      console.error(error);
-      alert("플레이리스트 저장에 실패했습니다.");
+    } catch (error: any) {
+      if (error?.response?.status === 409) {
+        alert("같은 제목의 플레이리스트가 이미 존재합니다.");
+      } else {
+        alert("플레이리스트 저장에 실패했습니다.");
+      }
     } finally {
       setIsSaving(false);
     }
@@ -311,7 +348,7 @@ function RecommendPlaylistResult() {
                   className="w-full h-full object-cover"
                 />
                 {/* 이미지 초기화 버튼 (저장 전만) */}
-                {!savedPlaylistId && (
+                {!savedPlaylistId && imagePreviewUrl !== coverImageUrl && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -321,6 +358,18 @@ function RecommendPlaylistResult() {
                     title="이미지 초기화"
                   >
                     ✕
+                  </button>
+                )}
+                {!savedPlaylistId && imagePreviewUrl === coverImageUrl && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCoverClick();
+                    }}
+                    className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70 transition-all"
+                    title="이미지 수정"
+                  >
+                    <HiPencil size={18} />
                   </button>
                 )}
               </>
@@ -345,7 +394,7 @@ function RecommendPlaylistResult() {
           />
 
           {/* 플레이리스트 제목, 설명, 버튼 부분 */}
-          <div className="flex flex-col items-center justify-center w-full max-w-md relative gap-1">
+          <div className="flex flex-col items-center w-full max-w-lg px-6">
             {/* 제목 표시/수정 영역 */}
             <div className="relative w-full flex items-center justify-center group">
               <textarea
@@ -362,12 +411,12 @@ function RecommendPlaylistResult() {
                 placeholder="플레이리스트 제목 입력.."
                 maxLength={100}
                 className={`
-                  text-4xl font-extrabold text-center text-white placeholder-gray-400
-                  w-full resize-none leading-tight p-1 overflow-hidden
-                  bg-transparent transition-colors duration-200
+                  text-4xl font-extrabold text-center text-white placeholder-gray-500
+                  w-full resize-none leading-tight px-2 py-1 overflow-hidden
+                  bg-transparent transition-colors duration-200 rounded-lg
                   ${isEditingTitle && !savedPlaylistId
                     ? "border-b-2 border-blue-400 cursor-text"
-                    : `border-b-2 border-transparent ${!savedPlaylistId ? "cursor-pointer" : "cursor-default focus:outline-none"}`
+                    : `border-b-2 border-transparent ${!savedPlaylistId ? "cursor-pointer hover:border-white/20" : "cursor-default focus:outline-none"}`
                   }
                 `}
                 onClick={() => {
@@ -377,33 +426,30 @@ function RecommendPlaylistResult() {
                   }
                 }}
               />
-
               {!savedPlaylistId && !isEditingTitle && (
                 <button
                   onClick={() => {
                     prevTitleRef.current = playlistTitle;
                     setIsEditingTitle(true);
                   }}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 p-1 text-white bg-black/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 p-1.5 text-white/60 bg-white/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/20"
                 >
-                  <HiPencil size={18} />
+                  <HiPencil size={16} />
                 </button>
               )}
             </div>
 
+            {/* 사이점 */}
+            <BsFillCircleFill size={5} className="text-white/30 mt-5" />
+
             {/* 곡 수 표시 */}
-            <div className="flex items-center gap-3 text-xl mt-5">
-              <FaMusic size={25} className="text-white" />
-              {savedPlaylistId ? (
-                <span>
-                  {checkedSongIds.length}곡
-                </span>
-              ) : (
-                <span>
-                  {data.length}곡
-                </span>
-              )}
+            <div className="flex items-center gap-2 mt-4 px-5 py-2 rounded-full bg-white/10 text-white/80 text-base font-medium">
+              <FaMusic size={15} />
+              <span>{savedPlaylistId ? checkedSongIds.length : data.length}곡</span>
             </div>
+
+            {/* 사이점 */}
+            <BsFillCircleFill size={5} className="text-white/30 mt-4" />
 
             {/* 설명 표시/수정 영역 */}
             <div className="relative w-full flex items-center justify-center group mt-4">
@@ -418,57 +464,60 @@ function RecommendPlaylistResult() {
                 placeholder="플레이리스트 설명 입력.."
                 maxLength={200}
                 className={`
-                  text-xl text-center text-white placeholder-gray-400
-                  w-full resize-none p-1 overflow-hidden break-all
-                  bg-transparent transition-colors duration-200
+                  text-base text-center text-white/70 placeholder-gray-500
+                  w-full resize-none px-2 py-1 overflow-hidden break-all
+                  bg-transparent transition-colors duration-200 rounded-lg
                   ${isEditingDescription && !savedPlaylistId
-                    ? "border-2 border-blue-400 cursor-text"
-                    : `border-2 border-transparent ${!savedPlaylistId ? "cursor-pointer" : "cursor-default focus:outline-none"}`
+                    ? "border border-blue-400 cursor-text"
+                    : `border border-transparent ${!savedPlaylistId ? "cursor-pointer hover:border-white/20" : "cursor-default focus:outline-none"}`
                   }
                 `}
                 onClick={() => {
                   if (!savedPlaylistId) setIsEditingDescription(true);
                 }}
               />
-
               {!savedPlaylistId && !isEditingDescription && (
                 <button
                   onClick={() => setIsEditingDescription(true)}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 p-1 text-white bg-black/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 p-1.5 text-white/60 bg-white/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/20"
                 >
-                  <HiPencil size={18} />
+                  <HiPencil size={16} />
                 </button>
               )}
             </div>
 
             {/* 버튼 영역 */}
-            <div className="flex gap-5 mt-8">
-              {/* 이전 버튼 */}
-                <button
-                  onClick={() => navigate(-1)}
-                  className="flex items-center gap-3 p-4 font-bold rounded-xl text-[17px] text-white border border-white hover:bg-gray-800 cursor-pointer transition-all"
-                >
-                  <RiArrowLeftLine size={25} />
-                  <span>이전</span>
-                </button>
+            <div className="flex gap-3 mt-7">
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 px-8 py-4 font-semibold rounded-full text-lg text-white border border-white/40 hover:bg-white/10 transition-all"
+              >
+                <RiArrowLeftLine size={22} />
+                <span>이전</span>
+              </button>
               {!savedPlaylistId ? (
-                /* 플레이리스트 저장 버튼 (저장 전만 표시) */
                 <button
                   onClick={handleSavePlaylist}
                   disabled={isSaving}
-                  className="flex items-center gap-3 p-4 font-bold rounded-xl text-[17px] text-white border border-white hover:bg-gray-800 cursor-pointer transition-all"
+                  className="flex items-center gap-2 px-8 py-4 font-semibold rounded-full text-lg text-white bg-white/20 hover:bg-white/30 disabled:opacity-50 transition-all"
                 >
-                  <FaSave size={25} />
+                  <FaSave size={20} />
                   <span>{isSaving ? "저장 중..." : "플레이리스트 저장"}</span>
                 </button>
+              ) : isReviewSubmitted ? (
+                <button
+                  onClick={() => setIsViewModalOpen(true)}
+                  className="flex items-center gap-2 px-8 py-4 font-semibold rounded-full text-lg text-white bg-white/20 hover:bg-white/30 transition-all"
+                >
+                  <HiPencil size={20} />
+                  <span>리뷰 보기</span>
+                </button>
               ) : (
-                /* 리뷰 작성 버튼 (저장 후에만 표시) */
                 <button
                   onClick={handleOpenReviewModal}
-                  disabled={isSaving}
-                  className="flex items-center gap-3 p-4 font-bold rounded-xl text-[17px] text-white border border-white hover:bg-gray-800 cursor-pointer transition-all"
+                  className="flex items-center gap-2 px-8 py-4 font-semibold rounded-full text-lg text-white bg-white/20 hover:bg-white/30 transition-all"
                 >
-                  <HiPencil size={25} />
+                  <HiPencil size={20} />
                   <span>리뷰 작성</span>
                 </button>
               )}
@@ -546,8 +595,20 @@ function RecommendPlaylistResult() {
 
       {/* 리뷰 작성 모달 */}
       {isModalOpen && savedPlaylistId && (
-        <PlaylistReviewModal
+        <PlaylistReviewCreateModal
           onClose={() => setIsModalOpen(false)}
+          playlistId={savedPlaylistId}
+          onSuccess={() => {
+            setIsReviewSubmitted(true);
+            setIsModalOpen(false);
+          }}
+        />
+      )}
+
+      {/* 리뷰 보기/수정 모달 */}
+      {isViewModalOpen && savedPlaylistId && (
+        <PlaylistReviewViewModal
+          onClose={() => setIsViewModalOpen(false)}
           playlistId={savedPlaylistId}
         />
       )}

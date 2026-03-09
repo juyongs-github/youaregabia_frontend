@@ -21,6 +21,7 @@ import PlaylistDetailPage from "./pages/playlist/PlaylistDetailPage";
 import CollaboPlaylistPage from "./pages/community/CollaboPlaylistPage";
 import CollaboPlaylistDetailPage from "./pages/community/CollaboPlaylistDetailPage";
 import MyPage from "./pages/auth/MyPage";
+import PlaylistReviewPage from "./pages/playlist/PlaylistReviewPage";
 
 function App() {
   // 2. Redux Store에서 로그인 여부 가져오기
@@ -35,6 +36,7 @@ function App() {
         <Route path="/recommend/result" element={<RecommendPlaylistResult />} />
         <Route path="/playlist/me" element={<MyPlaylistPage />} />
         <Route path="/playlist/me/:playlistId" element={<PlaylistDetailPage />} />
+        <Route path="/playlist/review" element={<PlaylistReviewPage />} />
         <Route path="/community/share" element={<BoardListPage />} />
         <Route path="/community/share/:boardId" element={<BoardDetailPage />} />
         <Route path="/community/share/new" element={<BoardWrite />} />

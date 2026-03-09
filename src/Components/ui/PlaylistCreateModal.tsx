@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { FaTimes, FaPlus } from "react-icons/fa";
 import { playlistApi } from "../../api/playlistApi";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store";
 
 interface Props {
   onClose: () => void;
@@ -8,6 +10,7 @@ interface Props {
 }
 
 function PlaylistCreateModal({ onClose, onCreated }: Props) {
+  const user = useSelector((state: RootState) => state.auth.user);
   const [image, setImage] = useState<File | null>(null);
 
   const [preview, setPreview] = useState<string | null>(null);
@@ -21,6 +24,11 @@ function PlaylistCreateModal({ onClose, onCreated }: Props) {
         onSubmit={(e) => {
           e.preventDefault();
 
+          if(!user?.email) {
+            alert("로그인이 필요합니다.");
+            return;
+          }
+
           if (!title.trim()) {
             alert("제목을 입력해주세요.");
             return;
@@ -29,6 +37,7 @@ function PlaylistCreateModal({ onClose, onCreated }: Props) {
           const formData = new FormData();
           formData.append("title", title);
           formData.append("description", description);
+          formData.append("email", user.email);
 
           if (image) {
             formData.append("file", image);

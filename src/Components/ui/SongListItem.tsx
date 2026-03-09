@@ -104,6 +104,7 @@ function SongListItem({ song, setSelectSong }: SongProps) {
                   state: {
                     trackName: song.trackName,
                     artistName: song.artistName,
+                    coverImageUrl: song.imgUrl,
                   },
                 });
               }}

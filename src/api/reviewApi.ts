@@ -1,6 +1,6 @@
 import api from "./axios";
 
-export const playlistApi = {
+export const reviewApi = {
   createReview: (data: { playlistId: number; userEmail: string; rating: number; content: string }) => {
   return api.post('/review', data);
 },
@@ -9,8 +9,12 @@ export const playlistApi = {
     return api.get("/review/all");
   },
 
-  getReview: (playlistId: number) => {
-    return api.get(`/review/${playlistId}`);
+  getReviewByPlaylist: (playlistId: number) => {
+    return api.get(`/review/playlist/${playlistId}`);
+  },
+
+  getReviewByUser: (email: string) => {
+    return api.get(`/review/user/${email}`);
   },
 
   updateReview: (reviewId: number , data: {
