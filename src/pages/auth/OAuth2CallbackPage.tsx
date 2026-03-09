@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../store/authSlice";
 
-// 기존 소셜 유저가 OAuth2 로그인 후 리다이렉트되는 페이지
 function OAuth2CallbackPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -11,7 +10,6 @@ function OAuth2CallbackPage() {
   const hasFetched = useRef(false);
 
   useEffect(() => {
-    // React 18 Strict Mode 이중 실행 방지
     if (hasFetched.current) return;
     hasFetched.current = true;
 
@@ -33,6 +31,7 @@ function OAuth2CallbackPage() {
             name: data.name,
             createDate: data.createdAt,
             imgUrl: data.imgUrl || undefined,
+            token: data.token,
           })
         );
         navigate("/home", { replace: true });

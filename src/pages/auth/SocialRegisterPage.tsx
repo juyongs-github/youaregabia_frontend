@@ -159,6 +159,7 @@ function SocialRegisterPage() {
           name: data.name,
           createDate: data.createdAt,
           imgUrl: data.imgUrl || undefined,
+          token: data.token,
         })
       );
       navigate("/home", { replace: true });

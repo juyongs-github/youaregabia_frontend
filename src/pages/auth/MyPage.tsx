@@ -1,16 +1,17 @@
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../store";
-import { updateProfile } from "../../store/authSlice";
+import { updateProfile, logout } from "../../store/authSlice";
 import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { MdEdit } from "react-icons/md";
-import axios from "axios";
+import api from "../../api/axios";
 
 function MyPage() {
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 이미지 업로드 버튼 클릭 시 숨겨진 input 호출
   const handleEditClick = () => fileInputRef.current?.click();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,11 +22,31 @@ function MyPage() {
     formData.append("email", user.email);
     formData.append("image", file);
 
-    const res = await axios.patch("http://localhost:8080/api/auth/update-image", formData, {
+    const res = await api.patch("/api/auth/update-image", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
     dispatch(updateProfile({ imgUrl: res.data.imgUrl }));
+  };
+
+  const handleWithdraw = async () => {
+    const confirmed = window.confirm(
+      "정말 탈퇴하시겠습니까?\n탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다."
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await api.delete("/api/auth/withdraw", {
+        data: { email: user?.email },
+      });
+      if (res.status === 200) {
+        alert("회원탈퇴가 완료됐습니다.");
+        dispatch(logout());
+        navigate("/login", { replace: true });
+      }
+    } catch {
+      alert("탈퇴 처리 중 오류가 발생했습니다.");
+    }
   };
 
   return (
@@ -88,6 +109,16 @@ function MyPage() {
             className="w-full bg-gray-800 border-none rounded-lg p-3"
           />
         </div>
+      </div>
+
+      {/* 회원탈퇴 */}
+      <div className="mt-8 text-right">
+        <button
+          onClick={handleWithdraw}
+          className="px-4 py-2 text-sm text-gray-500 border border-gray-700 rounded-lg hover:bg-red-900/30 hover:text-red-400 hover:border-red-700 transition-colors"
+        >
+          회원탈퇴
+        </button>
       </div>
     </div>
   );
