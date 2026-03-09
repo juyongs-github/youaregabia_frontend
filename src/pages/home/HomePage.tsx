@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FaPlus, FaChevronLeft, FaChevronRight, FaPlay } from "react-icons/fa";
-import RankSection from "../../Components/layout/RankSection";
-import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
+import RankSection from "../../components/layout/RankSection";
+import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
 import { playlistApi } from "../../api/playlistApi";
 import type { Playlist } from "../../types/playlist";
 import { useNavigate } from "react-router-dom";

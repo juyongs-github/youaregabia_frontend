@@ -31,7 +31,6 @@ function SearchResult() {
 
   // 곡 정보 UI에서 선택한 곡(미리듣기, 유사 곡 추천)
   const [selectSong, setSelectSong] = useState<Song | null>(null);
-  const [isPlayerVisible, setIsPlayerVisible] = useState<boolean>(false);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -109,7 +108,7 @@ function SearchResult() {
         <div className="fixed bottom-0 left-0 z-50 w-full">
           <MusicPlayer
             song={selectSong}
-            setIsPlayerVisible={() => setIsPlayerVisible(!isPlayerVisible)}
+            setIsPlayerVisible={() => setSelectSong(null)}
           />
         </div>
       )}

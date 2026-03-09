@@ -32,7 +32,6 @@ function RecommendPlaylistResult() {
 
   // 곡 정보 UI에서 선택한 곡(미리듣기, 유사 곡 추천)
   const [selectSong, setSelectSong] = useState<Song | null>(null);
-  const [isPlayerVisible, setIsPlayerVisible] = useState<boolean>(false);
 
   // 리뷰 작성 Modal
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -44,11 +43,11 @@ function RecommendPlaylistResult() {
   const [checkedSongIds, setCheckedSongIds] = useState<number[]>([]);
   const [savedPlaylistId, setSavedPlaylistId] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  
+
   // 플레이리스트 제목과 설명
   const [playlistTitle, setPlaylistTitle] = useState<string>("");
   const [playlistDescription, setPlaylistDescription] = useState<string>("");
-  
+
   // 수정 모드 상태
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
   const [isEditingDescription, setIsEditingDescription] = useState<boolean>(false);
@@ -59,11 +58,11 @@ function RecommendPlaylistResult() {
   const titleTextareaRef = useRef<HTMLTextAreaElement>(null);
   // 설명 textarea ref
   const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
-  
+
   // 플레이리스트 커버 이미지
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
-  
+
   const isAllChecked = data.length > 0 && checkedSongIds.length === data.length;
   const isIndeterminate = checkedSongIds.length > 0 && !isAllChecked;
 
@@ -142,7 +141,7 @@ function RecommendPlaylistResult() {
     if (selectedImageFile) {
       const url = URL.createObjectURL(selectedImageFile);
       setImagePreviewUrl(url);
-      
+
       // 컴포넌트 언마운트 시 URL 정리
       return () => URL.revokeObjectURL(url);
     } else {
@@ -172,17 +171,17 @@ function RecommendPlaylistResult() {
     const file = event.target.files?.[0];
     if (file) {
       // 이미지 파일 타입 검증
-      if (!file.type.startsWith('image/')) {
-        alert('이미지 파일만 선택할 수 있습니다.');
+      if (!file.type.startsWith("image/")) {
+        alert("이미지 파일만 선택할 수 있습니다.");
         return;
       }
-      
+
       // 파일 크기 제한 (10MB)
       if (file.size > 10 * 1024 * 1024) {
-        alert('파일 크기는 10MB 이하여야 합니다.');
+        alert("파일 크기는 10MB 이하여야 합니다.");
         return;
       }
-      
+
       setSelectedImageFile(file);
     }
   };
@@ -191,18 +190,18 @@ function RecommendPlaylistResult() {
   const handleImageReset = () => {
     setSelectedImageFile(null);
     setImagePreviewUrl(coverImageUrl || null);
-    
+
     // 파일 초기화
-    const fileInput = document.getElementById('playlist-cover-input') as HTMLInputElement;
+    const fileInput = document.getElementById("playlist-cover-input") as HTMLInputElement;
     if (fileInput) {
-      fileInput.value = '';
+      fileInput.value = "";
     }
   };
 
   // 커버 이미지 클릭 핸들러
   const handleCoverClick = () => {
     if (savedPlaylistId) return; // 저장 후에는 클릭 불가
-    const fileInput = document.getElementById('playlist-cover-input') as HTMLInputElement;
+    const fileInput = document.getElementById("playlist-cover-input") as HTMLInputElement;
     if (fileInput) {
       fileInput.click();
     }
@@ -229,11 +228,11 @@ function RecommendPlaylistResult() {
     try {
       const formData = new FormData();
 
-      if(!user) {
+      if (!user) {
         alert("로그인이 필요합니다.");
         return;
       }
-      
+
       // 선택된 이미지 파일이 있으면 추가, 없으면 빈 문자열
       let fileToUpload: File | null = selectedImageFile;
       if (!fileToUpload && coverImageUrl) {
@@ -245,7 +244,7 @@ function RecommendPlaylistResult() {
       } else {
         formData.append("file", "");
       }
-      
+
       formData.append("title", playlistTitle.trim());
       formData.append("description", playlistDescription.trim());
       formData.append("email", user.email);
@@ -291,8 +290,8 @@ function RecommendPlaylistResult() {
       {isLoading && (
         <div className="flex items-center justify-center py-48">
           <div className="flex flex-col items-center justify-center py-48 space-y-4">
-            <div className="animate-bounce text-3xl">🎵</div>
-            <p className="text-white text-lg">유사 곡 추천 중입니다...</p>
+            <div className="text-3xl animate-bounce">🎵</div>
+            <p className="text-lg text-white">유사 곡 추천 중입니다...</p>
           </div>
         </div>
       )}
@@ -331,21 +330,19 @@ function RecommendPlaylistResult() {
       {!isLoading && !isError && data.length > 0 && (
         <div className="flex flex-col items-center justify-center gap-12">
           {/* 플레이리스트 이미지 커버 부분 */}
-          <div 
+          <div
             className={`relative overflow-hidden w-60 h-60 bg-slate-500 rounded-2xl cursor-pointer transition-all ${
-              savedPlaylistId 
-                ? 'cursor-not-allowed' 
-                : 'hover:bg-slate-400 hover:scale-105'
+              savedPlaylistId ? "cursor-not-allowed" : "hover:bg-slate-400 hover:scale-105"
             }`}
             onClick={handleCoverClick}
-            title={savedPlaylistId ? '저장 후에는 변경할 수 없습니다' : '클릭하여 커버 이미지 선택'}
+            title={savedPlaylistId ? "저장 후에는 변경할 수 없습니다" : "클릭하여 커버 이미지 선택"}
           >
             {imagePreviewUrl ? (
               <>
-                <img 
-                  src={imagePreviewUrl} 
-                  alt="플레이리스트 커버" 
-                  className="w-full h-full object-cover"
+                <img
+                  src={imagePreviewUrl}
+                  alt="플레이리스트 커버"
+                  className="object-cover w-full h-full"
                 />
                 {/* 이미지 초기화 버튼 (저장 전만) */}
                 {!savedPlaylistId && imagePreviewUrl !== coverImageUrl && (
@@ -354,7 +351,7 @@ function RecommendPlaylistResult() {
                       e.stopPropagation();
                       handleImageReset();
                     }}
-                    className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70 transition-all"
+                    className="absolute flex items-center justify-center w-8 h-8 text-white transition-all bg-black bg-opacity-50 rounded-full top-2 right-2 hover:bg-opacity-70"
                     title="이미지 초기화"
                   >
                     ✕
@@ -366,7 +363,7 @@ function RecommendPlaylistResult() {
                       e.stopPropagation();
                       handleCoverClick();
                     }}
-                    className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70 transition-all"
+                    className="absolute flex items-center justify-center w-8 h-8 text-white transition-all bg-black bg-opacity-50 rounded-full top-2 right-2 hover:bg-opacity-70"
                     title="이미지 수정"
                   >
                     <HiPencil size={18} />
@@ -375,14 +372,14 @@ function RecommendPlaylistResult() {
               </>
             ) : (
               <div className="flex flex-col items-center justify-center w-full h-full">
-                <RiPlayList2Fill size={80} className="text-white opacity-60 mb-2" />
-                <span className="text-white text-sm opacity-80">
-                  {!savedPlaylistId ? '커버 이미지 선택' : ''}
+                <RiPlayList2Fill size={80} className="mb-2 text-white opacity-60" />
+                <span className="text-sm text-white opacity-80">
+                  {!savedPlaylistId ? "커버 이미지 선택" : ""}
                 </span>
               </div>
             )}
           </div>
-          
+
           {/* 파일 input 요소 */}
           <input
             id="playlist-cover-input"
@@ -396,7 +393,7 @@ function RecommendPlaylistResult() {
           {/* 플레이리스트 제목, 설명, 버튼 부분 */}
           <div className="flex flex-col items-center w-full max-w-lg px-6">
             {/* 제목 표시/수정 영역 */}
-            <div className="relative w-full flex items-center justify-center group">
+            <div className="relative flex items-center justify-center w-full group">
               <textarea
                 ref={titleTextareaRef}
                 value={playlistTitle}
@@ -414,9 +411,10 @@ function RecommendPlaylistResult() {
                   text-4xl font-extrabold text-center text-white placeholder-gray-500
                   w-full resize-none leading-tight px-2 py-1 overflow-hidden
                   bg-transparent transition-colors duration-200 rounded-lg
-                  ${isEditingTitle && !savedPlaylistId
-                    ? "border-b-2 border-blue-400 cursor-text"
-                    : `border-b-2 border-transparent ${!savedPlaylistId ? "cursor-pointer hover:border-white/20" : "cursor-default focus:outline-none"}`
+                  ${
+                    isEditingTitle && !savedPlaylistId
+                      ? "border-b-2 border-blue-400 cursor-text"
+                      : `border-b-2 border-transparent ${!savedPlaylistId ? "cursor-pointer hover:border-white/20" : "cursor-default focus:outline-none"}`
                   }
                 `}
                 onClick={() => {
@@ -440,19 +438,19 @@ function RecommendPlaylistResult() {
             </div>
 
             {/* 사이점 */}
-            <BsFillCircleFill size={5} className="text-white/30 mt-5" />
+            <BsFillCircleFill size={5} className="mt-5 text-white/30" />
 
             {/* 곡 수 표시 */}
-            <div className="flex items-center gap-2 mt-4 px-5 py-2 rounded-full bg-white/10 text-white/80 text-base font-medium">
+            <div className="flex items-center gap-2 px-5 py-2 mt-4 text-base font-medium rounded-full bg-white/10 text-white/80">
               <FaMusic size={15} />
               <span>{savedPlaylistId ? checkedSongIds.length : data.length}곡</span>
             </div>
 
             {/* 사이점 */}
-            <BsFillCircleFill size={5} className="text-white/30 mt-4" />
+            <BsFillCircleFill size={5} className="mt-4 text-white/30" />
 
             {/* 설명 표시/수정 영역 */}
-            <div className="relative w-full flex items-center justify-center group mt-4">
+            <div className="relative flex items-center justify-center w-full mt-4 group">
               <textarea
                 ref={descriptionTextareaRef}
                 value={playlistDescription}
@@ -467,9 +465,10 @@ function RecommendPlaylistResult() {
                   text-base text-center text-white/70 placeholder-gray-500
                   w-full resize-none px-2 py-1 overflow-hidden break-all
                   bg-transparent transition-colors duration-200 rounded-lg
-                  ${isEditingDescription && !savedPlaylistId
-                    ? "border border-blue-400 cursor-text"
-                    : `border border-transparent ${!savedPlaylistId ? "cursor-pointer hover:border-white/20" : "cursor-default focus:outline-none"}`
+                  ${
+                    isEditingDescription && !savedPlaylistId
+                      ? "border border-blue-400 cursor-text"
+                      : `border border-transparent ${!savedPlaylistId ? "cursor-pointer hover:border-white/20" : "cursor-default focus:outline-none"}`
                   }
                 `}
                 onClick={() => {
@@ -490,7 +489,7 @@ function RecommendPlaylistResult() {
             <div className="flex gap-3 mt-7">
               <button
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 px-8 py-4 font-semibold rounded-full text-lg text-white border border-white/40 hover:bg-white/10 transition-all"
+                className="flex items-center gap-2 px-8 py-4 text-lg font-semibold text-white transition-all border rounded-full border-white/40 hover:bg-white/10"
               >
                 <RiArrowLeftLine size={22} />
                 <span>이전</span>
@@ -499,15 +498,15 @@ function RecommendPlaylistResult() {
                 <button
                   onClick={handleSavePlaylist}
                   disabled={isSaving}
-                  className="flex items-center gap-2 px-8 py-4 font-semibold rounded-full text-lg text-white bg-white/20 hover:bg-white/30 disabled:opacity-50 transition-all"
+                  className="flex items-center gap-2 px-8 py-4 text-lg font-semibold text-white transition-all rounded-full bg-white/20 hover:bg-white/30 disabled:opacity-50"
                 >
                   <FaSave size={20} />
                   <span>{isSaving ? "저장 중..." : "플레이리스트 저장"}</span>
                 </button>
               ) : isReviewSubmitted ? (
                 <button
-                  onClick={() => setIsViewModalOpen(true)}
-                  className="flex items-center gap-2 px-8 py-4 font-semibold rounded-full text-lg text-white bg-white/20 hover:bg-white/30 transition-all"
+                  onClick={() => navigate("/playlist/review", { state: { searchQuery: playlistTitle, tab: "mine" } })}
+                  className="flex items-center gap-2 px-8 py-4 text-lg font-semibold text-white transition-all rounded-full bg-white/20 hover:bg-white/30"
                 >
                   <HiPencil size={20} />
                   <span>리뷰 보기</span>
@@ -515,7 +514,7 @@ function RecommendPlaylistResult() {
               ) : (
                 <button
                   onClick={handleOpenReviewModal}
-                  className="flex items-center gap-2 px-8 py-4 font-semibold rounded-full text-lg text-white bg-white/20 hover:bg-white/30 transition-all"
+                  className="flex items-center gap-2 px-8 py-4 text-lg font-semibold text-white transition-all rounded-full bg-white/20 hover:bg-white/30"
                 >
                   <HiPencil size={20} />
                   <span>리뷰 작성</span>
@@ -528,7 +527,9 @@ function RecommendPlaylistResult() {
             <FormControlLabel
               label={
                 <span className="text-lg">
-                  {savedPlaylistId ? '저장된 곡들' : `전체 선택 (${checkedSongIds.length} / ${data.length})`}
+                  {savedPlaylistId
+                    ? "저장된 곡들"
+                    : `전체 선택 (${checkedSongIds.length} / ${data.length})`}
                 </span>
               }
               control={
@@ -548,37 +549,39 @@ function RecommendPlaylistResult() {
                 />
               }
             />
-            {(savedPlaylistId ? data.filter(song => checkedSongIds.includes(song.id)) : data).map((item) => (
-              <Box key={item.id} sx={{ display: "flex", alignItems: "center" }}>
-                <Box
-                  onClick={(e) => {
-                    if (savedPlaylistId) {
-                      return; // 저장 후에는 선택 불가
-                    }
-                    e.stopPropagation();
-                    setCheckedSongIds((prev) => {
-                      if (prev.includes(item.id)) {
-                        return prev.filter((id) => id !== item.id);
-                      } else {
-                        return [...prev, item.id];
+            {(savedPlaylistId ? data.filter((song) => checkedSongIds.includes(song.id)) : data).map(
+              (item) => (
+                <Box key={item.id} sx={{ display: "flex", alignItems: "center" }}>
+                  <Box
+                    onClick={(e) => {
+                      if (savedPlaylistId) {
+                        return; // 저장 후에는 선택 불가
                       }
-                    });
-                  }}
-                  sx={{ cursor: savedPlaylistId ? "not-allowed" : "pointer", pd: 0 }}
-                >
-                  <Checkbox
-                    size="large"
-                    checked={checkedSongIds.includes(item.id)}
-                    disabled={savedPlaylistId !== null}
-                    sx={{ color: "white" }}
-                  />
-                </Box>
+                      e.stopPropagation();
+                      setCheckedSongIds((prev) => {
+                        if (prev.includes(item.id)) {
+                          return prev.filter((id) => id !== item.id);
+                        } else {
+                          return [...prev, item.id];
+                        }
+                      });
+                    }}
+                    sx={{ cursor: savedPlaylistId ? "not-allowed" : "pointer", pd: 0 }}
+                  >
+                    <Checkbox
+                      size="large"
+                      checked={checkedSongIds.includes(item.id)}
+                      disabled={savedPlaylistId !== null}
+                      sx={{ color: "white" }}
+                    />
+                  </Box>
 
-                <Box sx={{ flex: 1 }}>
-                  <SongListItem song={item} setSelectSong={setSelectSong} />
+                  <Box sx={{ flex: 1 }}>
+                    <SongListItem song={item} setSelectSong={setSelectSong} />
+                  </Box>
                 </Box>
-              </Box>
-            ))}
+              )
+            )}
           </div>
         </div>
       )}
@@ -588,7 +591,7 @@ function RecommendPlaylistResult() {
         <div className="fixed bottom-0 left-0 z-50 w-full">
           <MusicPlayer
             song={selectSong}
-            setIsPlayerVisible={() => setIsPlayerVisible(!isPlayerVisible)}
+            setIsPlayerVisible={() => setSelectSong(null)}
           />
         </div>
       )}

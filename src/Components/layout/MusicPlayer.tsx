@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { FaChevronDown, FaPause, FaPlay, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
+import { FaChevronDown, FaPause, FaPlay, FaVolumeMute, FaVolumeUp, FaStepBackward, FaStepForward } from "react-icons/fa";
 import Slider from "@mui/material/Slider";
 import Box from "@mui/material/Box";
 import { GoDotFill } from "react-icons/go";
@@ -8,10 +8,14 @@ import type { Song } from "../ui/SongListItem";
 interface MusicPlayerProps {
   song: Song;
   setIsPlayerVisible: () => void;
+  // 플레이리스트 재생 시 사용 (optional)
+  songs?: Song[];
+  songIndex?: number;
+  onSongChange?: (index: number) => void;
 }
 
 // 음악 재생 바 UI
-function MusicPlayer({ song, setIsPlayerVisible }: MusicPlayerProps) {
+function MusicPlayer({ song, setIsPlayerVisible, songs, songIndex, onSongChange }: MusicPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false); // 재생 중 여부
   const [progress, setProgress] = useState<number>(0); // 곡 재생 진행바(%)
@@ -20,12 +24,22 @@ function MusicPlayer({ song, setIsPlayerVisible }: MusicPlayerProps) {
   const [volume, setVolume] = useState<number>(50); // 볼륨 크기
   const [isMute, setIsMute] = useState<boolean>(false); // 음소거 상태 여부
 
+  const isPlaylist = !!(songs && onSongChange && songIndex != null);
+  const hasPrev = isPlaylist && songIndex! > 0;
+  const hasNext = isPlaylist && songIndex! < songs!.length - 1;
+
   // 시간 변환
   const formatTime = (time: number) => {
     const minute = Math.floor(time / 60);
     const second = Math.floor(time % 60);
     return `${minute}:${String(second).padStart(2, "0")}`;
   };
+
+  // 초기 볼륨 동기화
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.volume = volume / 100;
+  }, []);
 
   // 곡 바뀔 때 마다 정보 로드 후 자동 재생
   useEffect(() => {
@@ -62,6 +76,11 @@ function MusicPlayer({ song, setIsPlayerVisible }: MusicPlayerProps) {
           }
           setDuration(audioRef.current.duration);
         }}
+        onEnded={() => {
+          if (hasNext) {
+            onSongChange!(songIndex! + 1);
+          }
+        }}
       />
 
       {/* 곡 재생 진행 바 */}
@@ -80,8 +99,17 @@ function MusicPlayer({ song, setIsPlayerVisible }: MusicPlayerProps) {
       </Box>
 
       <div className="flex items-center justify-between">
-        {/* 곡 재생 / 일시정지 */}
+        {/* 곡 재생 / 일시정지 + 이전/다음 (플레이리스트 모드) */}
         <div className="flex items-center gap-7">
+          {isPlaylist && (
+            <button
+              onClick={() => onSongChange!(songIndex! - 1)}
+              disabled={!hasPrev}
+              className="disabled:opacity-30"
+            >
+              <FaStepBackward size={24} color="white" />
+            </button>
+          )}
           <button
             onClick={() => {
               if (!audioRef.current) {
@@ -99,6 +127,15 @@ function MusicPlayer({ song, setIsPlayerVisible }: MusicPlayerProps) {
           >
             {isPlaying ? <FaPause size={40} color="white" /> : <FaPlay size={40} color="white" />}
           </button>
+          {isPlaylist && (
+            <button
+              onClick={() => onSongChange!(songIndex! + 1)}
+              disabled={!hasNext}
+              className="disabled:opacity-30"
+            >
+              <FaStepForward size={24} color="white" />
+            </button>
+          )}
           <div className="text-lg">
             <span>{formatTime(currentTime)}</span>
             <span> / </span>
