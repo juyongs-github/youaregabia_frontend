@@ -21,6 +21,8 @@ import PlaylistDetailPage from "./pages/playlist/PlaylistDetailPage";
 import CollaboPlaylistPage from "./pages/community/CollaboPlaylistPage";
 import CollaboPlaylistDetailPage from "./pages/community/CollaboPlaylistDetailPage";
 import MyPage from "./pages/auth/MyPage";
+import OAuth2CallbackPage from "./pages/auth/OAuth2CallbackPage";
+import SocialRegisterPage from "./pages/auth/SocialRegisterPage";
 
 function App() {
   // 2. Redux Store에서 로그인 여부 가져오기
@@ -54,6 +56,10 @@ function App() {
       {/* 5. 기타 경로 처리 */}
       <Route path="/auth/ci" element={<CiVerifyPage />} />
       <Route path="/auth/" element={<RegisterForm />} />
+
+      {/* 소셜 로그인 OAuth2 콜백 */}
+      <Route path="/oauth2/callback" element={<OAuth2CallbackPage />} />
+      <Route path="/social-register" element={<SocialRegisterPage />} />
 
       {/* 6. 초기 접속 시 경로 설정 */}
       <Route path="/" element={<Navigate to={isLogin ? "/home" : "/login"} replace />} />

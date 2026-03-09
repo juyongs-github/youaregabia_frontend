@@ -24,6 +24,7 @@ const authSlice = createSlice({
   reducers: {
     // 로그인 성공 시 유저 정보까지 한 번에 저장
     loginSuccess: (state, action: PayloadAction<UserInfo>) => {
+      console.log("LOGIN USER:", action.payload); // 여기
       state.isLoggedIn = true;
       state.user = action.payload;
     },

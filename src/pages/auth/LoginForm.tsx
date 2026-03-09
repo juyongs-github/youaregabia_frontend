@@ -49,7 +49,8 @@ function LoginForm() {
           dispatch(loginSuccess({
             email: form.email,
             name: response?.data?.name || "사용자", // 서버 데이터가 없다면 기본값
-            createDate: response?.data?.createDate || new Date().toISOString()
+            createDate: response?.data?.createDate || new Date().toISOString(),
+            imgUrl: response?.data?.imgUrl || undefined
           }));
 
           alert("로그인 성공");
@@ -108,7 +109,7 @@ function LoginForm() {
           >
             <img src="/icons/kakao.svg" alt="Kakao" />
           </button>
-          <button type="button" className="social-icon naver" aria-label="Naver Login">
+          <button type="button" className="social-icon naver" aria-label="Naver Login" onClick={handleNaverLogin}>
             <img src="/icons/naver.svg" alt="Naver" />
           </button>
         </div>
