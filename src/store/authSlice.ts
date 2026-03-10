@@ -1,16 +1,16 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-// 1. 유저 정보
 interface UserInfo {
   email: string;
   name?: string;
   createDate?: string;
   imgUrl?: string;
+  token?: string;
 }
 
 interface AuthState {
   isLoggedIn: boolean;
-  user: UserInfo | null; // 로그인한 유저 정보를 담을 객체
+  user: UserInfo | null;
 }
 
 const initialState: AuthState = {
@@ -22,16 +22,19 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    // 로그인 성공 시 유저 정보까지 한 번에 저장
     loginSuccess: (state, action: PayloadAction<UserInfo>) => {
+      console.log("LOGIN USER:", action.payload);
       state.isLoggedIn = true;
       state.user = action.payload;
+      if (action.payload.token) {
+        localStorage.setItem("token", action.payload.token);
+      }
     },
     logout: (state) => {
       state.isLoggedIn = false;
-      state.user = null; // 로그아웃 시 유저 정보도 삭제
+      state.user = null;
+      localStorage.removeItem("token");
     },
-    // (선택) 회원 정보만 나중에 업데이트할 때 사용
     updateUserInfo: (state, action: PayloadAction<UserInfo>) => {
       state.user = { ...state.user, ...action.payload };
     },
