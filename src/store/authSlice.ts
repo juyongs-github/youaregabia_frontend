@@ -6,6 +6,7 @@ interface UserInfo {
   createDate?: string;
   imgUrl?: string;
   token?: string;
+  role?: string;  // "USER" | "CRITIC" | "ADMIN"
 }
 
 interface AuthState {

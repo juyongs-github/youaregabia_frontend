@@ -44,10 +44,17 @@ function LoginForm() {
         createDate: response.data.createdAt,
         imgUrl: response.data.imgUrl || undefined,
         token: response.data.token,
+        role: response.data.role,
       }));
 
+      console.log("🔍 LOGIN RESPONSE:", response.data);
+      console.log("🔍 ROLE VALUE:", response.data.role);
       alert("로그인 성공");
-      navigate("/home");
+      if (response.data.role === "ADMIN") {
+        navigate("/admin");
+      } else {
+        navigate("/home");
+      }
     } catch (error: any) {
       console.error("Login Error Details:", error.response?.data);
       alert(error.response?.data?.message || "로그인 정보가 올바르지 않습니다.");

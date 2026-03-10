@@ -160,6 +160,7 @@ function SocialRegisterPage() {
           createDate: data.createdAt,
           imgUrl: data.imgUrl || undefined,
           token: data.token,
+          role: data.role,
         })
       );
       navigate("/home", { replace: true });

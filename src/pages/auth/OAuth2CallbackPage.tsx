@@ -32,9 +32,11 @@ function OAuth2CallbackPage() {
             createDate: data.createdAt,
             imgUrl: data.imgUrl || undefined,
             token: data.token,
+            role: data.role,
           })
         );
-        navigate("/home", { replace: true });
+        const dest = data.role === "ADMIN" ? "/admin" : "/home";
+        navigate(dest, { replace: true });
       })
       .catch(() => {
         alert("로그인에 실패했습니다. 다시 시도해주세요.");

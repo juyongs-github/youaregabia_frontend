@@ -2,10 +2,13 @@ import { useState } from "react";
 import { FaChevronDown, FaCompass, FaHome, FaMinus, FaUsers } from "react-icons/fa";
 import { PiPlaylistBold } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store";
 
 function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const userRole = useSelector((state: RootState) => state.auth.user?.role);
 
   const goPage = (path: string) => {
     if (location.pathname === path) {
@@ -24,7 +27,7 @@ function Sidebar() {
       <nav className="flex flex-col p-5 pt-10 text-xl font-bold gap-7">
         <button
           className="flex items-center gap-5 px-3 py-2 text-white rounded-lg hover:bg-gray-800"
-          onClick={() => goPage("/home")}
+          onClick={() => goPage(userRole === "ADMIN" ? "/admin" : "/home")}
         >
           <FaHome size={24} />
           <span>홈</span>

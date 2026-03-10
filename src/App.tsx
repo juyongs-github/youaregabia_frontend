@@ -24,10 +24,13 @@ import MyPage from "./pages/auth/MyPage";
 import OAuth2CallbackPage from "./pages/auth/OAuth2CallbackPage";
 import SocialRegisterPage from "./pages/auth/SocialRegisterPage";
 import FindAccountPage from "./pages/auth/FindAccountPage";
+import AdminPage from "./pages/admin/AdminPage";
 
 function App() {
   // 2. Redux Store에서 로그인 여부 가져오기
   const isLogin = useSelector((state: RootState) => state.auth.isLoggedIn);
+  const userRole = useSelector((state: RootState) => state.auth.user?.role);
+  const loginRedirect = userRole === "ADMIN" ? "/admin" : "/home";
 
   return (
     <Routes>
@@ -45,13 +48,14 @@ function App() {
         <Route path="/community/collabo" element={<CollaboPlaylistPage />} />
         <Route path="/community/collabo/detail/:id" element={<CollaboPlaylistDetailPage />} />
         <Route path="/profile/me" element={<MyPage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Route>
       {/* 아닌 것들은 여기 밑으로 Route 추가 */}
       {/* 4. 로그인하지 않은 사용자만 접근 가능한 경로 (이미 로그인했다면 홈으로 이동) */}
-      <Route path="/login" element={!isLogin ? <LoginForm /> : <Navigate to="/home" replace />} />
+      <Route path="/login" element={!isLogin ? <LoginForm /> : <Navigate to={loginRedirect} replace />} />
       <Route
         path="/register"
-        element={!isLogin ? <TermsAgreement /> : <Navigate to="/home" replace />}
+        element={!isLogin ? <TermsAgreement /> : <Navigate to={loginRedirect} replace />}
       />
 
       {/* 5. 기타 경로 처리 */}
@@ -66,7 +70,7 @@ function App() {
       <Route path="/find" element={<FindAccountPage />} />
 
       {/* 6. 초기 접속 시 경로 설정 */}
-      <Route path="/" element={<Navigate to={isLogin ? "/home" : "/login"} replace />} />
+      <Route path="/" element={<Navigate to={isLogin ? loginRedirect : "/login"} replace />} />
     </Routes>
   );
 }
