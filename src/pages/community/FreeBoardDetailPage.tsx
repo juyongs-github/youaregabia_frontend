@@ -8,7 +8,7 @@ import Pagination from "../../components/ui/Pagination";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 
-const BoardDetailPage = () => {
+const FreeBoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const [board, setBoard] = useState<Board | null>(null);
   const [replyContent, setReplyContent] = useState("");
@@ -101,7 +101,7 @@ const BoardDetailPage = () => {
       </div>
       <div className="flex items-center justify-end">
         {userEmail && board.writerEmail === userEmail && (
-          <button onClick={() => navigate(`/community/share/${board.boardId}/update`)}>수정</button>
+          <button onClick={() => navigate(`/community/free/${board.boardId}/update`)}>수정</button>
         )}
       </div>
 
@@ -164,4 +164,4 @@ const BoardDetailPage = () => {
   );
 };
 
-export default BoardDetailPage;
+export default FreeBoardDetailPage;
