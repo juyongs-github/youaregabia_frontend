@@ -11,7 +11,6 @@ import { RiArrowLeftLine, RiPlayList2Fill } from "react-icons/ri";
 import MusicPlayer from "../../components/layout/MusicPlayer";
 import { RiResetLeftFill } from "react-icons/ri";
 import PlaylistReviewCreateModal from "../../components/ui/PlaylistReviewCreateModal";
-import PlaylistReviewViewModal from "../../components/ui/PlaylistReviewViewModal";
 import Checkbox from "@mui/material/Checkbox";
 import { playlistApi } from "../../api/playlistApi";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -248,6 +247,7 @@ function RecommendPlaylistResult() {
       formData.append("title", playlistTitle.trim());
       formData.append("description", playlistDescription.trim());
       formData.append("email", user.email);
+      formData.append("type", "RECOMMENDED");
 
       // 선택 곡들 Controller에 List로 보내기 위한 작업
       checkedSongIds.forEach((id) => {
@@ -605,14 +605,6 @@ function RecommendPlaylistResult() {
             setIsReviewSubmitted(true);
             setIsModalOpen(false);
           }}
-        />
-      )}
-
-      {/* 리뷰 보기/수정 모달 */}
-      {isViewModalOpen && savedPlaylistId && (
-        <PlaylistReviewViewModal
-          onClose={() => setIsViewModalOpen(false)}
-          playlistId={savedPlaylistId}
         />
       )}
     </div>

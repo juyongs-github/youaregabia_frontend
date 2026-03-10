@@ -38,6 +38,7 @@ function PlaylistCreateModal({ onClose, onCreated }: Props) {
           formData.append("title", title);
           formData.append("description", description);
           formData.append("email", user.email);
+          formData.append("type", "MYPLAYLIST");
 
           if (image) {
             formData.append("file", image);

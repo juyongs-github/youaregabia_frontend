@@ -246,7 +246,7 @@ function PlaylistReviewPage() {
       className="min-h-screen px-8 py-10 text-white"
       style={{ paddingBottom: isPlayerVisible ? "160px" : undefined }}
     >
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         {/* 헤더 */}
         <div className="flex items-center gap-3 mb-6">
           <TbMessageStar size={32} className="text-white/80" />
@@ -264,7 +264,7 @@ function PlaylistReviewPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="플레이리스트 제목 / 리뷰 내용 / 수록곡 제목 · 아티스트 검색"
-            className="w-full px-[3rem] py-3 text-sm text-white transition-all border rounded-full bg-white/5 border-white/10 placeholder-white/30 focus:outline-none focus:border-white/30"
+            className="w-full px-[3rem] py-3 text-sm text-white transition-colors border rounded-full bg-white/5 border-white/10 placeholder-white/30 outline-none focus:border-white/30"
           />
           {searchQuery && (
             <button
@@ -376,7 +376,7 @@ function PlaylistReviewPage() {
                     {/* 리뷰 내용 */}
                     <div className="flex flex-col gap-2.5 flex-1 min-w-0 overflow-hidden">
                       <div className="flex items-start justify-between gap-3">
-                        <div className="flex flex-col gap-1.5 min-w-0 overflow-hidden">
+                        <div className="flex flex-col gap-2.5 min-w-0 overflow-hidden">
                           {title && (
                             <span
                               className="max-w-full text-sm font-bold truncate cursor-default text-white/70"
@@ -455,12 +455,12 @@ function PlaylistReviewPage() {
                       )}
 
                       <div className="flex items-center justify-between mt-auto">
-                        <span className="text-sm text-white/30">
-                          작성: {maskEmail(review.userEmail)}
+                        <span className="text-sm text-bold text-white/50">
+                          작성자: {maskEmail(review.userEmail)}
                         </span>
 
                         {review.createdAt && (
-                          <span className="text-sm text-white/30">
+                          <span className="text-sm text-bold text-white/50">
                             {new Date(review.createdAt).toLocaleDateString("ko-KR")}
                           </span>
                         )}

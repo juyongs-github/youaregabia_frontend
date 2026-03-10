@@ -1,4 +1,5 @@
 import api from "./axios";
+import type { CollaboPlaylist } from "../types/playlist";
 
 export const playlistApi = {
   createPlaylist: (formData: FormData) => {
@@ -23,4 +24,8 @@ export const playlistApi = {
     deletePlaylist: (playlistId:number) => {
       return api.delete(`/playlist/${playlistId}`)
     },
+
+  getAllCollaborativePlaylist: () => {
+    return api.get<CollaboPlaylist[]>("/playlist/collabo/all");
+  },
 };

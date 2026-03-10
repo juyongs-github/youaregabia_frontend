@@ -1,22 +1,44 @@
+import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import { useState } from "react";
 import CollaborationPlaylistTopicItem from "../../components/ui/CollaboPlaylistTopicItem";
 import CollaboPlaylistCreateModal from "../../components/ui/CollaboPlaylistCreateModal";
+import { playlistApi } from "../../api/playlistApi";
+import type { CollaboPlaylist } from "../../types/playlist";
+import Spinner from "../../components/ui/Spinner";
 
 // 공동 플레이리스트 제작 페이지
 function CollaboPlaylistPage() {
-  const [value, setValue] = useState("1");
+  const [tab, setTab] = useState("1");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [playlists, setPlaylists] = useState<CollaboPlaylist[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-    setValue(newValue);
+  const fetchPlaylists = async () => {
+    setIsLoading(true);
+    try {
+      const res = await playlistApi.getAllCollaborativePlaylist();
+      setPlaylists(res.data || []);
+    } catch (e) {
+      console.error(e);
+      setPlaylists([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  useEffect(() => {
+    fetchPlaylists();
+  }, []);
+
+  // 탭별 정렬
+  const allPlaylists = playlists;
+  const popularPlaylists = [...playlists].sort((a, b) => b.songCount - a.songCount);
+  const recentPlaylists = [...playlists].reverse();
 
   return (
     <div>
@@ -34,44 +56,55 @@ function CollaboPlaylistPage() {
         </button>
       </div>
 
-      {/* Filter Tabs */}
-      <Box sx={{ width: "100%", typography: "body1" }}>
-        <TabContext value={value}>
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <TabList
-              onChange={handleChange}
-              aria-label="공동 플레이리스트 제작 Filter Tab"
-              sx={{
-                "& .MuiTab-root": {
-                  color: "#ffffff",
-                  fontWeight: 600,
-                  fontSize: 16,
-                },
-                // 선택된 탭
-                "& .Mui-selected": {
-                  color: "#ffffff",
-                },
-                // 하단 밑줄
-                "& .MuiTabs-indicator": {
-                  backgroundColor: "#ffffff",
-                },
-              }}
-            >
-              <Tab label="전체" value="1" />
-              <Tab label="인기순" value="2" />
-              <Tab label="최신순" value="3" />
-            </TabList>
-          </Box>
-          <TabPanel value="1">
-            <CollaborationPlaylistTopicItem />
-          </TabPanel>
-          <TabPanel value="2">인기순</TabPanel>
-          <TabPanel value="3">최신순</TabPanel>
-        </TabContext>
-      </Box>
+      {/* 로딩 */}
+      {isLoading && (
+        <div className="flex justify-center py-24">
+          <Spinner />
+        </div>
+      )}
 
-      {/* ===== 모달 ===== */}
-      {isModalOpen && <CollaboPlaylistCreateModal onClose={() => setIsModalOpen(false)} />}
+      {/* Filter Tabs */}
+      {!isLoading && (
+        <Box sx={{ width: "100%", typography: "body1" }}>
+          <TabContext value={tab}>
+            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+              <TabList
+                onChange={(_, v) => setTab(v)}
+                aria-label="공동 플레이리스트 제작 Filter Tab"
+                sx={{
+                  "& .MuiTab-root": { color: "#ffffff", fontWeight: 600, fontSize: 16 },
+                  "& .Mui-selected": { color: "#ffffff" },
+                  "& .MuiTabs-indicator": { backgroundColor: "#ffffff" },
+                }}
+              >
+                <Tab label="전체" value="1" />
+                <Tab label="인기순" value="2" />
+                <Tab label="최신순" value="3" />
+              </TabList>
+            </Box>
+            <TabPanel value="1">
+              <CollaborationPlaylistTopicItem playlists={allPlaylists} />
+            </TabPanel>
+            <TabPanel value="2">
+              <CollaborationPlaylistTopicItem playlists={popularPlaylists} />
+            </TabPanel>
+            <TabPanel value="3">
+              <CollaborationPlaylistTopicItem playlists={recentPlaylists} />
+            </TabPanel>
+          </TabContext>
+        </Box>
+      )}
+
+      {/* 모달 */}
+      {isModalOpen && (
+        <CollaboPlaylistCreateModal
+          onClose={() => setIsModalOpen(false)}
+          onCreated={() => {
+            setIsModalOpen(false);
+            fetchPlaylists();
+          }}
+        />
+      )}
     </div>
   );
 }

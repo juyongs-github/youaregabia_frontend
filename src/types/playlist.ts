@@ -6,6 +6,12 @@ export interface Playlist {
     songCount:number;
 }
 
+export interface CollaboPlaylist extends Playlist {
+    creatorEmail?: string;
+    participantCount?: number;
+    createdAt?: string; // ISO 8601 형식 (e.g. "2025-03-10T12:34:56")
+}
+
 // 생성
 export interface PlaylistCreate {
     title:string;
