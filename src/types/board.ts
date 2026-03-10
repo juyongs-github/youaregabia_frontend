@@ -3,17 +3,24 @@ export interface Reply {
   content: string;
   writer: string;
   likeCount: number;
-  likedByMe: boolean; 
+  likedByMe: boolean;
   createdAt: string;
+  deleted: boolean;
+  writerEmail: string;
+  children: Reply[];
 }
 
 export interface Board {
   boardId: number;
   title: string;
   content: string;
+  boardType: string;
+  boardGenre: string;
   writer: string;
   createdAt: string;
   replies?: PageResult<Reply>;
+  viewCount: number;
+  writerEmail: string;
 }
 
 export interface PageResult<T> {

@@ -5,7 +5,7 @@ import type { Board, PageResult } from "../../types/board";
 import { Link, useNavigate } from "react-router-dom";
 import Pagination from "../../components/ui/Pagination";
 
-const BoardListPage = () => {
+const FreeBoardListPage = () => {
   // 페이징 관리
   const [pageData, setPageData] = useState<PageResult<Board> | null>(null);
   // 검색기능
@@ -17,9 +17,16 @@ const BoardListPage = () => {
   // 페이지 데이터 불러오기
   const loadPage = async (page: number, search?: string, currentGenre?: string) => {
     try {
-      const params: { page: number; size: number; keyword?: string; genre?: string } = {
+      const params: {
+        page: number;
+        size: number;
+        boardType?: "FREE";
+        keyword?: string;
+        genre?: string;
+      } = {
         page,
         size: 10,
+        boardType: "FREE" as const,
       };
       if (search) {
         params.keyword = search;
@@ -77,31 +84,15 @@ const BoardListPage = () => {
       {/* 상단 헤더 */}
       <div className="mt-8 mb-6 flex items-end justify-between border-b border-neutral-700 pb-5">
         <div>
-          <h2 className="text-3xl font-bold text-white">플레이리스트 공유</h2>
-          <p className="mt-2 text-sm text-gray-400">다양한 장르의 음악을 함께 나눠보세요.</p>
+          <h2 className="text-3xl font-bold text-white">자유게시판</h2>
+          <p className="mt-2 text-sm text-gray-400">주제에 상관없이 편한 시간을 보내세요.</p>
         </div>
         <div className="flex items-center gap-3">
-          {/* 장르 선택창 (Select) */}
-          <div className="relative">
-            <select
-              value={genre || ""}
-              onChange={(e) => setGenre(e.target.value === "" ? undefined : e.target.value)}
-              className="h-[42px] appearance-none rounded-md border border-neutral-700 bg-neutral-900 px-4 py-2 pr-10 text-sm text-gray-300 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            >
-              <option value="">모든 장르</option>
-              <option value="KPOP">KPOP</option>
-              <option value="JPOP">JPOP</option>
-              <option value="POP">POP</option>
-              <option value="HIPHOP">HIPHOP</option>
-              <option value="ROCK">ROCK</option>
-            </select>
-          </div>
-
           {/* 글쓰기 버튼 */}
           <button
             // h-[42px]로 셀렉트박스와 높이를 맞췄습니다.
             className="h-[42px] flex items-center justify-center rounded-md bg-indigo-600 px-5 text-sm font-semibold text-white transition-all hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95"
-            onClick={() => navigate("/community/share/new")}
+            onClick={() => navigate("/community/free/new")}
           >
             새 글 쓰기
           </button>
@@ -115,7 +106,7 @@ const BoardListPage = () => {
             <li key={board.boardId}>
               <button
                 className="block w-full px-4 py-3 text-left hover:bg-neutral-800"
-                onClick={() => navigate(`/community/share/${board.boardId}`)}
+                onClick={() => navigate(`/community/free/${board.boardId}`)}
               >
                 <div className="flex items-center justify-between">
                   {/* 왼쪽: 제목 */}
@@ -196,4 +187,4 @@ const BoardListPage = () => {
   );
 };
 
-export default BoardListPage;
+export default FreeBoardListPage;
