@@ -8,10 +8,11 @@ import type { Song } from "../ui/SongListItem";
 interface MusicPlayerProps {
   song: Song;
   setIsPlayerVisible: () => void;
+  onSongEnd?: () => void; // * 수정한 부분 *
 }
 
 // 음악 재생 바 UI
-function MusicPlayer({ song, setIsPlayerVisible }: MusicPlayerProps) {
+function MusicPlayer({ song, setIsPlayerVisible, onSongEnd }: MusicPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false); // 재생 중 여부
   const [progress, setProgress] = useState<number>(0); // 곡 재생 진행바(%)
@@ -33,6 +34,7 @@ function MusicPlayer({ song, setIsPlayerVisible }: MusicPlayerProps) {
       return;
     }
     audioRef.current.pause();
+    audioRef.current.currentTime = 0; // * 수정된 부분 *
     audioRef.current.load();
     audioRef.current.play();
   }, [song.previewUrl]);
@@ -61,6 +63,10 @@ function MusicPlayer({ song, setIsPlayerVisible }: MusicPlayerProps) {
             return;
           }
           setDuration(audioRef.current.duration);
+        }}
+        // * 수정된 부분 *
+        onEnded={() => {
+          onSongEnd?.();
         }}
       />
 

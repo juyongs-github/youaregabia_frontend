@@ -2,7 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  margin: 0;
+  height: 100%;
+  overflow: hidden; /* 페이지 전체 스크롤 제거 */
+}
+
 body {
   background-color: #0f0f0f;
   color: white;
+
+  margin: 0;
+  height: 100%;
+  overflow: hidden; /* 페이지 전체 스크롤 제거 */
 }

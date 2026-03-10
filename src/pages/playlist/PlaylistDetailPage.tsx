@@ -6,10 +6,18 @@ import "../../styles/MyplaylistPage.css";
 import { FaPlay, FaTrash } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
 import { useSelector } from "react-redux";
+import type { Song } from "../../components/ui/SongListItem";
+import MusicPlayer from "../../components/layout/MusicPlayer";
 
 function PlaylistDetailPage() {
   const navigate = useNavigate();
   const { playlistId } = useParams<string>();
+
+  // 미리듣기
+  const [selectSong, setSelectSong] = useState<Song | null>(null);
+  const [isPlayerVisible, setIsPlayerVisible] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
+  const [allMode, setAllMode] = useState(false);
 
   // 유저
   const user = useSelector((state: any) => state.auth.user);
@@ -130,6 +138,16 @@ function PlaylistDetailPage() {
     fetchData();
   }, [playlistId, user.email]);
 
+  // 수정모드 켜질 시 플레이어 종료
+  useEffect(() => {
+    if (isEditMode) {
+      setIsPlayerVisible(false);
+      setSelectSong(null);
+      setCurrentIndex(null);
+      setAllMode(false);
+    }
+  }, [isEditMode]);
+
   return (
     <div className="playlist-detail-page">
       {/* ================= 왼쪽 패널 ================= */}
@@ -163,7 +181,17 @@ function PlaylistDetailPage() {
             {/* ===== 액션 ===== */}
             {!isEditMode && (
               <div className="playlist-actions">
-                <button className="primary-play large">
+                <button
+                  className="primary-play large"
+                  onClick={() => {
+                    if (!songs.length) return;
+
+                    setAllMode(true);
+                    setCurrentIndex(0);
+                    setSelectSong(songs[0]);
+                    setIsPlayerVisible(true);
+                  }}
+                >
                   <FaPlay />
                 </button>
 
@@ -259,7 +287,20 @@ function PlaylistDetailPage() {
       <section className="playlist-right">
         <ul className="track-list">
           {songs.map((song) => (
-            <li key={song.playlistSongId} className="track-item">
+            <li
+              key={song.playlistSongId}
+              className={`track-item ${!isEditMode && selectSong?.id === song.id ? "playing" : ""}`}
+              onClick={() => {
+                if (isEditMode) return;
+
+                const index = songs.findIndex((s) => s.playlistSongId === song.playlistSongId);
+
+                setAllMode(false);
+                setCurrentIndex(null);
+                setSelectSong(song);
+                setIsPlayerVisible(true);
+              }}
+            >
               <img className="track-thumb" src={song.imgUrl} alt="" />
 
               <div className="track-info">
@@ -267,22 +308,59 @@ function PlaylistDetailPage() {
                 <span className="track-artist">{song.artistName}</span>
               </div>
 
-              <span className="track-duration">
-                {Math.floor(song.durationMs / 60000)}:
-                {String(Math.floor((song.durationMs % 60000) / 1000)).padStart(2, "0")}
-              </span>
+              {!isEditMode && (
+                <span className="track-duration">
+                  {Math.floor(song.durationMs / 60000)}:
+                  {String(Math.floor((song.durationMs % 60000) / 1000)).padStart(2, "0")}
+                </span>
+              )}
 
-              <button
-                className="track-delete"
-                onClick={() => handleRemoveSong(song.playlistSongId)}
-                title="곡 삭제"
-              >
-                <FaTrash />
-              </button>
+              {isEditMode && (
+                <button
+                  className="track-delete"
+                  title="곡 삭제"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveSong(song.playlistSongId);
+                  }}
+                >
+                  <FaTrash />
+                </button>
+              )}
             </li>
           ))}
         </ul>
       </section>
+      {isPlayerVisible && selectSong && (
+        <div className="fixed bottom-0 left-0 z-50 w-full">
+          <MusicPlayer
+            song={selectSong}
+            setIsPlayerVisible={() => setIsPlayerVisible(false)}
+            onSongEnd={() => {
+              // 단일곡 재생이면 플레이어 종료
+              if (!allMode) {
+                setIsPlayerVisible(false);
+                setSelectSong(null);
+                return;
+              }
+
+              // 플레이리스트 재생
+              if (currentIndex === null) return;
+
+              const nextIndex = currentIndex + 1;
+
+              if (nextIndex < songs.length) {
+                setCurrentIndex(nextIndex);
+                setSelectSong(songs[nextIndex]);
+              } else {
+                // 마지막 곡이면 플레이어 종료
+                setIsPlayerVisible(false);
+                setSelectSong(null);
+              }
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

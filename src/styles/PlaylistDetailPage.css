@@ -3,9 +3,13 @@
 ========================= */
 .playlist-detail-page {
   display: flex;
-  height: 100vh;
+  height: 100%; /* header 높이 */
+  margin-top: 80px;
+
   background: black;
   color: white;
+
+  overflow: hidden;
 }
 
 /* =========================
@@ -13,17 +17,21 @@
 ========================= */
 .playlist-left {
   position: fixed;
+
   top: 160px;
   left: 420px;
 
   width: 340px;
-  height: 100vh;
+  height: calc(100vh - 160px);
+
   padding: 24px;
+  padding-bottom: 150px;
+  box-sizing: border-box;
 
   display: flex;
   justify-content: center;
+
   background: black;
-  z-index: 10;
 }
 
 .playlist-center {
@@ -43,9 +51,12 @@
   border-color: rgba(255, 77, 79, 0.35);
   max-height: 650px;
 }
+.playlist-center.editing .track-item {
+  cursor: default;
+}
 
 /* =========================
-   커버 이미지 + 액션
+   커버 이미지
 ========================= */
 
 .playlist-cover-large {
@@ -80,13 +91,14 @@
   pointer-events: none;
 }
 
-/* hover 시 표시 */
 .playlist-center.editing .playlist-cover-large:hover::after {
   opacity: 1;
 }
 
-/* 이미지 살짝 확대 */
 .playlist-cover-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: transform 0.25s ease;
 }
 
@@ -101,20 +113,16 @@
   cursor: pointer;
 }
 
-.playlist-cover-large img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+/* =========================
+   액션 버튼
+========================= */
 
-/* 액션 묶음 */
 .playlist-actions {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-/* 재생 버튼 */
 .primary-play.large {
   position: absolute;
   top: 50%;
@@ -142,13 +150,15 @@
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
 }
 
-/* hover 시 등장 */
 .playlist-cover-large:hover .primary-play.large {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
 }
 
-/* dots */
+/* =========================
+   더보기 버튼
+========================= */
+
 .more-wrapper {
   position: absolute;
   top: 10px;
@@ -177,7 +187,6 @@
   background: rgba(0, 0, 0, 0.65);
 }
 
-/* 드롭다운 */
 .playlist-menu {
   position: absolute;
   top: 110%;
@@ -216,6 +225,7 @@
 /* =========================
    제목
 ========================= */
+
 .playlist-title-large,
 .playlist-title-edit {
   height: 48px;
@@ -239,8 +249,9 @@
 }
 
 /* =========================
-   메타 바
+   메타
 ========================= */
+
 .playlist-meta-bar {
   display: flex;
   align-items: center;
@@ -264,6 +275,7 @@
 /* =========================
    설명
 ========================= */
+
 .playlist-description-box {
   margin-top: 14px;
   width: 320px;
@@ -303,59 +315,115 @@
 }
 
 /* =========================
-   편집 액션
+   수정 버튼 영역
 ========================= */
+
 .edit-actions {
   display: flex;
-  gap: 18px;
-  margin-top: 10px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
+/* 저장 */
+
 .btn-save {
-  padding: 10px 28px;
-  border-radius: 999px;
+  padding: 8px 16px;
+
   background: #ff4d4f;
-  color: #000;
-  font-weight: 700;
   border: none;
+  border-radius: 8px;
+
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+
   cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    transform 0.1s ease;
 }
 
 .btn-save:hover {
-  transform: scale(1.05);
+  background: #ff2f31;
 }
 
+.btn-save:active {
+  transform: scale(0.96);
+}
+
+/* 취소 */
+
 .btn-cancel {
+  padding: 8px 16px;
+
   background: transparent;
-  border: none;
-  color: #aaa;
-  font-size: 14px;
+  border: 1px solid #444;
+  border-radius: 8px;
+
+  color: #ccc;
+  font-size: 13px;
+
   cursor: pointer;
+
+  transition: all 0.15s ease;
 }
 
 .btn-cancel:hover {
-  color: #fff;
-  text-decoration: underline;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #666;
+  color: white;
+}
+
+.btn-cancel:active {
+  transform: scale(0.96);
 }
 
 /* =========================
    오른쪽 트랙 리스트
 ========================= */
+
 .playlist-right {
-  margin-left: 340px; /* 왼쪽 패널만큼 밀기 */
-  flex: 1;
+  position: fixed;
+
+  top: 160px;
+  left: 780px; /* sidebar 420 + left 340 */
+
+  right: 60px;
+
+  height: calc(100vh - 160px);
+
   padding: 24px 32px;
-  height: 100vh;
-  overflow-y: auto;
+  padding-bottom: 150px;
+  box-sizing: border-box;
+
+  overflow: hidden;
 }
+
+/* ===== 곡 리스트 스크롤 ===== */
 
 .track-list {
   list-style: none;
   padding: 0;
+
   margin: 0;
+
+  height: 100%;
+  overflow-y: auto;
+}
+.track-list::-webkit-scrollbar {
+  width: 6px;
 }
 
-/* 트랙 아이템 */
+.track-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+.track-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 .track-item {
   display: flex;
   align-items: center;
@@ -370,7 +438,15 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
-/* 썸네일 */
+.track-item.playing {
+  background: rgba(255, 0, 0, 0.08);
+}
+
+.track-item.playing .track-title {
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
 .track-thumb {
   width: 42px;
   height: 42px;
@@ -378,15 +454,20 @@
   object-fit: cover;
 }
 
-/* 트랙 정보 */
 .track-info {
   display: flex;
   flex-direction: column;
   flex: 1;
+
+  min-width: 0;
 }
 
 .track-title {
   font-size: 14px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .track-artist {
@@ -394,10 +475,11 @@
   color: #aaa;
 }
 
-/* 재생 시간 */
 .track-duration {
   font-size: 12px;
   color: #aaa;
+
+  margin-right: 12px;
 }
 
 .track-delete {
@@ -406,6 +488,13 @@
   color: #888;
   font-size: 12px;
   cursor: pointer;
+
+  opacity: 1;
+  pointer-events: auto;
+
+  transition: color 0.2s ease;
+
+  margin-right: 12px;
 }
 
 .track-delete:hover {
