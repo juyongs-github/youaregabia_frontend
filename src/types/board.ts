@@ -3,8 +3,10 @@ export interface Reply {
   content: string;
   writer: string;
   likeCount: number;
-  likedByMe: boolean; 
+  likedByMe: boolean;
   createdAt: string;
+  deleted: boolean;
+  children: Reply[];
 }
 
 export interface Board {
@@ -16,6 +18,7 @@ export interface Board {
   writer: string;
   createdAt: string;
   replies?: PageResult<Reply>;
+  viewCount: number;
 }
 
 export interface PageResult<T> {

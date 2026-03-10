@@ -1,22 +1,24 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { boardApi } from '../../api/boardApi';
-import { useSelector } from 'react-redux';
-import type { RootState } from '../../store';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { boardApi } from "../../api/boardApi";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store";
 
 const BoardWrite = () => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const navigate = useNavigate();
   const [boardGenre, setBoardGenre] = useState("HIPHOP");
-const [boardType] = useState("PLAYLIST_SHARE");
+  const [boardType] = useState("PLAYLIST_SHARE");
   // 이메일 가져오
   const userEmail = useSelector((state: RootState) => state.auth.user?.email);
 
   const submit = async () => {
     if (!userEmail) return;
-    const boardId = await boardApi.createBoard({ title, content,boardType,
-      boardGenre, }, userEmail);
+    const boardId = await boardApi.createBoard(
+      { title, content, boardType, boardGenre },
+      userEmail
+    );
     navigate(`/community/share/${boardId}`);
   };
 
@@ -37,9 +39,9 @@ const [boardType] = useState("PLAYLIST_SHARE");
       >
         <option value="HIPHOP">HIPHOP</option>
         <option value="POP">POP</option>
-        <option value="ROCK">KPOP</option>
-        <option value="BALLAD">JPOP</option>
-        <option value="JAZZ">ROCK</option>
+        <option value="KPOP">KPOP</option>
+        <option value="JPOP">JPOP</option>
+        <option value="ROCK">ROCK</option>
       </select>
       <textarea
         className="mb-4 w-full min-h-[400px] resize-y rounded border px-4 py-3 leading-normal"
@@ -49,10 +51,7 @@ const [boardType] = useState("PLAYLIST_SHARE");
         onChange={(e) => setContent(e.target.value)}
       />
 
-      <button
-        className="rounded bg-indigo-600 px-4 py-2 text-white"
-        onClick={submit}
-      >
+      <button className="rounded bg-indigo-600 px-4 py-2 text-white" onClick={submit}>
         등록
       </button>
     </div>

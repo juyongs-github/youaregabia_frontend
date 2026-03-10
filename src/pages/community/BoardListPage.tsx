@@ -1,137 +1,111 @@
 // pages/BoardListPage.tsx
-import { useEffect, useState } from 'react';
-import { boardApi } from '../../api/boardApi';
-import type { Board, PageResult } from '../../types/board';
-import { Link, useNavigate } from 'react-router-dom';
-import Pagination from '../../components/ui/Pagination';
-
-
+import { useEffect, useState } from "react";
+import { boardApi } from "../../api/boardApi";
+import type { Board, PageResult } from "../../types/board";
+import { Link, useNavigate } from "react-router-dom";
+import Pagination from "../../components/ui/Pagination";
 
 const BoardListPage = () => {
   // 페이징 관리
   const [pageData, setPageData] = useState<PageResult<Board> | null>(null);
   // 검색기능
-  const [keyword, setKeyword] = useState('');
-  const [searchKeyword, setSearchKeyword] = useState('');
+  const [keyword, setKeyword] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
   const navigate = useNavigate();
   const [genre, setGenre] = useState<string | undefined>(undefined);
 
   // 페이지 데이터 불러오기
-  const loadPage = async (page: number, search?:string, currentGenre?: string) => {
+  const loadPage = async (page: number, search?: string, currentGenre?: string) => {
     try {
-      const params: {page: number; size:number ; keyword?: string; genre?: string} = {
-        page, size: 10,
-      }
+      const params: { page: number; size: number; keyword?: string; genre?: string } = {
+        page,
+        size: 10,
+      };
       if (search) {
         params.keyword = search;
       }
       if (currentGenre) {
-        params.genre = currentGenre;  // 클로저 대신 파라미터 사용
+        params.genre = currentGenre; // 클로저 대신 파라미터 사용
       }
       const data = await boardApi.getBoards(params);
-      console.log(' 백엔드 응답:', data)
-      console.log(' dtoList:', data.dtoList);
+      console.log(" 백엔드 응답:", data);
+      console.log(" dtoList:", data.dtoList);
       setPageData(data);
     } catch (error) {
-      console.error('게시글 로드 실패:', error);
+      console.error("게시글 로드 실패:", error);
     }
   };
 
   //  처음 로드
   useEffect(() => {
-    loadPage(1, searchKeyword, genre);  // genre를 파라미터로 전달
+    loadPage(1, searchKeyword, genre); // genre를 파라미터로 전달
   }, [genre]);
 
   //  페이지 변경
   const handlePageChange = (page: number) => {
-    loadPage(page,searchKeyword, genre);  // genre를 파라미터로 전달  
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    loadPage(page, searchKeyword, genre); // genre를 파라미터로 전달
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // 검색
-  const handleSearch = ()=> {
+  const handleSearch = () => {
     setSearchKeyword(keyword);
-    loadPage(1,keyword, genre);
+    loadPage(1, keyword, genre);
   };
 
   // 엔터키 검색
   const handleEnter = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSearch();
-    };
+    }
   };
 
   // 검색 후 초기화
   const handleKeyReset = () => {
-    setKeyword('');
-    setSearchKeyword('');
+    setKeyword("");
+    setSearchKeyword("");
     loadPage(1, undefined, genre);
   };
 
   //  로딩 중
   if (!pageData) {
     return <div className="p-4 text-center">로딩 중...</div>;
-  };
+  }
 
   return (
     <div className="mx-auto max-w-4xl p-4">
-      <div className="mt-6 flex items-center justify-between border-b pb-4">
-      <h2 className="mb-4 text-2xl font-bold">플레이리스트 공유</h2>
-            {/* 글쓰기 버튼 */}
-        <button
-          className="rounded bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-500"
-          onClick={() => navigate('/community/share/new')}
-        >
-          글쓰기
-        </button>
-        {/* 장르 필터 */}
-    <div className="mt-4 mb-4 flex gap-2 flex-wrap">
+      {/* 상단 헤더 */}
+      <div className="mt-8 mb-6 flex items-end justify-between border-b border-neutral-700 pb-5">
+        <div>
+          <h2 className="text-3xl font-bold text-white">플레이리스트 공유</h2>
+          <p className="mt-2 text-sm text-gray-400">다양한 장르의 음악을 함께 나눠보세요.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          {/* 장르 선택창 (Select) */}
+          <div className="relative">
+            <select
+              value={genre || ""}
+              onChange={(e) => setGenre(e.target.value === "" ? undefined : e.target.value)}
+              className="h-[42px] appearance-none rounded-md border border-neutral-700 bg-neutral-900 px-4 py-2 pr-10 text-sm text-gray-300 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            >
+              <option value="">모든 장르</option>
+              <option value="KPOP">KPOP</option>
+              <option value="JPOP">JPOP</option>
+              <option value="POP">POP</option>
+              <option value="HIPHOP">HIPHOP</option>
+              <option value="ROCK">ROCK</option>
+            </select>
+          </div>
 
-    <button
-      onClick={() => setGenre(undefined)}
-      className={`px-3 py-1 rounded ${
-        genre === undefined
-          ? 'bg-indigo-600 text-white'
-          : 'bg-neutral-800 text-gray-300'
-      }`}
-    >
-      전체
-    </button>
-
-    <button
-      onClick={() => setGenre("JPOP")}
-      className={`px-3 py-1 rounded ${
-        genre === "JPOP"
-          ? 'bg-indigo-600 text-white'
-          : 'bg-neutral-800 text-gray-300'
-      }`}
-    >
-      JPOP
-    </button>
-
-    <button
-      onClick={() => setGenre("POP")}
-      className={`px-3 py-1 rounded ${
-        genre === "POP"
-          ? 'bg-indigo-600 text-white'
-          : 'bg-neutral-800 text-gray-300'
-      }`}
-    >
-      POP
-    </button>
-
-    <button
-      onClick={() => setGenre("KPOP")}
-      className={`px-3 py-1 rounded ${
-        genre === "KPOP"
-          ? 'bg-indigo-600 text-white'
-          : 'bg-neutral-800 text-gray-300'
-      }`}
-    >
-      KPOP
-    </button>
-
-    </div>
+          {/* 글쓰기 버튼 */}
+          <button
+            // h-[42px]로 셀렉트박스와 높이를 맞췄습니다.
+            className="h-[42px] flex items-center justify-center rounded-md bg-indigo-600 px-5 text-sm font-semibold text-white transition-all hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95"
+            onClick={() => navigate("/community/share/new")}
+          >
+            새 글 쓰기
+          </button>
+        </div>
       </div>
 
       {/* 게시글 목록, 삼항연산자 사용 */}
@@ -144,55 +118,61 @@ const BoardListPage = () => {
                 onClick={() => navigate(`/community/share/${board.boardId}`)}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-indigo-400">  [{board.boardGenre}]{board.title}</span>
-                  <span className="text-sm text-gray-500">
-                    {board.writer}
+                  {/* 왼쪽: 제목 */}
+                  <span className="text-indigo-400 font-medium truncate mr-4">
+                    [{board.boardGenre}] {board.title}
                   </span>
+
+                  {/* 오른쪽: 작성자와 조회수를 하나로 묶음 */}
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-sm text-gray-400">{board.writer}</span>
+                    <span className="text-xs text-gray-500 border-l border-neutral-700 pl-3">
+                      조회 {board.viewCount}
+                    </span>
+                  </div>
                 </div>
                 <div className="mt-1 text-xs text-gray-500">
-                  {new Date(board.createdAt).toLocaleDateString('ko-KR')}
+                  {new Date(board.createdAt).toLocaleDateString("ko-KR")}
                 </div>
               </button>
             </li>
           ))
         ) : (
-          <li className="px-4 py-8 text-center text-gray-500">
-            게시글이 없습니다
-          </li>
+          <li className="px-4 py-8 text-center text-gray-500">게시글이 없습니다</li>
         )}
       </ul>
 
-        {/* 검색바 */}
-        <div className="mb-4 flex gap-2">
+      {/* 검색바 */}
+      <div className="mb-4 flex gap-2">
         <input
-            type="text"
-            placeholder="제목으로 검색..."
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onKeyDown={handleEnter}
-            className="flex-1 rounded border border-neutral-700 bg-neutral-900 px-4 py-2 text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
-          />
-          <button
-            onClick={handleSearch}
-            className="rounded bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-500"
-          >
-            검색
-          </button>
-          {searchKeyword && (
-            <button
-              onClick={handleKeyReset}
-              className="rounded border border-neutral-700 px-4 py-2 text-gray-400 hover:bg-neutral-800"
-            >
-              전체글
-            </button>
-          )}
-        </div>
-          {/* 검색 결과 표시 */}
+          type="text"
+          placeholder="제목으로 검색..."
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          onKeyDown={handleEnter}
+          className="flex-1 rounded border border-neutral-700 bg-neutral-900 px-4 py-2 text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+        />
+        <button
+          onClick={handleSearch}
+          className="rounded bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-500"
+        >
+          검색
+        </button>
         {searchKeyword && (
-          <div className="mb-2 text-sm text-gray-400">
-            '{searchKeyword}' 검색 결과: {pageData.totalCount}개
-          </div>
+          <button
+            onClick={handleKeyReset}
+            className="rounded border border-neutral-700 px-4 py-2 text-gray-400 hover:bg-neutral-800"
+          >
+            전체글
+          </button>
         )}
+      </div>
+      {/* 검색 결과 표시 */}
+      {searchKeyword && (
+        <div className="mb-2 text-sm text-gray-400">
+          '{searchKeyword}' 검색 결과: {pageData.totalCount}개
+        </div>
+      )}
       {/* 페이지네이션 */}
       {pageData.pageNumList.length > 0 && (
         <div className="mt-6">
@@ -215,6 +195,5 @@ const BoardListPage = () => {
     </div>
   );
 };
-
 
 export default BoardListPage;

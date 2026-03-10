@@ -1,18 +1,17 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { boardApi } from '../../api/boardApi';
-import { useSelector } from 'react-redux';
-import type { RootState } from '../../store';
-
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { boardApi } from "../../api/boardApi";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store";
 
 const BoardUpdate = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const navigate = useNavigate();
   const userEmail = useSelector((state: RootState) => state.auth.user?.email);
 
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [genre, setGenre] = useState('');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [genre, setGenre] = useState("");
 
   // 1️⃣ 기존 게시글 불러오기
   useEffect(() => {
@@ -20,7 +19,7 @@ const BoardUpdate = () => {
 
     boardApi.getBoardDetail(Number(boardId), userEmail).then((board) => {
       setTitle(board.title);
-      setContent(board.content ?? '');
+      setContent(board.content ?? "");
       setGenre(board.boardGenre);
     });
   }, [boardId]);
@@ -29,11 +28,15 @@ const BoardUpdate = () => {
   const update = async () => {
     if (!boardId || !userEmail) return;
 
-    await boardApi.updateBoard(Number(boardId), {
-      title,
-      content,
-      boardGenre: genre,
-    }, userEmail);
+    await boardApi.updateBoard(
+      Number(boardId),
+      {
+        title,
+        content,
+        boardGenre: genre,
+      },
+      userEmail
+    );
 
     navigate(`/community/share/${boardId}`);
   };
@@ -42,10 +45,10 @@ const BoardUpdate = () => {
   const remove = async () => {
     if (!boardId || !userEmail) return;
 
-    if (!confirm('정말 삭제할까요?')) return;
+    if (!confirm("정말 삭제할까요?")) return;
 
     await boardApi.deleteBoard(Number(boardId), userEmail);
-    navigate('/community/share');
+    navigate("/community/share");
   };
 
   return (
@@ -75,12 +78,15 @@ const BoardUpdate = () => {
       />
 
       <div className="flex gap-2">
-        <button onClick={update}
-        className="rounded bg-neutral-600 px-2  text-white hover:bg-neutral-500"
-        >수정</button>
-        <button onClick={remove}
-        className="rounded bg-red-600 px-2  text-white hover:bg-red-500"
-        >삭제</button>
+        <button
+          onClick={update}
+          className="rounded bg-neutral-600 px-2  text-white hover:bg-neutral-500"
+        >
+          수정
+        </button>
+        <button onClick={remove} className="rounded bg-red-600 px-2  text-white hover:bg-red-500">
+          삭제
+        </button>
       </div>
     </div>
   );
