@@ -1,9 +1,10 @@
 export interface Playlist {
-    id:number;
-    title:string;
-    description?: string;
-    imageUrl: string;
-    songCount:number;
+  id: number;
+  title: string;
+  description?: string;
+  imageUrl: string;
+  songCount: number;
+  userName: string;
 }
 
 export interface CollaboPlaylist extends Playlist {
@@ -14,15 +15,10 @@ export interface CollaboPlaylist extends Playlist {
 
 // 생성
 export interface PlaylistCreate {
-    title:string;
-    description?: string;
-    imageUrl?: string;
+  title: string;
+  description?: string;
+  imageUrl?: string;
 }
 
 // 수정
-export interface PlaylistUpdate {
-    
-
-
-}
-
+export interface PlaylistUpdate {}

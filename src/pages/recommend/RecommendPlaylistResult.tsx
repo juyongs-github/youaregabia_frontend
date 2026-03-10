@@ -29,6 +29,9 @@ function RecommendPlaylistResult() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
 
+  // 수정한 것 --
+  const email = useSelector((state: any) => state.auth.user?.email);
+
   // 곡 정보 UI에서 선택한 곡(미리듣기, 유사 곡 추천)
   const [selectSong, setSelectSong] = useState<Song | null>(null);
 

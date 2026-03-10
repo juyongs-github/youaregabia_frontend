@@ -5,12 +5,15 @@ import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
 import { playlistApi } from "../../api/playlistApi";
 import type { Playlist } from "../../types/playlist";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 function HomePage() {
   const [data, setData] = useState<Playlist[]>([]);
   const baseURL: string = "http://localhost:8080";
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
+
+  const email = useSelector((state: any) => state.auth.user.email);
 
   const navigate = useNavigate();
 
@@ -19,7 +22,7 @@ function HomePage() {
     setIsError(false);
 
     try {
-      const res = await playlistApi.getAllPlaylist();
+      const res = await playlistApi.getAllPlaylist(email);
       setData(res.data || []);
     } catch (error) {
       console.error(error);
@@ -99,7 +102,11 @@ function HomePage() {
 
       {/* ===== 모달 ===== */}
       {isModalOpen && (
-        <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
+        <PlaylistCreateModal
+          onClose={() => setIsModalOpen(false)}
+          onCreated={fetchData}
+          email={email}
+        />
       )}
     </div>
   );

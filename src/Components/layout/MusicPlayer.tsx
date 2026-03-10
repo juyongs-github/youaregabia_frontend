@@ -12,10 +12,12 @@ interface MusicPlayerProps {
   songs?: Song[];
   songIndex?: number;
   onSongChange?: (index: number) => void;
+  // 단일 곡 또는 마지막 곡 종료 시 콜백
+  onSongEnd?: () => void;
 }
 
 // 음악 재생 바 UI
-function MusicPlayer({ song, setIsPlayerVisible, songs, songIndex, onSongChange }: MusicPlayerProps) {
+function MusicPlayer({ song, setIsPlayerVisible, songs, songIndex, onSongChange, onSongEnd }: MusicPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false); // 재생 중 여부
   const [progress, setProgress] = useState<number>(0); // 곡 재생 진행바(%)
@@ -47,6 +49,7 @@ function MusicPlayer({ song, setIsPlayerVisible, songs, songIndex, onSongChange 
       return;
     }
     audioRef.current.pause();
+    audioRef.current.currentTime = 0; // * 수정된 부분 *
     audioRef.current.load();
     audioRef.current.play();
   }, [song.previewUrl]);
@@ -79,6 +82,8 @@ function MusicPlayer({ song, setIsPlayerVisible, songs, songIndex, onSongChange 
         onEnded={() => {
           if (hasNext) {
             onSongChange!(songIndex! + 1);
+          } else {
+            onSongEnd?.();
           }
         }}
       />
