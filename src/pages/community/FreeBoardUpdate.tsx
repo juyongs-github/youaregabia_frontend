@@ -4,7 +4,7 @@ import { boardApi } from "../../api/boardApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 
-const BoardUpdate = () => {
+const FreeBoardUpdate = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const navigate = useNavigate();
   const userEmail = useSelector((state: RootState) => state.auth.user?.email);
@@ -34,7 +34,7 @@ const BoardUpdate = () => {
       boardGenre: genre,
     });
 
-    navigate(`/community/share/${boardId}`);
+    navigate(`/community/free/${boardId}`);
   };
 
   // 3️⃣ 삭제
@@ -44,7 +44,7 @@ const BoardUpdate = () => {
     if (!confirm("정말 삭제할까요?")) return;
 
     await boardApi.deleteBoard(Number(boardId));
-    navigate("/community/share");
+    navigate("/community/free");
   };
 
   return (
@@ -88,4 +88,4 @@ const BoardUpdate = () => {
   );
 };
 
-export default BoardUpdate;
+export default FreeBoardUpdate;

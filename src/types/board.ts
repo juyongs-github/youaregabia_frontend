@@ -6,6 +6,7 @@ export interface Reply {
   likedByMe: boolean;
   createdAt: string;
   deleted: boolean;
+  writerEmail: string;
   children: Reply[];
 }
 
@@ -19,6 +20,7 @@ export interface Board {
   createdAt: string;
   replies?: PageResult<Reply>;
   viewCount: number;
+  writerEmail: string;
 }
 
 export interface PageResult<T> {

@@ -4,7 +4,7 @@ import api from "./axios";
 
 export const boardApi = {
   // 전체 조회
-  getBoards: (params: PageRequest & { keyword?: string; genre?: string }) =>
+  getBoards: (params: PageRequest & { keyword?: string; genre?: string; boardType?: string }) =>
     api.get<PageResult<Board>>("/community/share", { params }).then((res) => res.data),
 
   // 상세 조회

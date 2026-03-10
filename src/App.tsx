@@ -24,6 +24,10 @@ import MyPage from "./pages/auth/MyPage";
 import OAuth2CallbackPage from "./pages/auth/OAuth2CallbackPage";
 import SocialRegisterPage from "./pages/auth/SocialRegisterPage";
 import FindAccountPage from "./pages/auth/FindAccountPage";
+import FreeBoardListPage from "./pages/community/FreeBoardListPage";
+import FreeBoardCreatePage from "./pages/community/FreeBoardCreatePage";
+import FreeBoardDetailPage from "./pages/community/FreeBoardDetailPage";
+import FreeBoardUpdate from "./pages/community/FreeBoardUpdate";
 
 function App() {
   // 2. Redux Store에서 로그인 여부 가져오기
@@ -44,6 +48,10 @@ function App() {
         <Route path="/community/share/:boardId/update" element={<BoardUpdate />} />
         <Route path="/community/collabo" element={<CollaboPlaylistPage />} />
         <Route path="/community/collabo/detail/:id" element={<CollaboPlaylistDetailPage />} />
+        <Route path="/community/free" element={<FreeBoardListPage />} />
+        <Route path="/community/free/:boardId" element={<FreeBoardDetailPage />} />
+        <Route path="/community/free/new" element={<FreeBoardCreatePage />} />
+        <Route path="/community/free/:boardId/update" element={<FreeBoardUpdate />} />
         <Route path="/profile/me" element={<MyPage />} />
       </Route>
       {/* 아닌 것들은 여기 밑으로 Route 추가 */}

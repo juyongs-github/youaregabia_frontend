@@ -130,6 +130,13 @@ function Sidebar() {
                 <FaMinus size={12} />
                 <span>공동 플레이리스트 제작</span>
               </button>
+              <button
+                className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
+                onClick={() => goPage("/community/free")}
+              >
+                <FaMinus size={12} />
+                <span>자유게시판</span>
+              </button>
             </div>
           )}
         </div>
