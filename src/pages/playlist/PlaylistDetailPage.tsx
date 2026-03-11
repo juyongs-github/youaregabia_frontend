@@ -3,21 +3,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import type { Playlist } from "../../types/playlist";
 import { playlistApi } from "../../api/playlistApi";
 import "../../styles/MyplaylistPage.css";
-import { FaPlay, FaTrash } from "react-icons/fa";
+import { FaPlay, FaPlus, FaTrash } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import type { Song } from "../../components/ui/SongListItem";
 import MusicPlayer from "../../components/layout/MusicPlayer";
+import AddSongsModal from "../../Components/ui/AddSongsModal";
 
 function PlaylistDetailPage() {
   const navigate = useNavigate();
   const { playlistId } = useParams<string>();
-
-  // 미리듣기
-  const [selectSong, setSelectSong] = useState<Song | null>(null);
-  const [isPlayerVisible, setIsPlayerVisible] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
-  const [allMode, setAllMode] = useState(false);
 
   // 유저
   const user = useSelector((state: any) => state.auth.user);
@@ -27,8 +22,20 @@ function PlaylistDetailPage() {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
+  // 곡 추가
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  // 미리듣기
+  const [selectSong, setSelectSong] = useState<Song | null>(null);
+  const [isPlayerVisible, setIsPlayerVisible] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
+  const [allMode, setAllMode] = useState(false);
 
-  //  ========== 메뉴 ==========
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  // 정렬된 곡 목록 (추가된 순서 기준 — playlistSongId 기준)
+  const sortedSongs = [...songs].sort((a, b) =>
+    sortOrder === "asc" ? a.playlistSongId - b.playlistSongId : b.playlistSongId - a.playlistSongId
+  );
   const [menuOpen, setMenuOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   // 수정 모드
@@ -186,10 +193,18 @@ function PlaylistDetailPage() {
                   onClick={() => {
                     if (!songs.length) return;
 
-                    setAllMode(true);
-                    setCurrentIndex(0);
-                    setSelectSong(songs[0]);
-                    setIsPlayerVisible(true);
+                    // 이미 재생 중이어도 강제로 처음부터 재시작
+                    setIsPlayerVisible(false);
+                    setSelectSong(null);
+                    setCurrentIndex(null);
+                    setAllMode(false);
+
+                    setTimeout(() => {
+                      setAllMode(true);
+                      setCurrentIndex(0);
+                      setSelectSong(sortedSongs[0]);
+                      setIsPlayerVisible(true);
+                    }, 0);
                   }}
                 >
                   <FaPlay />
@@ -234,9 +249,8 @@ function PlaylistDetailPage() {
               className="playlist-title-edit"
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
-              maxLength={10}
               autoFocus
-              placeholder="10자 이하로 입력"
+              placeholder="제목을 입력하세요"
             />
           )}
           {/* ===== 메타 정보 ===== */}
@@ -284,9 +298,56 @@ function PlaylistDetailPage() {
       </aside>
 
       {/* ================= 오른쪽 트랙 리스트 ================= */}
-      <section className="playlist-right">
+      {/* isPlayerVisible 상태에 따라 player-active 클래스 토글 → padding-bottom 확보 */}
+      <section className={`playlist-right${isPlayerVisible ? " player-active" : ""}`}>
+        <div className="track-header">
+          <h2>곡 목록</h2>
+
+          <div className="track-header-actions">
+            {/* 정렬 드롭다운 */}
+            <select
+              className="sort-select"
+              value={sortOrder}
+              onChange={(e) => {
+                const newOrder = e.target.value as "asc" | "desc";
+                setSortOrder(newOrder);
+
+                // 재생 중인 곡이 있으면 새 정렬 기준으로 인덱스 재계산
+                if (selectSong && isPlayerVisible) {
+                  const newSorted = [...songs].sort((a, b) =>
+                    newOrder === "asc"
+                      ? a.playlistSongId - b.playlistSongId
+                      : b.playlistSongId - a.playlistSongId
+                  );
+                  const newIndex = newSorted.findIndex((s) => s.id === selectSong.id);
+                  if (newIndex !== -1) setCurrentIndex(newIndex);
+                }
+              }}
+            >
+              <option value="asc">추가된 순</option>
+              <option value="desc">최근 추가순</option>
+            </select>
+
+            {!isEditMode && (
+              <button
+                className="btn-add-song"
+                onClick={() => {
+                  setIsPlayerVisible(false);
+                  setSelectSong(null);
+                  setCurrentIndex(null);
+                  setAllMode(false);
+                  setIsAddModalOpen(true);
+                }}
+                title="곡 추가"
+              >
+                <FaPlus />
+              </button>
+            )}
+          </div>
+        </div>
+
         <ul className="track-list">
-          {songs.map((song) => (
+          {sortedSongs.map((song) => (
             <li
               key={song.playlistSongId}
               className={`track-item ${!isEditMode && selectSong?.id === song.id ? "playing" : ""}`}
@@ -295,8 +356,8 @@ function PlaylistDetailPage() {
 
                 const index = songs.findIndex((s) => s.playlistSongId === song.playlistSongId);
 
-                setAllMode(false);
-                setCurrentIndex(null);
+                setAllMode(true);
+                setCurrentIndex(index);
                 setSelectSong(song);
                 setIsPlayerVisible(true);
               }}
@@ -331,6 +392,7 @@ function PlaylistDetailPage() {
           ))}
         </ul>
       </section>
+
       {isPlayerVisible && selectSong && (
         <div className="fixed bottom-0 left-0 z-50 w-full">
           <MusicPlayer
@@ -343,12 +405,12 @@ function PlaylistDetailPage() {
             }}
             {...(allMode && currentIndex !== null
               ? {
-                  songs: songs,
+                  songs: sortedSongs,
                   songIndex: currentIndex,
                   onSongChange: (index: number) => {
-                    if (index < songs.length) {
+                    if (index < sortedSongs.length) {
                       setCurrentIndex(index);
-                      setSelectSong(songs[index]);
+                      setSelectSong(sortedSongs[index]);
                     } else {
                       setIsPlayerVisible(false);
                       setSelectSong(null);
@@ -360,6 +422,15 @@ function PlaylistDetailPage() {
               : {})}
           />
         </div>
+      )}
+
+      {isAddModalOpen && playlistId && (
+        <AddSongsModal
+          playlistId={Number(playlistId)}
+          onClose={() => setIsAddModalOpen(false)}
+          onAdded={fetchData}
+          existingSongs={songs}
+        />
       )}
     </div>
   );
