@@ -30,6 +30,9 @@ import FreeBoardCreatePage from "./pages/community/FreeBoardCreatePage";
 import FreeBoardDetailPage from "./pages/community/FreeBoardDetailPage";
 import FreeBoardUpdate from "./pages/community/FreeBoardUpdate";
 import PlaylistReviewPage from "./pages/playlist/PlaylistReviewPage";
+import BlindRecommendPage from "./pages/recommend/BlindRecommendPage";
+import MusicQuizPage from "./pages/game/MusicQuizPage";
+import AlbumQuizPage from "./pages/game/AlbumQuizPage";
 
 function App() {
   // 2. Redux Store에서 로그인 여부 가져오기
@@ -44,6 +47,9 @@ function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/search" element={<SearchResult />} />
         <Route path="/recommend/result" element={<RecommendPlaylistResult />} />
+        <Route path="/recommend/blind" element={<BlindRecommendPage />} />
+        <Route path="/game/music-quiz" element={<MusicQuizPage />} />
+        <Route path="/game/album-quiz" element={<AlbumQuizPage />} />
         <Route path="/playlist/me" element={<MyPlaylistPage />} />
         <Route path="/playlist/me/:playlistId" element={<PlaylistDetailPage />} />
         <Route path="/playlist/review" element={<PlaylistReviewPage />} />
@@ -62,7 +68,10 @@ function App() {
       </Route>
       {/* 아닌 것들은 여기 밑으로 Route 추가 */}
       {/* 4. 로그인하지 않은 사용자만 접근 가능한 경로 (이미 로그인했다면 홈으로 이동) */}
-      <Route path="/login" element={!isLogin ? <LoginForm /> : <Navigate to={loginRedirect} replace />} />
+      <Route
+        path="/login"
+        element={!isLogin ? <LoginForm /> : <Navigate to={loginRedirect} replace />}
+      />
       <Route
         path="/register"
         element={!isLogin ? <TermsAgreement /> : <Navigate to={loginRedirect} replace />}

@@ -1,16 +1,18 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 
 const BoardWrite = () => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const location = useLocation(); // 추가
+  const state = location.state as { title?: string; content?: string } | null; // 추가
+  const [title, setTitle] = useState(state?.title ?? "");
+  const [content, setContent] = useState(state?.content ?? "");
   const navigate = useNavigate();
   const [boardGenre, setBoardGenre] = useState("HIPHOP");
   const [boardType] = useState("PLAYLIST_SHARE");
-  // 이메일 가져오
+  // 이메일 가져오기
   const userEmail = useSelector((state: RootState) => state.auth.user?.email);
 
   const submit = async () => {

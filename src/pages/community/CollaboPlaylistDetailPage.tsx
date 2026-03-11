@@ -53,13 +53,13 @@ function CollaboPlaylistDetailPage() {
 
   const fetchPlaylist = async () => {
     if (!id) return;
-    try { const res = await playlistApi.getPlaylist(id); setPlaylist(res.data as CollaboPlaylist); }
+    try { const res = await playlistApi.getPlaylist(id, user?.email ?? ""); setPlaylist(res.data as CollaboPlaylist); }
     catch (e) { console.error(e); }
   };
   const fetchSongs = async () => {
     if (!id) return;
     setIsSongsLoading(true);
-    try { const res = await playlistSongApi.getSongsByPlaylist(Number(id)); setSongs((res.data as PlaylistSong[]) || []); }
+    try { const res = await playlistApi.getPlaylistSongs(Number(id)); setSongs((res.data as PlaylistSong[]) || []); }
     catch (e) { console.error(e); }
     finally { setIsSongsLoading(false); }
   };
@@ -81,8 +81,8 @@ function CollaboPlaylistDetailPage() {
 
   // 작성자 직접 추가 (즉시 수록)
   const handleAddSongDirectly = async (song: Song) => {
-    if (!id || !user?.email) return;
-    try { await playlistSongApi.addSongDirectly(Number(id), song.id, user.email); alert("곡이 추가되었습니다."); fetchSongs(); }
+    if (!id) return;
+    try { await playlistApi.addSongToPlaylist(Number(id), song.id); alert("곡이 추가되었습니다."); fetchSongs(); }
     catch (e) { alert("곡 추가에 실패했습니다."); }
   };
 
@@ -96,7 +96,7 @@ function CollaboPlaylistDetailPage() {
   // 수록곡 삭제 (작성자만)
   const handleRemoveSong = async (playlistSongId: number) => {
     if (!window.confirm("이 곡을 수록곡에서 삭제하시겠습니까?")) return;
-    try { await playlistSongApi.removeSongFromPlaylist(playlistSongId); fetchSongs(); }
+    try { await playlistApi.removeSongFromPlaylist(playlistSongId); fetchSongs(); }
     catch (e) { alert("곡 삭제에 실패했습니다."); }
   };
 

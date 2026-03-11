@@ -63,6 +63,13 @@ function Sidebar() {
                 <FaMinus size={12} />
                 <span>이상형 월드컵 곡 추천</span>
               </button>
+              <button
+                className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
+                onClick={() => goPage("/game/music-quiz")}
+              >
+                <FaMinus size={12} />
+                <span>노래 맞추기</span>
+              </button>
             </div>
           )}
         </div>
@@ -139,6 +146,40 @@ function Sidebar() {
               >
                 <FaMinus size={12} />
                 <span>자유게시판</span>
+              </button>
+            </div>
+          )}
+        </div>
+        {/* 게임 메뉴 */}
+        <div>
+          <button
+            onClick={() => setIsRecommendMenuOpen(!isRecommendMenuOpen)}
+            className="flex items-center w-full gap-5 px-3 py-2 text-white rounded-lg hover:bg-gray-800"
+          >
+            <FaCompass size={24} />
+            <span>게임</span>
+            <FaChevronDown
+              size={16}
+              className={`ml-auto transition-transform ${isRecommendMenuOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          {/* 게임 하위 메뉴 */}
+          {isRecommendMenuOpen && (
+            <div className="mt-3 ml-5 space-y-2 text-[17px] font-semibold">
+              <button
+                className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
+                onClick={() => goPage("/game/music-quiz")}
+              >
+                <FaMinus size={12} />
+                <span>노래 맞추기</span>
+              </button>
+              <button
+                className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
+                onClick={() => goPage("/game/album-quiz")}
+              >
+                <FaMinus size={12} />
+                <span>앨범 맞추기</span>
               </button>
             </div>
           )}

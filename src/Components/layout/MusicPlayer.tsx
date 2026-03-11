@@ -1,5 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { FaChevronDown, FaPause, FaPlay, FaVolumeMute, FaVolumeUp, FaStepBackward, FaStepForward } from "react-icons/fa";
+import {
+  FaChevronDown,
+  FaPause,
+  FaPlay,
+  FaVolumeMute,
+  FaVolumeUp,
+  FaStepBackward,
+  FaStepForward,
+} from "react-icons/fa";
 import Slider from "@mui/material/Slider";
 import Box from "@mui/material/Box";
 import { GoDotFill } from "react-icons/go";
@@ -14,10 +22,20 @@ interface MusicPlayerProps {
   onSongChange?: (index: number) => void;
   // 단일 곡 또는 마지막 곡 종료 시 콜백
   onSongEnd?: () => void;
+  // 블라인드 추천을 위한 보기 설정
+  blind?: boolean;
 }
 
 // 음악 재생 바 UI
-function MusicPlayer({ song, setIsPlayerVisible, songs, songIndex, onSongChange, onSongEnd }: MusicPlayerProps) {
+function MusicPlayer({
+  song,
+  setIsPlayerVisible,
+  songs,
+  songIndex,
+  onSongChange,
+  onSongEnd,
+  blind = false,
+}: MusicPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false); // 재생 중 여부
   const [progress, setProgress] = useState<number>(0); // 곡 재생 진행바(%)
@@ -150,18 +168,23 @@ function MusicPlayer({ song, setIsPlayerVisible, songs, songIndex, onSongChange,
         {/* 가운데 영역 */}
         <div className="flex items-center gap-5">
           {/* 곡 이미지 부분 */}
-          <div className="flex items-center justify-center w-12 h-12 overflow-hidden bg-orange-500 rounded-2xl">
-            <img src={song.imgUrl} alt="" className="object-cover w-full h-full" />
-          </div>
-          {/* 곡 정보 부분 */}
-          <div className="flex flex-col">
-            <span className="text-lg font-bold">{song.trackName}</span>
-            <div className="flex items-center gap-2 text-base">
-              <span>{song.artistName}</span>
-              <GoDotFill size={10} />
-              <span>{song.genreName}</span>
+
+          {!blind && (
+            <div className="flex items-center justify-center w-12 h-12 overflow-hidden bg-orange-500 rounded-2xl">
+              <img src={song.imgUrl} alt="" className="object-cover w-full h-full" />
             </div>
-          </div>
+          )}
+          {/* 곡 정보 부분 */}
+          {!blind && (
+            <div className="flex flex-col">
+              <span className="text-lg font-bold">{song.trackName}</span>
+              <div className="flex items-center gap-2 text-base">
+                <span>{song.artistName}</span>
+                <GoDotFill size={10} />
+                <span>{song.genreName}</span>
+              </div>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-7">
           {/* 볼륨 부분 */}
