@@ -1,0 +1,699 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap");
+
+/* ============================================================
+   PAGE WRAPPER
+   ============================================================ */
+.wc-page {
+  min-height: 100vh;
+  background: #0c0c12;
+  font-family: "DM Sans", sans-serif;
+  color: #f0f0f8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.wc-page *,
+.wc-page *::before,
+.wc-page *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================================
+   AMBIENT BACKGROUND BLOBS
+   ============================================================ */
+.wc-bg-blobs {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wc-bg-blob-left {
+  position: absolute;
+  top: -20%;
+  left: -10%;
+  width: 55vw;
+  height: 55vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(160, 50, 220, 0.07) 0%, transparent 70%);
+}
+
+.wc-bg-blob-right {
+  position: absolute;
+  bottom: -20%;
+  right: -10%;
+  width: 48vw;
+  height: 48vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(50, 100, 255, 0.06) 0%, transparent 70%);
+}
+
+/* ============================================================
+   INNER CONTAINER
+   ============================================================ */
+.wc-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 880px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ============================================================
+   START SCREEN
+   ============================================================ */
+.wc-start {
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+  animation: wc-fadeUp 0.5s ease;
+}
+
+.wc-start-eyebrow {
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: #383848;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.wc-start-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(58px, 14vw, 100px);
+  line-height: 0.85;
+  background: linear-gradient(135deg, #ff6b9d 0%, #cc44ff 40%, #4488ff 80%, #44ddff 100%);
+  background-size: 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: wc-gradShift 4s ease infinite;
+  margin-bottom: 14px;
+}
+
+.wc-start-desc {
+  color: #404050;
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 48px;
+}
+
+.wc-start-desc span {
+  color: #303040;
+}
+
+.wc-error {
+  background: rgba(255, 70, 70, 0.07);
+  border: 1px solid rgba(255, 70, 70, 0.22);
+  border-radius: 12px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  color: #ff7777;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.wc-size-label {
+  font-size: 11px;
+  color: #2e2e3e;
+  margin-bottom: 14px;
+  letter-spacing: 1px;
+}
+
+.wc-size-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.wc-size-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: #f0f0f8;
+  border-radius: 20px;
+  padding: 24px 10px 18px;
+  cursor: pointer;
+  transition: all 0.22s;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.wc-size-btn:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.wc-size-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.wc-size-btn-unit {
+  font-size: 13px;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 400;
+  color: #555;
+}
+
+.wc-size-btn-count {
+  font-size: 10px;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 300;
+  color: #333;
+}
+
+.wc-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #555;
+  font-size: 13px;
+  margin-top: 14px;
+}
+
+.wc-spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid #222;
+  border-top-color: #cc44ff;
+  border-radius: 50%;
+  animation: wc-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   GAME SCREEN
+   ============================================================ */
+.wc-game {
+  width: 100%;
+  animation: wc-fadeUp 0.3s ease;
+}
+
+.wc-round-header {
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+.wc-round-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 28px;
+  letter-spacing: 3px;
+  color: #f0f0f8;
+  margin-bottom: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wc-round-meta {
+  font-size: 12px;
+  color: #404050;
+  margin-bottom: 14px;
+}
+
+.wc-round-meta-divider {
+  margin: 0 8px;
+  color: #202028;
+}
+
+.wc-progress-track {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.wc-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #cc44ff, #4488ff);
+  border-radius: 2px;
+  transition: width 0.55s ease;
+}
+
+.wc-vs-grid {
+  display: grid;
+  grid-template-columns: 1fr 52px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.wc-vs-label {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 36px;
+  color: rgba(255, 255, 255, 0.06);
+  letter-spacing: 1px;
+  text-align: center;
+  user-select: none;
+}
+
+.wc-card-wrap {
+  display: flex;
+}
+
+.wc-game-hint {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 12px;
+  color: #282830;
+}
+
+/* ============================================================
+   SONG CARD
+   ============================================================ */
+.wc-card {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: #111118;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.wc-card:hover .wc-choose-cta {
+  opacity: 1;
+}
+
+.wc-card--chosen {
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  transform: scale(1.03) translateY(-6px);
+  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.7);
+  cursor: default;
+}
+
+.wc-card--loser {
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transform: scale(0.95);
+  opacity: 0.18;
+  filter: grayscale(1);
+  cursor: default;
+}
+
+/* Album art wrapper */
+.wc-card-art {
+  position: relative;
+  padding-bottom: 100%;
+  overflow: hidden;
+}
+
+.wc-card-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.wc-card--chosen .wc-card-img {
+  transform: scale(1.08);
+}
+
+.wc-card-img-fallback {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #18102e, #0a1422);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.wc-card-img-fallback-icon {
+  font-size: 44px;
+  opacity: 0.2;
+}
+
+.wc-card-img-fallback-genre {
+  font-size: 10px;
+  color: #383848;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.wc-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 35%, rgba(0, 0, 0, 0.95) 100%);
+  transition: background 0.4s ease;
+}
+
+.wc-card--chosen .wc-card-overlay {
+  background: linear-gradient(to bottom, transparent 20%, rgba(0, 0, 0, 0.9) 100%);
+}
+
+.wc-card-chosen-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #000;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 5px 13px;
+  border-radius: 20px;
+}
+
+.wc-card-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+}
+
+.wc-card-play-btn--playing {
+  background: rgba(255, 255, 255, 0.9);
+  color: #000;
+}
+
+.wc-card-audio-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.wc-card-audio-progress-fill {
+  height: 100%;
+  background: #fff;
+  transition: width 0.3s linear;
+}
+
+/* Card info */
+.wc-card-info {
+  padding: 16px 18px 18px;
+}
+
+.wc-card-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+  color: #f4f4f8;
+  line-height: 1.1;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wc-card-artist {
+  font-size: 12px;
+  color: #888;
+  font-weight: 600;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wc-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wc-card-genre-badge {
+  font-size: 10px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #555;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.wc-card-preview-label {
+  font-size: 10px;
+  color: #383848;
+}
+
+/* Hover CTA */
+.wc-choose-cta {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.wc-choose-cta-text {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 9px 22px;
+  border-radius: 28px;
+  backdrop-filter: blur(8px);
+}
+
+/* ============================================================
+   RESULT SCREEN
+   ============================================================ */
+.wc-result {
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  animation: wc-fadeUp 0.5s ease;
+}
+
+.wc-result-eyebrow {
+  font-size: 12px;
+  letter-spacing: 5px;
+  color: #404050;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.wc-result-art-wrap {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 28px;
+}
+
+.wc-result-pulse-ring {
+  position: absolute;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.wc-result-pulse-ring--1 {
+  inset: -14px;
+  border-radius: 28px;
+  animation: wc-pulseRing 1.7s ease-out infinite;
+}
+
+.wc-result-pulse-ring--2 {
+  inset: -28px;
+  border-radius: 32px;
+  border-color: rgba(255, 255, 255, 0.04);
+  animation: wc-pulseRing 2.2s ease-out infinite;
+  animation-delay: 0.35s;
+}
+
+.wc-result-cover {
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  object-fit: cover;
+  box-shadow: 0 20px 72px rgba(0, 0, 0, 0.65);
+}
+
+.wc-result-cover-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #18102e, #0a1422);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56px;
+  opacity: 0.2;
+}
+
+.wc-result-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(32px, 8vw, 54px);
+  line-height: 1;
+  color: #f8f8f8;
+  margin-bottom: 8px;
+}
+
+.wc-result-artist {
+  font-size: 16px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.wc-result-genre {
+  display: inline-block;
+  font-size: 10px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: #404050;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 36px;
+}
+
+.wc-result-preview {
+  margin-bottom: 36px;
+}
+
+.wc-result-preview-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #bbb;
+  padding: 11px 26px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.wc-result-preview-btn--playing {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.wc-result-preview-progress {
+  margin-top: 10px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.wc-result-preview-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #cc44ff, #4488ff);
+  transition: width 0.3s linear;
+}
+
+.wc-result-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.wc-btn-restart {
+  background: linear-gradient(135deg, #cc44ff, #4488ff);
+  border: none;
+  color: #fff;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 17px;
+  letter-spacing: 2px;
+  padding: 13px 34px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.wc-btn-restart:hover {
+  transform: scale(1.04);
+}
+
+.wc-btn-reselect {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #666;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 17px;
+  letter-spacing: 2px;
+  padding: 13px 30px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wc-btn-reselect:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #999;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes wc-fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes wc-gradShift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes wc-pulseRing {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.65);
+    opacity: 0;
+  }
+}

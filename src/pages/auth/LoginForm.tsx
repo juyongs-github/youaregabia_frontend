@@ -6,23 +6,37 @@ import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../store/authSlice";
 
 function LoginForm() {
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [form, setForm] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  // function handleGoogleLogin() {
+  //   window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
+  // }
+
+  // function handleKakaoLogin() {
+  //   window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao`;
+  // }
+
+  // function handleNaverLogin() {
+  //   window.location.href = `${API_BASE_URL}/oauth2/authorization/naver`;
+  // }
+  // ❌ 환경변수 방식 제거
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+  // ✅ 그냥 경로만 사용 (vite proxy가 처리)
   function handleGoogleLogin() {
-    window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
+    window.location.href = "/oauth2/authorization/google";
   }
 
   function handleKakaoLogin() {
-    window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao`;
+    window.location.href = "/oauth2/authorization/kakao";
   }
 
   function handleNaverLogin() {
-    window.location.href = `${API_BASE_URL}/oauth2/authorization/naver`;
+    window.location.href = "/oauth2/authorization/naver";
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -38,14 +52,16 @@ function LoginForm() {
       setIsSubmitting(true);
       const response = await login({ email: form.email, password: form.password });
 
-      dispatch(loginSuccess({
-        email: response.data.email || form.email,
-        name: response.data.name || "사용자",
-        createDate: response.data.createdAt,
-        imgUrl: response.data.imgUrl || undefined,
-        token: response.data.token,
-        role: response.data.role,
-      }));
+      dispatch(
+        loginSuccess({
+          email: response.data.email || form.email,
+          name: response.data.name || "사용자",
+          createDate: response.data.createdAt,
+          imgUrl: response.data.imgUrl || undefined,
+          token: response.data.token,
+          role: response.data.role,
+        })
+      );
 
       console.log("🔍 LOGIN RESPONSE:", response.data);
       console.log("🔍 ROLE VALUE:", response.data.role);
@@ -107,7 +123,12 @@ function LoginForm() {
           >
             <img src="/icons/kakao.svg" alt="Kakao" />
           </button>
-          <button type="button" className="social-icon naver" aria-label="Naver Login" onClick={handleNaverLogin}>
+          <button
+            type="button"
+            className="social-icon naver"
+            aria-label="Naver Login"
+            onClick={handleNaverLogin}
+          >
             <img src="/icons/naver.svg" alt="Naver" />
           </button>
         </div>

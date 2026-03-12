@@ -3,15 +3,12 @@ import { useNavigate } from "react-router-dom";
 import type { Playlist } from "../../types/playlist";
 import { playlistApi } from "../../api/playlistApi";
 import { FaPlay, FaPlus } from "react-icons/fa";
-import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
+import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
 import { useSelector } from "react-redux";
 
 function MyPlaylistPage() {
   const baseURL: string = "http://localhost:8080";
   const navigate = useNavigate();
-
-  // 유저 정보
-  const email = useSelector((state: any) => state.auth.user.email);
 
   // 플레이리스트 정보
   const [data, setData] = useState<Playlist[]>([]);
@@ -25,12 +22,10 @@ function MyPlaylistPage() {
   const [sortType, setSortType] = useState("oldest");
 
   const fetchData = async () => {
-    if (!email) return;
-
     setIsLoading(true);
     setIsError(false);
     try {
-      const res = await playlistApi.getAllPlaylist(email);
+      const res = await playlistApi.getAllPlaylist();
       setData(res.data || []);
     } catch (error) {
       console.error(error);
@@ -42,10 +37,8 @@ function MyPlaylistPage() {
   };
 
   useEffect(() => {
-    if (email) {
-      fetchData();
-    }
-  }, [email]);
+    fetchData();
+  }, []);
 
   // 데이터 정렬
   const sortedData = [...data].sort((a, b) => {
@@ -72,9 +65,9 @@ function MyPlaylistPage() {
         <select
           value={sortType}
           onChange={(e) => setSortType(e.target.value)}
-          className="playlist-sort"
+          className="sort-select"
         >
-          <option value="oldest">오래된순</option>
+          <option value="oldest">오래된 순</option>
           <option value="latest">최신순</option>
           <option value="title">이름순</option>
         </select>
@@ -111,11 +104,7 @@ function MyPlaylistPage() {
         </div>
         {/* ===== 플레이리스트 생성 모달 ===== */}
         {isModalOpen && (
-          <PlaylistCreateModal
-            onClose={() => setIsModalOpen(false)}
-            onCreated={fetchData}
-            email={email}
-          />
+          <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
         )}
       </div>
     </div>

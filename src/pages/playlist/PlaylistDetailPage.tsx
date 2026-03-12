@@ -32,7 +32,7 @@ function PlaylistDetailPage() {
 
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  // 정렬된 곡 목록 (playlistSongId 기준 — desc: 최신순, asc: 오래된순)
+  // 정렬된 곡 목록 (playlistSongId 기준 — desc: 최신순, asc: 오래된 순)
   const sortedSongs = [...songs].sort((a, b) =>
     sortOrder === "asc" ? a.playlistSongId - b.playlistSongId : b.playlistSongId - a.playlistSongId
   );
@@ -115,14 +115,14 @@ function PlaylistDetailPage() {
   // 조회
   const fetchData = async () => {
     //  email 없으면 API 호출 안함
-    if (!playlistId || !user.email) return;
+    if (!playlistId) return;
 
     setIsLoading(true);
     setIsError(false);
 
     try {
       //  playlist 조회
-      const playlistRes = await playlistApi.getPlaylist(playlistId, user.email);
+      const playlistRes = await playlistApi.getPlaylist(playlistId);
       console.log("playlist data:", playlistRes.data);
 
       if (playlistRes.data) {
@@ -145,7 +145,7 @@ function PlaylistDetailPage() {
 
   useEffect(() => {
     fetchData();
-  }, [playlistId, user.email]);
+  }, [playlistId]);
 
   // 수정모드 켜질 시 플레이어 종료
   useEffect(() => {
@@ -340,13 +340,13 @@ function PlaylistDetailPage() {
                 }
               }}
             >
-              <option value="asc">추가된 순</option>
-              <option value="desc">최근 추가순</option>
+              <option value="desc">최신순</option>
+              <option value="asc">오래된 순</option>
             </select>
 
             {!isEditMode && (
               <button
-                className="btn-add-song"
+                className="add-playlist-btn"
                 onClick={() => {
                   setIsPlayerVisible(false);
                   setSelectSong(null);
@@ -370,7 +370,9 @@ function PlaylistDetailPage() {
               onClick={() => {
                 if (isEditMode) return;
 
-                const index = songs.findIndex((s) => s.playlistSongId === song.playlistSongId);
+                const index = sortedSongs.findIndex(
+                  (s) => s.playlistSongId === song.playlistSongId
+                );
 
                 setAllMode(true);
                 setCurrentIndex(index);

@@ -2,8 +2,6 @@ import { useState } from "react";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import api from "../../api/axios";
 import "../../styles/AddSongsModal.css";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../store";
 
 interface Song {
   id: number;
@@ -25,20 +23,16 @@ function AddSongsModal({ playlistId, onClose, onAdded, existingSongs }: Props) {
   const [results, setResults] = useState<Song[]>([]);
   const [selected, setSelected] = useState<Song[]>([]);
 
-  const user = useSelector((state: RootState) => state.auth.user);
-
   const isAlreadyAdded = (songId: number) => existingSongs.some((s) => s.id === songId);
 
   const handleSearch = async () => {
     if (!keyword.trim()) return;
-
     const res = await api.get("/api/search", { params: { q: keyword } });
     setResults(res.data || []);
   };
 
   const toggleSelect = (song: Song) => {
     const exists = selected.find((s) => s.id === song.id);
-
     if (exists) {
       setSelected(selected.filter((s) => s.id !== song.id));
     } else {
@@ -53,9 +47,7 @@ function AddSongsModal({ playlistId, onClose, onAdded, existingSongs }: Props) {
   const handleAddSongs = async () => {
     try {
       for (const song of selected) {
-        await api.post(`/playlist/${playlistId}/songs/${song.id}`, null, {
-          params: { email: user?.email },
-        });
+        await api.post(`/playlist/${playlistId}/songs/${song.id}`);
       }
       onAdded();
       onClose();
@@ -66,12 +58,12 @@ function AddSongsModal({ playlistId, onClose, onAdded, existingSongs }: Props) {
   };
 
   return (
-    <div className="add-song-overlay">
+    <div className="modal-overlay">
       <div className="add-song-modal">
         {/* 헤더 */}
         <div className="modal-header">
           <h2>수록곡 추가</h2>
-          <button onClick={onClose}>
+          <button className="close-btn" onClick={onClose}>
             <FaTimes />
           </button>
         </div>
@@ -155,10 +147,10 @@ function AddSongsModal({ playlistId, onClose, onAdded, existingSongs }: Props) {
 
         {/* 하단 버튼 */}
         <div className="modal-actions">
-          <button className="btn-cancel" onClick={onClose}>
+          <button className="cancel-btn" onClick={onClose}>
             취소
           </button>
-          <button className="btn-add" disabled={selected.length === 0} onClick={handleAddSongs}>
+          <button className="submit-btn" disabled={selected.length === 0} onClick={handleAddSongs}>
             선택 곡 추가
           </button>
         </div>
