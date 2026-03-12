@@ -2,13 +2,15 @@
 전체 배경
 ================================================== */
 .auth-container {
-  min-height: 100vh;
+  height: 100vh;
   background: linear-gradient(180deg, #0f0f0f, #121212);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   width: 100vw;
-  padding: 16px; /* 모바일 안전 여백 */
+  padding: 40px 16px;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 /* ==================================================
