@@ -34,8 +34,8 @@ export const playlistApi = {
     return api.get(`/playlist/${playlistId}/songs`);
   },
 
-  addSongToPlaylist: (playlistId: number, songId: number) => {
-    return api.post(`/playlist/${playlistId}/songs/${songId}`);
+  addSongToPlaylist: (playlistId: number, songId: number, email: string) => {
+    return api.post(`/playlist/${playlistId}/songs/${songId}`, null, { params: { email } });
   },
 
   removeSongFromPlaylist: (playlistSongId: number) => {

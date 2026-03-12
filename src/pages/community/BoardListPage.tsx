@@ -17,9 +17,16 @@ const BoardListPage = () => {
   // 페이지 데이터 불러오기
   const loadPage = async (page: number, search?: string, currentGenre?: string) => {
     try {
-      const params: { page: number; size: number; keyword?: string; genre?: string } = {
+      const params: {
+        page: number;
+        size: number;
+        keyword?: string;
+        genre?: string;
+        boardType?: "PLAYLIST_SHARE";
+      } = {
         page,
         size: 10,
+        boardType: "PLAYLIST_SHARE" as const,
       };
       if (search) {
         params.keyword = search;

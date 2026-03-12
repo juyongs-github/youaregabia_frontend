@@ -157,6 +157,19 @@ function PlaylistDetailPage() {
     }
   }, [isEditMode]);
 
+  const handleShare = () => {
+    if (!confirm("플레이리스트 공유하시겠습니까?")) return;
+
+    const songList = songs.map((s) => s.trackName).join("\n");
+
+    navigate("/community/share/new", {
+      state: {
+        title: data?.title ?? "",
+        content: `🎵 ${data?.title}\n\n수록곡\n${songList}`,
+      },
+    });
+  };
+
   return (
     <div className="playlist-detail-page">
       {/* ================= 왼쪽 패널 ================= */}
@@ -236,6 +249,7 @@ function PlaylistDetailPage() {
                       >
                         삭제
                       </button>
+                      <button onClick={handleShare}>공유하기</button>
                     </div>
                   )}
                 </div>

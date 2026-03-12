@@ -20,8 +20,11 @@ interface MusicPlayerProps {
   songIndex?: number;
   onSongChange?: (index: number) => void;
   onSongEnd?: () => void;
+  // 블라인드 추천을 위한 보기 설정
+  blind?: boolean;
 }
 
+// 음악 재생 바 UI
 function MusicPlayer({
   song,
   setIsPlayerVisible,
@@ -29,6 +32,7 @@ function MusicPlayer({
   songIndex,
   onSongChange,
   onSongEnd,
+  blind = false,
 }: MusicPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -146,17 +150,24 @@ function MusicPlayer({
 
         {/* 가운데: 곡 정보 */}
         <div className="flex items-center gap-5">
-          <div className="flex items-center justify-center w-12 h-12 overflow-hidden bg-orange-500 rounded-2xl">
-            <img src={song.imgUrl} alt="" className="object-cover w-full h-full" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-lg font-bold">{song.trackName}</span>
-            <div className="flex items-center gap-2 text-base">
-              <span>{song.artistName}</span>
-              <GoDotFill size={10} />
-              <span>{song.genreName}</span>
+          {/* 곡 이미지 부분 */}
+
+          {!blind && (
+            <div className="flex items-center justify-center w-12 h-12 overflow-hidden bg-orange-500 rounded-2xl">
+              <img src={song.imgUrl} alt="" className="object-cover w-full h-full" />
             </div>
-          </div>
+          )}
+          {/* 곡 정보 부분 */}
+          {!blind && (
+            <div className="flex flex-col">
+              <span className="text-lg font-bold">{song.trackName}</span>
+              <div className="flex items-center gap-2 text-base">
+                <span>{song.artistName}</span>
+                <GoDotFill size={10} />
+                <span>{song.genreName}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 오른쪽: 볼륨 + 닫기 */}
