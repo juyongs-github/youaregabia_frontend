@@ -32,10 +32,12 @@ function PlaylistDetailPage() {
 
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  // 정렬된 곡 목록 (추가된 순서 기준 — playlistSongId 기준)
+  // 정렬된 곡 목록 (playlistSongId 기준 — desc: 최신순, asc: 오래된순)
   const sortedSongs = [...songs].sort((a, b) =>
     sortOrder === "asc" ? a.playlistSongId - b.playlistSongId : b.playlistSongId - a.playlistSongId
   );
+
+  //  ========== 메뉴 ==========
   const [menuOpen, setMenuOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   // 수정 모드

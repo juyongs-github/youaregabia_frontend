@@ -10,7 +10,8 @@
     main 안의 래퍼(p-20, max-w-7xl)의 padding을 상쇄하고 main 높이를 꽉 채운다.
   */
 
-  /* 부모 래퍼(p-20 = 5rem)의 padding 탈출 */
+  /* 부모 래퍼(p-20 = 5rem)의 상하좌우 padding 상쇄.
+     위쪽 -5rem은 main의 overflow:hidden으로 가려져 시각적 문제 없음 */
   margin: -5rem;
   width: calc(100% + 10rem);
 
@@ -62,9 +63,6 @@
 .playlist-center.editing {
   border-color: rgba(255, 77, 79, 0.35);
   max-height: 650px;
-}
-.playlist-center.editing .track-item {
-  cursor: default;
 }
 
 /* =========================
