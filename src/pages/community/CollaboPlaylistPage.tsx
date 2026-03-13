@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaSearch } from "react-icons/fa";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
@@ -10,10 +10,14 @@ import CollaboPlaylistCreateModal from "../../components/ui/CollaboPlaylistCreat
 import { playlistApi } from "../../api/playlistApi";
 import type { CollaboPlaylist } from "../../types/playlist";
 import Spinner from "../../components/ui/Spinner";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store";
 
 // 공동 플레이리스트 제작 페이지
 function CollaboPlaylistPage() {
+  const user = useSelector((state: RootState) => state.auth.user);
   const [tab, setTab] = useState("1");
+  const [filter, setFilter] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [playlists, setPlaylists] = useState<CollaboPlaylist[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -21,7 +25,7 @@ function CollaboPlaylistPage() {
   const fetchPlaylists = async () => {
     setIsLoading(true);
     try {
-      const res = await playlistApi.getAllCollaborativePlaylist();
+      const res = await playlistApi.getAllCollaborativePlaylist(user?.email);
       setPlaylists(res.data || []);
     } catch (e) {
       console.error(e);
@@ -31,14 +35,44 @@ function CollaboPlaylistPage() {
     }
   };
 
+  const handleLike = async (playlist: CollaboPlaylist) => {
+    if (!user?.email) { alert("로그인이 필요합니다."); return; }
+    try {
+      if (playlist.hasLiked) {
+        await playlistApi.unlikeCollabo(playlist.id, user.email);
+      } else {
+        await playlistApi.likeCollabo(playlist.id, user.email);
+      }
+      setPlaylists(prev =>
+        prev.map(p =>
+          p.id === playlist.id
+            ? { ...p, hasLiked: !p.hasLiked, likeCount: (p.likeCount ?? 0) + (p.hasLiked ? -1 : 1) }
+            : p
+        )
+      );
+    } catch (e: any) {
+      alert(e?.response?.data?.message ?? "좋아요에 실패했습니다.");
+    }
+  };
+
   useEffect(() => {
     fetchPlaylists();
   }, []);
 
+  // 필터 적용
+  const filtered = playlists.filter(p =>
+    !filter.trim() ||
+    p.title?.toLowerCase().includes(filter.toLowerCase()) ||
+    p.description?.toLowerCase().includes(filter.toLowerCase()) ||
+    p.creatorEmail?.toLowerCase().includes(filter.toLowerCase())
+  );
+
   // 탭별 정렬
-  const allPlaylists = playlists;
-  const popularPlaylists = [...playlists].sort((a, b) => b.songCount - a.songCount);
-  const recentPlaylists = [...playlists].reverse();
+  const allPlaylists = filtered;
+  const popularPlaylists = [...filtered].sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0));
+  const recentPlaylists = [...filtered].sort((a, b) =>
+    new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
+  );
 
   return (
     <div>
@@ -55,6 +89,19 @@ function CollaboPlaylistPage() {
           <FaPlus size={20} />
         </button>
       </div>
+
+      {/* 검색바 */}
+      {!isLoading && playlists.length > 0 && (
+        <div className="relative mb-4">
+          <FaSearch size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          <input
+            value={filter}
+            onChange={e => setFilter(e.target.value)}
+            placeholder="제목, 설명 또는 작성자로 검색"
+            className="w-full pl-11 pr-4 py-3 text-base rounded-xl bg-white/5 border border-white/10 outline-none focus:border-white/30 transition-colors placeholder-white/30"
+          />
+        </div>
+      )}
 
       {/* 로딩 */}
       {isLoading && (
@@ -83,13 +130,13 @@ function CollaboPlaylistPage() {
               </TabList>
             </Box>
             <TabPanel value="1">
-              <CollaborationPlaylistTopicItem playlists={allPlaylists} />
+              <CollaborationPlaylistTopicItem playlists={allPlaylists} onLike={handleLike} />
             </TabPanel>
             <TabPanel value="2">
-              <CollaborationPlaylistTopicItem playlists={popularPlaylists} />
+              <CollaborationPlaylistTopicItem playlists={popularPlaylists} onLike={handleLike} />
             </TabPanel>
             <TabPanel value="3">
-              <CollaborationPlaylistTopicItem playlists={recentPlaylists} />
+              <CollaborationPlaylistTopicItem playlists={recentPlaylists} onLike={handleLike} />
             </TabPanel>
           </TabContext>
         </Box>

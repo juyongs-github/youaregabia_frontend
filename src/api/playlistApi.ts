@@ -25,8 +25,24 @@ export const playlistApi = {
     return api.delete(`/playlist/${playlistId}`);
   },
 
-  getAllCollaborativePlaylist: () => {
-    return api.get<CollaboPlaylist[]>("/playlist/collabo/all");
+  getAllCollaborativePlaylist: (email?: string) => {
+    return api.get<CollaboPlaylist[]>("/playlist/collabo/all", { params: { email } });
+  },
+
+  getCollaborativePlaylist: (playlistId: number, email?: string) => {
+    return api.get<CollaboPlaylist>(`/playlist/collabo/${playlistId}`, { params: { email } });
+  },
+
+  likeCollabo: (playlistId: number, email: string) => {
+    return api.post(`/playlist/collabo/${playlistId}/like`, null, { params: { email } });
+  },
+
+  unlikeCollabo: (playlistId: number, email: string) => {
+    return api.delete(`/playlist/collabo/${playlistId}/like`, { params: { email } });
+  },
+
+  reopenCollabo: (playlistId: number, email: string, newDeadline: string) => {
+    return api.put(`/playlist/collabo/${playlistId}/reopen`, null, { params: { email, newDeadline } });
   },
 
   // 곡

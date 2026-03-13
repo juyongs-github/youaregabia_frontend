@@ -85,7 +85,7 @@ function PlaylistReviewPage() {
 
   const fetchPlaylistInfos = async () => {
     try {
-      const res = await playlistApi.getAllPlaylist();
+      const res = await playlistApi.getAllPlaylist(user?.email);
       const playlists: any[] = res.data || [];
       const map = new Map<number, PlaylistInfo>();
       playlists.forEach((p) => {

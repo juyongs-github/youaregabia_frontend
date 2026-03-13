@@ -16,3 +16,18 @@ body {
   height: 100%;
   overflow: hidden; /* 페이지 전체 스크롤 제거 */
 }
+
+/* 커스텀 스크롤바 */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a3d52;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a5068;
+}

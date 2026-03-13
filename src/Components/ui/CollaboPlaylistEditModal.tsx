@@ -1,24 +1,41 @@
 import { useState } from "react";
 import { FaPlus, FaTimes, FaCalendarAlt } from "react-icons/fa";
 import { playlistApi } from "../../api/playlistApi";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../store";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from "date-fns/locale";
 
+const BASE_URL = "http://localhost:8080";
+
 interface Props {
+  playlistId: number;
+  initialTitle: string;
+  initialDescription: string;
+  initialDeadline?: string;
+  initialImageUrl?: string;
   onClose: () => void;
-  onCreated?: () => void;
+  onUpdated: () => void;
 }
 
-function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
-  const user = useSelector((state: RootState) => state.auth.user);
+function CollaboPlaylistEditModal({
+  playlistId,
+  initialTitle,
+  initialDescription,
+  initialDeadline = "",
+  initialImageUrl,
+  onClose,
+  onUpdated,
+}: Props) {
+  const initDate = initialDeadline ? new Date(initialDeadline) : null;
+
   const [image, setImage] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [deadlineDate, setDeadlineDate] = useState<Date | null>(null);
+  const [preview, setPreview] = useState<string | null>(
+    initialImageUrl ? `${BASE_URL}${initialImageUrl}` : null
+  );
+  const [title, setTitle] = useState(initialTitle);
+  const [description, setDescription] = useState(initialDescription);
+  const [deadlineDate, setDeadlineDate] = useState<Date | null>(initDate);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -32,14 +49,8 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
     <div className="modal-overlay">
       <form
         className="modal-container"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-
-          if (!user?.email) {
-            alert("로그인이 필요합니다.");
-            return;
-          }
-
           if (!title.trim()) {
             alert("제목을 입력해주세요.");
             return;
@@ -55,36 +66,40 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
             return;
           }
 
-          const formData = new FormData();
-          formData.append("title", title);
-          formData.append("description", description);
-          formData.append("email", user.email);
-          formData.append("type", "COLLABORATIVE");
-
           const deadline = buildDeadline();
-          if (deadline) formData.append("deadline", deadline);
+
+          const dto = {
+            title,
+            description,
+            deadline
+          };
+
+          const formData = new FormData();
+
+          formData.append(
+            "dto",
+            new Blob([JSON.stringify(dto)], { type: "application/json" })
+          );
 
           if (image) {
             formData.append("file", image);
           }
 
-          playlistApi
-            .createPlaylist(formData)
-            .then((res) => {
-              if (res.data) {
-                alert("플레이리스트가 생성되었습니다.");
-                onCreated?.();
-                onClose();
-              }
-            })
-            .catch((error) => {
-              alert("플레이리스트 생성에 실패했습니다.");
-              console.error(error);
-            });
+          setIsSubmitting(true);
+          try {
+            await playlistApi.updatePlaylist(playlistId, formData);
+            alert("플레이리스트가 수정되었습니다.");
+            onUpdated();
+            onClose();
+          } catch (e) {
+            alert("수정에 실패했습니다.");
+          } finally {
+            setIsSubmitting(false);
+          }
         }}
       >
         <div className="modal-header">
-          <h2>공동 플레이리스트 주제 등록</h2>
+          <h2>공동 플레이리스트 주제 수정</h2>
           <button type="button" className="close-btn" onClick={onClose}>
             <FaTimes size={20} />
           </button>
@@ -93,7 +108,7 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
         {/* 썸네일 */}
         <label className="thumbnail-box">
           {preview ? (
-            <img src={preview} className="absolute inset-0 w-full h-full rounded-[18px]" />
+            <img src={preview} className="absolute inset-0 w-full h-full rounded-[18px] object-cover" />
           ) : (
             <>
               <FaPlus size={20} />
@@ -143,9 +158,7 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
         <div style={{ position: "relative", width: "100%" }}>
           <DatePicker
             selected={deadlineDate}
-            onChange={(date: Date | null) => {
-              setDeadlineDate(date);
-            }}
+            onChange={(date: Date | null) => setDeadlineDate(date)}
             minDate={today}
             locale={ko}
             dateFormat="yyyy년 MM월 dd일"
@@ -193,11 +206,9 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
 
         {/* 버튼 */}
         <div className="modal-actions">
-          <button type="button" className="cancel-btn" onClick={onClose}>
-            취소
-          </button>
-          <button type="submit" className="submit-btn">
-            등록
+          <button type="button" className="cancel-btn" onClick={onClose}>취소</button>
+          <button type="submit" className="submit-btn" disabled={isSubmitting}>
+            {isSubmitting ? "저장 중..." : "저장"}
           </button>
         </div>
       </form>
@@ -205,4 +216,4 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
   );
 }
 
-export default CollaboPlaylistCreateModal;
+export default CollaboPlaylistEditModal;
