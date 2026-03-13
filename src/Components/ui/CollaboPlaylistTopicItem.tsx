@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { FaChevronRight, FaClock, FaHeart, FaMusic, FaStopwatch, FaUser, FaUsers } from "react-icons/fa";
+import {
+  FaChevronRight,
+  FaClock,
+  FaHeart,
+  FaMusic,
+  FaStopwatch,
+  FaUser,
+  FaUsers,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import type { CollaboPlaylist } from "../../types/playlist";
 
@@ -29,11 +37,17 @@ function statusCheck(deadlineStr?: string): string | null {
 function useTimeLeft(deadlineStr?: string) {
   const [timeLeft, setTimeLeft] = useState("");
   useEffect(() => {
-    if (!deadlineStr) { setTimeLeft(""); return; }
+    if (!deadlineStr) {
+      setTimeLeft("");
+      return;
+    }
     let timer: ReturnType<typeof setTimeout>;
     const update = () => {
       const diff = new Date(deadlineStr).getTime() - Date.now();
-      if (diff <= 0) { setTimeLeft(""); return; }
+      if (diff <= 0) {
+        setTimeLeft("");
+        return;
+      }
       const days = Math.floor(diff / 86400000);
       const hours = Math.floor((diff % 86400000) / 3600000);
       const minutes = Math.floor((diff % 3600000) / 60000);
@@ -50,7 +64,13 @@ function useTimeLeft(deadlineStr?: string) {
   return timeLeft;
 }
 
-function PlaylistCard({ playlist, onLike }: { playlist: CollaboPlaylist; onLike: (p: CollaboPlaylist) => void }) {
+function PlaylistCard({
+  playlist,
+  onLike,
+}: {
+  playlist: CollaboPlaylist;
+  onLike: (p: CollaboPlaylist) => void;
+}) {
   const navigate = useNavigate();
   const timeLeft = useTimeLeft(playlist.deadline);
   const isClosed = playlist.deadline ? new Date() > new Date(playlist.deadline) : false;
@@ -62,7 +82,7 @@ function PlaylistCard({ playlist, onLike }: { playlist: CollaboPlaylist; onLike:
     >
       <div className="flex gap-6 p-5">
         {/* 썸네일 */}
-        <div className="relative flex items-center justify-center flex-shrink-0 w-36 h-36 rounded-lg overflow-hidden bg-slate-700">
+        <div className="relative flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg w-36 h-36 bg-slate-700">
           {playlist.imageUrl ? (
             <img
               src={`http://localhost:8080${playlist.imageUrl}`}
@@ -75,20 +95,22 @@ function PlaylistCard({ playlist, onLike }: { playlist: CollaboPlaylist; onLike:
         </div>
 
         {/* 정보 */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center">
+        <div className="flex flex-col justify-center flex-1 min-w-0">
           <div className="flex items-start justify-between mb-1">
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center min-w-0 gap-3">
               <h3 className="text-xl font-bold truncate">{playlist.title}</h3>
               {(() => {
                 const d = statusCheck(playlist.deadline);
                 if (!d) return null;
                 const closed = d === "마감";
                 return (
-                  <span className={`shrink-0 px-3 py-1 rounded-full text-sm font-semibold border ${
-                    closed
-                      ? "bg-gray-500/20 text-gray-400 border-gray-500/30"
-                      : "bg-green-500/20 text-green-300 border-green-500/30"
-                  }`}>
+                  <span
+                    className={`shrink-0 px-3 py-1 rounded-full text-sm font-semibold border ${
+                      closed
+                        ? "bg-gray-500/20 text-gray-400 border-gray-500/30"
+                        : "bg-green-500/20 text-green-300 border-green-500/30"
+                    }`}
+                  >
                     {d}
                   </span>
                 );
@@ -98,7 +120,9 @@ function PlaylistCard({ playlist, onLike }: { playlist: CollaboPlaylist; onLike:
           </div>
 
           {playlist.description && (
-            <p className="mb-2 text-base text-gray-400 line-clamp-1 w-4/5">{playlist.description}</p>
+            <p className="w-4/5 mb-2 text-base text-gray-400 line-clamp-1">
+              {playlist.description}
+            </p>
           )}
 
           <div className="flex flex-wrap items-center gap-4 text-base text-gray-400">
@@ -118,10 +142,10 @@ function PlaylistCard({ playlist, onLike }: { playlist: CollaboPlaylist; onLike:
                 <span>{timeAgo(playlist.createdAt)}</span>
               </div>
             )}
-            {playlist.creatorEmail && (
+            {playlist.creatorName && (
               <div className="flex items-center gap-1.5">
                 <FaUser size={14} />
-                <span className="font-semibold text-white">{playlist.creatorEmail}</span>
+                <span className="font-semibold text-white">{playlist.creatorName}</span>
               </div>
             )}
             <button
@@ -130,7 +154,10 @@ function PlaylistCard({ playlist, onLike }: { playlist: CollaboPlaylist; onLike:
                   ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
                   : "bg-white/10 text-gray-400 hover:bg-white/20"
               }`}
-              onClick={(e) => { e.stopPropagation(); onLike(playlist); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onLike(playlist);
+              }}
             >
               <FaHeart size={13} />
               <span>{playlist.likeCount ?? 0}</span>

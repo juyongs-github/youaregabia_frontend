@@ -45,6 +45,10 @@ export const playlistApi = {
     return api.put(`/playlist/collabo/${playlistId}/reopen`, null, { params: { email, newDeadline } });
   },
 
+  importCollabo: (playlistId: number, email: string) => {
+    return api.post(`/playlist/collabo/${playlistId}/import`, null, { params: { email } });
+  },
+
   // 곡
   getPlaylistSongs: (playlistId: number) => {
     return api.get(`/playlist/${playlistId}/songs`);

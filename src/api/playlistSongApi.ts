@@ -5,6 +5,7 @@ import type { Song } from "../components/ui/SongListItem";
 export interface CollaboSong extends Song {
   playlistSongId: number;
   suggestedByEmail?: string;
+  suggestedByName?: string;
   voteCount?: number;
   hasVoted?: boolean;
   reason?: string;
@@ -35,5 +36,9 @@ export const playlistSongApi = {
   // 투표 취소
   cancelVote: (playlistId: number, playlistSongId: number, email: string) =>
     api.delete(`/playlist/${playlistId}/songs/${playlistSongId}/vote`, { params: { email } }),
+
+  // 추가 이유 수정
+  updateReason: (playlistSongId: number, email: string, reason: string) =>
+    api.patch(`/playlist/songs/${playlistSongId}/reason`, null, { params: { email, reason } }),
 
 };

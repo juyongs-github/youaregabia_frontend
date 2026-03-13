@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { reviewApi } from "../../api/reviewApi";
-import { playlistApi } from "../../api/playlistApi";
 import { playlistSongApi } from "../../api/playlistSongApi";
 import type { Song } from "../../components/ui/SongListItem";
 import Rating from "@mui/material/Rating";
@@ -28,15 +27,11 @@ interface Review {
   id: number;
   rating: number;
   content: string;
-  userEmail?: string;
+  userName?: string;
   playlistId?: number;
   playlistTitle?: string;
+  imageUrl?: string;
   createdAt?: string;
-}
-
-interface PlaylistInfo {
-  title: string;
-  imageUrl: string;
 }
 
 type TabType = "all" | "mine";
@@ -52,9 +47,6 @@ function PlaylistReviewPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [ratingFilter, setRatingFilter] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>(locationState.searchQuery ?? "");
-
-  // 플레이리스트 id → { title, imageUrl } 맵
-  const [playlistInfoMap, setPlaylistInfoMap] = useState<Map<number, PlaylistInfo>>(new Map());
 
   // 인라인 수정 상태
   const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
@@ -83,20 +75,6 @@ function PlaylistReviewPage() {
     setPlayKey((k) => k + 1);
   };
 
-  const fetchPlaylistInfos = async () => {
-    try {
-      const res = await playlistApi.getAllPlaylist(user?.email);
-      const playlists: any[] = res.data || [];
-      const map = new Map<number, PlaylistInfo>();
-      playlists.forEach((p) => {
-        if (p.id != null) map.set(p.id, { title: p.title ?? "", imageUrl: p.imageUrl ?? "" });
-      });
-      setPlaylistInfoMap(map);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const fetchAllReviews = async () => {
     setIsLoading(true);
     try {
@@ -121,10 +99,6 @@ function PlaylistReviewPage() {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchPlaylistInfos();
-  }, []);
 
   useEffect(() => {
     if (activeTab === "all") {
@@ -206,11 +180,6 @@ function PlaylistReviewPage() {
     }
   };
 
-  const getPlaylistInfo = (review: Review): PlaylistInfo | undefined => {
-    if (review.playlistId != null) return playlistInfoMap.get(review.playlistId);
-    return undefined;
-  };
-
   const maskEmail = (email?: string) => {
     if (!email) return "익명";
     const [local, domain] = email.split("@");
@@ -226,8 +195,7 @@ function PlaylistReviewPage() {
     const q = searchQuery.trim().toLowerCase();
     if (q) {
       result = result.filter((r) => {
-        const info = getPlaylistInfo(r);
-        const title = (r.playlistTitle ?? info?.title ?? "").toLowerCase();
+        const title = (r.playlistTitle ?? "").toLowerCase();
         const content = r.content.toLowerCase();
         const songs = r.playlistId != null ? (playlistSongsMap.get(r.playlistId) ?? []) : [];
         const songMatch = songs.some(
@@ -342,9 +310,8 @@ function PlaylistReviewPage() {
         ) : (
           <div className="flex flex-col gap-4">
             {currentReviews.map((review) => {
-              const info = getPlaylistInfo(review);
-              const title = review.playlistTitle ?? info?.title;
-              const imageUrl = info?.imageUrl ? `${BASE_URL}${info.imageUrl}` : null;
+              const title = review.playlistTitle;
+              const imageUrl = review.imageUrl ? `${BASE_URL}${review.imageUrl}` : null;
 
               const pid = review.playlistId;
               const isExpanded = pid != null && expandedIds.has(pid);
@@ -456,7 +423,7 @@ function PlaylistReviewPage() {
 
                       <div className="flex items-center justify-between mt-auto">
                         <span className="text-sm text-bold text-white/50">
-                          작성자: {maskEmail(review.userEmail)}
+                          작성자: {review.userName}
                         </span>
 
                         {review.createdAt && (
