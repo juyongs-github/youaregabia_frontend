@@ -33,6 +33,8 @@ import PlaylistReviewPage from "./pages/playlist/PlaylistReviewPage";
 import BlindRecommendPage from "./pages/recommend/BlindRecommendPage";
 import MusicQuizPage from "./pages/game/MusicQuizPage";
 import AlbumQuizPage from "./pages/game/AlbumQuizPage";
+import CriticWrite from "./pages/recommend/CriticWrite";
+import CriticListPage from "./pages/recommend/CriticListPage";
 
 function App() {
   // 2. Redux Store에서 로그인 여부 가져오기
@@ -48,6 +50,9 @@ function App() {
         <Route path="/search" element={<SearchResult />} />
         <Route path="/recommend/result" element={<RecommendPlaylistResult />} />
         <Route path="/recommend/blind" element={<BlindRecommendPage />} />
+        <Route path="/recommend/critic/write" element={<CriticWrite />} />
+        <Route path="/recommend/critic/:boardId" element={<BoardDetailPage />} />
+        <Route path="/recommend/critic" element={<CriticListPage />} />
         <Route path="/game/music-quiz" element={<MusicQuizPage />} />
         <Route path="/game/album-quiz" element={<AlbumQuizPage />} />
         <Route path="/playlist/me" element={<MyPlaylistPage />} />

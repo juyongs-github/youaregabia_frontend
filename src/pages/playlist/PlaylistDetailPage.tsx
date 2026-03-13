@@ -8,7 +8,7 @@ import { BsThreeDots } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import type { Song } from "../../components/ui/SongListItem";
 import MusicPlayer from "../../components/layout/MusicPlayer";
-import AddSongsModal from "../../Components/ui/AddSongsModal";
+import AddSongsModal from "../../components/ui/AddSongsModal";
 
 function PlaylistDetailPage() {
   const navigate = useNavigate();
@@ -156,16 +156,14 @@ function PlaylistDetailPage() {
       setAllMode(false);
     }
   }, [isEditMode]);
-
+  // 플레이리스트 공유
   const handleShare = () => {
     if (!confirm("플레이리스트 공유하시겠습니까?")) return;
 
-    const songList = songs.map((s) => s.trackName).join("\n");
-
     navigate("/community/share/new", {
       state: {
-        title: data?.title ?? "",
-        content: `🎵 ${data?.title}\n\n수록곡\n${songList}`,
+        playlistId: Number(playlistId),
+        playlistTitle: data?.title ?? "",
       },
     });
   };

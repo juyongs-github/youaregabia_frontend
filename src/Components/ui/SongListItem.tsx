@@ -1,13 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { GoDotFill } from "react-icons/go";
 import IconButton from "@mui/material/IconButton";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import { FaHeadphones, FaMusic } from "react-icons/fa";
+import { FaHeadphones, FaInfoCircle, FaMusic } from "react-icons/fa";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { useNavigate } from "react-router-dom";
+import SongDetailModal from "./SongDetailModal";
 
 export interface Song {
   id: number;
@@ -31,6 +32,7 @@ function SongListItem({ song, setSelectSong }: SongProps) {
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -98,29 +100,42 @@ function SongListItem({ song, setSelectSong }: SongProps) {
             </ListItemIcon>
             <ListItemText>미리듣기</ListItemText>
           </MenuItem>
-            <MenuItem
-              onClick={() => {
-                navigate("/recommend/result", {
-                  state: {
-                    trackName: song.trackName,
-                    artistName: song.artistName,
-                    coverImageUrl: song.imgUrl,
-                  },
-                });
-              }}
-              sx={{
-                color: "white",
-                fontWeight: "bold",
-                py: 1.5,
-              }}
-            >
-              <ListItemIcon sx={{ color: "white" }}>
-                <FaMusic size={20} />
-              </ListItemIcon>
-              <ListItemText>유사 곡 추천</ListItemText>
-            </MenuItem>
+          <MenuItem
+            onClick={() => {
+              navigate("/recommend/result", {
+                state: {
+                  trackName: song.trackName,
+                  artistName: song.artistName,
+                  coverImageUrl: song.imgUrl,
+                },
+              });
+            }}
+            sx={{
+              color: "white",
+              fontWeight: "bold",
+              py: 1.5,
+            }}
+          >
+            <ListItemIcon sx={{ color: "white" }}>
+              <FaMusic size={20} />
+            </ListItemIcon>
+            <ListItemText>유사 곡 추천</ListItemText>
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setIsDetailOpen(true);
+              handleClose();
+            }}
+            sx={{ color: "white", fontWeight: "bold", py: 1.5 }}
+          >
+            <ListItemIcon sx={{ color: "white" }}>
+              <FaInfoCircle size={20} />
+            </ListItemIcon>
+            <ListItemText>상세보기</ListItemText>
+          </MenuItem>
         </Menu>
       </div>
+      {isDetailOpen && <SongDetailModal song={song} onClose={() => setIsDetailOpen(false)} />}
     </div>
   );
 }

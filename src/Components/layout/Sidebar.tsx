@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaChevronDown, FaCompass, FaHome, FaMinus, FaUsers } from "react-icons/fa";
+import { FaChevronDown, FaCompass, FaGamepad, FaHome, FaMinus, FaUsers } from "react-icons/fa";
 import { PiPlaylistBold } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -9,6 +9,13 @@ function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const userRole = useSelector((state: RootState) => state.auth.user?.role);
+
+  // 현재 어떤 메뉴가 열려 있는지 관리 (null이면 모두 닫힘)
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  // 토글메뉴와 연동하여 하나의 메뉴만 열리도록
+  const toggleMenu = (menuName: string) => {
+    setOpenMenu(openMenu === menuName ? null : menuName);
+  };
 
   const goPage = (path: string) => {
     if (location.pathname === path) {
@@ -21,6 +28,7 @@ function Sidebar() {
   const [isRecommendMenuOpen, setIsRecommendMenuOpen] = useState<boolean>(false);
   const [isPlaylistMenuOpen, setIsPlaylistMenuOpen] = useState<boolean>(false);
   const [isCommunityMenuOpen, setIsCommunityMenuOpen] = useState<boolean>(false);
+  const [isGameMenuOpen, setIsGameMenuOpen] = useState<boolean>(false);
 
   return (
     <aside className="fixed left-0 border-r border-gray-800 w-80 top-20 h-[calc(100vh-5rem)]">
@@ -35,19 +43,19 @@ function Sidebar() {
         {/* 추천 메뉴 */}
         <div>
           <button
-            onClick={() => setIsRecommendMenuOpen(!isRecommendMenuOpen)}
+            onClick={() => toggleMenu("recommend")}
             className="flex items-center w-full gap-5 px-3 py-2 text-white rounded-lg hover:bg-gray-800"
           >
             <FaCompass size={24} />
             <span>추천</span>
             <FaChevronDown
               size={16}
-              className={`ml-auto transition-transform ${isRecommendMenuOpen ? "rotate-180" : ""}`}
+              className={`ml-auto transition-transform ${openMenu === "recommend" ? "rotate-180" : ""}`}
             />
           </button>
 
           {/* 추천 하위 메뉴 */}
-          {isRecommendMenuOpen && (
+          {openMenu === "recommend" && (
             <div className="mt-3 ml-5 space-y-2 text-[17px] font-semibold">
               <button
                 className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
@@ -65,10 +73,17 @@ function Sidebar() {
               </button>
               <button
                 className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
-                onClick={() => goPage("/game/music-quiz")}
+                onClick={() => goPage("/recommend/critic/write")}
               >
                 <FaMinus size={12} />
-                <span>노래 맞추기</span>
+                <span>음악 평론 작성</span>
+              </button>
+              <button
+                className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
+                onClick={() => goPage("/recommend/critic")}
+              >
+                <FaMinus size={12} />
+                <span>음악 평론</span>
               </button>
             </div>
           )}
@@ -77,19 +92,19 @@ function Sidebar() {
         {/* 플레이리스트 메뉴 */}
         <div>
           <button
-            onClick={() => setIsPlaylistMenuOpen(!isPlaylistMenuOpen)}
+            onClick={() => toggleMenu("playlist")}
             className="flex items-center w-full gap-5 px-3 py-2 text-white rounded-lg hover:bg-gray-800"
           >
             <PiPlaylistBold size={24} />
             <span>플레이리스트</span>
             <FaChevronDown
               size={16}
-              className={`ml-auto transition-transform ${isPlaylistMenuOpen ? "rotate-180" : ""}`}
+              className={`ml-auto transition-transform ${openMenu === "playlist" ? "rotate-180" : ""}`}
             />
           </button>
 
           {/* 플레이리스트 하위 메뉴 */}
-          {isPlaylistMenuOpen && (
+          {openMenu === "playlist" && (
             <div className="mt-3 ml-5 space-y-2 text-[17px] font-semibold">
               <button
                 className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
@@ -112,19 +127,19 @@ function Sidebar() {
         {/* 커뮤니티 메뉴 */}
         <div>
           <button
-            onClick={() => setIsCommunityMenuOpen(!isCommunityMenuOpen)}
+            onClick={() => toggleMenu("community")}
             className="flex items-center w-full gap-5 px-3 py-2 text-white rounded-lg hover:bg-gray-800"
           >
             <FaUsers size={24} />
             <span>커뮤니티</span>
             <FaChevronDown
               size={16}
-              className={`ml-auto transition-transform ${isCommunityMenuOpen ? "rotate-180" : ""}`}
+              className={`ml-auto transition-transform${openMenu === "community" ? "rotate-180" : ""}`}
             />
           </button>
 
           {/* 커뮤니티 하위 메뉴 */}
-          {isCommunityMenuOpen && (
+          {openMenu === "community" && (
             <div className="mt-3 ml-5 space-y-2 text-[17px] font-semibold">
               <button
                 className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
@@ -153,19 +168,19 @@ function Sidebar() {
         {/* 게임 메뉴 */}
         <div>
           <button
-            onClick={() => setIsRecommendMenuOpen(!isRecommendMenuOpen)}
+            onClick={() => toggleMenu("game")}
             className="flex items-center w-full gap-5 px-3 py-2 text-white rounded-lg hover:bg-gray-800"
           >
-            <FaCompass size={24} />
+            <FaGamepad size={24} />
             <span>게임</span>
             <FaChevronDown
               size={16}
-              className={`ml-auto transition-transform ${isRecommendMenuOpen ? "rotate-180" : ""}`}
+              className={`ml-auto transition-transform ${openMenu === "game" ? "rotate-180" : ""}`}
             />
           </button>
 
           {/* 게임 하위 메뉴 */}
-          {isRecommendMenuOpen && (
+          {openMenu === "game" && (
             <div className="mt-3 ml-5 space-y-2 text-[17px] font-semibold">
               <button
                 className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"

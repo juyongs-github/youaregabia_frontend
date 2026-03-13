@@ -21,6 +21,17 @@ export interface Board {
   replies?: PageResult<Reply>;
   viewCount: number;
   writerEmail: string;
+  songs?: BoardSong[];
+  likeCount: number;
+  likedByMe: boolean;
+}
+
+export interface BoardSong {
+  songId: number;
+  trackName: string;
+  artistName: string;
+  imgUrl: string;
+  orderIndex: number;
 }
 
 export interface PageResult<T> {
