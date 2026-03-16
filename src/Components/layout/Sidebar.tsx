@@ -173,13 +173,15 @@ function Sidebar() {
                 <FaMinus size={12} />
                 <span>굿즈샵</span>
               </button>
-              <button
-                className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
-                onClick={() => goPage("/goods/cart")}
-              >
-                <FaMinus size={12} />
-                <span>장바구니</span>
-              </button>
+              {userRole !== "ADMIN" && (
+                <button
+                  className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
+                  onClick={() => goPage("/goods/cart")}
+                >
+                  <FaMinus size={12} />
+                  <span>장바구니</span>
+                </button>
+              )}
             </div>
           )}
         </div>
