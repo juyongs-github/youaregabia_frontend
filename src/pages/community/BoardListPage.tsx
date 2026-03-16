@@ -4,6 +4,8 @@ import { boardApi } from "../../api/boardApi";
 import type { Board, PageResult } from "../../types/board";
 import { Link, useNavigate } from "react-router-dom";
 import Pagination from "../../components/ui/Pagination";
+import BoardItem from "../../components/ui/BoardItem";
+import BoardSortBar from "../../components/ui/BoardSortBar";
 
 const BoardListPage = () => {
   // 페이징 관리
@@ -13,9 +15,10 @@ const BoardListPage = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const navigate = useNavigate();
   const [genre, setGenre] = useState<string | undefined>(undefined);
+  const [sortBy, setSortBy] = useState("latest");
 
   // 페이지 데이터 불러오기
-  const loadPage = async (page: number, search?: string, currentGenre?: string) => {
+  const loadPage = async (page: number, search?: string, currentGenre?: string, sort?: string) => {
     try {
       const params: {
         page: number;
@@ -23,10 +26,12 @@ const BoardListPage = () => {
         keyword?: string;
         genre?: string;
         boardType?: "PLAYLIST_SHARE";
+        sort?: string;
       } = {
         page,
         size: 10,
         boardType: "PLAYLIST_SHARE" as const,
+        sort: sort ?? sortBy,
       };
       if (search) {
         params.keyword = search;
@@ -74,6 +79,12 @@ const BoardListPage = () => {
     loadPage(1, undefined, genre);
   };
 
+  // 정렬 바뀔 때 1페이지로 이동
+  const handleSortChange = (sort: string) => {
+    setSortBy(sort);
+    loadPage(1, searchKeyword, genre, sort);
+  };
+
   //  로딩 중
   if (!pageData) {
     return <div className="p-4 text-center">로딩 중...</div>;
@@ -114,46 +125,20 @@ const BoardListPage = () => {
           </button>
         </div>
       </div>
-
-      {/* 게시글 목록, 삼항연산자 사용 */}
+      <BoardSortBar sortBy={sortBy} onChange={handleSortChange} />
+      {/* 게시글 목록 Item으로 뺌 */}
       <ul className="divide-y divide-neutral-700 rounded border border-neutral-700">
         {pageData.dtoList.length > 0 ? (
-          pageData.dtoList.map((board) => (
-            <li key={board.boardId}>
-              <button
-                className="block w-full px-4 py-3 text-left hover:bg-neutral-800"
-                onClick={() => navigate(`/community/share/${board.boardId}`)}
-              >
-                <div className="flex items-center justify-between">
-                  {/* 왼쪽: 제목 */}
-                  <span className="text-indigo-400 font-medium truncate mr-4">
-                    [{board.boardGenre}] {board.title}
-                  </span>
-
-                  {/* 오른쪽: 작성자와 조회수를 하나로 묶음 */}
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-sm text-gray-400">{board.writer}</span>
-                    <span className="text-xs text-gray-500 border-l border-neutral-700 pl-3">
-                      조회 {board.viewCount}
-                    </span>
-                  </div>
-                </div>
-                <div className="mt-1 text-xs text-gray-500">
-                  {new Date(board.createdAt).toLocaleDateString("ko-KR")}
-                </div>
-              </button>
-            </li>
-          ))
+          pageData.dtoList.map((board) => <BoardItem key={board.boardId} board={board} />)
         ) : (
           <li className="px-4 py-8 text-center text-gray-500">게시글이 없습니다</li>
         )}
       </ul>
-
       {/* 검색바 */}
       <div className="mb-4 flex gap-2">
         <input
           type="text"
-          placeholder="제목으로 검색..."
+          placeholder="검색"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           onKeyDown={handleEnter}

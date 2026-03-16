@@ -44,11 +44,16 @@ const MusicQuizPage = () => {
 
     const answer = normalize(currentSong.trackName);
     const userInput = normalize(input);
-
     const isCorrect = answer.includes(userInput) || userInput.includes(answer);
 
     if (isCorrect) {
-      setScore((prev) => prev + 1);
+      let gained = 0;
+      if (timer < 10)
+        gained = 10; // 10초 이내: 10점
+      else if (timer < 20)
+        gained = 6; // 20초 이내: 6점
+      else gained = 3; // 30초 이내: 3점
+      setScore((prev) => prev + gained);
       setCorrectSongIds((prev) => new Set(prev).add(currentSong.id));
       setFeedback("correct");
     } else {
@@ -91,7 +96,6 @@ const MusicQuizPage = () => {
       isTransitioning = true; // 언마운트 시 플래그 정리
       clearInterval(interval);
     };
-    // feedback을 의존성에 넣으면 매 초 타이머가 재시작되므로 절대 넣지 마세요.
   }, [currentIndex, songs]);
 
   const handleEnter = (e: React.KeyboardEvent) => {

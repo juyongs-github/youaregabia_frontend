@@ -73,13 +73,6 @@ function Sidebar() {
               </button>
               <button
                 className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
-                onClick={() => goPage("/recommend/critic/write")}
-              >
-                <FaMinus size={12} />
-                <span>음악 평론 작성</span>
-              </button>
-              <button
-                className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
                 onClick={() => goPage("/recommend/critic")}
               >
                 <FaMinus size={12} />
@@ -195,6 +188,13 @@ function Sidebar() {
               >
                 <FaMinus size={12} />
                 <span>앨범 맞추기</span>
+              </button>
+              <button
+                className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
+                onClick={() => goPage("/game/card-match")}
+              >
+                <FaMinus size={12} />
+                <span>카드 맞추기</span>
               </button>
             </div>
           )}

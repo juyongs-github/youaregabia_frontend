@@ -5,6 +5,8 @@ import type { Board, PageResult } from "../../types/board";
 import Pagination from "../../components/ui/Pagination";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
+import BoardSortBar from "../../components/ui/BoardSortBar";
+import BoardItem from "../../components/ui/BoardItem";
 
 const CriticListPage = () => {
   const [pageData, setPageData] = useState<PageResult<Board> | null>(null);
@@ -12,20 +14,33 @@ const CriticListPage = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const navigate = useNavigate();
   const userRole = useSelector((state: RootState) => state.auth.user?.role);
+  const [sortBy, setSortBy] = useState("latest");
 
-  const loadPage = async (page: number, search?: string) => {
+  const loadPage = async (page: number, search?: string, sort?: string) => {
     try {
-      const data = await boardApi.getCriticList({ page, size: 10 }, search);
+      // params 객체 타입을 명시하여 타입 에러 방지
+      const params: {
+        page: number;
+        size: number;
+        sort?: string;
+      } = {
+        page,
+        size: 10,
+        sort: sort ?? sortBy,
+      };
+
+      const data = await boardApi.getCriticList(params, search);
       setPageData(data);
     } catch (error) {
       console.error("평론 목록 로드 실패:", error);
     }
   };
-
+  // 초기 로드
   useEffect(() => {
     loadPage(1);
   }, []);
 
+  // 검색 실행
   const handleSearch = () => {
     setSearchKeyword(keyword);
     loadPage(1, keyword);
@@ -41,9 +56,16 @@ const CriticListPage = () => {
     loadPage(1);
   };
 
+  // 페이지 변경
   const handlePageChange = (page: number) => {
     loadPage(page, searchKeyword);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // 정렬 바뀔 때 1페이지로 이동
+  const handleSortChange = (sort: string) => {
+    setSortBy(sort);
+    loadPage(1, searchKeyword, sort);
   };
 
   if (!pageData) {
@@ -68,11 +90,24 @@ const CriticListPage = () => {
         )}
       </div>
 
+      {/* 정렬 바 */}
+      <BoardSortBar sortBy={sortBy} onChange={handleSortChange} />
+
+      {/* 평론 목록 */}
+      <ul className="divide-y divide-neutral-700 rounded border border-neutral-700">
+        {pageData.dtoList.length > 0 ? (
+          pageData.dtoList.map((board) => (
+            <BoardItem key={board.boardId} board={board} basePath="/recommend/critic" />
+          ))
+        ) : (
+          <li className="px-4 py-8 text-center text-gray-500">평론이 없습니다.</li>
+        )}
+      </ul>
       {/* 검색바 */}
       <div className="mb-4 flex gap-2">
         <input
           type="text"
-          placeholder="평론 제목으로 검색..."
+          placeholder="검색"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           onKeyDown={handleEnter}
@@ -99,40 +134,6 @@ const CriticListPage = () => {
           '{searchKeyword}' 검색 결과: {pageData.totalCount}개
         </div>
       )}
-
-      {/* 평론 목록 */}
-      <ul className="divide-y divide-neutral-700 rounded border border-neutral-700">
-        {pageData.dtoList.length > 0 ? (
-          pageData.dtoList.map((board) => (
-            <li key={board.boardId}>
-              <button
-                className="block w-full px-4 py-4 text-left hover:bg-neutral-800"
-                onClick={() => navigate(`/recommend/critic/${board.boardId}`)}
-              >
-                {/* 평론 대상 곡 */}
-                {board.songs && board.songs.length > 0 && (
-                  <div className="mb-2 flex items-center gap-2">
-                    <img src={board.songs[0].imgUrl} className="w-8 h-8 rounded object-cover" />
-                    <span className="text-xs text-gray-400">
-                      {board.songs[0].trackName} - {board.songs[0].artistName}
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-white">{board.title}</span>
-                  <span className="text-sm text-gray-500">{board.writer}</span>
-                </div>
-                <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
-                  <span>{new Date(board.createdAt).toLocaleDateString("ko-KR")}</span>
-                  <span>조회 {board.viewCount}</span>
-                </div>
-              </button>
-            </li>
-          ))
-        ) : (
-          <li className="px-4 py-8 text-center text-gray-500">평론이 없습니다.</li>
-        )}
-      </ul>
 
       {/* 페이지네이션 */}
       {pageData.pageNumList.length > 0 && (

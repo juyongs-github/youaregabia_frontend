@@ -72,6 +72,7 @@ const AlbumQuizPage = () => {
       setTimeout(() => setFeedback(null), 1000);
       return;
     }
+
     const artistCorrect =
       normalize(currentSong.artistName).includes(normalize(artistInput)) ||
       normalize(artistInput).includes(normalize(currentSong.artistName));
@@ -95,6 +96,18 @@ const AlbumQuizPage = () => {
         setTimeout(() => setFeedback(null), 800);
       }
     }
+  };
+
+  const handleSkip = () => {
+    if (!currentSong || feedback) return;
+
+    // 1. 오답 처리 (gainedScore는 0으로 유지)
+    setFeedback("wrong");
+    setRevealed(true); // 정답을 보여줌
+    setTries(MAX_TRIES); // 기회를 다 쓴 것으로 처리 (시각적 일관성)
+
+    // 2. 1.5초 뒤 다음 문제로 이동 (기존 goNext 활용)
+    goNext();
   };
 
   const handleEnter = (e: React.KeyboardEvent) => {
@@ -208,6 +221,14 @@ const AlbumQuizPage = () => {
             className="rounded bg-indigo-600 px-5 py-3 font-semibold hover:bg-indigo-500 disabled:opacity-50"
           >
             정답 제출
+          </button>
+          {/* 스킵 버튼 */}
+          <button
+            onClick={handleSkip}
+            disabled={!!feedback}
+            className="mt-2 text-sm text-gray-500 hover:text-gray-300 transition-colors disabled:opacity-50"
+          >
+            모르겠어요 → 넘기기
           </button>
         </div>
       )}

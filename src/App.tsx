@@ -35,6 +35,7 @@ import MusicQuizPage from "./pages/game/MusicQuizPage";
 import AlbumQuizPage from "./pages/game/AlbumQuizPage";
 import CriticWrite from "./pages/recommend/CriticWrite";
 import CriticListPage from "./pages/recommend/CriticListPage";
+import MatchingGamePage from "./pages/game/MatchingGamePage";
 
 function App() {
   // 2. Redux Store에서 로그인 여부 가져오기
@@ -55,6 +56,7 @@ function App() {
         <Route path="/recommend/critic" element={<CriticListPage />} />
         <Route path="/game/music-quiz" element={<MusicQuizPage />} />
         <Route path="/game/album-quiz" element={<AlbumQuizPage />} />
+        <Route path="/game/card-match" element={<MatchingGamePage />} />
         <Route path="/playlist/me" element={<MyPlaylistPage />} />
         <Route path="/playlist/me/:playlistId" element={<PlaylistDetailPage />} />
         <Route path="/playlist/review" element={<PlaylistReviewPage />} />
