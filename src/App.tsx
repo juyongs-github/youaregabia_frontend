@@ -33,6 +33,11 @@ import PlaylistReviewPage from "./pages/playlist/PlaylistReviewPage";
 import BlindRecommendPage from "./pages/recommend/BlindRecommendPage";
 import MusicQuizPage from "./pages/game/MusicQuizPage";
 import AlbumQuizPage from "./pages/game/AlbumQuizPage";
+import GoodsListPage from "./pages/goods/GoodsListPage";
+import GoodsDetailPage from "./pages/goods/GoodsDetailPage";
+import CartPage from "./pages/goods/CartPage";
+import OrderPage from "./pages/goods/OrderPage";
+import OrderCompletePage from "./pages/goods/OrderCompletePage";
 
 function App() {
   // 2. Redux Store에서 로그인 여부 가져오기
@@ -65,6 +70,11 @@ function App() {
         <Route path="/community/free/:boardId/update" element={<FreeBoardUpdate />} />
         <Route path="/profile/me" element={<MyPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/goods" element={<GoodsListPage />} />
+        <Route path="/goods/:goodsId" element={<GoodsDetailPage />} />
+        <Route path="/goods/cart" element={<CartPage />} />
+        <Route path="/goods/order" element={<OrderPage />} />
+        <Route path="/goods/order/complete" element={<OrderCompletePage />} />
       </Route>
       {/* 아닌 것들은 여기 밑으로 Route 추가 */}
       {/* 4. 로그인하지 않은 사용자만 접근 가능한 경로 (이미 로그인했다면 홈으로 이동) */}
