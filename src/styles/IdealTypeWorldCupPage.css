@@ -5,7 +5,7 @@
    ============================================================ */
 .wc-page {
   min-height: 100vh;
-  background: #0c0c12;
+  background: #000000;
   font-family: "DM Sans", sans-serif;
   color: #f0f0f8;
   display: flex;
@@ -13,8 +13,6 @@
   align-items: center;
   justify-content: center;
   padding: 32px 20px;
-  position: relative;
-  overflow: hidden;
 }
 
 .wc-page *,
@@ -26,41 +24,9 @@
 }
 
 /* ============================================================
-   AMBIENT BACKGROUND BLOBS
-   ============================================================ */
-.wc-bg-blobs {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.wc-bg-blob-left {
-  position: absolute;
-  top: -20%;
-  left: -10%;
-  width: 55vw;
-  height: 55vw;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(160, 50, 220, 0.07) 0%, transparent 70%);
-}
-
-.wc-bg-blob-right {
-  position: absolute;
-  bottom: -20%;
-  right: -10%;
-  width: 48vw;
-  height: 48vw;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(50, 100, 255, 0.06) 0%, transparent 70%);
-}
-
-/* ============================================================
    INNER CONTAINER
    ============================================================ */
 .wc-inner {
-  position: relative;
-  z-index: 1;
   width: 100%;
   max-width: 880px;
   display: flex;
@@ -90,12 +56,7 @@
   font-family: "Bebas Neue", sans-serif;
   font-size: clamp(58px, 14vw, 100px);
   line-height: 0.85;
-  background: linear-gradient(135deg, #ff6b9d 0%, #cc44ff 40%, #4488ff 80%, #44ddff 100%);
-  background-size: 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: wc-gradShift 4s ease infinite;
+  color: #f0f0f8;
   margin-bottom: 14px;
 }
 
@@ -192,7 +153,7 @@
   width: 15px;
   height: 15px;
   border: 2px solid #222;
-  border-top-color: #cc44ff;
+  border-top-color: #fff;
   border-radius: 50%;
   animation: wc-spin 0.7s linear infinite;
   flex-shrink: 0;
@@ -217,9 +178,6 @@
   letter-spacing: 3px;
   color: #f0f0f8;
   margin-bottom: 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .wc-round-meta {
@@ -242,7 +200,7 @@
 
 .wc-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #cc44ff, #4488ff);
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 2px;
   transition: width 0.55s ease;
 }
@@ -251,7 +209,7 @@
   display: grid;
   grid-template-columns: 1fr 52px 1fr;
   gap: 12px;
-  align-items: center;
+  align-items: stretch; /* 양쪽 카드 높이 동일하게 */
 }
 
 .wc-vs-label {
@@ -261,10 +219,19 @@
   letter-spacing: 1px;
   text-align: center;
   user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .wc-card-wrap {
   display: flex;
+  flex-direction: column;
+  min-width: 0; /* grid 셀 너비 초과 방지 */
+}
+
+.wc-card-wrap .wc-card {
+  width: 100%; /* grid 셀 너비를 정확히 채움 */
 }
 
 .wc-game-hint {
@@ -283,33 +250,36 @@
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  background: #111118;
-  cursor: pointer;
+  background: #000000;
+  cursor: default;
   flex: 1;
   min-width: 0;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
 }
 
+/* 호버 시 이 곡 선택 버튼 표시 */
 .wc-card:hover .wc-choose-cta {
   opacity: 1;
 }
 
+/* 선택된 카드 */
 .wc-card--chosen {
   border: 2px solid rgba(255, 255, 255, 0.45);
   transform: scale(1.03) translateY(-6px);
   box-shadow: 0 28px 72px rgba(0, 0, 0, 0.7);
-  cursor: default;
 }
 
+/* 탈락한 카드 */
 .wc-card--loser {
   border: 1px solid rgba(255, 255, 255, 0.04);
   transform: scale(0.95);
   opacity: 0.18;
   filter: grayscale(1);
-  cursor: default;
 }
 
-/* Album art wrapper */
+/* 앨범 커버 wrapper — 1:1 비율 유지 */
 .wc-card-art {
   position: relative;
   padding-bottom: 100%;
@@ -325,10 +295,12 @@
   transition: transform 0.4s ease;
 }
 
+/* 선택된 카드는 커버 약간 확대 */
 .wc-card--chosen .wc-card-img {
   transform: scale(1.08);
 }
 
+/* 앨범 커버 없을 때 fallback */
 .wc-card-img-fallback {
   position: absolute;
   inset: 0;
@@ -352,6 +324,7 @@
   text-transform: uppercase;
 }
 
+/* 텍스트 가독성을 위한 하단 그라디언트 오버레이 */
 .wc-card-overlay {
   position: absolute;
   inset: 0;
@@ -363,6 +336,7 @@
   background: linear-gradient(to bottom, transparent 20%, rgba(0, 0, 0, 0.9) 100%);
 }
 
+/* 선택된 카드 우상단 뱃지 */
 .wc-card-chosen-badge {
   position: absolute;
   top: 14px;
@@ -376,6 +350,7 @@
   border-radius: 20px;
 }
 
+/* 미리듣기 재생/일시정지 버튼 */
 .wc-card-play-btn {
   position: absolute;
   top: 50%;
@@ -396,11 +371,13 @@
   transition: all 0.2s;
 }
 
+/* 재생 중일 때 버튼 스타일 */
 .wc-card-play-btn--playing {
   background: rgba(255, 255, 255, 0.9);
   color: #000;
 }
 
+/* 재생 진행 바 — 커버 하단에 위치 */
 .wc-card-audio-progress {
   position: absolute;
   bottom: 0;
@@ -416,9 +393,10 @@
   transition: width 0.3s linear;
 }
 
-/* Card info */
+/* 곡 정보 영역 — flex: 1로 남은 공간 채워 카드 높이 통일 */
 .wc-card-info {
   padding: 16px 18px 18px;
+  flex: 1;
 }
 
 .wc-card-title {
@@ -464,28 +442,32 @@
   color: #383848;
 }
 
-/* Hover CTA */
+/* 이 곡 선택 버튼 — 호버 시 표시, 카드 하단 고정 */
 .wc-choose-cta {
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.04);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
+  width: calc(100% - 36px);
+  margin: 0 18px 18px;
+  padding: 12px 0;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  cursor: pointer;
   opacity: 0;
-  transition: opacity 0.2s;
-  pointer-events: none;
+  transition:
+    opacity 0.2s,
+    background 0.2s;
+}
+
+.wc-choose-cta:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .wc-choose-cta-text {
   font-family: "Bebas Neue", sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   letter-spacing: 3px;
   color: #fff;
-  background: rgba(0, 0, 0, 0.55);
-  padding: 9px 22px;
-  border-radius: 28px;
-  backdrop-filter: blur(8px);
+  pointer-events: none;
 }
 
 /* ============================================================
@@ -506,6 +488,7 @@
   margin-bottom: 24px;
 }
 
+/* 우승곡 커버 + 펄스 링 애니메이션 컨테이너 */
 .wc-result-art-wrap {
   position: relative;
   width: 200px;
@@ -521,7 +504,6 @@
 
 .wc-result-pulse-ring--1 {
   inset: -14px;
-  border-radius: 28px;
   animation: wc-pulseRing 1.7s ease-out infinite;
 }
 
@@ -580,6 +562,7 @@
   margin-bottom: 36px;
 }
 
+/* 우승곡 미리듣기 버튼 + 진행 바 */
 .wc-result-preview {
   margin-bottom: 36px;
 }
@@ -612,7 +595,7 @@
 
 .wc-result-preview-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #cc44ff, #4488ff);
+  background: #fff;
   transition: width 0.3s linear;
 }
 
@@ -622,9 +605,10 @@
   justify-content: center;
 }
 
+/* 다시하기 버튼 */
 .wc-btn-restart {
-  background: linear-gradient(135deg, #cc44ff, #4488ff);
-  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
   font-family: "Bebas Neue", sans-serif;
   font-size: 17px;
@@ -637,24 +621,6 @@
 
 .wc-btn-restart:hover {
   transform: scale(1.04);
-}
-
-.wc-btn-reselect {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #666;
-  font-family: "Bebas Neue", sans-serif;
-  font-size: 17px;
-  letter-spacing: 2px;
-  padding: 13px 30px;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.wc-btn-reselect:hover {
-  background: rgba(255, 255, 255, 0.07);
-  color: #999;
 }
 
 /* ============================================================
@@ -677,16 +643,6 @@
   }
 }
 
-@keyframes wc-gradShift {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
 @keyframes wc-pulseRing {
   0% {
     transform: scale(1);
@@ -696,4 +652,430 @@
     transform: scale(1.65);
     opacity: 0;
   }
+}
+
+/* ============================================================
+   WIN LIST — 승리 기록
+   ============================================================ */
+.wc-win-list {
+  width: 100%;
+  max-width: 400px;
+  margin-top: 36px;
+  text-align: left;
+}
+
+.wc-win-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.wc-win-list-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: #404050;
+  text-transform: uppercase;
+}
+
+.wc-win-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 전체 선택/해제 버튼 */
+.wc-win-select-all {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #666;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wc-win-select-all:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #aaa;
+}
+
+/* 플레이리스트 추가 버튼 — 체크 시 표시 */
+.wc-win-add-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.wc-win-add-btn:hover {
+  opacity: 0.85;
+}
+
+/* 추가 성공 메시지 */
+.wc-win-add-success {
+  font-size: 12px;
+  color: #69db7c;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.wc-win-list-items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 승리 기록 아이템 — 클릭으로 체크 토글 */
+.wc-win-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+/* 체크된 아이템 강조 */
+.wc-win-item--checked {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 순위 표시 */
+.wc-win-rank {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 18px;
+  color: #383848;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* 1~3위 금/은/동 색상 — 동순위도 동일하게 적용 */
+.wc-win-item--rank1 .wc-win-rank {
+  color: #ffd700;
+}
+.wc-win-item--rank2 .wc-win-rank {
+  color: #c0c0c0;
+}
+.wc-win-item--rank3 .wc-win-rank {
+  color: #cd7f32;
+}
+
+/* 체크박스 */
+.wc-win-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: transparent;
+  transition: all 0.15s;
+}
+
+.wc-win-checkbox--checked {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+}
+
+.wc-win-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.wc-win-thumb--fallback {
+  background: linear-gradient(135deg, #18102e, #0a1422);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #383848;
+}
+
+.wc-win-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.wc-win-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e0e0f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wc-win-artist {
+  font-size: 11px;
+  color: #555;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wc-win-count {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 16px;
+  color: #888;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   PLAYLIST MODAL — 기존 모달 스타일 기준
+   ============================================================ */
+.wc-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.wc-modal {
+  background: #1c2333;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 헤더 — 제목 + X 닫기 버튼 */
+.wc-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+}
+
+.wc-modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #f0f0f8;
+}
+
+.wc-modal-subtitle {
+  font-size: 12px;
+  color: #666;
+  margin-left: 8px;
+}
+
+.wc-modal-close {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.wc-modal-close:hover {
+  color: #f0f0f8;
+}
+
+.wc-modal-loading,
+.wc-modal-empty {
+  padding: 32px;
+  text-align: center;
+  font-size: 13px;
+  color: #555;
+}
+
+/* 플레이리스트 목록 */
+.wc-modal-list {
+  list-style: none;
+  overflow-y: auto;
+  flex: 1;
+  padding: 0 12px;
+}
+
+.wc-modal-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.wc-modal-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* 선택된 플레이리스트 */
+.wc-modal-item--selected {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* 중복 곡 아이템 (step 2) */
+.wc-modal-item--duplicate {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.wc-modal-item--duplicate:hover {
+  background: none;
+}
+
+.wc-modal-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.wc-modal-thumb--fallback {
+  background: #2a3347;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #555;
+}
+
+.wc-modal-playlist-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e0e0f0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 선택된 플레이리스트 우측 체크 표시 */
+.wc-modal-check {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #2a3a4a;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #f0f0f8;
+  flex-shrink: 0;
+}
+
+.wc-modal-song-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.wc-modal-song-artist {
+  font-size: 11px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 중복 뱃지 */
+.wc-modal-duplicate-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(255, 100, 100, 0.12);
+  border: 1px solid rgba(255, 100, 100, 0.2);
+  color: #ff7777;
+  flex-shrink: 0;
+}
+
+/* 중복 제외 안내 문구 */
+.wc-modal-confirm-desc {
+  padding: 12px 24px;
+  font-size: 13px;
+  color: #666;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.wc-modal-error {
+  padding: 8px 24px;
+  font-size: 12px;
+  color: #ff7777;
+}
+
+/* 하단 버튼 — 취소(좌) / 추가(우) */
+.wc-modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.wc-modal-btn-cancel {
+  background: #2a3347;
+  border: none;
+  color: #aaa;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.wc-modal-btn-cancel:hover {
+  background: #333f58;
+}
+
+/* 추가하기 버튼 — 밝은 색으로 강조 */
+.wc-modal-btn-add {
+  background: #f0f0f8;
+  border: none;
+  color: #111;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.wc-modal-btn-add:hover {
+  opacity: 0.9;
+}
+
+.wc-modal-btn-add:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
