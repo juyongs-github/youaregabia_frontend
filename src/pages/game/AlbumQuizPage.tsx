@@ -134,7 +134,13 @@ const AlbumQuizPage = () => {
 
   if (phase === "result") {
     return (
-      <GameResult songs={songs} score={score} maxScore={TOTAL * 10} onRestart={handleRestart} />
+      <GameResult
+        songs={songs}
+        score={score}
+        maxScore={TOTAL * 10}
+        onRestart={handleRestart}
+        quizType="ALBUM"
+      />
     );
   }
 

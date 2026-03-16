@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { playlistApi } from "../../api/playlistApi";
 import type { Song } from "../ui/SongListItem";
 import PlaylistCreateModal from "./PlaylistCreateModal";
+import { pointApi } from "../../api/pointApi";
 
 interface Props {
   songs: Song[];
@@ -12,9 +13,18 @@ interface Props {
   onRestart: () => void;
   correctSongIds?: Set<number>; // 정답
   wrongSongIds?: Set<number>; // 오답
+  quizType?: "MUSIC" | "ALBUM" | "CARD";
 }
 
-const GameResult = ({ songs, score, maxScore, onRestart, correctSongIds, wrongSongIds }: Props) => {
+const GameResult = ({
+  songs,
+  score,
+  maxScore,
+  onRestart,
+  correctSongIds,
+  wrongSongIds,
+  quizType,
+}: Props) => {
   const userEmail = useSelector((state: RootState) => state.auth.user?.email);
   const [playlists, setPlaylists] = useState<{ id: number; title: string }[]>([]);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<number | null>(null);
@@ -39,6 +49,14 @@ const GameResult = ({ songs, score, maxScore, onRestart, correctSongIds, wrongSo
     await playlistApi.addSongToPlaylist(selectedPlaylistId, songId, userEmail);
     setAddedSongIds((prev) => new Set(prev).add(songId));
   };
+
+  // 마운트 시 포인트 전송
+  const pointSent = useRef(false);
+  useEffect(() => {
+    if (score > 0 && quizType && userEmail && !pointSent.current) {
+      pointApi.addQuizPoint(score, quizType).catch(console.error);
+    }
+  }, []);
 
   return (
     <div className="flex flex-col items-center gap-6 py-12 text-white mx-auto max-w-xl px-8">

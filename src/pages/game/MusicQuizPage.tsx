@@ -144,6 +144,7 @@ const MusicQuizPage = () => {
         onRestart={handleRestart}
         correctSongIds={correctSongIds}
         wrongSongIds={wrongSongIds}
+        quizType="MUSIC"
       />
     );
   }

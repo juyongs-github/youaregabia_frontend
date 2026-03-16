@@ -34,10 +34,22 @@ const MatchingGamePage = () => {
 
     try {
       const results: Song[] = [];
-      for (let i = 0; i < TOTAL_PAIRS; i++) {
+      const artistSet = new Set();
+      const titleSet = new Set();
+
+      // 8개의 고유한 쌍이 모일 때까지 반복
+      while (results.length < TOTAL_PAIRS) {
         const res = await api.get("/api/random");
-        results.push(res.data);
+        const s = res.data;
+
+        // 가수나 제목이 겹치면 패스
+        if (artistSet.has(s.artistName) || titleSet.has(s.trackName)) continue;
+
+        results.push(s);
+        artistSet.add(s.artistName);
+        titleSet.add(s.trackName);
       }
+
       setSongs(results);
 
       const deck: Card[] = [];
@@ -126,7 +138,9 @@ const MatchingGamePage = () => {
   }
 
   if (phase === "result") {
-    return <GameResult songs={songs} score={score} maxScore={100} onRestart={loadGame} />;
+    return (
+      <GameResult songs={songs} score={score} maxScore={100} onRestart={loadGame} quizType="CARD" />
+    );
   }
 
   return (
