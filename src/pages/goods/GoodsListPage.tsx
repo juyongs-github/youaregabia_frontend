@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaShoppingCart, FaBox } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store";
 import { goodsApi, cartUtils, type Goods } from "../../api/goodsApi";
 
 const CATEGORIES = [
@@ -26,6 +28,8 @@ const categoryLabel: Record<string, string> = {
 
 export default function GoodsListPage() {
   const navigate = useNavigate();
+  const userRole = useSelector((state: RootState) => state.auth.user?.role);
+  const isAdmin = userRole === "ADMIN";
   const [goods, setGoods] = useState<Goods[]>([]);
   const [category, setCategory] = useState("");
   const [cartCount, setCartCount] = useState(0);
@@ -66,18 +70,20 @@ export default function GoodsListPage() {
           <h1 className="text-3xl font-bold">굿즈</h1>
           <p className="text-gray-400 mt-1">GAP Music 공식 굿즈샵</p>
         </div>
-        <button
-          onClick={() => navigate("/goods/cart")}
-          className="relative flex items-center gap-2 px-5 py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
-        >
-          <FaShoppingCart size={20} />
-          <span className="font-semibold">장바구니</span>
-          {cartCount > 0 && (
-            <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
-              {cartCount > 99 ? "99+" : cartCount}
-            </span>
-          )}
-        </button>
+        {!isAdmin && (
+          <button
+            onClick={() => navigate("/goods/cart")}
+            className="relative flex items-center gap-2 px-5 py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
+          >
+            <FaShoppingCart size={20} />
+            <span className="font-semibold">장바구니</span>
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                {cartCount > 99 ? "99+" : cartCount}
+              </span>
+            )}
+          </button>
+        )}
       </div>
 
       {/* 카테고리 탭 */}
@@ -129,17 +135,19 @@ export default function GoodsListPage() {
                 {item.stock === 0 && (
                   <p className="text-xs text-gray-500 mt-1">품절</p>
                 )}
-                <button
-                  onClick={(e) => handleAddCart(e, item)}
-                  disabled={item.stock === 0}
-                  className={`w-full mt-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                    item.stock === 0
-                      ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-                      : "bg-red-600 hover:bg-red-700 text-white"
-                  }`}
-                >
-                  {item.stock === 0 ? "품절" : "장바구니 담기"}
-                </button>
+                {!isAdmin && (
+                  <button
+                    onClick={(e) => handleAddCart(e, item)}
+                    disabled={item.stock === 0}
+                    className={`w-full mt-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                      item.stock === 0
+                        ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+                        : "bg-red-600 hover:bg-red-700 text-white"
+                    }`}
+                  >
+                    {item.stock === 0 ? "품절" : "장바구니 담기"}
+                  </button>
+                )}
               </div>
             </div>
           ))}
