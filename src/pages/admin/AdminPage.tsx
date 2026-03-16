@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
+import { FaBox, FaEdit, FaPlus, FaTrash } from "react-icons/fa";
 import type { RootState } from "../../store";
 import api from "../../api/axios";
 
@@ -33,7 +34,37 @@ interface ActivityLog {
 }
 
 const ROLES = ["USER", "CRITIC", "ADMIN"];
-type Tab = "users" | "loginLogs" | "activityLogs";
+const CATEGORIES = [
+  { key: "CLOTHING", label: "의류" },
+  { key: "ACCESSORIES", label: "악세사리" },
+  { key: "ALBUM", label: "앨범" },
+  { key: "ETC", label: "기타" },
+];
+const categoryLabel: Record<string, string> = { CLOTHING: "의류", ACCESSORIES: "악세사리", ALBUM: "앨범", ETC: "기타" };
+
+interface GoodsRow {
+  goodsId: number;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: string;
+  imageUrl: string | null;
+}
+
+interface GoodsForm {
+  goodsId?: number;
+  name: string;
+  description: string;
+  price: string;
+  stock: string;
+  category: string;
+  imageFile?: File | null;
+}
+
+type Tab = "users" | "loginLogs" | "activityLogs" | "goods";
+
+const EMPTY_FORM: GoodsForm = { name: "", description: "", price: "", stock: "", category: "CLOTHING", imageFile: null };
 
 function AdminPage() {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -42,6 +73,11 @@ function AdminPage() {
   const [loginLogs, setLoginLogs] = useState<LoginLog[]>([]);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [goodsList, setGoodsList] = useState<GoodsRow[]>([]);
+  const [showGoodsForm, setShowGoodsForm] = useState(false);
+  const [goodsForm, setGoodsForm] = useState<GoodsForm>(EMPTY_FORM);
+  const [goodsLoading, setGoodsLoading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (user?.role !== "ADMIN") return;
@@ -59,7 +95,64 @@ function AdminPage() {
     if (activeTab === "activityLogs" && activityLogs.length === 0) {
       api.get("/api/admin/logs/activity").then((res) => setActivityLogs(res.data));
     }
+    if (activeTab === "goods") loadGoods();
   }, [activeTab, user?.role]);
+
+  const loadGoods = () => {
+    api.get("/api/goods").then((res) => setGoodsList(res.data)).catch(() => {});
+  };
+
+  const handleGoodsFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setGoodsForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  };
+
+  const handleGoodsEdit = (g: GoodsRow) => {
+    setGoodsForm({ goodsId: g.goodsId, name: g.name, description: g.description, price: String(g.price), stock: String(g.stock), category: g.category, imageFile: null });
+    setShowGoodsForm(true);
+  };
+
+  const handleGoodsDelete = async (goodsId: number) => {
+    if (!confirm("상품을 삭제하시겠습니까?")) return;
+    try {
+      await api.delete(`/api/goods/${goodsId}`);
+      loadGoods();
+    } catch {
+      alert("삭제에 실패했습니다.");
+    }
+  };
+
+  const handleGoodsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!goodsForm.name.trim() || !goodsForm.price || !goodsForm.stock) {
+      alert("이름, 가격, 재고를 입력해주세요.");
+      return;
+    }
+    setGoodsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("request", new Blob([JSON.stringify({
+        name: goodsForm.name,
+        description: goodsForm.description,
+        price: Number(goodsForm.price),
+        stock: Number(goodsForm.stock),
+        category: goodsForm.category,
+      })], { type: "application/json" }));
+      if (goodsForm.imageFile) formData.append("image", goodsForm.imageFile);
+
+      if (goodsForm.goodsId) {
+        await api.put(`/api/goods/${goodsForm.goodsId}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
+      } else {
+        await api.post("/api/goods", formData, { headers: { "Content-Type": "multipart/form-data" } });
+      }
+      setShowGoodsForm(false);
+      setGoodsForm(EMPTY_FORM);
+      loadGoods();
+    } catch {
+      alert("저장에 실패했습니다.");
+    } finally {
+      setGoodsLoading(false);
+    }
+  };
 
   const handleRoleChange = async (id: number, role: string) => {
     try {
@@ -90,6 +183,7 @@ function AdminPage() {
     { key: "users", label: "회원 관리" },
     { key: "loginLogs", label: "접속 로그" },
     { key: "activityLogs", label: "활동 로그" },
+    { key: "goods", label: "굿즈 관리" },
   ];
 
   return (
@@ -197,6 +291,104 @@ function AdminPage() {
             {loginLogs.length === 0 && <p className="text-gray-500 text-center py-12">접속 기록이 없습니다.</p>}
           </div>
           <p className="text-gray-600 text-sm mt-4">최근 {loginLogs.length}건</p>
+        </>
+      )}
+
+      {/* 굿즈 관리 */}
+      {activeTab === "goods" && (
+        <>
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-gray-400 text-sm">총 {goodsList.length}개 상품</p>
+            <button
+              onClick={() => { setGoodsForm(EMPTY_FORM); setShowGoodsForm(true); }}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold text-sm transition-colors"
+            >
+              <FaPlus size={12} /> 상품 등록
+            </button>
+          </div>
+
+          {/* 상품 등록/수정 폼 */}
+          {showGoodsForm && (
+            <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 mb-6">
+              <h3 className="font-bold text-lg mb-4">{goodsForm.goodsId ? "상품 수정" : "상품 등록"}</h3>
+              <form onSubmit={handleGoodsSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">상품명 *</label>
+                  <input name="name" value={goodsForm.name} onChange={handleGoodsFormChange} placeholder="상품명" className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500" />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">카테고리 *</label>
+                  <select name="category" value={goodsForm.category} onChange={handleGoodsFormChange} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                    {CATEGORIES.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">가격 (원) *</label>
+                  <input name="price" type="number" value={goodsForm.price} onChange={handleGoodsFormChange} placeholder="0" className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500" />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">재고 수량 *</label>
+                  <input name="stock" type="number" value={goodsForm.stock} onChange={handleGoodsFormChange} placeholder="0" className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="text-sm text-gray-400 mb-1 block">상품 설명</label>
+                  <textarea name="description" value={goodsForm.description} onChange={handleGoodsFormChange} placeholder="상품 설명을 입력하세요" rows={3} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500 resize-none" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="text-sm text-gray-400 mb-1 block">상품 이미지</label>
+                  <input ref={fileRef} type="file" accept="image/*" onChange={(e) => setGoodsForm((f) => ({ ...f, imageFile: e.target.files?.[0] ?? null }))} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-gray-600 file:text-white file:cursor-pointer" />
+                </div>
+                <div className="md:col-span-2 flex gap-3 justify-end">
+                  <button type="button" onClick={() => { setShowGoodsForm(false); setGoodsForm(EMPTY_FORM); }} className="px-5 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-semibold transition-colors">취소</button>
+                  <button type="submit" disabled={goodsLoading} className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded-lg text-sm font-semibold transition-colors">
+                    {goodsLoading ? "저장 중..." : goodsForm.goodsId ? "수정" : "등록"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* 상품 목록 */}
+          <div className="w-full overflow-x-auto bg-gray-900/50 border border-gray-800 rounded-xl">
+            <table className="min-w-[760px] w-full text-base">
+              <thead>
+                <tr className="border-b border-gray-700 text-gray-400 whitespace-nowrap">
+                  <th className="text-left px-6 py-4">이미지</th>
+                  <th className="text-left px-6 py-4">상품명</th>
+                  <th className="text-left px-6 py-4">카테고리</th>
+                  <th className="text-left px-6 py-4">가격</th>
+                  <th className="text-left px-6 py-4">재고</th>
+                  <th className="text-left px-6 py-4">관리</th>
+                </tr>
+              </thead>
+              <tbody>
+                {goodsList.map((g) => (
+                  <tr key={g.goodsId} className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors whitespace-nowrap">
+                    <td className="px-6 py-4">
+                      <div className="w-12 h-12 bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden">
+                        {g.imageUrl ? <img src={`http://localhost:8080${g.imageUrl}`} alt={g.name} className="w-full h-full object-cover" /> : <FaBox size={16} className="text-gray-500" />}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 font-medium">{g.name}</td>
+                    <td className="px-6 py-4 text-gray-300">{categoryLabel[g.category] ?? g.category}</td>
+                    <td className="px-6 py-4 text-white">{g.price.toLocaleString()}원</td>
+                    <td className={`px-6 py-4 font-semibold ${g.stock === 0 ? "text-red-400" : "text-white"}`}>{g.stock === 0 ? "품절" : `${g.stock}개`}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2">
+                        <button onClick={() => handleGoodsEdit(g)} className="flex items-center gap-1 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-semibold transition-colors">
+                          <FaEdit size={11} /> 수정
+                        </button>
+                        <button onClick={() => handleGoodsDelete(g.goodsId)} className="flex items-center gap-1 px-3 py-1.5 bg-red-900/50 hover:bg-red-900 text-red-300 rounded-lg text-xs font-semibold transition-colors">
+                          <FaTrash size={11} /> 삭제
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {goodsList.length === 0 && <p className="text-gray-500 text-center py-12">등록된 상품이 없습니다.</p>}
+          </div>
         </>
       )}
 
