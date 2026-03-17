@@ -7,7 +7,6 @@ import type { RootState } from "../../store";
 interface Props {
   onClose: () => void;
   onCreated: () => void;
-  email: string;
 }
 
 function PlaylistCreateModal({ onClose, onCreated }: Props) {
@@ -24,11 +23,6 @@ function PlaylistCreateModal({ onClose, onCreated }: Props) {
         onSubmit={(e) => {
           e.preventDefault();
 
-          if(!user?.email) {
-            alert("로그인이 필요합니다.");
-            return;
-          }
-
           if (!title.trim()) {
             alert("제목을 입력해주세요.");
             return;
@@ -37,7 +31,6 @@ function PlaylistCreateModal({ onClose, onCreated }: Props) {
           const formData = new FormData();
           formData.append("title", title);
           formData.append("description", description);
-          formData.append("email", user.email);
           formData.append("type", "MYPLAYLIST");
 
           if (image) {
@@ -65,9 +58,9 @@ function PlaylistCreateModal({ onClose, onCreated }: Props) {
         </div>
 
         {/* 썸네일 */}
-        <label className="thumbnail-box">
+        <label className="thumbnail-box w-64 mx-auto block">
           {preview ? (
-            <img src={preview} className="absolute inset-0 h-full w-full rounded-[18px]" />
+            <img src={preview} className="h-full w-full rounded-[18px] object-cover" />
           ) : (
             <>
               <FaPlus size={20} />
@@ -96,8 +89,7 @@ function PlaylistCreateModal({ onClose, onCreated }: Props) {
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          maxLength={10}
-          placeholder="플레이리스트 제목(10자 이내)"
+          placeholder="플레이리스트 제목"
         />
 
         {/* 설명 */}

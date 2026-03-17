@@ -447,6 +447,7 @@
 
 /* 정렬 드롭다운 */
 .sort-select {
+  width: 110px;
   appearance: none;
   -webkit-appearance: none;
 
@@ -650,6 +651,10 @@
     overflow: visible;
   }
 
+  .playlist-right.player-active {
+    padding-bottom: 120px;
+  }
+
   .track-list {
     height: auto;
     overflow-y: visible;
@@ -660,6 +665,7 @@
 @media (max-width: 600px) {
   .playlist-cover-large {
     width: clamp(120px, 50vw, 180px);
+    overflow: visible;
   }
 
   .track-header {
@@ -668,5 +674,15 @@
 
   .playlist-right {
     padding: 16px 12px 120px;
+    overflow: visible;
+  }
+
+  .playlist-right.player-active {
+    padding-bottom: 120px;
+  }
+
+  .track-list {
+    height: auto;
+    overflow-y: visible;
   }
 }

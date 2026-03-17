@@ -1,11 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { FaPlus, FaChevronLeft, FaChevronRight, FaPlay } from "react-icons/fa";
+<<<<<<< HEAD
 import RankSection from "../../Components/layout/RankSection";
 import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
+=======
+
+>>>>>>> origin/3/12-kgm
 import { playlistApi } from "../../api/playlistApi";
 import type { Playlist } from "../../types/playlist";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import RankSection from "../../Components/layout/RankSection";
+import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
 
 function HomePage() {
   const [data, setData] = useState<Playlist[]>([]);
@@ -22,8 +28,8 @@ function HomePage() {
     setIsError(false);
 
     try {
-      const res = await playlistApi.getAllPlaylist(email);
-      setData(res.data || []);
+      const res = await playlistApi.getAllPlaylist();
+      setData([...(res.data || [])].reverse());
     } catch (error) {
       console.error(error);
       setIsError(true);
@@ -102,11 +108,7 @@ function HomePage() {
 
       {/* ===== 모달 ===== */}
       {isModalOpen && (
-        <PlaylistCreateModal
-          onClose={() => setIsModalOpen(false)}
-          onCreated={fetchData}
-          email={email}
-        />
+        <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
       )}
     </div>
   );

@@ -37,6 +37,7 @@ import PlaylistReviewPage from "./pages/playlist/PlaylistReviewPage";
 import BlindRecommendPage from "./pages/recommend/BlindRecommendPage";
 import MusicQuizPage from "./pages/game/MusicQuizPage";
 import AlbumQuizPage from "./pages/game/AlbumQuizPage";
+<<<<<<< HEAD
 import GoodsListPage from "./pages/goods/GoodsListPage";
 import GoodsDetailPage from "./pages/goods/GoodsDetailPage";
 import CartPage from "./pages/goods/CartPage";
@@ -49,6 +50,9 @@ import CriticWrite from "./pages/recommend/CriticWrite";
 import CriticListPage from "./pages/recommend/CriticListPage";
 import MatchingGamePage from "./pages/game/MatchingGamePage";
 import PointHistoryPage from "./pages/auth/PointHistoryPage";
+=======
+import IdealTypeWorldCupPage from "./pages/recommend/IdealTypeWorldCupPage";
+>>>>>>> origin/3/12-kgm
 
 function App() {
   // 2. Redux Store에서 로그인 여부 가져오기
@@ -64,9 +68,13 @@ function App() {
         <Route path="/search" element={<SearchResult />} />
         <Route path="/recommend/result" element={<RecommendPlaylistResult />} />
         <Route path="/recommend/blind" element={<BlindRecommendPage />} />
+<<<<<<< HEAD
         <Route path="/recommend/critic/write" element={<CriticWrite />} />
         <Route path="/recommend/critic/:boardId" element={<BoardDetailPage />} />
         <Route path="/recommend/critic" element={<CriticListPage />} />
+=======
+        <Route path="/recommend/worldcup" element={<IdealTypeWorldCupPage />} />
+>>>>>>> origin/3/12-kgm
         <Route path="/game/music-quiz" element={<MusicQuizPage />} />
         <Route path="/game/album-quiz" element={<AlbumQuizPage />} />
         <Route path="/game/card-match" element={<MatchingGamePage />} />
