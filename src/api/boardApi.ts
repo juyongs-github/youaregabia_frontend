@@ -4,8 +4,9 @@ import api from "./axios";
 
 export const boardApi = {
   // 전체 조회
-  getBoards: (params: PageRequest & { keyword?: string; genre?: string; boardType?: string }) =>
-    api.get<PageResult<Board>>("/community/share", { params }).then((res) => res.data),
+  getBoards: (
+    params: PageRequest & { keyword?: string; genre?: string; boardType?: string; sort?: string }
+  ) => api.get<PageResult<Board>>("/community/share", { params }).then((res) => res.data),
 
   // 상세 조회
   getBoardDetail: (boardId: number, pageRequest: PageRequest = { page: 1, size: 10 }) =>
@@ -21,6 +22,7 @@ export const boardApi = {
     content: string;
     boardType: string;
     boardGenre: string;
+    songIds?: number[];
   }): Promise<number> => {
     const res = await api.post("/community/share/add", data);
     return res.data;
@@ -32,4 +34,23 @@ export const boardApi = {
 
   // 게시글 삭제
   deleteBoard: (boardId: number) => api.delete(`/community/share/delete/${boardId}`),
+
+  getCriticBoards: (songId: number, params: PageRequest) =>
+    api
+      .get<PageResult<Board>>("/community/share/critic", {
+        params: { songId, ...params },
+      })
+      .then((res) => res.data),
+
+  getCriticList: (params: PageRequest, keyword?: string) =>
+    api
+      .get<PageResult<Board>>("/community/share/critic/list", {
+        params: { ...params, keyword },
+      })
+      .then((res) => res.data),
+
+  toggleBoardLike: (boardId: number) =>
+    api
+      .post<{ likeCount: number; likedByMe: boolean }>(`/boards/${boardId}/like`, null)
+      .then((res) => res.data),
 };

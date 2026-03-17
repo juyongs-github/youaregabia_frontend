@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"Get-Process -Id 36628,14468,17660,20216,36916,43740 -ErrorAction SilentlyContinue | Select-Object Id,Name,Path\")"
+    ]
+  }
+}

@@ -37,6 +37,7 @@ import PlaylistReviewPage from "./pages/playlist/PlaylistReviewPage";
 import BlindRecommendPage from "./pages/recommend/BlindRecommendPage";
 import MusicQuizPage from "./pages/game/MusicQuizPage";
 import AlbumQuizPage from "./pages/game/AlbumQuizPage";
+<<<<<<< HEAD
 import GoodsListPage from "./pages/goods/GoodsListPage";
 import GoodsDetailPage from "./pages/goods/GoodsDetailPage";
 import CartPage from "./pages/goods/CartPage";
@@ -45,6 +46,12 @@ import OrderCompletePage from "./pages/goods/OrderCompletePage";
 import OrderSuccessPage from "./pages/goods/OrderSuccessPage";
 import OrderFailPage from "./pages/goods/OrderFailPage";
 import OrderHistoryPage from "./pages/goods/OrderHistoryPage";
+=======
+import CriticWrite from "./pages/recommend/CriticWrite";
+import CriticListPage from "./pages/recommend/CriticListPage";
+import MatchingGamePage from "./pages/game/MatchingGamePage";
+import PointHistoryPage from "./pages/auth/PointHistoryPage";
+>>>>>>> origin/deploy/test3-yks
 
 function App() {
   // 2. Redux Store에서 로그인 여부 가져오기
@@ -60,8 +67,12 @@ function App() {
         <Route path="/search" element={<SearchResult />} />
         <Route path="/recommend/result" element={<RecommendPlaylistResult />} />
         <Route path="/recommend/blind" element={<BlindRecommendPage />} />
+        <Route path="/recommend/critic/write" element={<CriticWrite />} />
+        <Route path="/recommend/critic/:boardId" element={<BoardDetailPage />} />
+        <Route path="/recommend/critic" element={<CriticListPage />} />
         <Route path="/game/music-quiz" element={<MusicQuizPage />} />
         <Route path="/game/album-quiz" element={<AlbumQuizPage />} />
+        <Route path="/game/card-match" element={<MatchingGamePage />} />
         <Route path="/playlist/me" element={<MyPlaylistPage />} />
         <Route path="/playlist/me/:playlistId" element={<PlaylistDetailPage />} />
         <Route path="/playlist/review" element={<PlaylistReviewPage />} />
@@ -76,6 +87,7 @@ function App() {
         <Route path="/community/free/new" element={<FreeBoardCreatePage />} />
         <Route path="/community/free/:boardId/update" element={<FreeBoardUpdate />} />
         <Route path="/profile/me" element={<MyPage />} />
+<<<<<<< HEAD
         <Route path="/goods" element={<GoodsListPage />} />
         <Route path="/goods/cart" element={<CartPage />} />
         <Route path="/goods/order/complete" element={<OrderCompletePage />} />
@@ -93,6 +105,10 @@ function App() {
         <Route path="activity-logs" element={<AdminActivityLogsPage />} />
         <Route path="goods" element={<AdminGoodsPage />} />
         <Route path="orders" element={<AdminOrdersPage />} />
+=======
+        <Route path="/profile/points" element={<PointHistoryPage />} />
+        <Route path="/admin" element={<AdminPage />} />
+>>>>>>> origin/deploy/test3-yks
       </Route>
       {/* 아닌 것들은 여기 밑으로 Route 추가 */}
       {/* 4. 로그인하지 않은 사용자만 접근 가능한 경로 (이미 로그인했다면 홈으로 이동) */}

@@ -13,6 +13,7 @@ import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../store";
 import { logout } from "../../store/authSlice";
 import api from "../../api/axios";
+import { usePoint } from "../../store/usePoint";
 
 interface NotificationItem {
   id: number;
@@ -28,11 +29,20 @@ function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useSelector((state: RootState) => state.auth.user);
+  const { totalPoint, grade } = usePoint();
 
   const handleLogout = () => {
     dispatch(logout());
     handleClose();
     navigate("/login");
+  };
+
+  const gradeColor = {
+    ENSEMBLE: "text-black-400",
+    SESSION: "text-amber-600",
+    SOLOIST: "text-gray-300",
+    MAESTRO: "text-yellow-400",
+    LEGEND: "text-cyan-400",
   };
 
   const goPage = (path: string) => {
@@ -107,7 +117,10 @@ function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-20 px-10 py-5 bg-black border-b border-gray-800 gap-7">
       {/* 로고 부분 */}
       <div className="flex items-center flex-shrink-0 gap-8">
-        <button className="flex items-center gap-3" onClick={() => goPage(user?.role === "ADMIN" ? "/admin" : "/home")}>
+        <button
+          className="flex items-center gap-3"
+          onClick={() => goPage(user?.role === "ADMIN" ? "/admin" : "/home")}
+        >
           <div className="flex items-center justify-center w-8 h-8 bg-red-600 rounded-full">
             <FaHeadphones size={20} color="white" />
           </div>
@@ -151,6 +164,20 @@ function Header() {
 
       {/* 알림 + 유저 프로필 */}
       <div className="flex items-center gap-4">
+        {/* 포인트/등급 표시 */}
+        {isLogin && (
+          <button
+            onClick={() => navigate("/profile/points")}
+            className="flex items-center gap-2 rounded-full border border-neutral-700 px-3 py-1.5 hover:bg-neutral-800 transition-colors"
+          >
+            <span
+              className={`text-xs font-bold ${gradeColor[grade as keyof typeof gradeColor] ?? "text-amber-600"}`}
+            >
+              {grade}
+            </span>
+            <span className="text-xs text-gray-400">{totalPoint.toLocaleString()}P</span>
+          </button>
+        )}
         {/* 알림 벨 */}
         {isLogin && (
           <div className="relative" ref={notifRef}>
@@ -240,7 +267,12 @@ function Header() {
         >
           <MenuItem
             onClick={() => goPage("/profile/me")}
-            sx={{ color: "white", fontWeight: "bold", py: 1.5, "&:hover": { backgroundColor: "#3d3d3d" } }}
+            sx={{
+              color: "white",
+              fontWeight: "bold",
+              py: 1.5,
+              "&:hover": { backgroundColor: "#3d3d3d" },
+            }}
           >
             <ListItemIcon sx={{ color: "white" }}>
               <BiSolidUser size={20} />
@@ -271,7 +303,12 @@ function Header() {
           )}
           <MenuItem
             onClick={handleLogout}
-            sx={{ color: "white", fontWeight: "bold", py: 1.5, "&:hover": { backgroundColor: "#3d3d3d" } }}
+            sx={{
+              color: "white",
+              fontWeight: "bold",
+              py: 1.5,
+              "&:hover": { backgroundColor: "#3d3d3d" },
+            }}
           >
             <ListItemIcon sx={{ color: "white" }}>
               <RiLogoutBoxRLine size={20} />

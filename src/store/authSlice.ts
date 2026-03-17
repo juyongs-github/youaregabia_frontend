@@ -6,7 +6,9 @@ interface UserInfo {
   createDate?: string;
   imgUrl?: string;
   token?: string;
-  role?: string;  // "USER" | "CRITIC" | "ADMIN"
+  role?: string; // "USER" | "CRITIC" | "ADMIN"
+  totalPoint?: number; // 유저 포인트
+  grade?: string; // 유저 등급
 }
 
 interface AuthState {
@@ -44,8 +46,14 @@ const authSlice = createSlice({
         state.user = { ...state.user, ...action.payload };
       }
     },
+    updatePoint: (state, action: PayloadAction<{ totalPoint: number; grade: string }>) => {
+      if (state.user) {
+        state.user.totalPoint = action.payload.totalPoint;
+        state.user.grade = action.payload.grade;
+      }
+    },
   },
 });
 
-export const { loginSuccess, logout, updateProfile } = authSlice.actions;
+export const { loginSuccess, logout, updateProfile, updatePoint } = authSlice.actions;
 export default authSlice.reducer;

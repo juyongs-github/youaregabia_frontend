@@ -114,7 +114,8 @@ function AdminPage() {
 
   useEffect(() => {
     if (user?.role !== "ADMIN") return;
-    api.get("/api/admin/users")
+    api
+      .get("/api/admin/users")
       .then((res) => setUsers(res.data))
       .catch(() => alert("유저 목록을 불러오는데 실패했습니다."))
       .finally(() => setLoading(false));
@@ -220,7 +221,7 @@ function AdminPage() {
   const handleRoleChange = async (id: number, role: string) => {
     try {
       await api.patch(`/api/admin/users/${id}/role`, { role });
-      setUsers((prev) => prev.map((u) => u.id === id ? { ...u, role } : u));
+      setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role } : u)));
     } catch {
       alert("권한 변경에 실패했습니다.");
     }
@@ -292,7 +293,10 @@ function AdminPage() {
                 {users.map((u) => {
                   const label = roleLabel(u.role);
                   return (
-                    <tr key={u.id} className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors whitespace-nowrap">
+                    <tr
+                      key={u.id}
+                      className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors whitespace-nowrap"
+                    >
                       <td className="px-6 py-5 text-gray-500">{u.id}</td>
                       <td className="px-6 py-5 font-medium">{u.name}</td>
                       <td className="px-6 py-5 text-gray-300">{u.email || "-"}</td>
@@ -317,7 +321,9 @@ function AdminPage() {
                 })}
               </tbody>
             </table>
-            {users.length === 0 && <p className="text-gray-500 text-center py-12">회원이 없습니다.</p>}
+            {users.length === 0 && (
+              <p className="text-gray-500 text-center py-12">회원이 없습니다.</p>
+            )}
           </div>
           <p className="text-gray-600 text-sm mt-4">총 {users.length}명</p>
         </>
@@ -341,18 +347,25 @@ function AdminPage() {
                 {loginLogs.map((log) => {
                   const lt = loginTypeLabel(log.loginType);
                   return (
-                    <tr key={log.id} className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors whitespace-nowrap">
+                    <tr
+                      key={log.id}
+                      className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors whitespace-nowrap"
+                    >
                       <td className="px-6 py-4 font-medium">{log.name}</td>
                       <td className="px-6 py-4 text-gray-300">{log.email}</td>
                       <td className={`px-6 py-4 font-medium ${lt.color}`}>{lt.text}</td>
                       <td className="px-6 py-4 text-gray-400">{log.ip}</td>
-                      <td className="px-6 py-4 text-gray-400">{log.loginAt?.replace("T", " ").slice(0, 19)}</td>
+                      <td className="px-6 py-4 text-gray-400">
+                        {log.loginAt?.replace("T", " ").slice(0, 19)}
+                      </td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
-            {loginLogs.length === 0 && <p className="text-gray-500 text-center py-12">접속 기록이 없습니다.</p>}
+            {loginLogs.length === 0 && (
+              <p className="text-gray-500 text-center py-12">접속 기록이 없습니다.</p>
+            )}
           </div>
           <p className="text-gray-600 text-sm mt-4">최근 {loginLogs.length}건</p>
         </>
@@ -567,21 +580,30 @@ function AdminPage() {
               </thead>
               <tbody>
                 {activityLogs.map((log, i) => (
-                  <tr key={i} className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors whitespace-nowrap">
+                  <tr
+                    key={i}
+                    className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors whitespace-nowrap"
+                  >
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded text-sm font-medium ${log.type === "게시글" ? "bg-blue-900/50 text-blue-300" : "bg-purple-900/50 text-purple-300"}`}>
+                      <span
+                        className={`px-2 py-0.5 rounded text-sm font-medium ${log.type === "게시글" ? "bg-blue-900/50 text-blue-300" : "bg-purple-900/50 text-purple-300"}`}
+                      >
                         {log.type}
                       </span>
                     </td>
                     <td className="px-6 py-4 font-medium">{log.name}</td>
                     <td className="px-6 py-4 text-gray-300">{log.email}</td>
                     <td className="px-6 py-4 text-gray-300 max-w-xs truncate">{log.content}</td>
-                    <td className="px-6 py-4 text-gray-400">{log.createdAt?.replace("T", " ").slice(0, 19)}</td>
+                    <td className="px-6 py-4 text-gray-400">
+                      {log.createdAt?.replace("T", " ").slice(0, 19)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {activityLogs.length === 0 && <p className="text-gray-500 text-center py-12">활동 기록이 없습니다.</p>}
+            {activityLogs.length === 0 && (
+              <p className="text-gray-500 text-center py-12">활동 기록이 없습니다.</p>
+            )}
           </div>
           <p className="text-gray-600 text-sm mt-4">최근 {activityLogs.length}건</p>
         </>
