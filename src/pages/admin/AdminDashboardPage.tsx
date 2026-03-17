@@ -1,4 +1,4 @@
-1import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUsers, FaBox, FaShoppingCart, FaSignInAlt } from "react-icons/fa";
 import api from "../../api/axios";
@@ -20,21 +20,51 @@ export default function AdminDashboardPage() {
       api.get("/api/goods"),
       api.get("/api/admin/orders"),
       api.get("/api/admin/logs/login"),
-    ]).then(([users, goods, orders, logs]) => {
-      setStats({
-        userCount: users.data.length,
-        goodsCount: goods.data.length,
-        orderCount: orders.data.length,
-        loginCount: logs.data.length,
-      });
-    }).catch(() => {});
+    ])
+      .then(([users, goods, orders, logs]) => {
+        setStats({
+          userCount: users.data.length,
+          goodsCount: goods.data.length,
+          orderCount: orders.data.length,
+          loginCount: logs.data.length,
+        });
+      })
+      .catch(() => {});
   }, []);
 
   const cards = [
-    { label: "전체 회원", value: stats?.userCount, icon: FaUsers, color: "text-blue-400", bg: "bg-blue-400/10", path: "/admin/users" },
-    { label: "등록 상품", value: stats?.goodsCount, icon: FaBox, color: "text-purple-400", bg: "bg-purple-400/10", path: "/admin/goods" },
-    { label: "전체 주문", value: stats?.orderCount, icon: FaShoppingCart, color: "text-green-400", bg: "bg-green-400/10", path: "/admin/orders" },
-    { label: "접속 로그", value: stats?.loginCount, icon: FaSignInAlt, color: "text-yellow-400", bg: "bg-yellow-400/10", path: "/admin/login-logs" },
+    {
+      label: "전체 회원",
+      value: stats?.userCount,
+      icon: FaUsers,
+      color: "text-blue-400",
+      bg: "bg-blue-400/10",
+      path: "/admin/users",
+    },
+    {
+      label: "등록 상품",
+      value: stats?.goodsCount,
+      icon: FaBox,
+      color: "text-purple-400",
+      bg: "bg-purple-400/10",
+      path: "/admin/goods",
+    },
+    {
+      label: "전체 주문",
+      value: stats?.orderCount,
+      icon: FaShoppingCart,
+      color: "text-green-400",
+      bg: "bg-green-400/10",
+      path: "/admin/orders",
+    },
+    {
+      label: "접속 로그",
+      value: stats?.loginCount,
+      icon: FaSignInAlt,
+      color: "text-yellow-400",
+      bg: "bg-yellow-400/10",
+      path: "/admin/login-logs",
+    },
   ];
 
   return (
@@ -58,7 +88,11 @@ export default function AdminDashboardPage() {
               </div>
             </div>
             <p className="text-3xl font-bold">
-              {value == null ? <span className="text-gray-600 text-xl">로딩중</span> : value.toLocaleString()}
+              {value == null ? (
+                <span className="text-gray-600 text-xl">로딩중</span>
+              ) : (
+                value.toLocaleString()
+              )}
             </p>
           </button>
         ))}

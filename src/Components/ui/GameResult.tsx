@@ -33,20 +33,20 @@ const GameResult = ({
 
   const fetchPlaylists = async () => {
     if (!userEmail || playlists.length > 0) return; // 이미 불렀으면 스킵
-    const res = await playlistApi.getAllPlaylist(userEmail);
+    const res = await playlistApi.getAllPlaylist();
     setPlaylists(res.data);
   };
 
   // 플레이리스트 생성 후 목록 새로고침
   const handleCreated = async () => {
     if (!userEmail) return;
-    const res = await playlistApi.getAllPlaylist(userEmail);
+    const res = await playlistApi.getAllPlaylist();
     setPlaylists(res.data);
   };
 
   const handleAddSong = async (songId: number) => {
     if (!selectedPlaylistId || !userEmail) return;
-    await playlistApi.addSongToPlaylist(selectedPlaylistId, songId, userEmail);
+    await playlistApi.addSongToPlaylist(selectedPlaylistId, songId);
     setAddedSongIds((prev) => new Set(prev).add(songId));
   };
 
@@ -145,7 +145,7 @@ const GameResult = ({
       {/* 플레이리스트 생성 모달 */}
       {isCreateModalOpen && (
         <PlaylistCreateModal
-          email={userEmail ?? ""}
+          
           onClose={() => setIsCreateModalOpen(false)}
           onCreated={handleCreated}
         />

@@ -4,7 +4,7 @@ import type { Playlist } from "../../types/playlist";
 import { playlistApi } from "../../api/playlistApi";
 import { FaPlay, FaPlus } from "react-icons/fa";
 import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
-import { useSelector } from "react-redux";
+
 
 function MyPlaylistPage() {
   const navigate = useNavigate();

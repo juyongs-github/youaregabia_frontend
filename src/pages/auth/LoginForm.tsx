@@ -24,7 +24,6 @@ function LoginForm() {
   //   window.location.href = `${API_BASE_URL}/oauth2/authorization/naver`;
   // }
   // ❌ 환경변수 방식 제거
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   // ✅ 그냥 경로만 사용 (vite proxy가 처리)
   function handleGoogleLogin() {

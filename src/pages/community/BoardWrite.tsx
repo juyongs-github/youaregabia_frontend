@@ -37,7 +37,7 @@ const BoardWrite = () => {
   // 플레이리스트 목록 불러오기
   const fetchPlaylists = async () => {
     if (!userEmail) return;
-    const res = await playlistApi.getAllPlaylist(userEmail);
+    const res = await playlistApi.getAllPlaylist();
     setPlaylists(res.data);
     setShowPlaylistSelector(true);
   };

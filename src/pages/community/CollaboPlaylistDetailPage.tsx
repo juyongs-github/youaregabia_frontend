@@ -53,7 +53,7 @@ function CollaboPlaylistDetailPage() {
 
   const fetchPlaylist = async () => {
     if (!id) return;
-    try { const res = await playlistApi.getPlaylist(id, user?.email ?? ""); setPlaylist(res.data as CollaboPlaylist); }
+    try { const res = await playlistApi.getPlaylist(id); setPlaylist(res.data as CollaboPlaylist); }
     catch (e) { console.error(e); }
   };
   const fetchSongs = async () => {
@@ -82,7 +82,7 @@ function CollaboPlaylistDetailPage() {
   // 작성자 직접 추가 (즉시 수록)
   const handleAddSongDirectly = async (song: Song) => {
     if (!id) return;
-    try { await playlistApi.addSongToPlaylist(Number(id), song.id, user?.email ?? ""); alert("곡이 추가되었습니다."); fetchSongs(); }
+    try { await playlistApi.addSongToPlaylist(Number(id), song.id); alert("곡이 추가되었습니다."); fetchSongs(); }
     catch (e) { alert("곡 추가에 실패했습니다."); }
   };
 

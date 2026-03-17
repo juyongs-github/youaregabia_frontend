@@ -40,13 +40,13 @@ const BlindRecommendPage = () => {
 
   const fetchPlaylists = async () => {
     if (!userEmail || playlists.length > 0) return;
-    const res = await playlistApi.getAllPlaylist(userEmail);
+    const res = await playlistApi.getAllPlaylist();
     setPlaylists(res.data);
   };
 
   const handleCreated = async () => {
     if (!userEmail) return;
-    const res = await playlistApi.getAllPlaylist(userEmail);
+    const res = await playlistApi.getAllPlaylist();
     setPlaylists(res.data);
   };
 
@@ -78,7 +78,7 @@ const BlindRecommendPage = () => {
 
   const handleAddSong = async (songId: number) => {
     if (!selectedPlaylistId || !userEmail) return;
-    await playlistApi.addSongToPlaylist(selectedPlaylistId, songId, userEmail);
+    await playlistApi.addSongToPlaylist(selectedPlaylistId, songId);
     setAddedSongIds((prev) => new Set(prev).add(songId));
   };
 
@@ -177,7 +177,7 @@ const BlindRecommendPage = () => {
 
         {isCreateModalOpen && (
           <PlaylistCreateModal
-            email={userEmail ?? ""}
+            
             onClose={() => setIsCreateModalOpen(false)}
             onCreated={handleCreated}
           />

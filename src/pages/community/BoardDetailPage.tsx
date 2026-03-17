@@ -94,7 +94,7 @@ const BoardDetailPage = () => {
 
   const fetchPlaylists = async () => {
     if (!userEmail || playlists.length > 0) return;
-    const res = await playlistApi.getAllPlaylist(userEmail);
+    const res = await playlistApi.getAllPlaylist();
     setPlaylists(res.data);
   };
 
@@ -116,7 +116,7 @@ const BoardDetailPage = () => {
       board?.songs?.filter((s) => selectedSongIds.has(s.songId) && !addedSongIds.has(s.songId)) ??
       [];
     for (const song of toAdd) {
-      await playlistApi.addSongToPlaylist(selectedPlaylistId, song.songId, userEmail);
+      await playlistApi.addSongToPlaylist(selectedPlaylistId, song.songId);
       setAddedSongIds((prev) => new Set(prev).add(song.songId));
     }
     alert(`${toAdd.length}곡이 추가됐어요!`);
@@ -303,11 +303,11 @@ const BoardDetailPage = () => {
       {/* 플레이리스트 생성 모달 */}
       {isCreateModalOpen && (
         <PlaylistCreateModal
-          email={userEmail ?? ""}
+          
           onClose={() => setIsCreateModalOpen(false)}
           onCreated={async () => {
             if (!userEmail) return;
-            const res = await playlistApi.getAllPlaylist(userEmail);
+            const res = await playlistApi.getAllPlaylist();
             setPlaylists(res.data);
           }}
         />

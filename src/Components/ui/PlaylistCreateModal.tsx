@@ -1,16 +1,12 @@
 import { useState } from "react";
 import { FaTimes, FaPlus } from "react-icons/fa";
 import { playlistApi } from "../../api/playlistApi";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../store";
-
 interface Props {
   onClose: () => void;
   onCreated: () => void;
 }
 
 function PlaylistCreateModal({ onClose, onCreated }: Props) {
-  const user = useSelector((state: RootState) => state.auth.user);
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [title, setTitle] = useState("");
