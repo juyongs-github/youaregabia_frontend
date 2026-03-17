@@ -301,6 +301,10 @@ function PlaylistDetailPage() {
                 onClick={() => {
                   setEditTitle(data?.title ?? "");
                   setEditDescription(data?.description ?? "");
+                  if (preview) URL.revokeObjectURL(preview);
+                  setPreview(null);
+                  setImage(null);
+
                   setIsEditMode(false);
                 }}
               >
