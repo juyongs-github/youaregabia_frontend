@@ -1,10 +1,10 @@
-import { use, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
 import type { Board } from "../../types/board";
 import { replyApi } from "../../api/replyApi";
-import ReplyItem from "../../components/ui/replyItem";
-import Pagination from "../../components/ui/Pagination";
+import ReplyItem from "../../Components/ui/replyItem";
+import Pagination from "../../Components/ui/Pagination";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 
@@ -13,7 +13,6 @@ const FreeBoardDetailPage = () => {
   const [board, setBoard] = useState<Board | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [replyPage, setReplyPage] = useState(1); // 댓글 페이지
-  const userName = useSelector((state: RootState) => state.auth.user?.name);
   const userEmail = useSelector((state: RootState) => state.auth.user?.email);
 
   // 정렬

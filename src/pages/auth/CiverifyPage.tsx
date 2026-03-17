@@ -1,20 +1,13 @@
 import { useMemo, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../../styles/ciAuth.css";
 
 import { sendSmsCode, verifySmsCode } from "../../api/sms";
 import { verifyCiMock } from "../../api/auth";
 
-type TermsState = {
-  agreedService?: boolean;
-  agreedPrivacy?: boolean;
-  agreedMarketing?: boolean;
-};
 
 export default function CiVerifyPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const termsState = (location.state || {}) as TermsState;
 
   const [name, setName] = useState("");
   const [birth, setBirth] = useState("");

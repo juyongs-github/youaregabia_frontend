@@ -1,16 +1,16 @@
 import { useEffect, useState, useRef } from "react";
-import type { Song } from "../../components/ui/SongListItem";
+import type { Song } from "../../Components/ui/SongListItem";
 import api from "../../api/axios";
 import { FaMusic, FaSave } from "react-icons/fa";
-import SongListItem from "../../components/ui/SongListItem";
+import SongListItem from "../../Components/ui/SongListItem";
 import { IoWarning } from "react-icons/io5";
 import { useLocation, useNavigate } from "react-router-dom";
 import { HiPencil } from "react-icons/hi2";
 import { BsQuestionCircleFill, BsFillCircleFill } from "react-icons/bs";
 import { RiArrowLeftLine, RiPlayList2Fill } from "react-icons/ri";
-import MusicPlayer from "../../components/layout/MusicPlayer";
+import MusicPlayer from "../../Components/layout/MusicPlayer";
 import { RiResetLeftFill } from "react-icons/ri";
-import PlaylistReviewCreateModal from "../../components/ui/PlaylistReviewCreateModal";
+import PlaylistReviewCreateModal from "../../Components/ui/PlaylistReviewCreateModal";
 import Checkbox from "@mui/material/Checkbox";
 import { playlistApi } from "../../api/playlistApi";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -29,8 +29,6 @@ function RecommendPlaylistResult() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
 
-  // 수정한 것 --
-  const email = useSelector((state: any) => state.auth.user?.email);
 
   // 곡 정보 UI에서 선택한 곡(미리듣기, 유사 곡 추천)
   const [selectSong, setSelectSong] = useState<Song | null>(null);
@@ -39,8 +37,6 @@ function RecommendPlaylistResult() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   // 리뷰 등록 완료 여부
   const [isReviewSubmitted, setIsReviewSubmitted] = useState<boolean>(false);
-  // 리뷰 보기/수정 Modal
-  const [isViewModalOpen, setIsViewModalOpen] = useState<boolean>(false);
 
   const [checkedSongIds, setCheckedSongIds] = useState<number[]>([]);
   const [savedPlaylistId, setSavedPlaylistId] = useState<number | null>(null);

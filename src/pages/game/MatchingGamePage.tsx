@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import type { Song } from "../../components/ui/SongListItem";
-import GameResult from "../../components/ui/GameResult";
+import type { Song } from "../../Components/ui/SongListItem";
+import GameResult from "../../Components/ui/GameResult";
 
 interface Card {
   id: number;

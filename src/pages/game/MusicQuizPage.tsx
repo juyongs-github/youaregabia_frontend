@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import MusicPlayer from "../../components/layout/MusicPlayer";
-import type { Song } from "../../components/ui/SongListItem";
-import GameResult from "../../components/ui/GameResult";
+import MusicPlayer from "../../Components/layout/MusicPlayer";
+import type { Song } from "../../Components/ui/SongListItem";
+import GameResult from "../../Components/ui/GameResult";
 
 const TOTAL = 10;
 

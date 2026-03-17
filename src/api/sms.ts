@@ -1,5 +1,3 @@
-import api from "./axios";
-
 // src/api/sms.ts
 export interface SmsSendResponse {
   success: boolean;

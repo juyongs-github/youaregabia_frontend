@@ -35,7 +35,7 @@ function PlaylistReviewCreateModal({ onClose, playlistId, onSuccess }: Props) {
             name="rating"
             value={rating}
             size="large"
-            onChange={(event, newValue) => {
+            onChange={(_event, newValue) => {
               setRating(newValue);
             }}
             icon={<FaStar color="yellow"/>}

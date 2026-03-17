@@ -1,5 +1,5 @@
-import { use, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
@@ -8,8 +8,6 @@ const FreeBoardCreatePage = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const navigate = useNavigate();
-  const [boardGenre, setBoardGenre] = useState("FREE");
-  const [boardType] = useState("FREE");
   // 이메일 가져오
   const userEmail = useSelector((state: RootState) => state.auth.user?.email);
 

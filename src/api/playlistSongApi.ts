@@ -1,5 +1,5 @@
 import api from "./axios";
-import type { Song } from "../components/ui/SongListItem";
+import type { Song } from "../Components/ui/SongListItem";
 
 export interface SongSuggestion {
   id: number;

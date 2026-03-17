@@ -7,10 +7,10 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { playlistApi } from "../../api/playlistApi";
 import { playlistSongApi, type SongSuggestion } from "../../api/playlistSongApi";
-import type { Song } from "../../components/ui/SongListItem";
+import type { Song } from "../../Components/ui/SongListItem";
 import type { CollaboPlaylist } from "../../types/playlist";
-import MusicPlayer from "../../components/layout/MusicPlayer";
-import Spinner from "../../components/ui/Spinner";
+import MusicPlayer from "../../Components/layout/MusicPlayer";
+import Spinner from "../../Components/ui/Spinner";
 import api from "../../api/axios";
 
 interface PlaylistSong extends Song {
@@ -82,7 +82,7 @@ function CollaboPlaylistDetailPage() {
   // 작성자 직접 추가 (즉시 수록)
   const handleAddSongDirectly = async (song: Song) => {
     if (!id) return;
-    try { await playlistApi.addSongToPlaylist(Number(id), song.id); alert("곡이 추가되었습니다."); fetchSongs(); }
+    try { await playlistApi.addSongToPlaylist(Number(id), song.id, user?.email ?? ""); alert("곡이 추가되었습니다."); fetchSongs(); }
     catch (e) { alert("곡 추가에 실패했습니다."); }
   };
 

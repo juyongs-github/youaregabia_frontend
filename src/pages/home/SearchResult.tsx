@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import SongListItem from "../../components/ui/SongListItem";
+import SongListItem from "../../Components/ui/SongListItem";
 import { useLocation, useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
-import Spinner from "../../components/ui/Spinner";
+import Spinner from "../../Components/ui/Spinner";
 import { BsQuestionCircleFill } from "react-icons/bs";
 import { IoWarning } from "react-icons/io5";
-import MusicPlayer from "../../components/layout/MusicPlayer";
+import MusicPlayer from "../../Components/layout/MusicPlayer";
 import { RiResetLeftFill } from "react-icons/ri";
 
 interface Song {

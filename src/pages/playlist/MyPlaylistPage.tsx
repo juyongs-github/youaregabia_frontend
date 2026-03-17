@@ -3,11 +3,10 @@ import { useNavigate } from "react-router-dom";
 import type { Playlist } from "../../types/playlist";
 import { playlistApi } from "../../api/playlistApi";
 import { FaPlay, FaPlus } from "react-icons/fa";
-import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
+import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
 import { useSelector } from "react-redux";
 
 function MyPlaylistPage() {
-  const baseURL: string = "http://localhost:8080";
   const navigate = useNavigate();
 
   // 유저 정보
@@ -15,8 +14,8 @@ function MyPlaylistPage() {
 
   // 플레이리스트 정보
   const [data, setData] = useState<Playlist[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isError, setIsError] = useState<boolean>(false);
+  const [, setIsLoading] = useState<boolean>(false);
+  const [, setIsError] = useState<boolean>(false);
 
   // Create Modal
   const [isModalOpen, setIsModalOpen] = useState(false);

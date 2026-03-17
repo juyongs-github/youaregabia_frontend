@@ -96,7 +96,7 @@ function MusicPlayer({
       <Box sx={{ position: "absolute", top: 0, left: 0, width: "100%" }}>
         <Slider
           value={progress}
-          onChange={(e, value) => {
+          onChange={(_e, value) => {
             if (!audioRef.current) return;
             setProgress(value);
             audioRef.current.currentTime = (value / 100) * audioRef.current.duration;
@@ -195,7 +195,7 @@ function MusicPlayer({
             <Box sx={{ width: "100%", display: "flex" }}>
               <Slider
                 value={volume}
-                onChange={(e, value) => {
+                onChange={(_e, value) => {
                   if (!audioRef.current) return;
                   audioRef.current.volume = value / 100;
                   setVolume(value);

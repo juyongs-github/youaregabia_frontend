@@ -2,10 +2,10 @@
 import { useEffect, useState } from "react";
 import { boardApi } from "../../api/boardApi";
 import type { Board, PageResult } from "../../types/board";
-import { Link, useNavigate } from "react-router-dom";
-import Pagination from "../../components/ui/Pagination";
-import BoardSortBar from "../../components/ui/BoardSortBar";
-import BoardItem from "../../components/ui/BoardItem";
+import { useNavigate } from "react-router-dom";
+import Pagination from "../../Components/ui/Pagination";
+import BoardSortBar from "../../Components/ui/BoardSortBar";
+import BoardItem from "../../Components/ui/BoardItem";
 
 const FreeBoardListPage = () => {
   // 페이징 관리
@@ -14,7 +14,7 @@ const FreeBoardListPage = () => {
   const [keyword, setKeyword] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
   const navigate = useNavigate();
-  const [genre, setGenre] = useState<string | undefined>(undefined);
+  const [genre] = useState<string | undefined>(undefined);
   const [sortBy, setSortBy] = useState("latest");
 
   // 페이지 데이터 불러오기

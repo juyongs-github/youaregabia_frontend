@@ -131,7 +131,7 @@ function RegisterForm() {
   };
 
   useEffect(() => {
-    if (window.daum?.Postcode) return;
+    if ((window as any).daum?.Postcode) return;
     const script = document.createElement("script");
     script.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
     script.async = true;
@@ -139,7 +139,7 @@ function RegisterForm() {
   }, []);
 
   const openAddressSearch = () => {
-    new window.daum.Postcode({
+    new (window as any).daum.Postcode({
       oncomplete: (data: any) => {
         setForm(prev => ({ ...prev, address: data.address }));
         setTimeout(() => detailAddressRef.current?.focus(), 0);

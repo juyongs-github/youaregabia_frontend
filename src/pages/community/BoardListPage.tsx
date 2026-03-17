@@ -2,10 +2,10 @@
 import { useEffect, useState } from "react";
 import { boardApi } from "../../api/boardApi";
 import type { Board, PageResult } from "../../types/board";
-import { Link, useNavigate } from "react-router-dom";
-import Pagination from "../../components/ui/Pagination";
-import BoardItem from "../../components/ui/BoardItem";
-import BoardSortBar from "../../components/ui/BoardSortBar";
+import { useNavigate } from "react-router-dom";
+import Pagination from "../../Components/ui/Pagination";
+import BoardItem from "../../Components/ui/BoardItem";
+import BoardSortBar from "../../Components/ui/BoardSortBar";
 
 const BoardListPage = () => {
   // 페이징 관리

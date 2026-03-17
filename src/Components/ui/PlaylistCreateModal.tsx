@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FaTimes, FaPlus } from "react-icons/fa";
 import { playlistApi } from "../../api/playlistApi";
 import { useSelector } from "react-redux";
@@ -46,7 +46,7 @@ function PlaylistCreateModal({ onClose, onCreated }: Props) {
 
           playlistApi
             .createPlaylist(formData)
-            .then((res) => {
+            .then(() => {
               alert("플레이리스트가 생성되었습니다.");
               onCreated();
               onClose();

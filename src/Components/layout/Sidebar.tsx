@@ -1,9 +1,5 @@
 import { useState } from "react";
-<<<<<<< HEAD
-import { FaChevronDown, FaCompass, FaHome, FaMinus, FaUsers, FaShoppingBag } from "react-icons/fa";
-=======
-import { FaChevronDown, FaCompass, FaGamepad, FaHome, FaMinus, FaUsers } from "react-icons/fa";
->>>>>>> origin/deploy/test3-yks
+import { FaChevronDown, FaCompass, FaGamepad, FaHome, FaMinus, FaUsers, FaShoppingBag } from "react-icons/fa";
 import { PiPlaylistBold } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -29,10 +25,6 @@ function Sidebar() {
     }
   };
 
-  const [isRecommendMenuOpen, setIsRecommendMenuOpen] = useState<boolean>(false);
-  const [isPlaylistMenuOpen, setIsPlaylistMenuOpen] = useState<boolean>(false);
-  const [isCommunityMenuOpen, setIsCommunityMenuOpen] = useState<boolean>(false);
-  const [isGameMenuOpen, setIsGameMenuOpen] = useState<boolean>(false);
 
   return (
     <aside className="fixed left-0 border-r border-gray-800 w-80 top-20 h-[calc(100vh-5rem)]">
