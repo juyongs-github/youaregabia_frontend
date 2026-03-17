@@ -4,7 +4,17 @@ import { updateProfile, logout } from "../../store/authSlice";
 import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MdEdit } from "react-icons/md";
+import { FaBell } from "react-icons/fa";
 import api from "../../api/axios";
+import { cartUtils } from "../../api/goodsApi";
+
+interface NotificationItem {
+  id: number;
+  message: string;
+  boardId: number;
+  isRead: boolean;
+  createdAt: string;
+}
 
 type Tab = "profile" | "boards" | "replies";
 
@@ -35,6 +45,7 @@ function MyPage() {
   const [activeTab, setActiveTab] = useState<Tab>("profile");
   const [myBoards, setMyBoards] = useState<MyBoard[]>([]);
   const [myReplies, setMyReplies] = useState<MyReply[]>([]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   useEffect(() => {
     if (activeTab === "boards" && myBoards.length === 0) {
@@ -43,7 +54,23 @@ function MyPage() {
     if (activeTab === "replies" && myReplies.length === 0) {
       api.get("/api/mypage/replies").then((res) => setMyReplies(res.data)).catch(() => {});
     }
+    if (activeTab === "profile") {
+      api.get("/api/notifications").then((res) => setNotifications(res.data)).catch(() => {});
+    }
   }, [activeTab]);
+
+  const handleNotifClick = async (n: NotificationItem) => {
+    if (!n.isRead) {
+      await api.patch(`/api/notifications/${n.id}/read`);
+      setNotifications((prev) => prev.map((x) => x.id === n.id ? { ...x, isRead: true } : x));
+    }
+    if (n.boardId) navigate(`/community/share/${n.boardId}`);
+  };
+
+  const handleMarkAllRead = async () => {
+    await api.patch("/api/notifications/read-all");
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+  };
 
   const handleEditClick = () => fileInputRef.current?.click();
 
@@ -68,6 +95,7 @@ function MyPage() {
       const res = await api.delete("/api/auth/withdraw", { data: { email: user?.email } });
       if (res.status === 200) {
         alert("회원탈퇴가 완료됐습니다.");
+        cartUtils.clear();
         dispatch(logout());
         navigate("/login", { replace: true });
       }
@@ -138,6 +166,55 @@ function MyPage() {
               회원탈퇴
             </button>
           </div>
+        </div>
+      )}
+
+      {/* 알림 이력 (내 정보 탭 하단) */}
+      {activeTab === "profile" && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <FaBell size={15} className="text-gray-400" />
+              <h2 className="text-base font-semibold text-white">알림 이력</h2>
+              <span className="text-xs text-gray-500">({notifications.length}건)</span>
+            </div>
+            {notifications.some((n) => !n.isRead) && (
+              <button
+                onClick={handleMarkAllRead}
+                className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                모두 읽음
+              </button>
+            )}
+          </div>
+
+          {notifications.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-8">알림 이력이 없습니다.</p>
+          ) : (
+            <div className="space-y-2">
+              {notifications.map((n) => (
+                <button
+                  key={n.id}
+                  onClick={() => handleNotifClick(n)}
+                  className={`w-full text-left px-4 py-3 rounded-xl border transition-colors ${
+                    n.isRead
+                      ? "bg-gray-900/50 border-gray-800 hover:border-gray-600"
+                      : "bg-blue-950/30 border-blue-900/50 hover:border-blue-700"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    {!n.isRead && (
+                      <span className="mt-1.5 w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                    )}
+                    <div className={!n.isRead ? "" : "ml-5"}>
+                      <p className="text-sm text-white leading-snug">{n.message}</p>
+                      <p className="text-xs text-gray-500 mt-1">{n.createdAt?.slice(0, 10)}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

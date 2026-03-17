@@ -21,7 +21,6 @@ function Sidebar() {
   const [isRecommendMenuOpen, setIsRecommendMenuOpen] = useState<boolean>(false);
   const [isPlaylistMenuOpen, setIsPlaylistMenuOpen] = useState<boolean>(false);
   const [isCommunityMenuOpen, setIsCommunityMenuOpen] = useState<boolean>(false);
-  const [isGoodsMenuOpen, setIsGoodsMenuOpen] = useState<boolean>(false);
 
   return (
     <aside className="fixed left-0 border-r border-gray-800 w-80 top-20 h-[calc(100vh-5rem)]">
@@ -151,40 +150,14 @@ function Sidebar() {
             </div>
           )}
         </div>
-        {/* 굿즈 메뉴 */}
-        <div>
-          <button
-            onClick={() => setIsGoodsMenuOpen(!isGoodsMenuOpen)}
-            className="flex items-center w-full gap-5 px-3 py-2 text-white rounded-lg hover:bg-gray-800"
-          >
-            <FaShoppingBag size={24} />
-            <span>굿즈</span>
-            <FaChevronDown
-              size={16}
-              className={`ml-auto transition-transform ${isGoodsMenuOpen ? "rotate-180" : ""}`}
-            />
-          </button>
-          {isGoodsMenuOpen && (
-            <div className="mt-3 ml-5 space-y-2 text-[17px] font-semibold">
-              <button
-                className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
-                onClick={() => goPage("/goods")}
-              >
-                <FaMinus size={12} />
-                <span>굿즈샵</span>
-              </button>
-              {userRole !== "ADMIN" && (
-                <button
-                  className="flex items-center w-full gap-3 px-3 py-2 text-left text-gray-400 rounded-lg hover:bg-gray-800"
-                  onClick={() => goPage("/goods/cart")}
-                >
-                  <FaMinus size={12} />
-                  <span>장바구니</span>
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+        {/* 굿즈샵 메뉴 */}
+        <button
+          className="flex items-center gap-5 px-3 py-2 text-white rounded-lg hover:bg-gray-800"
+          onClick={() => goPage("/goods")}
+        >
+          <FaShoppingBag size={24} />
+          <span>굿즈샵</span>
+        </button>
 
         {/* 게임 메뉴 */}
         <div>

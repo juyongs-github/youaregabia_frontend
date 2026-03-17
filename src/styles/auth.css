@@ -19,7 +19,7 @@
 .auth-box {
   width: 100%;
   max-width: 1000px;
-  margin: 35px auto 0;
+  margin: auto;
   padding: 48px 44px;
   background: #181818;
   border-radius: 12px;

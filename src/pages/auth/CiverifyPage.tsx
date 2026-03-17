@@ -31,8 +31,9 @@ export default function CiVerifyPage() {
   const [loadingCi, setLoadingCi] = useState(false);
 
   // --- 실시간 유효성 검사 (입력창 색상용) ---
-  const isNameValid = name.trim().length >= 2;
+  const isNameValid = /^[가-힣]{2,10}$/.test(name.trim());
   const isNameError = name.length > 0 && !isNameValid;
+  const nameErrorMsg = isNameError ? "이름은 한글 2~10자로 입력해주세요." : null;
 
   const birthError = useMemo(() => {
     if (!birth) return null; // 입력 전엔 에러 아님
@@ -58,7 +59,8 @@ export default function CiVerifyPage() {
   const phoneDigits = useMemo(() => phone.replace(/\D/g, ""), [phone]);
   const isPhoneValid = /^01[016789]\d{7,8}$/.test(phoneDigits);
   // 휴대폰: 정규식 통과하면 성공, 입력은 했는데 틀리면 에러
-  const isPhoneError = phone.length > 3 && !isPhoneValid; // 3자리 이상 쳤는데 안 맞으면 에러 후보 (UX상 느슨하게)
+  const isPhoneError = phone.length > 3 && !isPhoneValid;
+  const phoneErrorMsg = isPhoneError ? "올바른 휴대폰 번호를 입력해주세요. (예: 010-1234-5678)" : null;
 
   // 인증코드: 6자리 숫자면 형식은 OK
   const isSmsCodeFormatValid = /^\d{6}$/.test(smsCode);
@@ -166,6 +168,7 @@ export default function CiVerifyPage() {
             placeholder="성함을 입력하세요"
             className={getInputClass(isNameValid, isNameError)}
           />
+          {nameErrorMsg && <p className="ci-msg error">{nameErrorMsg}</p>}
         </div>
 
         <div className="ci-field">
@@ -222,6 +225,7 @@ export default function CiVerifyPage() {
             </div>
           )}
 
+          {phoneErrorMsg && <p className="ci-msg error">{phoneErrorMsg}</p>}
           {smsMsg && <p className={`ci-msg ${smsVerified ? "success" : "success"}`}>{smsMsg}</p>}
           {smsError && <p className="ci-msg error">{smsError}</p>}
         </div>

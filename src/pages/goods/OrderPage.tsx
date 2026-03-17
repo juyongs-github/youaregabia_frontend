@@ -1,19 +1,54 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaCreditCard, FaMoneyBill, FaSearch } from "react-icons/fa";
+import { SiKakaotalk } from "react-icons/si";
+import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
 import { cartUtils, goodsApi, type CartItem } from "../../api/goodsApi";
+import api from "../../api/axios";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 
 const DELIVERY_FEE = 3000;
 const FREE_DELIVERY_THRESHOLD = 50000;
+const CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY as string;
+
+const PAYMENT_METHODS = [
+  { key: "CARD", label: "카드", icon: <FaCreditCard size={18} /> },
+  { key: "TRANSFER", label: "계좌이체", icon: <FaMoneyBill size={18} /> },
+  { key: "KAKAOPAY", label: "카카오페이", icon: <SiKakaotalk size={18} /> },
+] as const;
+
+type PaymentMethodKey = typeof PAYMENT_METHODS[number]["key"];
+
+const formatPhone = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+};
+
+const isValidPhone = (value: string) => /^01[0-9]-\d{3,4}-\d{4}$/.test(value);
 
 export default function OrderPage() {
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [form, setForm] = useState({ receiverName: "", receiverPhone: "", deliveryAddress: "", detailAddress: "" });
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const [useSameInfo, setUseSameInfo] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodKey>("CARD");
   const [loading, setLoading] = useState(false);
+  const detailAddressRef = useRef<HTMLInputElement>(null);
+
+  // 카카오(다음) 주소 API 스크립트 로드
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((window as any).daum?.Postcode) return;
+    const script = document.createElement("script");
+    script.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
   useEffect(() => {
     const items = cartUtils.getCart();
@@ -22,7 +57,6 @@ export default function OrderPage() {
       return;
     }
     setCart(items);
-    // 로그인 유저 정보 자동 입력
     if (user) setForm((f) => ({ ...f, receiverName: user.name || "" }));
   }, []);
 
@@ -30,13 +64,56 @@ export default function OrderPage() {
   const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE;
   const total = subtotal + deliveryFee;
 
+  const phoneValid = isValidPhone(form.receiverPhone);
+
+  const getPhoneBorderClass = () => {
+    if (!phoneTouched) return "border-gray-700";
+    return phoneValid ? "border-green-500" : "border-red-500";
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    if (name === "receiverPhone") {
+      setForm((f) => ({ ...f, receiverPhone: formatPhone(value) }));
+      setPhoneTouched(true);
+    } else {
+      setForm((f) => ({ ...f, [name]: value }));
+    }
+  };
+
+  const handleSameInfo = async (checked: boolean) => {
+    setUseSameInfo(checked);
+    if (checked) {
+      try {
+        const res = await api.get<{ name: string; phoneNumber: string; address: string; addressDetail: string }>("/api/auth/me");
+        setForm((f) => ({
+          ...f,
+          receiverName: res.data.name || f.receiverName,
+          receiverPhone: formatPhone(res.data.phoneNumber || ""),
+          deliveryAddress: res.data.address || f.deliveryAddress,
+          detailAddress: res.data.addressDetail || "",
+        }));
+        if (res.data.phoneNumber) setPhoneTouched(true);
+      } catch {
+        setForm((f) => ({ ...f, receiverName: user?.name || "" }));
+      }
+    }
+  };
+
+  const openAddressSearch = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    new (window as any).daum.Postcode({
+      oncomplete: (data: { address: string }) => {
+        setForm((f) => ({ ...f, deliveryAddress: data.address, detailAddress: "" }));
+        setTimeout(() => detailAddressRef.current?.focus(), 0);
+      },
+    }).open();
   };
 
   const handleOrder = async () => {
-    if (!form.receiverName.trim() || !form.receiverPhone.trim() || !form.deliveryAddress.trim()) {
-      alert("배송 정보를 모두 입력해주세요.");
+    setPhoneTouched(true);
+    if (!form.receiverName.trim() || !phoneValid || !form.deliveryAddress.trim()) {
+      alert("배송 정보를 모두 올바르게 입력해주세요.");
       return;
     }
     setLoading(true);
@@ -48,19 +125,32 @@ export default function OrderPage() {
         deliveryAddress: `${form.deliveryAddress} ${form.detailAddress}`.trim(),
         totalAmount: total,
       });
-      cartUtils.clear();
-      navigate("/goods/order/complete", { state: { orderId: result.orderId, total } });
-    } catch {
-      // TODO: 추후 Toss Payments 연동 시 실제 결제 처리
-      alert("결제 기능은 준비 중입니다. (토스페이먼츠 연동 예정)");
-    } finally {
+
+      const tossPayments = await loadTossPayments(CLIENT_KEY);
+      const payment = tossPayments.payment({ customerKey: user!.email });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (payment.requestPayment as any)({
+        method: paymentMethod,
+        amount: { currency: "KRW", value: total },
+        orderId: result.tossOrderId,
+        orderName: cart.length === 1 ? cart[0].name : `${cart[0].name} 외 ${cart.length - 1}건`,
+        customerName: form.receiverName,
+        customerEmail: user?.email,
+        successUrl: `${window.location.origin}/goods/order/success`,
+        failUrl: `${window.location.origin}/goods/order/fail`,
+      });
+    } catch (e: unknown) {
       setLoading(false);
+      const err = e as { code?: string };
+      if (err?.code !== "USER_CANCEL") {
+        alert("결제 중 오류가 발생했습니다. 다시 시도해주세요.");
+      }
     }
   };
 
   return (
     <div className="p-8 text-white min-h-screen max-w-4xl">
-      {/* 헤더 */}
       <div className="flex items-center gap-4 mb-8">
         <button onClick={() => navigate("/goods/cart")} className="text-gray-400 hover:text-white transition-colors">
           <FaArrowLeft size={18} />
@@ -69,11 +159,24 @@ export default function OrderPage() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* 배송 정보 */}
         <div className="flex-1 flex flex-col gap-5">
+          {/* 배송 정보 */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-            <h2 className="font-bold text-lg mb-4">배송 정보</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-lg">배송 정보</h2>
+              <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={useSameInfo}
+                  onChange={(e) => handleSameInfo(e.target.checked)}
+                  className="w-4 h-4 accent-red-500 cursor-pointer"
+                />
+                회원정보와 동일
+              </label>
+            </div>
+
             <div className="flex flex-col gap-4">
+              {/* 받는 분 */}
               <div>
                 <label className="text-sm text-gray-400 mb-1 block">받는 분 *</label>
                 <input
@@ -84,30 +187,51 @@ export default function OrderPage() {
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-red-500"
                 />
               </div>
+
+              {/* 연락처 */}
               <div>
                 <label className="text-sm text-gray-400 mb-1 block">연락처 *</label>
                 <input
                   name="receiverPhone"
                   value={form.receiverPhone}
                   onChange={handleChange}
+                  onBlur={() => setPhoneTouched(true)}
                   placeholder="010-0000-0000"
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-red-500"
+                  maxLength={13}
+                  className={`w-full bg-gray-800 border rounded-lg px-4 py-2.5 text-white focus:outline-none transition-colors border-b-2 ${getPhoneBorderClass()}`}
                 />
+                {phoneTouched && form.receiverPhone && !phoneValid && (
+                  <p className="text-red-400 text-xs mt-1">올바른 휴대폰 번호를 입력해주세요. (예: 010-1234-5678)</p>
+                )}
+                {phoneTouched && phoneValid && (
+                  <p className="text-green-400 text-xs mt-1">올바른 형식입니다.</p>
+                )}
               </div>
+
+              {/* 주소 */}
               <div>
                 <label className="text-sm text-gray-400 mb-1 block">주소 *</label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    value={form.deliveryAddress}
+                    readOnly
+                    placeholder="주소 검색 버튼을 눌러주세요"
+                    className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white cursor-default"
+                  />
+                  <button
+                    type="button"
+                    onClick={openAddressSearch}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap"
+                  >
+                    <FaSearch size={13} /> 주소 검색
+                  </button>
+                </div>
                 <input
-                  name="deliveryAddress"
-                  value={form.deliveryAddress}
-                  onChange={handleChange}
-                  placeholder="주소 입력"
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-red-500 mb-2"
-                />
-                <input
+                  ref={detailAddressRef}
                   name="detailAddress"
                   value={form.detailAddress}
                   onChange={handleChange}
-                  placeholder="상세 주소"
+                  placeholder="상세 주소 입력"
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-red-500"
                 />
               </div>
@@ -117,11 +241,22 @@ export default function OrderPage() {
           {/* 결제 수단 */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
             <h2 className="font-bold text-lg mb-4">결제 수단</h2>
-            <div className="flex items-center gap-3 p-3 bg-gray-800 border border-red-600 rounded-lg">
-              <div className="w-4 h-4 bg-red-600 rounded-full flex-shrink-0" />
-              <span className="text-sm font-semibold">토스페이먼츠 (연동 예정)</span>
+            <div className="flex gap-3">
+              {PAYMENT_METHODS.map((m) => (
+                <button
+                  key={m.key}
+                  onClick={() => setPaymentMethod(m.key)}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border text-sm font-semibold transition-colors ${
+                    paymentMethod === m.key
+                      ? "border-red-500 bg-red-500/10 text-red-400"
+                      : "border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-500"
+                  }`}
+                >
+                  {m.icon}
+                  {m.label}
+                </button>
+              ))}
             </div>
-            <p className="text-xs text-gray-500 mt-2">카드, 계좌이체, 카카오페이 등 지원 예정</p>
           </div>
 
           {/* 주문 상품 */}

@@ -29,6 +29,7 @@ export interface CreateOrderRequest {
 
 export interface OrderResult {
   orderId: number;
+  tossOrderId: string;
   totalAmount: number;
   createdAt: string;
 }
@@ -45,6 +46,9 @@ export const goodsApi = {
 
   getMyOrders: () =>
     api.get<OrderResult[]>("/api/orders/me").then((r) => r.data),
+
+  confirmPayment: (data: { paymentKey: string; orderId: string; amount: number }) =>
+    api.post<void>("/api/payments/confirm", data).then((r) => r.data),
 };
 
 // 장바구니 localStorage 유틸

@@ -6,14 +6,11 @@ import api from "./axios";
 export interface RegisterRequest {
   email: string;
   name: string;
-  birthDate: string; // ✅ 추가
+  birthDate: string;
   password: string;
   phoneNumber: string;
   address: string;
-
-  // [추가 예정]
-  // zipCode?: string;         // 주소 API 붙이면 같이 쓰는 걸 추천
-  // detailAddress?: string;   // 분리 저장이면 백엔드 DTO도 맞춰야 함
+  addressDetail?: string;
 }
 
 /* ===========================

@@ -5,7 +5,7 @@ import ListItemText from "@mui/material/ListItemText";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { useEffect, useRef, useState } from "react";
-import { FaHeadphones, FaSearch, FaTimes, FaBell } from "react-icons/fa";
+import { FaHeadphones, FaSearch, FaTimes, FaBell, FaShoppingCart, FaClipboardList } from "react-icons/fa";
 import { BiSolidUser } from "react-icons/bi";
 import { RiLogoutBoxRLine } from "react-icons/ri";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -184,7 +184,7 @@ function Header() {
                   {notifications.length === 0 ? (
                     <p className="text-gray-500 text-sm text-center py-8">알림이 없습니다.</p>
                   ) : (
-                    notifications.map((n) => (
+                    notifications.slice(0, 4).map((n) => (
                       <button
                         key={n.id}
                         onClick={() => handleNotifClick(n)}
@@ -247,6 +247,28 @@ function Header() {
             </ListItemIcon>
             <ListItemText>내 프로필</ListItemText>
           </MenuItem>
+          {user?.role !== "ADMIN" && (
+            <MenuItem
+              onClick={() => goPage("/goods/cart")}
+              sx={{ color: "white", fontWeight: "bold", py: 1.5, "&:hover": { backgroundColor: "#3d3d3d" } }}
+            >
+              <ListItemIcon sx={{ color: "white" }}>
+                <FaShoppingCart size={18} />
+              </ListItemIcon>
+              <ListItemText>장바구니</ListItemText>
+            </MenuItem>
+          )}
+          {user?.role !== "ADMIN" && (
+            <MenuItem
+              onClick={() => goPage("/goods/orders")}
+              sx={{ color: "white", fontWeight: "bold", py: 1.5, "&:hover": { backgroundColor: "#3d3d3d" } }}
+            >
+              <ListItemIcon sx={{ color: "white" }}>
+                <FaClipboardList size={18} />
+              </ListItemIcon>
+              <ListItemText>주문 내역</ListItemText>
+            </MenuItem>
+          )}
           <MenuItem
             onClick={handleLogout}
             sx={{ color: "white", fontWeight: "bold", py: 1.5, "&:hover": { backgroundColor: "#3d3d3d" } }}

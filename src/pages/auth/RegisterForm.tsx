@@ -154,7 +154,8 @@ function RegisterForm() {
       setIsSubmitting(true);
       await register({
         ...form,
-        address: `${form.address} ${form.detailAddress}`.trim(),
+        address: form.address,
+        addressDetail: form.detailAddress,
         phoneNumber: form.phone,
       });
       alert("회원가입이 완료되었습니다.");
