@@ -13,7 +13,7 @@ const BASE_URL = "http://localhost:8080";
 
 // ============================================================
 // NORMALIZER — SongDTO → Song
-// Sportify API 교체 고려
+// ※ API 교체 시 (예: Spotify) 이 함수와 SongDTO 타입만 수정하면 됨
 // ============================================================
 function normalizeSongDTO(dto: SongDTO): Song {
   return {
@@ -66,11 +66,11 @@ function getRoundLabel(n: number): string {
 // AUDIO HOOK — iTunes 30초 미리듣기 오디오 상태 관리
 // ============================================================
 function useAudio(): AudioState {
-  // 실제 오디오 객체
+  // 실제 오디오 객체 — 변경해도 리렌더 불필요하므로 useRef 사용
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  // 현재 재생 중인 곡의 id
+  // 현재 재생 중인 곡의 id (null이면 미재생)
   const [playing, setPlaying] = useState<number | null>(null);
-  // 곡별 재생 진행률 { [songId]: 0~100 }
+  // 곡별 재생 진행률 { [songId]: 0~100 } — 일시정지 후 이어듣기를 위해 곡마다 저장
   const [progress, setProgress] = useState<Record<number, number>>({});
   // 곡별 재생 위치(초) — 이어듣기 시 audio.currentTime 복원용 (리렌더 불필요 → useRef)
   const currentTimeRef = useRef<Record<number, number>>({});
@@ -652,7 +652,7 @@ export default function IdealTypeWorldCupPage() {
               </div>
             </div>
 
-            <p className="wc-game-hint"></p>
+            <p className="wc-game-hint">▶ : 30초 미리듣기</p>
           </div>
         )}
 
@@ -741,50 +741,53 @@ export default function IdealTypeWorldCupPage() {
                 )}
 
                 <ul className="wc-win-list-items">
-                  {winList.map((item, idx) => {
-                    // 동순위 처리 — 같은 승수면 같은 순위
-                    const rank =
-                      idx === 0
-                        ? 1
-                        : item.count === winList[idx - 1].count
-                          ? winList.findIndex((w) => w.count === item.count) + 1
-                          : idx + 1;
-                    const isChecked = checkedSongIds.has(item.song.id);
-                    return (
-                      <li
-                        key={item.song.id}
-                        className={[
-                          "wc-win-item",
-                          rank <= 3 ? `wc-win-item--rank${rank}` : "",
-                          isChecked ? "wc-win-item--checked" : "",
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                        onClick={() => toggleCheck(item.song.id)}
-                      >
-                        <div
-                          className={`wc-win-checkbox${isChecked ? " wc-win-checkbox--checked" : ""}`}
+                  {(() => {
+                    // 동순위 처리 — 같은 승수면 같은 순위, 다르면 이전 순위 + 1
+                    // 예: [3승, 2승, 2승, 1승] → [1, 2, 2, 3]
+                    const ranks = winList.reduce<number[]>((acc, item, idx) => {
+                      if (idx === 0) return [1];
+                      const prev = acc[idx - 1];
+                      return [...acc, item.count === winList[idx - 1].count ? prev : prev + 1];
+                    }, []);
+                    return winList.map((item, idx) => {
+                      const rank = ranks[idx];
+                      const isChecked = checkedSongIds.has(item.song.id);
+                      return (
+                        <li
+                          key={item.song.id}
+                          className={[
+                            "wc-win-item",
+                            rank <= 3 ? `wc-win-item--rank${rank}` : "",
+                            isChecked ? "wc-win-item--checked" : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" ")}
+                          onClick={() => toggleCheck(item.song.id)}
                         >
-                          {isChecked && "✓"}
-                        </div>
-                        <span className="wc-win-rank">{rank}</span>
-                        {item.song.coverUrl ? (
-                          <img
-                            className="wc-win-thumb"
-                            src={item.song.coverUrl}
-                            alt={item.song.title}
-                          />
-                        ) : (
-                          <div className="wc-win-thumb wc-win-thumb--fallback">♪</div>
-                        )}
-                        <div className="wc-win-info">
-                          <span className="wc-win-title">{item.song.title}</span>
-                          <span className="wc-win-artist">{item.song.artist}</span>
-                        </div>
-                        <span className="wc-win-count">{item.count}승</span>
-                      </li>
-                    );
-                  })}
+                          <div
+                            className={`wc-win-checkbox${isChecked ? " wc-win-checkbox--checked" : ""}`}
+                          >
+                            {isChecked && "✓"}
+                          </div>
+                          <span className="wc-win-rank">{rank}</span>
+                          {item.song.coverUrl ? (
+                            <img
+                              className="wc-win-thumb"
+                              src={item.song.coverUrl}
+                              alt={item.song.title}
+                            />
+                          ) : (
+                            <div className="wc-win-thumb wc-win-thumb--fallback">♪</div>
+                          )}
+                          <div className="wc-win-info">
+                            <span className="wc-win-title">{item.song.title}</span>
+                            <span className="wc-win-artist">{item.song.artist}</span>
+                          </div>
+                          <span className="wc-win-count">{item.count}승</span>
+                        </li>
+                      );
+                    });
+                  })()}
                 </ul>
               </div>
             )}
