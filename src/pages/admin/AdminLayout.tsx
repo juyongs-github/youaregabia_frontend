@@ -1,6 +1,14 @@
 import { NavLink, Outlet, Navigate, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { FaUsers, FaSignInAlt, FaListAlt, FaBox, FaShoppingCart, FaHome, FaSignOutAlt } from "react-icons/fa";
+import {
+  FaUsers,
+  FaSignInAlt,
+  FaListAlt,
+  FaBox,
+  FaShoppingCart,
+  FaHome,
+  FaSignOutAlt,
+} from "react-icons/fa";
 import type { RootState } from "../../store";
 import { logout } from "../../store/authSlice";
 
@@ -27,11 +35,13 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="flex min-h-screen text-white">
+    <div className="flex min-h-screen text-white bg-gray-950">
       {/* Sidebar */}
       <aside className="w-52 shrink-0 border-r border-gray-800 bg-gray-950 flex flex-col py-6">
         <div className="px-5 mb-6">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Admin Panel</p>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+            Admin Panel
+          </p>
         </div>
         <nav className="flex flex-col gap-0.5 px-3">
           {navItems.map(({ to, label, icon: Icon, end }) => (

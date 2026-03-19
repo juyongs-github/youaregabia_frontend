@@ -19,9 +19,10 @@ interface Props {
   boardId: number;
   onRefresh: () => void;
   isChild?: boolean; // 대댓글 여부 (대댓글엔 답글 버튼 숨기기용)
+  isAnonymous?: boolean; // 익명
 }
 
-const ReplyItem = ({ reply, boardId, onRefresh, isChild = false }: Props) => {
+const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = false }: Props) => {
   const [isEdit, setIsEdit] = useState(false);
   const [content, setContent] = useState(reply.content);
   const [showReplyForm, setShowReplyForm] = useState(false);
@@ -94,6 +95,7 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false }: Props) => {
               boardId={boardId}
               onRefresh={onRefresh}
               isChild={true}
+              isAnonymous={isAnonymous}
             />
           ))}
       </li>
@@ -122,7 +124,11 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false }: Props) => {
         ) : (
           <>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-indigo-400">{reply.writer}</span>
+              {isAnonymous ? (
+                <span className="text-sm font-semibold text-gray-400">익명</span>
+              ) : (
+                <span className="text-sm font-semibold text-indigo-400">{reply.writer}</span>
+              )}
               <span className="text-xs text-gray-500">{reply.createdAt}</span>
             </div>
             <span>{reply.content}</span>
@@ -194,6 +200,7 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false }: Props) => {
               boardId={boardId}
               onRefresh={onRefresh}
               isChild={true}
+              isAnonymous={isAnonymous}
             />
           ))}
       </li>

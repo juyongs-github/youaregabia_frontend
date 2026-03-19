@@ -16,14 +16,19 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
-// axios.ts
-api.interceptors.request.use((config) => {
-  const token = store.getState().auth.user?.token; // user 안에 있음
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+
+// response interceptor — 에러 공통 처리
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 429) {
+      const message =
+        error.response.data?.message ?? "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.";
+      alert(message);
+    }
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 // axios.ts - localStorage 폴백 추가
 api.interceptors.request.use((config) => {

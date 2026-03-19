@@ -10,7 +10,7 @@ import { BsQuestionCircleFill, BsFillCircleFill } from "react-icons/bs";
 import { RiArrowLeftLine, RiPlayList2Fill } from "react-icons/ri";
 import MusicPlayer from "../../Components/layout/MusicPlayer";
 import { RiResetLeftFill } from "react-icons/ri";
-import PlaylistReviewCreateModal from "../../Components/ui/PlaylistReviewCreateModal";
+import PlaylistReviewCreateModal from "../../components/ui/PlaylistReviewCreateModal";
 import Checkbox from "@mui/material/Checkbox";
 import { playlistApi } from "../../api/playlistApi";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -28,7 +28,6 @@ function RecommendPlaylistResult() {
   const [data, setData] = useState<Song[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
-
 
   // 곡 정보 UI에서 선택한 곡(미리듣기, 유사 곡 추천)
   const [selectSong, setSelectSong] = useState<Song | null>(null);
@@ -504,7 +503,11 @@ function RecommendPlaylistResult() {
                 </button>
               ) : isReviewSubmitted ? (
                 <button
-                  onClick={() => navigate("/playlist/review", { state: { searchQuery: playlistTitle, tab: "mine" } })}
+                  onClick={() =>
+                    navigate("/playlist/review", {
+                      state: { searchQuery: playlistTitle, tab: "mine" },
+                    })
+                  }
                   className="flex items-center gap-2 px-8 py-4 text-lg font-semibold text-white transition-all rounded-full bg-white/20 hover:bg-white/30"
                 >
                   <HiPencil size={20} />
@@ -588,10 +591,7 @@ function RecommendPlaylistResult() {
       {/* 음악 플레이어 (미리듣기용) */}
       {selectSong && (
         <div className="fixed bottom-0 left-0 z-50 w-full">
-          <MusicPlayer
-            song={selectSong}
-            setIsPlayerVisible={() => setSelectSong(null)}
-          />
+          <MusicPlayer song={selectSong} setIsPlayerVisible={() => setSelectSong(null)} />
         </div>
       )}
 
