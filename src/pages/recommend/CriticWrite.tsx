@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import CriticSongSelectModal from "../../Components/ui/CriticSongSelectModal";
+import CriticSongSelectModal from "../../components/ui/CriticSongSelectModal";
 
 interface SelectedSong {
   id: number;

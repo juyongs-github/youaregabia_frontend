@@ -5,14 +5,15 @@ import { playlistApi } from "../../api/playlistApi";
 import type { Song } from "../ui/SongListItem";
 import PlaylistCreateModal from "./PlaylistCreateModal";
 import { pointApi } from "../../api/pointApi";
+import { refreshPoint } from "../../components/ui/refreshPoint";
 
 interface Props {
   songs: Song[];
   score: number;
   maxScore: number;
   onRestart: () => void;
-  correctSongIds?: Set<number>; // 정답
-  wrongSongIds?: Set<number>; // 오답
+  correctSongIds?: Set<number>;
+  wrongSongIds?: Set<number>;
   quizType?: "MUSIC" | "ALBUM" | "CARD";
 }
 
@@ -29,15 +30,27 @@ const GameResult = ({
   const [playlists, setPlaylists] = useState<{ id: number; title: string }[]>([]);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<number | null>(null);
   const [addedSongIds, setAddedSongIds] = useState<Set<number>>(new Set());
+  const [playlistSongIds, setPlaylistSongIds] = useState<Set<number>>(new Set());
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const fetchPlaylists = async () => {
-    if (!userEmail || playlists.length > 0) return; // 이미 불렀으면 스킵
+    if (!userEmail || playlists.length > 0) return;
     const res = await playlistApi.getAllPlaylist();
     setPlaylists(res.data);
   };
 
-  // 플레이리스트 생성 후 목록 새로고침
+  useEffect(() => {
+    if (!selectedPlaylistId) {
+      setPlaylistSongIds(new Set());
+      setAddedSongIds(new Set());
+      return;
+    }
+    playlistApi.getPlaylistSongs(selectedPlaylistId).then((res) => {
+      setPlaylistSongIds(new Set(res.data.map((s: any) => s.id)));
+      setAddedSongIds(new Set());
+    });
+  }, [selectedPlaylistId]);
+
   const handleCreated = async () => {
     if (!userEmail) return;
     const res = await playlistApi.getAllPlaylist();
@@ -46,17 +59,25 @@ const GameResult = ({
 
   const handleAddSong = async (songId: number) => {
     if (!selectedPlaylistId || !userEmail) return;
-    await playlistApi.addSongToPlaylist(selectedPlaylistId, songId);
-    setAddedSongIds((prev) => new Set(prev).add(songId));
+    try {
+      await playlistApi.addSongToPlaylist(selectedPlaylistId, songId);
+      setAddedSongIds((prev) => new Set(prev).add(songId));
+      setPlaylistSongIds((prev) => new Set(prev).add(songId));
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  // 마운트 시 포인트 전송
   const pointSent = useRef(false);
   useEffect(() => {
     if (score > 0 && quizType && userEmail && !pointSent.current) {
-      pointApi.addQuizPoint(score, quizType).catch(console.error);
+      pointApi
+        .addQuizPoint(score, quizType)
+        .then(() => refreshPoint())
+        .catch(console.error);
+      pointSent.current = true;
     }
-  }, []);
+  }, [score, quizType, userEmail]);
 
   return (
     <div className="flex flex-col items-center gap-6 py-12 text-white mx-auto max-w-xl px-8">
@@ -75,20 +96,18 @@ const GameResult = ({
       </p>
       <button
         onClick={onRestart}
-        className="rounded-full bg-indigo-600 px-8 py-3 font-semibold hover:bg-indigo-500"
+        className="rounded-full bg-indigo-600 px-8 py-3 font-semibold hover:bg-indigo-500 transition-colors"
       >
         다시 도전
       </button>
 
-      {/* 사용된 곡 목록 */}
       <div className="w-full mt-4">
         <h3 className="text-lg font-bold mb-3">이번 게임 수록곡</h3>
 
-        {/* 플레이리스트 선택 */}
         {userEmail && (
           <div className="mb-4">
             <select
-              className="w-full rounded border border-neutral-700 bg-neutral-900 px-4 py-2 text-white"
+              className="w-full rounded border border-neutral-700 bg-neutral-900 px-4 py-2 text-white outline-none focus:ring-1 focus:ring-indigo-500"
               value={selectedPlaylistId ?? ""}
               onChange={(e) => setSelectedPlaylistId(Number(e.target.value) || null)}
               onClick={fetchPlaylists}
@@ -100,7 +119,6 @@ const GameResult = ({
                 </option>
               ))}
             </select>
-            {/* 플레이리스트 생성 버튼 */}
             <button
               onClick={() => setIsCreateModalOpen(true)}
               className="mt-2 text-sm text-indigo-400 hover:text-indigo-300"
@@ -111,41 +129,62 @@ const GameResult = ({
         )}
 
         <ul className="flex flex-col gap-3">
-          {songs.map((song) => (
-            <li
-              key={song.id}
-              className={`flex items-center justify-between rounded border px-4 py-3 ${
-                correctSongIds?.has(song.id)
-                  ? "border-green-700 bg-green-900/20"
-                  : wrongSongIds?.has(song.id)
-                    ? "border-red-700 bg-red-900/20"
-                    : "border-neutral-700"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <img src={song.imgUrl} className="w-10 h-10 rounded object-cover" />
-                <div>
-                  <p className="font-semibold text-sm">{song.trackName}</p>
-                  <p className="text-xs text-gray-400">{song.artistName}</p>
+          {songs.map((song) => {
+            const isAdded = addedSongIds.has(song.id);
+            const isInPlaylist = playlistSongIds.has(song.id);
+            const isDisabled = isAdded || isInPlaylist;
+
+            return (
+              <li
+                key={song.id}
+                className={`flex items-center justify-between rounded border px-4 py-3 transition-all ${
+                  correctSongIds?.has(song.id)
+                    ? "border-green-700 bg-green-900/20"
+                    : wrongSongIds?.has(song.id)
+                      ? "border-red-700 bg-red-900/20"
+                      : "border-neutral-700"
+                } ${isDisabled ? "opacity-60" : ""}`}
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src={song.imgUrl}
+                    className="w-10 h-10 rounded object-cover shadow-sm"
+                    alt={song.trackName}
+                  />
+                  <div>
+                    <p className="font-semibold text-sm">{song.trackName}</p>
+                    <p className="text-xs text-gray-400">{song.artistName}</p>
+                  </div>
                 </div>
-              </div>
-              {userEmail && selectedPlaylistId && (
-                <button
-                  onClick={() => handleAddSong(song.id)}
-                  disabled={addedSongIds.has(song.id)}
-                  className="rounded bg-indigo-600 px-3 py-1 text-sm hover:bg-indigo-500 disabled:bg-neutral-700 disabled:text-gray-500"
-                >
-                  {addedSongIds.has(song.id) ? "추가됨 ✓" : "+ 추가"}
-                </button>
-              )}
-            </li>
-          ))}
+
+                {userEmail && selectedPlaylistId && (
+                  <div className="flex-shrink-0">
+                    {isAdded ? (
+                      <span className="text-xs text-green-400 font-semibold px-2 py-1">
+                        추가됨 ✓
+                      </span>
+                    ) : isInPlaylist ? (
+                      <span className="text-[11px] font-semibold text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded">
+                        이미 있음
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => handleAddSong(song.id)}
+                        className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium hover:bg-indigo-500 active:scale-95 transition-all"
+                      >
+                        + 추가
+                      </button>
+                    )}
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
-      {/* 플레이리스트 생성 모달 */}
+
       {isCreateModalOpen && (
         <PlaylistCreateModal
-          
           onClose={() => setIsCreateModalOpen(false)}
           onCreated={handleCreated}
         />

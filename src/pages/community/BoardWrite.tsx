@@ -4,6 +4,7 @@ import { boardApi } from "../../api/boardApi";
 import { playlistApi } from "../../api/playlistApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
+import { refreshPoint } from "../../components/ui/refreshPoint";
 
 interface PlaylistSong {
   id: number;
@@ -71,6 +72,7 @@ const BoardWrite = () => {
     if (!userEmail) return;
     if (!title.trim()) {
       alert("제목을 입력해주세요.");
+      refreshPoint();
       return;
     }
 

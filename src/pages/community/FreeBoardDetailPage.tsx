@@ -3,8 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
 import type { Board } from "../../types/board";
 import { replyApi } from "../../api/replyApi";
-import ReplyItem from "../../Components/ui/replyItem";
-import Pagination from "../../Components/ui/Pagination";
+import ReplyItem from "../../components/ui/replyItem";
+import Pagination from "../../components/ui/Pagination";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 
@@ -133,6 +133,7 @@ const FreeBoardDetailPage = () => {
                 reply={reply}
                 onRefresh={refresh}
                 boardId={Number(boardId)}
+                isAnonymous={true}
               />
             ))}
           </ul>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
 import type { Song } from "../../Components/ui/SongListItem";
-import GameResult from "../../Components/ui/GameResult";
+import GameResult from "../../components/ui/GameResult";
 
 const TOTAL = 5;
 const MAX_TRIES = 5;
@@ -158,7 +158,7 @@ const AlbumQuizPage = () => {
       <div className="mb-6 h-2 w-full rounded-full bg-neutral-700">
         <div
           className="h-2 rounded-full bg-indigo-600 transition-all"
-          style={{ width: `${(currentIndex / TOTAL) * 100}%` }}
+          style={{ width: `${((currentIndex + 1) / TOTAL) * 100}%` }}
         />
       </div>
 
