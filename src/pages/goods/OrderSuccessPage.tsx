@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
 import { goodsApi, cartUtils } from "../../api/goodsApi";
+import api from "../../api/axios";
+
+const POINT_SESSION_KEY = "order_points_to_use";
 
 export default function OrderSuccessPage() {
   const [searchParams] = useSearchParams();
@@ -29,8 +32,14 @@ export default function OrderSuccessPage() {
 
     goodsApi
       .confirmPayment({ paymentKey, orderId, amount: amountNum })
-      .then(() => {
+      .then(async () => {
         cartUtils.clear();
+        // 결제 완료 후 포인트 차감
+        const pointsToUse = parseInt(sessionStorage.getItem(POINT_SESSION_KEY) || "0", 10);
+        if (pointsToUse > 0) {
+          await api.post("/api/points/deduct", { amount: pointsToUse }).catch(() => {});
+          sessionStorage.removeItem(POINT_SESSION_KEY);
+        }
         setConfirming(false);
       })
       .catch(() => {

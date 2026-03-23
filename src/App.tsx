@@ -29,6 +29,7 @@ import AdminLoginLogsPage from "./pages/admin/AdminLoginLogsPage";
 import AdminActivityLogsPage from "./pages/admin/AdminActivityLogsPage";
 import AdminGoodsPage from "./pages/admin/AdminGoodsPage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
+import AdminPointsPage from "./pages/admin/AdminPointsPage";
 import FreeBoardListPage from "./pages/community/FreeBoardListPage";
 import FreeBoardCreatePage from "./pages/community/FreeBoardCreatePage";
 import FreeBoardDetailPage from "./pages/community/FreeBoardDetailPage";
@@ -121,6 +122,7 @@ function App() {
           <Route path="activity-logs" element={<AdminActivityLogsPage />} />
           <Route path="goods" element={<AdminGoodsPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
+          <Route path="points" element={<AdminPointsPage />} />
         </Route>
         {/* 아닌 것들은 여기 밑으로 Route 추가 */}
         {/* 4. 로그인하지 않은 사용자만 접근 가능한 경로 (이미 로그인했다면 홈으로 이동) */}

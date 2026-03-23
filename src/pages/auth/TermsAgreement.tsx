@@ -7,20 +7,20 @@ function TermsAgreement() {
   const navigate = useNavigate();
 
   // 보기 내용 모달관련된 부분
-  type TermType = "service" | "privacy" | "marketing";
+  type TermType = "service" | "privacy" | "thirdParty" | "marketing";
   const [openTerm, setOpenTerm] = useState<TermType | null>(null);
 
   const [agreeAll, setAgreeAll] = useState(false);
 
   const [terms, setTerms] = useState({
-    service: false,   // 필수
-    privacy: false,   // 필수
-    marketing: false, // 선택
+    service: false,     // 필수
+    privacy: false,     // 필수
+    thirdParty: false,  // 필수
+    marketing: false,   // 선택
   });
 
-
   // 필수 동의 체크 여부
-  const isRequiredAgreed = terms.service && terms.privacy;
+  const isRequiredAgreed = terms.service && terms.privacy && terms.thirdParty;
 
   // 전체 동의 클릭
   const handleAgreeAll = (checked: boolean) => {
@@ -28,6 +28,7 @@ function TermsAgreement() {
     setTerms({
       service: checked,
       privacy: checked,
+      thirdParty: checked,
       marketing: checked,
     });
   };
@@ -42,7 +43,7 @@ function TermsAgreement() {
 
   // 개별 동의 변경 시 전체 동의 자동 동기화
   useEffect(() => {
-    if (terms.service && terms.privacy && terms.marketing) {
+    if (terms.service && terms.privacy && terms.thirdParty && terms.marketing) {
       setAgreeAll(true);
     } else {
       setAgreeAll(false);
@@ -115,6 +116,26 @@ function TermsAgreement() {
             type="button"
             className="term-view-button"
             onClick={() => setOpenTerm("privacy")}
+          >
+            보기
+          </button>
+        </div>
+
+        {/* 필수 제3자 제공 */}
+        <div className="terms-item">
+          <label>
+            <input
+              type="checkbox"
+              checked={terms.thirdParty}
+              onChange={() => handleChange("thirdParty")}
+            />
+            <span className="required">필수</span>
+            개인정보 제3자 제공 동의
+          </label>
+          <button
+            type="button"
+            className="term-view-button"
+            onClick={() => setOpenTerm("thirdParty")}
           >
             보기
           </button>
