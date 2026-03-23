@@ -28,9 +28,9 @@ function PlaylistDetailPage() {
   const [selectSong, setSelectSong] = useState<Song | null>(null);
   const [isPlayerVisible, setIsPlayerVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
-  const [allMode, setAllMode] = useState(false);
 
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
 
   // 정렬된 곡 목록 (playlistSongId 기준 — desc: 최신순, asc: 오래된 순)
   const sortedSongs = [...songs].sort((a, b) =>
@@ -153,7 +153,6 @@ function PlaylistDetailPage() {
       setIsPlayerVisible(false);
       setSelectSong(null);
       setCurrentIndex(null);
-      setAllMode(false);
     }
   }, [isEditMode]);
   // 플레이리스트 공유
@@ -210,10 +209,8 @@ function PlaylistDetailPage() {
                     setIsPlayerVisible(false);
                     setSelectSong(null);
                     setCurrentIndex(null);
-                    setAllMode(false);
 
                     setTimeout(() => {
-                      setAllMode(true);
                       setCurrentIndex(0);
                       setSelectSong(sortedSongs[0]);
                       setIsPlayerVisible(true);
@@ -353,7 +350,6 @@ function PlaylistDetailPage() {
                   setIsPlayerVisible(false);
                   setSelectSong(null);
                   setCurrentIndex(null);
-                  setAllMode(false);
                   setIsAddModalOpen(true);
                 }}
                 title="곡 추가"
@@ -376,7 +372,6 @@ function PlaylistDetailPage() {
                   (s) => s.playlistSongId === song.playlistSongId
                 );
 
-                setAllMode(true);
                 setCurrentIndex(index);
                 setSelectSong(song);
                 setIsPlayerVisible(true);
@@ -421,26 +416,19 @@ function PlaylistDetailPage() {
               setIsPlayerVisible(false);
               setSelectSong(null);
               setCurrentIndex(null);
-              setAllMode(false);
             }}
-            fullPlay={true} // 전체 재생
-            {...(allMode && currentIndex !== null
-              ? {
-                  songs: sortedSongs,
-                  songIndex: currentIndex,
-                  onSongChange: (index: number) => {
-                    if (index < sortedSongs.length) {
-                      setCurrentIndex(index);
-                      setSelectSong(sortedSongs[index]);
-                    } else {
-                      setIsPlayerVisible(false);
-                      setSelectSong(null);
-                      setCurrentIndex(null);
-                      setAllMode(false);
-                    }
-                  },
-                }
-              : {})}
+            songs={sortedSongs}
+            songIndex={currentIndex ?? 0}
+            onSongChange={(index: number) => {
+              if (index < sortedSongs.length) {
+                setCurrentIndex(index);
+                setSelectSong(sortedSongs[index]);
+              } else {
+                setIsPlayerVisible(false);
+                setSelectSong(null);
+                setCurrentIndex(null);
+              }
+            }}
           />
         </div>
       )}
