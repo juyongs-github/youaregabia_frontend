@@ -10,7 +10,7 @@ import { BsQuestionCircleFill, BsFillCircleFill } from "react-icons/bs";
 import { RiArrowLeftLine, RiPlayList2Fill } from "react-icons/ri";
 import MusicPlayer from "../../Components/layout/MusicPlayer";
 import { RiResetLeftFill } from "react-icons/ri";
-import PlaylistReviewCreateModal from "../../components/ui/PlaylistReviewCreateModal";
+import PlaylistReviewCreateModal from "../../Components/ui/PlaylistReviewCreateModal";
 import Checkbox from "@mui/material/Checkbox";
 import { playlistApi } from "../../api/playlistApi";
 import FormControlLabel from "@mui/material/FormControlLabel";

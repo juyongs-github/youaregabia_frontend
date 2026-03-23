@@ -5,7 +5,7 @@ import { playlistApi } from "../../api/playlistApi";
 import type { Song } from "../ui/SongListItem";
 import PlaylistCreateModal from "./PlaylistCreateModal";
 import { pointApi } from "../../api/pointApi";
-import { refreshPoint } from "../../components/ui/refreshPoint";
+import { refreshPoint } from "../../Components/ui/refreshPoint";
 
 interface Props {
   songs: Song[];

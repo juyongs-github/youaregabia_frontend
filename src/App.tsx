@@ -9,7 +9,7 @@ import BoardListPage from "./pages/community/BoardListPage";
 import BoardDetailPage from "./pages/community/BoardDetailPage";
 import BoardWrite from "./pages/community/BoardWrite";
 import BoardUpdate from "./pages/community/BoardUpdate";
-import Layout from "./components/layout/Layout";
+import Layout from "./Components/layout/Layout";
 import LoginForm from "./pages/auth/LoginForm";
 import RegisterForm from "./pages/auth/RegisterForm";
 import TermsAgreement from "./pages/auth/TermsAgreement";
@@ -52,7 +52,7 @@ import PointHistoryPage from "./pages/auth/PointHistoryPage";
 import IdealTypeWorldCupPage from "./pages/recommend/IdealTypeWorldCupPage";
 import { useEffect, useState } from "react";
 import { setRateLimitHandler } from "./api/axios";
-import RateLimitToast from "./components/ui/RateLimitToast";
+import RateLimitToast from "./Components/ui/RateLimitToast";
 
 interface RateLimitInfo {
   message: string;
