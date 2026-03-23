@@ -6,7 +6,7 @@ const api = axios.create({
   // headers: {
   //   "Content-Type": "application/json; charset=UTF-8", // 인코딩 설정 추가
   // },
-  timeout: 10000, // timeout 10초
+  timeout: 60000, // timeout 60초
 });
 // 요청마다 토큰 자동 첨부
 api.interceptors.request.use((config) => {

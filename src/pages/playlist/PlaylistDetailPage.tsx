@@ -423,6 +423,7 @@ function PlaylistDetailPage() {
               setCurrentIndex(null);
               setAllMode(false);
             }}
+            fullPlay={true} // 전체 재생
             {...(allMode && currentIndex !== null
               ? {
                   songs: sortedSongs,
