@@ -16,6 +16,7 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
 // axios.ts
 api.interceptors.request.use((config) => {
   const token = store.getState().auth.user?.token; // user 안에 있음

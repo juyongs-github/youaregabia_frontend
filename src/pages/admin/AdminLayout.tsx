@@ -27,7 +27,7 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="flex min-h-screen text-white">
+    <div className="flex min-h-screen text-white bg-gray-950">
       {/* Sidebar */}
       <aside className="w-52 shrink-0 border-r border-gray-800 bg-gray-950 flex flex-col py-6">
         <div className="px-5 mb-6">
