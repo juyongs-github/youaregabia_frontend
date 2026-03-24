@@ -60,8 +60,11 @@ function App() {
   return (
     <Routes>
       {/* Layout 적용 화면만 Layout Route 안에 Route 추가 */}
+      <Route
+        path="/home"
+        element={isLogin ? <HomePage /> : <Navigate to="/login" replace />}
+      />
       <Route element={isLogin ? <Layout /> : <Navigate to="/login" replace />}>
-        <Route path="/home" element={<HomePage />} />
         <Route path="/search" element={<SearchResult />} />
         <Route path="/recommend/result" element={<RecommendPlaylistResult />} />
         <Route path="/recommend/blind" element={<BlindRecommendPage />} />

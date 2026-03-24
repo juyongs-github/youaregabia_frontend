@@ -88,7 +88,7 @@ function MyPlaylistPage() {
               <button className="play-button">
                 <FaPlay />
               </button>
-              <span className="playlist-title playlist-title-small">{item.title}</span>
+              <span className="playlist-title-small">{item.title}</span>
             </div>
           </div>
         ))}

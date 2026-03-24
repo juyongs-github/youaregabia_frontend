@@ -13,7 +13,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // ============================================================
 // NORMALIZER — SongDTO → Song
-// ※ API 교체 시 (예: Spotify) 이 함수와 SongDTO 타입만 수정하면 됨
+// ※ Spotify API 교체 시 이 함수와 SongDTO 타입만 수정하면 됨
 // ============================================================
 function normalizeSongDTO(dto: SongDTO): Song {
   return {
@@ -234,7 +234,7 @@ function SongCard({ song, onChoose, isChosen, isLoser, audio }: SongCardProps) {
 interface Playlist {
   id: number;
   title: string;
-  imgUrl?: string;
+  imageUrl?: string;
 }
 
 interface PlaylistModalProps {
@@ -260,7 +260,10 @@ function PlaylistModal({ selectedSongs, onClose, onSuccess }: PlaylistModalProps
   useEffect(() => {
     playlistApi
       .getAllPlaylist()
-      .then((res) => setPlaylists(res.data))
+      .then((res) => {
+        console.log("플레이리스트 데이터 확인:", res.data); // ← 여기 추가
+        setPlaylists(res.data);
+      })
       .catch(() => setError("플레이리스트를 불러오지 못했습니다."))
       .finally(() => setLoading(false));
   }, []);
@@ -340,8 +343,12 @@ function PlaylistModal({ selectedSongs, onClose, onSuccess }: PlaylistModalProps
                   className={`wc-modal-item${selectedPlaylistId === pl.id ? " wc-modal-item--selected" : ""}`}
                   onClick={() => setSelectedPlaylistId(pl.id)}
                 >
-                  {pl.imgUrl ? (
-                    <img className="wc-modal-thumb" src={pl.imgUrl} alt={pl.title} />
+                  {pl.imageUrl ? (
+                    <img
+                      className="wc-modal-thumb"
+                      src={`${BASE_URL}${pl.imageUrl}`}
+                      alt={pl.title}
+                    />
                   ) : (
                     <div className="wc-modal-thumb wc-modal-thumb--fallback">♪</div>
                   )}

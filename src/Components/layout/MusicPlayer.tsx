@@ -20,12 +20,10 @@ interface MusicPlayerProps {
   songIndex?: number;
   onSongChange?: (index: number) => void;
   onSongEnd?: () => void;
-  // 블라인드 추천을 위한 보기 설정
   blind?: boolean;
   externalPaused?: boolean;
 }
 
-// 음악 재생 바 UI
 function MusicPlayer({
   song,
   setIsPlayerVisible,
@@ -54,11 +52,7 @@ function MusicPlayer({
     return `${minute}:${String(second).padStart(2, "0")}`;
   };
 
-  useEffect(() => {
-    if (!audioRef.current) return;
-    audioRef.current.volume = volume / 100;
-  }, []);
-
+  // 곡 변경 시 재생
   useEffect(() => {
     if (!audioRef.current) return;
     if (externalPaused) audioRef.current.pause();
@@ -70,7 +64,48 @@ function MusicPlayer({
     audioRef.current.currentTime = 0;
     audioRef.current.load();
     audioRef.current.play();
-  }, [song.previewUrl]);
+  }, [song]);
+
+  // 볼륨 초기화
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.volume = volume / 100;
+  }, []);
+
+  const handlePlayPause = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleSeek = (_e: any, value: any) => {
+    if (!audioRef.current) return;
+    setProgress(value);
+    audioRef.current.currentTime = (value / 100) * audioRef.current.duration;
+  };
+
+  const handleVolume = (_e: any, value: any) => {
+    if (!audioRef.current) return;
+    audioRef.current.volume = value / 100;
+    setVolume(value);
+    setIsMute(value === 0);
+  };
+
+  const handleMute = () => {
+    if (!audioRef.current) return;
+    if (isMute) {
+      audioRef.current.muted = false;
+      setVolume(audioRef.current.volume * 100);
+    } else {
+      audioRef.current.muted = true;
+      setVolume(0);
+    }
+    setIsMute(audioRef.current.muted);
+  };
 
   return (
     <div className="px-10 pt-10 bg-black border-t border-gray-800 pb-7">
@@ -101,21 +136,12 @@ function MusicPlayer({
 
       {/* 진행 바 */}
       <Box sx={{ position: "absolute", top: 0, left: 0, width: "100%" }}>
-        <Slider
-          value={progress}
-          onChange={(_e, value) => {
-            if (!audioRef.current) return;
-            setProgress(value);
-            audioRef.current.currentTime = (value / 100) * audioRef.current.duration;
-          }}
-          sx={{ color: "red" }}
-        />
+        <Slider value={progress} onChange={handleSeek} sx={{ color: "red" }} />
       </Box>
 
       <div className="flex items-center justify-between">
-        {/* 왼쪽: 이전/재생/다음 + 시간 — 항상 동일한 너비 유지 */}
+        {/* 왼쪽: 이전/재생/다음 + 시간 */}
         <div className="flex items-center gap-7">
-          {/* 이전 버튼 */}
           <button
             onClick={() => isPlaylist && onSongChange!(songIndex! - 1)}
             disabled={!hasPrev}
@@ -124,22 +150,10 @@ function MusicPlayer({
             <FaStepBackward size={24} color="white" />
           </button>
 
-          {/* 재생/일시정지 */}
-          <button
-            onClick={() => {
-              if (!audioRef.current) return;
-              if (isPlaying) {
-                audioRef.current.pause();
-              } else {
-                audioRef.current.play();
-              }
-              setIsPlaying(!isPlaying);
-            }}
-          >
+          <button onClick={handlePlayPause}>
             {isPlaying ? <FaPause size={40} color="white" /> : <FaPlay size={40} color="white" />}
           </button>
 
-          {/* 다음 버튼 */}
           <button
             onClick={() => isPlaylist && onSongChange!(songIndex! + 1)}
             disabled={!hasNext}
@@ -157,14 +171,11 @@ function MusicPlayer({
 
         {/* 가운데: 곡 정보 */}
         <div className="flex items-center gap-5">
-          {/* 곡 이미지 부분 */}
-
           {!blind && (
             <div className="flex items-center justify-center w-12 h-12 overflow-hidden bg-orange-500 rounded-2xl">
               <img src={song.imgUrl} alt="" className="object-cover w-full h-full" />
             </div>
           )}
-          {/* 곡 정보 부분 */}
           {!blind && (
             <div className="flex flex-col">
               <span className="text-lg font-bold">{song.trackName}</span>
@@ -180,19 +191,7 @@ function MusicPlayer({
         {/* 오른쪽: 볼륨 + 닫기 */}
         <div className="flex items-center gap-7">
           <div className="flex items-center w-40 gap-7">
-            <button
-              onClick={() => {
-                if (!audioRef.current) return;
-                if (isMute) {
-                  audioRef.current.muted = false;
-                  setVolume(audioRef.current.volume * 100);
-                } else {
-                  audioRef.current.muted = true;
-                  setVolume(0);
-                }
-                setIsMute(audioRef.current.muted);
-              }}
-            >
+            <button onClick={handleMute}>
               {isMute ? (
                 <FaVolumeMute size={30} color="white" />
               ) : (
@@ -200,16 +199,7 @@ function MusicPlayer({
               )}
             </button>
             <Box sx={{ width: "100%", display: "flex" }}>
-              <Slider
-                value={volume}
-                onChange={(_e, value) => {
-                  if (!audioRef.current) return;
-                  audioRef.current.volume = value / 100;
-                  setVolume(value);
-                  setIsMute(value === 0);
-                }}
-                sx={{ color: "grey" }}
-              />
+              <Slider value={volume} onChange={handleVolume} sx={{ color: "grey" }} />
             </Box>
           </div>
           <button onClick={setIsPlayerVisible}>

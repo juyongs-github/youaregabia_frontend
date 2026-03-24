@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import type { Playlist } from "../../types/playlist";
 import { playlistApi } from "../../api/playlistApi";
 import "../../styles/MyplaylistPage.css";
+import "../../styles/PlaylistDetailPage.css";
 import { FaPlay, FaPlus, FaTrash } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
 import { useSelector } from "react-redux";
@@ -28,9 +29,9 @@ function PlaylistDetailPage() {
   const [selectSong, setSelectSong] = useState<Song | null>(null);
   const [isPlayerVisible, setIsPlayerVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
-  const [allMode, setAllMode] = useState(false);
 
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
 
   // 정렬된 곡 목록 (playlistSongId 기준 — desc: 최신순, asc: 오래된 순)
   const sortedSongs = [...songs].sort((a, b) =>
@@ -153,7 +154,6 @@ function PlaylistDetailPage() {
       setIsPlayerVisible(false);
       setSelectSong(null);
       setCurrentIndex(null);
-      setAllMode(false);
     }
   }, [isEditMode]);
   // 플레이리스트 공유
@@ -206,18 +206,10 @@ function PlaylistDetailPage() {
                   onClick={() => {
                     if (!songs.length) return;
 
-                    // 이미 재생 중이어도 강제로 처음부터 재시작
-                    setIsPlayerVisible(false);
-                    setSelectSong(null);
-                    setCurrentIndex(null);
-                    setAllMode(false);
-
-                    setTimeout(() => {
-                      setAllMode(true);
-                      setCurrentIndex(0);
-                      setSelectSong(sortedSongs[0]);
-                      setIsPlayerVisible(true);
-                    }, 0);
+                    // 기존 플레이어가 있으면 첫 곡으로 변경, 없으면 플레이어 열기
+                    setCurrentIndex(0);
+                    setSelectSong(sortedSongs[0]);
+                    setIsPlayerVisible(true);
                   }}
                 >
                   <FaPlay />
@@ -301,6 +293,10 @@ function PlaylistDetailPage() {
                 onClick={() => {
                   setEditTitle(data?.title ?? "");
                   setEditDescription(data?.description ?? "");
+                  if (preview) URL.revokeObjectURL(preview);
+                  setPreview(null);
+                  setImage(null);
+
                   setIsEditMode(false);
                 }}
               >
@@ -349,7 +345,6 @@ function PlaylistDetailPage() {
                   setIsPlayerVisible(false);
                   setSelectSong(null);
                   setCurrentIndex(null);
-                  setAllMode(false);
                   setIsAddModalOpen(true);
                 }}
                 title="곡 추가"
@@ -372,7 +367,6 @@ function PlaylistDetailPage() {
                   (s) => s.playlistSongId === song.playlistSongId
                 );
 
-                setAllMode(true);
                 setCurrentIndex(index);
                 setSelectSong(song);
                 setIsPlayerVisible(true);
@@ -417,25 +411,19 @@ function PlaylistDetailPage() {
               setIsPlayerVisible(false);
               setSelectSong(null);
               setCurrentIndex(null);
-              setAllMode(false);
             }}
-            {...(allMode && currentIndex !== null
-              ? {
-                  songs: sortedSongs,
-                  songIndex: currentIndex,
-                  onSongChange: (index: number) => {
-                    if (index < sortedSongs.length) {
-                      setCurrentIndex(index);
-                      setSelectSong(sortedSongs[index]);
-                    } else {
-                      setIsPlayerVisible(false);
-                      setSelectSong(null);
-                      setCurrentIndex(null);
-                      setAllMode(false);
-                    }
-                  },
-                }
-              : {})}
+            songs={sortedSongs}
+            songIndex={currentIndex ?? 0}
+            onSongChange={(index: number) => {
+              if (index < sortedSongs.length) {
+                setCurrentIndex(index);
+                setSelectSong(sortedSongs[index]);
+              } else {
+                setIsPlayerVisible(false);
+                setSelectSong(null);
+                setCurrentIndex(null);
+              }
+            }}
           />
         </div>
       )}
