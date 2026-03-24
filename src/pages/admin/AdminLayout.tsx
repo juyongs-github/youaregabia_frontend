@@ -8,6 +8,7 @@ import {
   FaShoppingCart,
   FaHome,
   FaSignOutAlt,
+  FaCoins,
 } from "react-icons/fa";
 import type { RootState } from "../../store";
 import { logout } from "../../store/authSlice";
@@ -19,6 +20,7 @@ const navItems = [
   { to: "/admin/activity-logs", label: "활동 로그", icon: FaListAlt },
   { to: "/admin/goods", label: "굿즈 관리", icon: FaBox },
   { to: "/admin/orders", label: "결제 내역", icon: FaShoppingCart },
+  { to: "/admin/points", label: "포인트 관리", icon: FaCoins },
 ];
 
 export default function AdminLayout() {
@@ -37,7 +39,7 @@ export default function AdminLayout() {
   return (
     <div className="flex min-h-screen text-white bg-gray-950">
       {/* Sidebar */}
-      <aside className="w-52 shrink-0 border-r border-gray-800 bg-gray-950 flex flex-col py-6">
+      <aside className="w-52 shrink-0 border-r border-gray-800 bg-gray-950 flex flex-col py-6 sticky top-0 h-screen overflow-y-auto">
         <div className="px-5 mb-6">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
             Admin Panel

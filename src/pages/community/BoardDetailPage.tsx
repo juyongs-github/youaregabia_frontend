@@ -4,12 +4,12 @@ import { boardApi } from "../../api/boardApi";
 import type { Board } from "../../types/board";
 import { replyApi } from "../../api/replyApi";
 import { playlistApi } from "../../api/playlistApi";
-import ReplyItem from "../../components/ui/replyItem";
-import Pagination from "../../components/ui/Pagination";
+import ReplyItem from "../../Components/ui/replyItem";
+import Pagination from "../../Components/ui/Pagination";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
-import { refreshPoint } from "../../components/ui/refreshPoint";
+import { refreshPoint } from "../../Components/ui/refreshPoint";
 
 const BoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();

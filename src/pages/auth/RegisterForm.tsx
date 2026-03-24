@@ -15,11 +15,17 @@ interface RegisterFormValues {
   ci?: string;
 }
 
+const PW_CONDITIONS = [
+  { label: "8자 이상", test: (pw: string) => pw.length >= 8 },
+  { label: "영문 포함", test: (pw: string) => /[a-zA-Z]/.test(pw) },
+  { label: "숫자 포함", test: (pw: string) => /[0-9]/.test(pw) },
+  { label: "특수문자 포함 (!@#$% 등)", test: (pw: string) => /[!@#$%^&*(),.?":{}|<>]/.test(pw) },
+];
+
 function RegisterForm() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 1. ✅ CiVerifyPage에서 보낸 데이터들(ci, phone, name, birth)을 모두 꺼냅니다.
   const { ci, phone, name, birth } = (location.state || {}) as {
     ci?: string;
     phone?: string;
@@ -35,24 +41,22 @@ function RegisterForm() {
   }, [ci, navigate]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
-  const [isEmailValid, setIsEmailValid] = useState(false);
-  const [emailMessage, setEmailMessage] = useState<string | null>(null);
 
+  // 이메일 상태: idle(입력 중) | checking(검사 중) | valid(사용 가능) | duplicate(중복됨)
+  const [emailStatus, setEmailStatus] = useState<"idle" | "checking" | "valid" | "duplicate">("idle");
+  const emailTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestEmailRef = useRef("");
-  const [emailTimer, setEmailTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
-  const detailAddressRef = useRef<HTMLInputElement>(null);
 
+  const detailAddressRef = useRef<HTMLInputElement>(null);
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
 
-  // 2. ✅ 꺼낸 값들을 폼의 초기값(form state)에 넣어줍니다.
   const [form, setForm] = useState<RegisterFormValues>({
     email: "",
-    name: name || "",       // 넘어온 이름 자동 입력
-    birthDate: birth || "", // 넘어온 생년월일 자동 입력
+    name: name || "",
+    birthDate: birth || "",
     password: "",
     passwordcheck: "",
-    phone: phone || "",     // 넘어온 폰번호 자동 입력
+    phone: phone || "",
     address: "",
     detailAddress: "",
     ci: ci,
@@ -65,46 +69,48 @@ function RegisterForm() {
     return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
   };
 
-  const validateField = (name: string, value: string) => {
-    if (name === "email") {
-      if (!value) return "이메일은 필수입니다.";
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "이메일 형식이 올바르지 않습니다.";
-    }
-    if (name === "password" && value.length < 4) return "4자 이상 입력해주세요.";
+  const validateEmailFormat = (email: string) => {
+    if (!email) return "이메일은 필수입니다.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "이메일 형식이 올바르지 않습니다.";
     return "";
   };
 
+  // 비밀번호 조건
+  const pwConditionResults = PW_CONDITIONS.map(c => c.test(form.password));
+  const isPasswordValid = pwConditionResults.every(Boolean);
   const isPasswordMatch = form.password && form.password === form.passwordcheck;
-  const isFormValid = isEmailValid && !clientErrors.email && form.name && isPasswordMatch && form.address && !isSubmitting;
+  const isEmailValid = emailStatus === "valid";
+
+  const isFormValid =
+    isEmailValid &&
+    !clientErrors.email &&
+    form.name &&
+    isPasswordValid &&
+    isPasswordMatch &&
+    form.address &&
+    !isSubmitting;
+
+  const getEmailInputClass = () => {
+    if (emailStatus === "valid") return "input-success";
+    if (emailStatus === "duplicate") return "input-error";
+    return "";
+  };
 
   const getFieldClass = (name: keyof RegisterFormValues) => {
-    if (name === "email" && isEmailValid) return "input-success";
-    if (name === "email" && emailMessage && !isEmailValid) return "input-error";
-    if (name === "passwordcheck" && isPasswordMatch) return "input-success";
-    // 본인인증으로 넘어온 값들은 바로 성공 스타일 적용
+    if (name === "passwordcheck" && form.passwordcheck) return isPasswordMatch ? "input-success" : "input-error";
+    if (name === "password" && form.password) return isPasswordValid ? "input-success" : "input-error";
     if ((name === "name" || name === "birthDate" || name === "phone") && form[name]) return "input-success";
     return form[name] && !clientErrors[name] ? "input-success" : "";
   };
 
   const checkEmail = async (email: string) => {
-    setIsCheckingEmail(true);
-    setEmailMessage(null);
+    setEmailStatus("checking");
     try {
       const res = await checkEmailDuplicate(email);
       if (latestEmailRef.current !== email) return;
-
-      if (res.data === true) {
-        setEmailMessage("이미 사용 중인 이메일입니다.");
-        setIsEmailValid(false);
-      } else {
-        setEmailMessage("사용 가능한 이메일입니다.");
-        setIsEmailValid(true);
-      }
-    } catch (error) {
-      setEmailMessage("중복 확인 중 오류가 발생했습니다.");
-      setIsEmailValid(false);
-    } finally {
-      setIsCheckingEmail(false);
+      setEmailStatus(res.data === true ? "duplicate" : "valid");
+    } catch {
+      if (latestEmailRef.current === email) setEmailStatus("idle");
     }
   };
 
@@ -115,17 +121,16 @@ function RegisterForm() {
     if (name === "birthDate") finalValue = formatBirthDate(value);
 
     setForm(prev => ({ ...prev, [name]: finalValue }));
-    setClientErrors(prev => ({ ...prev, [name]: validateField(name, finalValue) }));
 
     if (name === "email") {
       latestEmailRef.current = finalValue;
-      setIsEmailValid(false);
-      setEmailMessage(null);
-      if (emailTimer) clearTimeout(emailTimer);
+      setEmailStatus("idle");
+      setClientErrors(prev => ({ ...prev, email: validateEmailFormat(finalValue) }));
 
-      if (finalValue && !validateField("email", finalValue)) {
-        const timer = setTimeout(() => checkEmail(finalValue), 500);
-        setEmailTimer(timer);
+      if (emailTimerRef.current) clearTimeout(emailTimerRef.current);
+
+      if (finalValue && !validateEmailFormat(finalValue)) {
+        emailTimerRef.current = setTimeout(() => checkEmail(finalValue), 600);
       }
     }
   };
@@ -173,34 +178,76 @@ function RegisterForm() {
         <h1>회원가입</h1>
         <p className="auth-desc">정보를 입력하여 가입을 완료해 주세요.</p>
 
+        {/* 이메일 — 자동 debounce 중복 체크 */}
         <div className="auth-field">
           <label>Email</label>
-          <input name="email" value={form.email} onChange={handleChange} className={getFieldClass("email")} placeholder="example@email.com" />
-          {isCheckingEmail && <p className="auth-message">확인 중...</p>}
-          {emailMessage && <p className={`auth-message ${isEmailValid ? "success" : "error"}`}>{emailMessage}</p>}
+          <input
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            className={getEmailInputClass()}
+            placeholder="example@email.com"
+          />
+          {clientErrors.email && emailStatus === "idle" && (
+            <p className="auth-message error">{clientErrors.email}</p>
+          )}
+          {emailStatus === "checking" && (
+            <p className="auth-message">확인 중...</p>
+          )}
+          {emailStatus === "valid" && (
+            <p className="auth-message success">사용 가능한 이메일입니다.</p>
+          )}
+          {emailStatus === "duplicate" && (
+            <p className="auth-message error">이미 사용 중인 이메일입니다.</p>
+          )}
         </div>
 
         <div className="auth-field">
           <label>Name</label>
-          {/* ✅ readOnly 속성을 추가해 인증된 정보 보호 */}
           <input name="name" value={form.name} onChange={handleChange} className={getFieldClass("name")} readOnly={!!name} />
         </div>
 
         <div className="auth-field">
           <label>생년월일</label>
-          {/* ✅ readOnly 속성을 추가해 인증된 정보 보호 */}
           <input name="birthDate" value={form.birthDate} onChange={handleChange} className={getFieldClass("birthDate")} placeholder="YYYY-MM-DD" maxLength={10} readOnly={!!birth} />
         </div>
 
+        {/* 비밀번호 + 실시간 조건 체크 */}
         <div className="auth-field">
           <label>Password</label>
-          <input name="password" type="password" value={form.password} onChange={handleChange} className={getFieldClass("password")} />
+          <input
+            name="password"
+            type="password"
+            value={form.password}
+            onChange={handleChange}
+            className={getFieldClass("password")}
+          />
+          {form.password && (
+            <ul className="pw-conditions">
+              {PW_CONDITIONS.map((c, i) => (
+                <li key={i} className={pwConditionResults[i] ? "pw-cond-ok" : "pw-cond-fail"}>
+                  {pwConditionResults[i] ? "✓" : "✗"} {c.label}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="auth-field">
           <label>Password Check</label>
-          <input name="passwordcheck" type="password" value={form.passwordcheck} onChange={handleChange} className={form.passwordcheck ? (isPasswordMatch ? "input-success" : "input-error") : ""} />
-          {form.passwordcheck && !isPasswordMatch && <p className="auth-message error">비밀번호가 일치하지 않습니다.</p>}
+          <input
+            name="passwordcheck"
+            type="password"
+            value={form.passwordcheck}
+            onChange={handleChange}
+            className={form.passwordcheck ? (isPasswordMatch ? "input-success" : "input-error") : ""}
+          />
+          {form.passwordcheck && !isPasswordMatch && (
+            <p className="auth-message error">비밀번호가 일치하지 않습니다.</p>
+          )}
+          {form.passwordcheck && isPasswordMatch && (
+            <p className="auth-message success">비밀번호가 일치합니다.</p>
+          )}
         </div>
 
         <div className="auth-field">

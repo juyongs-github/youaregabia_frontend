@@ -9,7 +9,7 @@ import BoardListPage from "./pages/community/BoardListPage";
 import BoardDetailPage from "./pages/community/BoardDetailPage";
 import BoardWrite from "./pages/community/BoardWrite";
 import BoardUpdate from "./pages/community/BoardUpdate";
-import Layout from "./components/layout/Layout";
+import Layout from "./Components/layout/Layout";
 import LoginForm from "./pages/auth/LoginForm";
 import RegisterForm from "./pages/auth/RegisterForm";
 import TermsAgreement from "./pages/auth/TermsAgreement";
@@ -29,6 +29,7 @@ import AdminLoginLogsPage from "./pages/admin/AdminLoginLogsPage";
 import AdminActivityLogsPage from "./pages/admin/AdminActivityLogsPage";
 import AdminGoodsPage from "./pages/admin/AdminGoodsPage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
+import AdminPointsPage from "./pages/admin/AdminPointsPage";
 import FreeBoardListPage from "./pages/community/FreeBoardListPage";
 import FreeBoardCreatePage from "./pages/community/FreeBoardCreatePage";
 import FreeBoardDetailPage from "./pages/community/FreeBoardDetailPage";
@@ -52,7 +53,7 @@ import PointHistoryPage from "./pages/auth/PointHistoryPage";
 import IdealTypeWorldCupPage from "./pages/recommend/IdealTypeWorldCupPage";
 import { useEffect, useState } from "react";
 import { setRateLimitHandler } from "./api/axios";
-import RateLimitToast from "./components/ui/RateLimitToast";
+import RateLimitToast from "./Components/ui/RateLimitToast";
 
 interface RateLimitInfo {
   message: string;
@@ -121,6 +122,7 @@ function App() {
           <Route path="activity-logs" element={<AdminActivityLogsPage />} />
           <Route path="goods" element={<AdminGoodsPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
+          <Route path="points" element={<AdminPointsPage />} />
         </Route>
         {/* 아닌 것들은 여기 밑으로 Route 추가 */}
         {/* 4. 로그인하지 않은 사용자만 접근 가능한 경로 (이미 로그인했다면 홈으로 이동) */}

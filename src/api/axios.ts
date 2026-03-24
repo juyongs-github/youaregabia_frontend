@@ -2,30 +2,29 @@ import axios from "axios";
 import { store } from "../store";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080", // 스프링 부트 서버의 baseURL
+  baseURL: "http://localhost:8080",
   // headers: {
-  //   "Content-Type": "application/json; charset=UTF-8", // 인코딩 설정 추가
+  //   "Content-Type": "application/json; charset=UTF-8",
   // },
-  timeout: 10000, // timeout 10초
+  timeout: 10000,
 });
-// 요청마다 토큰 자동 첨부
+
+// 요청마다 토큰 자동 첨부 (localStorage 폴백 포함)
 api.interceptors.request.use((config) => {
-  const token = store.getState().auth.user?.token;
+  const token = store.getState().auth.user?.token ?? localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// response interceptor — 에러 공통 처리
-// App.tsx에서 등록한 핸들러를 저장
+// response interceptor — Rate limit 공통 처리
 let rateLimitHandler: ((message: string, remainSeconds: number) => void) | null = null;
 
 export function setRateLimitHandler(handler: (message: string, remainSeconds: number) => void) {
   rateLimitHandler = handler;
 }
 
-// response interceptor
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -38,14 +37,5 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-// axios.ts - localStorage 폴백 추가
-api.interceptors.request.use((config) => {
-  const token = store.getState().auth.user?.token ?? localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
 
 export default api;

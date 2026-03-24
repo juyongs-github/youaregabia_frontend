@@ -4,7 +4,7 @@ import { boardApi } from "../../api/boardApi";
 import { playlistApi } from "../../api/playlistApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import { refreshPoint } from "../../components/ui/refreshPoint";
+import { refreshPoint } from "../../Components/ui/refreshPoint";
 
 interface PlaylistSong {
   id: number;

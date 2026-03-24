@@ -181,6 +181,31 @@
 }
 
 /* ==================================================
+비밀번호 조건 체크리스트
+================================================== */
+.pw-conditions {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pw-conditions li {
+  font-size: 15px;
+  transition: color 0.2s;
+}
+
+.pw-cond-ok {
+  color: #3ddc84;
+}
+
+.pw-cond-fail {
+  color: #888;
+}
+
+/* ==================================================
 반응형
 ================================================== */
 @media (min-width: 768px) {
