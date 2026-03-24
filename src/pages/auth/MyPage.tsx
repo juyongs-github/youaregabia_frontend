@@ -89,7 +89,7 @@ function MyPage() {
     const formData = new FormData();
     formData.append("email", user.email);
     formData.append("image", file);
-    const res = await api.patch("/auth/update-image", formData, {
+    const res = await api.patch("/api/auth/update-image", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     dispatch(updateProfile({ imgUrl: res.data.imgUrl }));
