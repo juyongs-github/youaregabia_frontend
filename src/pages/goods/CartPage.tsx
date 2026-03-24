@@ -35,10 +35,7 @@ export default function CartPage() {
     <div className="p-8 text-white min-h-screen max-w-4xl">
       {/* 헤더 */}
       <div className="flex items-center gap-4 mb-8">
-        <button
-          onClick={() => navigate("/goods")}
-          className="text-gray-400 hover:text-white transition-colors"
-        >
+        <button onClick={() => navigate("/goods")} className="text-gray-400 hover:text-white transition-colors">
           <FaArrowLeft size={18} />
         </button>
         <h1 className="text-2xl font-bold">장바구니</h1>
@@ -49,10 +46,7 @@ export default function CartPage() {
         <div className="flex flex-col items-center justify-center h-64 gap-4 text-gray-400">
           <FaBox size={48} />
           <p>장바구니가 비어있습니다.</p>
-          <button
-            onClick={() => navigate("/goods")}
-            className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors"
-          >
+          <button onClick={() => navigate("/goods")} className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors">
             굿즈 보러가기
           </button>
         </div>
@@ -61,18 +55,19 @@ export default function CartPage() {
           {/* 상품 목록 */}
           <div className="flex-1 flex flex-col gap-4">
             {cart.map((item) => (
-              <div
-                key={item.goodsId}
-                className="flex gap-4 bg-gray-900 border border-gray-800 rounded-xl p-4"
-              >
+              <div key={item.goodsId} className="flex gap-4 bg-gray-900 border border-gray-800 rounded-xl p-4">
                 {/* 이미지 */}
                 <div className="w-20 h-20 bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {item.imageUrl ? (
+<<<<<<< HEAD
                     <img
                       src={`http://localhost:8080${item.imageUrl}`}
                       alt={item.name}
                       className="w-full h-full object-cover"
                     />
+=======
+                    <img src={`${import.meta.env.VITE_API_BASE_URL}${item.imageUrl}`} alt={item.name} className="w-full h-full object-cover" />
+>>>>>>> origin/deploy/test5
                   ) : (
                     <FaBox size={24} className="text-gray-600" />
                   )}
@@ -86,34 +81,22 @@ export default function CartPage() {
                   <div className="flex items-center gap-3 mt-3">
                     {/* 수량 */}
                     <div className="flex items-center gap-2 bg-gray-800 rounded-lg px-2 py-1">
-                      <button
-                        onClick={() => handleQuantity(item.goodsId, -1)}
-                        className="p-1 hover:text-red-400 transition-colors"
-                      >
+                      <button onClick={() => handleQuantity(item.goodsId, -1)} className="p-1 hover:text-red-400 transition-colors">
                         <FaMinus size={10} />
                       </button>
                       <span className="w-6 text-center text-sm font-semibold">{item.quantity}</span>
-                      <button
-                        onClick={() => handleQuantity(item.goodsId, 1)}
-                        className="p-1 hover:text-red-400 transition-colors"
-                      >
+                      <button onClick={() => handleQuantity(item.goodsId, 1)} className="p-1 hover:text-red-400 transition-colors">
                         <FaPlus size={10} />
                       </button>
                     </div>
                     <span className="text-sm text-gray-400">
-                      금액:{" "}
-                      <span className="text-white font-semibold">
-                        {(item.price * item.quantity).toLocaleString()}원
-                      </span>
+                      소계: <span className="text-white font-semibold">{(item.price * item.quantity).toLocaleString()}원</span>
                     </span>
                   </div>
                 </div>
 
                 {/* 삭제 */}
-                <button
-                  onClick={() => handleRemove(item.goodsId)}
-                  className="text-gray-600 hover:text-red-400 transition-colors self-start"
-                >
+                <button onClick={() => handleRemove(item.goodsId)} className="text-gray-600 hover:text-red-400 transition-colors self-start">
                   <FaTrash size={14} />
                 </button>
               </div>

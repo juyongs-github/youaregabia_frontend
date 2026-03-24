@@ -2,7 +2,11 @@ import axios from "axios";
 import { store } from "../store";
 
 const api = axios.create({
+<<<<<<< HEAD
   baseURL: "http://localhost:8080",
+=======
+  baseURL: "/api", // nginx proxy 기준 baseURL
+>>>>>>> origin/deploy/test5
   // headers: {
   //   "Content-Type": "application/json; charset=UTF-8",
   // },

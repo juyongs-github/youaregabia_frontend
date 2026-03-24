@@ -6,7 +6,11 @@ export const pointApi = {
     api.get<{ totalPoint: number; grade: string }>("/points/me").then((res) => res.data),
 
   getHistory: (params: { page: number; size: number; filter?: string }) =>
+<<<<<<< HEAD
     api.get<PageResult<PointHistoryDto>>("/api/points/history", { params }).then((res) => res.data),
+=======
+    api.get<PageResult<PointHistoryDto>>("/points/history", { params }).then((res) => res.data),
+>>>>>>> origin/deploy/test5
 
   deductPoint: (amount: number) => api.post("/points/deduct", { amount }),
 

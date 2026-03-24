@@ -22,28 +22,28 @@ export const playlistApi = {
     return api.delete(`/playlist/${playlistId}`);
   },
 
-  getAllCollaborativePlaylist: (email?: string) => {
-    return api.get<CollaboPlaylist[]>("/playlist/collabo/all", { params: { email } });
+  getAllCollaborativePlaylist: () => {
+    return api.get<CollaboPlaylist[]>("/playlist/collabo/all");
   },
 
-  getCollaborativePlaylist: (playlistId: number, email?: string) => {
-    return api.get<CollaboPlaylist>(`/playlist/collabo/${playlistId}`, { params: { email } });
+  getCollaborativePlaylist: (playlistId: number) => {
+    return api.get<CollaboPlaylist>(`/playlist/collabo/${playlistId}`);
   },
 
-  likeCollabo: (playlistId: number, email: string) => {
-    return api.post(`/playlist/collabo/${playlistId}/like`, null, { params: { email } });
+  likeCollabo: (playlistId: number) => {
+    return api.post(`/playlist/collabo/${playlistId}/like`);
   },
 
-  unlikeCollabo: (playlistId: number, email: string) => {
-    return api.delete(`/playlist/collabo/${playlistId}/like`, { params: { email } });
+  unlikeCollabo: (playlistId: number) => {
+    return api.delete(`/playlist/collabo/${playlistId}/like`);
   },
 
-  reopenCollabo: (playlistId: number, email: string, newDeadline: string) => {
-    return api.put(`/playlist/collabo/${playlistId}/reopen`, null, { params: { email, newDeadline } });
+  reopenCollabo: (playlistId: number, newDeadline: string) => {
+    return api.put(`/playlist/collabo/${playlistId}/reopen`, null, { params: { newDeadline } });
   },
 
-  importCollabo: (playlistId: number, email: string) => {
-    return api.post(`/playlist/collabo/${playlistId}/import`, null, { params: { email } });
+  importCollabo: (playlistId: number) => {
+    return api.post(`/playlist/collabo/${playlistId}/import`);
   },
 
   getPlaylistSongs: (playlistId: number) => {

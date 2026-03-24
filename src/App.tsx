@@ -54,7 +54,7 @@ import PointHistoryPage from "./pages/auth/PointHistoryPage";
 import IdealTypeWorldCupPage from "./pages/recommend/IdealTypeWorldCupPage";
 import { useEffect, useState } from "react";
 import { setRateLimitHandler } from "./api/axios";
-import RateLimitToast from "./Components/ui/RateLimitToast";
+import RateLimitToast from "./components/ui/RateLimitToast";
 
 interface RateLimitInfo {
   message: string;
@@ -95,9 +95,11 @@ function App() {
   return (
     <>
       <Routes>
+        {/* HomePage — 자체 Header/풀페이지 레이아웃, Layout 없이 */}
+        <Route path="/home" element={isLogin ? <HomePage /> : <Navigate to="/login" replace />} />
+
         {/* Layout 적용 화면만 Layout Route 안에 Route 추가 */}
         <Route element={isLogin ? <Layout /> : <Navigate to="/login" replace />}>
-          <Route path="/home" element={<HomePage />} />
           <Route path="/search" element={<SearchResult />} />
           <Route path="/recommend/result" element={<RecommendPlaylistResult />} />
           <Route path="/recommend/blind" element={<BlindRecommendPage />} />

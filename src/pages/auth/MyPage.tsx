@@ -49,6 +49,7 @@ function MyPage() {
 
   useEffect(() => {
     if (activeTab === "boards" && myBoards.length === 0) {
+<<<<<<< HEAD
       api
         .get("/api/mypage/boards")
         .then((res) => setMyBoards(res.data))
@@ -65,13 +66,27 @@ function MyPage() {
         .get("/api/notifications")
         .then((res) => setNotifications(res.data))
         .catch(() => {});
+=======
+      api.get("/mypage/boards").then((res) => setMyBoards(res.data)).catch(() => {});
+    }
+    if (activeTab === "replies" && myReplies.length === 0) {
+      api.get("/mypage/replies").then((res) => setMyReplies(res.data)).catch(() => {});
+    }
+    if (activeTab === "profile") {
+      api.get("/notifications").then((res) => setNotifications(res.data)).catch(() => {});
+>>>>>>> origin/deploy/test5
     }
   }, [activeTab]);
 
   const handleNotifClick = async (n: NotificationItem) => {
     if (!n.isRead) {
+<<<<<<< HEAD
       await api.patch(`/api/notifications/${n.id}/read`);
       setNotifications((prev) => prev.map((x) => (x.id === n.id ? { ...x, isRead: true } : x)));
+=======
+      await api.patch(`/notifications/${n.id}/read`);
+      setNotifications((prev) => prev.map((x) => x.id === n.id ? { ...x, isRead: true } : x));
+>>>>>>> origin/deploy/test5
     }
     if (n.boardId) navigate(`/community/share/${n.boardId}`);
   };
@@ -101,7 +116,11 @@ function MyPage() {
     );
     if (!confirmed) return;
     try {
+<<<<<<< HEAD
       const res = await api.delete("/api/auth/withdraw");
+=======
+      const res = await api.delete("/auth/withdraw", { data: { email: user?.email } });
+>>>>>>> origin/deploy/test5
       if (res.status === 200) {
         alert("회원탈퇴가 완료됐습니다.");
         cartUtils.clear();
@@ -127,11 +146,15 @@ function MyPage() {
         <div className="relative">
           <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-700 bg-gray-800 flex items-center justify-center">
             {user?.imgUrl ? (
+<<<<<<< HEAD
               <img
                 src={`http://localhost:8080${user.imgUrl}`}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
+=======
+              <img src={`${import.meta.env.VITE_API_BASE_URL}${user.imgUrl}`} alt="Profile" className="w-full h-full object-cover" />
+>>>>>>> origin/deploy/test5
             ) : (
               <span className="text-gray-500 text-sm">이미지 없음</span>
             )}
@@ -143,13 +166,7 @@ function MyPage() {
           >
             <MdEdit size={20} color="white" />
           </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            className="hidden"
-            accept="image/*"
-          />
+          <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
         </div>
         <div>
           <h1 className="text-3xl font-bold">{user?.name}</h1>
@@ -161,15 +178,9 @@ function MyPage() {
 
       {/* 탭 */}
       <div className="flex border-b border-gray-700 mb-6">
-        <button className={tabStyle("profile")} onClick={() => setActiveTab("profile")}>
-          내 정보
-        </button>
-        <button className={tabStyle("boards")} onClick={() => setActiveTab("boards")}>
-          내가 쓴 게시글
-        </button>
-        <button className={tabStyle("replies")} onClick={() => setActiveTab("replies")}>
-          내가 쓴 댓글
-        </button>
+        <button className={tabStyle("profile")} onClick={() => setActiveTab("profile")}>내 정보</button>
+        <button className={tabStyle("boards")} onClick={() => setActiveTab("boards")}>내가 쓴 게시글</button>
+        <button className={tabStyle("replies")} onClick={() => setActiveTab("replies")}>내가 쓴 댓글</button>
       </div>
 
       {/* 내 정보 탭 */}
@@ -177,21 +188,11 @@ function MyPage() {
         <div className="space-y-6 bg-gray-900/50 p-6 rounded-xl border border-gray-800">
           <div>
             <label className="block text-sm text-gray-400 mb-1">이름</label>
-            <input
-              type="text"
-              value={user?.name || ""}
-              readOnly
-              className="w-full bg-gray-800 border-none rounded-lg p-3"
-            />
+            <input type="text" value={user?.name || ""} readOnly className="w-full bg-gray-800 border-none rounded-lg p-3" />
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-1">이메일</label>
-            <input
-              type="email"
-              value={user?.email || ""}
-              readOnly
-              className="w-full bg-gray-800 border-none rounded-lg p-3"
-            />
+            <input type="email" value={user?.email || ""} readOnly className="w-full bg-gray-800 border-none rounded-lg p-3" />
           </div>
           <div className="pt-4 text-right">
             <button
