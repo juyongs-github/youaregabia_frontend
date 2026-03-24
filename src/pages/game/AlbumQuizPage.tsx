@@ -215,6 +215,7 @@ const AlbumQuizPage = () => {
           <input
             type="text"
             value={artistInput}
+            autoFocus
             onChange={(e) => setArtistInput(e.target.value)}
             onKeyDown={handleEnter}
             placeholder="아티스트 이름..."

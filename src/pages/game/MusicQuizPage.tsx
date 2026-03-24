@@ -195,6 +195,7 @@ const MusicQuizPage = () => {
         <input
           type="text"
           value={input}
+          autoFocus
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleEnter}
           placeholder="곡 제목을 입력하세요..."
