@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { Playlist } from "../../types/playlist";
 import { playlistApi } from "../../api/playlistApi";
 import { FaPlay, FaPlus } from "react-icons/fa";
-import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
+import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
 
 
 function MyPlaylistPage() {
@@ -84,11 +84,11 @@ function MyPlaylistPage() {
             }}
           >
             <div className="playlist-image-wrapper">
-              <img src={`http://localhost:8080${item.imageUrl}`} />
+              <img src={`${import.meta.env.VITE_API_BASE_URL}${item.imageUrl}`} />
               <button className="play-button">
                 <FaPlay />
               </button>
-              <span className="playlist-title playlist-title-small">{item.title}</span>
+              <span className="playlist-title-small">{item.title}</span>
             </div>
           </div>
         ))}

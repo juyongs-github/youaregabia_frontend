@@ -1,285 +1,602 @@
 /* =========================
-   Home Page
+   전체 레이아웃
 ========================= */
 .home {
-  margin-top: 0px;
-  width: 100%;
-}
-
-.home-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 60px;
-}
-
-/* =========================
-   상단 섹션
-========================= */
-.top-section {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.page-title {
-  font-size: 36px;
-  font-weight: bold;
-}
-
-/* + 버튼 */
-.add-playlist-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: #2a2a2a;
-  color: white;
-  cursor: pointer;
-}
-
-.add-playlist-btn:hover {
-  background: white;
-  color: black;
-}
-
-/* =========================
-   슬라이더
-========================= */
-.playlist-slider {
   position: relative;
+  height: 100vh;
+  background: black;
+  color: white;
   overflow: hidden;
 }
 
-.top-playlist-row {
-  display: flex;
-  gap: 24px;
-  flex-wrap: nowrap;
+/* =========================
+   중앙 영역
+========================= */
+.center-area {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 2;
+}
 
-  overflow-x: scroll;
+.main-title {
+  font-size: clamp(28px, 3vw, 50px);
+  font-weight: 600;
+  margin-bottom: clamp(16px, 2vh, 28px);
+}
+
+/* =========================
+   검색창
+========================= */
+.home .search-bar {
+  position: relative;
+  display: inline-block;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.home .search-bar input {
+  width: clamp(360px, 50vw, 920px);
+  height: clamp(62px, 7.5vh, 84px);
+  border-radius: 16px;
+  background: #3a3a3a;
+  border: none;
+  padding: 0 56px 0 28px;
+  color: #e8e8e8;
+  font-size: clamp(16px, 1.3vw, 20px);
+
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.home .search-bar input:focus-visible {
+  outline: none;
+}
+
+.home .search-bar input::placeholder {
+  color: #999;
+}
+
+.home .search-bar input:focus {
+  background: #444;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+.home .search-bar.dropdown-open input {
+  border-radius: 16px 16px 0 0;
+  box-shadow: none;
+}
+
+/* =========================
+   검색 드롭다운 (modal 스타일 통일)
+========================= */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% - 1px);
+  left: 0;
+  right: 0;
+  background: #3a3a3a;
+  border: none;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  overflow: hidden;
+  padding: 8px 0;
+}
+
+.search-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  transition: background 0.1s;
+}
+
+.search-dropdown-item:hover {
+  background: #2e2e2e;
+}
+
+.search-dropdown-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.search-dropdown-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.search-dropdown-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e8e8e8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-dropdown-artist {
+  font-size: 12px;
+  color: #888;
+}
+
+.search-dropdown-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.search-dropdown-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: #333;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.search-dropdown-actions button:hover,
+.search-dropdown-actions button.active {
+  background: #444;
+  color: #e8e8e8;
+}
+
+.search-dropdown-divider {
+  height: 1px;
+  background: #333;
+  margin: 4px 20px;
+}
+
+.search-dropdown-more {
+  width: 100%;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.15s;
+}
+
+.search-dropdown-more:hover {
+  color: #e8e8e8;
+}
+
+.search-dropdown-empty {
+  padding: 24px 20px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
+
+
+/* =========================
+   중앙 아이콘 (하단 고정)
+========================= */
+.center-icons-wrapper {
+  position: absolute;
+  bottom: max(24px, 3.5vh);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 1vh, 14px);
+}
+
+.icon-popup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 12px 20px;
+  border-radius: 20px;
+
+  background: rgba(20, 20, 20, 0.92);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+}
+
+.icon-popup button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: clamp(12px, 1vw, 15px);
+  cursor: pointer;
+  padding: clamp(6px, 0.6vh, 10px) clamp(10px, 1vw, 16px);
+  border-radius: 14px;
+
+  transition: all 0.15s ease;
+}
+
+.icon-popup button:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.center-icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 14px 24px;
+  border-radius: 40px;
+
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+}
+
+.center-icons button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: clamp(12px, 1vw, 15px);
+  cursor: pointer;
+  padding: clamp(6px, 0.6vh, 10px) clamp(10px, 1.2vw, 18px);
+  border-radius: 16px;
+
+  transition: all 0.15s ease;
+}
+
+.center-icons button:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+/* =========================
+   좌하단 - 내 플레이리스트
+========================= */
+.bottom-left {
+  position: absolute;
+  left: max(24px, 2vw);
+  bottom: max(24px, 3.5vh);
+  width: clamp(340px, 33vw, 680px);
+  height: clamp(300px, 42vh, 420px);
+
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px);
+  border-radius: 20px;
+  padding: clamp(14px, 1.5vh, 22px);
+  box-sizing: border-box;
+
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* 헤더 */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-header h2 {
+  font-size: clamp(16px, 1.4vw, 22px);
+}
+
+.section-header button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.section-header button:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: black;
+}
+
+/* 플레이리스트 */
+.playlist-slider {
+  position: relative;
+}
+
+.playlist-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
   scroll-behavior: smooth;
 }
 
-.top-playlist-row::-webkit-scrollbar {
+.playlist-row::-webkit-scrollbar {
   display: none;
 }
 
-/* 페이드 */
-.playlist-slider::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 1;
-
-  width: 40px;
-  height: 100%;
-
-  pointer-events: none;
-  background: linear-gradient(
-    to right,
-    rgba(18, 18, 18, 0),
-    rgba(18, 18, 18, 0.85)
-  );
+.playlist-card {
+  flex: 0 0 clamp(140px, 13vw, 220px);
+  width: clamp(140px, 13vw, 220px);
+  cursor: pointer;
+  position: relative;
 }
 
-.playlist-slider::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-
-  width: 24px;
-  height: 100%;
-
-  pointer-events: none;
-  background: linear-gradient(
-    to left,
-    rgba(18, 18, 18, 0),
-    rgba(18, 18, 18, 0.85)
-  );
+.playlist-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 12px;
+  transition: filter 0.2s ease;
 }
 
-/* 화살표 */
+.playlist-card span {
+  display: block;
+  font-size: 14px;
+  margin-top: 6px;
+  text-align: center;
+}
+
+/* 플레이 버튼 */
+.play-button {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  color: white;
+  cursor: pointer;
+
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s ease;
+
+  pointer-events: none;
+}
+
+/* 좌우 버튼 */
 .slider-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 5;
-
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: none;
+  z-index: 1;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
   background: rgba(0, 0, 0, 0.6);
-  color: white;
-  cursor: pointer;
-
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.playlist-slider:hover .slider-btn {
-  opacity: 1;
-}
-
-.slider-btn.left {
-  left: 8px;
-  width: 36px;
-}
-
-.slider-btn.right {
-  right: 8px;
-  width: 36px;
-}
-
-/* =========================
-   카드
-========================= */
-.top-playlist-card {
-  width: 260px;
-  flex-shrink: 0;
-}
-
-.playlist-image-wrapper {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 18px;
-  overflow: hidden;
-}
-
-.playlist-image-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* 재생 버튼 */
-.play-button {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.9);
-
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
   border: none;
+  color: rgba(255, 255, 255, 0.6);
 
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  opacity: 0;
-  transition: all 0.2s ease;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.play-button svg {
+.slider-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
   color: black;
 }
 
-/* 제목 */
-.playlist-title {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-
-  font-size: 13px;
-  font-weight: bold;
-  color: white;
-
-  background: rgba(0, 0, 0, 0.6);
-  padding: 4px 10px;
-  border-radius: 12px;
-
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 90%;
-  text-align: center;
+.slider-btn.left {
+  left: -10px;
 }
 
-/* hover */
-.top-playlist-card:hover img {
-  filter: brightness(0.7);
-}
-
-.top-playlist-card:hover .play-button {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
+.slider-btn.right {
+  right: -10px;
 }
 
 /* =========================
-   아래 섹션 (공동 플레이리스트)
+   우측 - 공동 플레이리스트
 ========================= */
-.bottom-section {
+.right-area {
+  position: absolute;
+  right: max(24px, 2vw);
+  bottom: max(24px, 3.5vh);
+  width: clamp(340px, 33vw, 680px);
+  height: clamp(300px, 42vh, 420px);
+
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px);
+  border-radius: 20px;
+  padding: clamp(14px, 1.5vh, 22px);
+  box-sizing: border-box;
+
   display: flex;
   flex-direction: column;
-  gap: 20px;
+
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
 }
 
-.rank-sections {
-  display: flex;
-  gap: 20px;
+.right-area h2 {
+  font-size: clamp(16px, 1.4vw, 22px);
+  margin-bottom: clamp(8px, 1vh, 14px);
+  flex-shrink: 0;
 }
 
-.rank-section {
+/* 캐러셀 */
+.shared-wrapper {
+  position: relative;
   flex: 1;
-  background: #000;
-  border-radius: 24px;
-  padding: 16px;
+  min-height: 0;
+}
+
+.shared-container {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  height: 100%;
+}
+
+.shared-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* RankSection 카드 */
+.shared-container > * {
+  min-width: 100%;
+  flex-shrink: 0;
+  height: 100%;
+  scroll-snap-align: start;
+}
+
+/* =========================
+   RankSection
+========================= */
+.rank-section {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 12px;
+  box-sizing: border-box;
 }
 
 .rank-title {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+  color: #fff;
 }
 
 .rank-list {
+  flex: 1;
+  overflow-y: auto;
   list-style: none;
   padding: 0;
   margin: 0;
+  min-height: 0;
+}
+
+.rank-list::-webkit-scrollbar {
+  display: none;
 }
 
 .rank-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-}
-
-.rank-item:hover {
-  background: #222;
-  border-radius: 6px;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 15px;
+  color: #ccc;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .rank-number {
-  width: 20px;
-  font-weight: bold;
-  color: #1db954;
+  color: #888;
+  min-width: 18px;
+  font-weight: 600;
+  font-size: 14px;
 }
+
+/* 좌우 버튼 */
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nav:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: black;
+}
+
+.nav.left {
+  left: -16px;
+}
+
+.nav.right {
+  right: -16px;
+}
+
+/* =========================
+   애니메이션
+========================= */
+.playlist-card:hover img {
+  filter: brightness(0.75);
+}
+
+/* =========================
+   플레이어 활성 시 스크롤
+========================= */
+.home.player-open {
+  overflow-y: scroll;
+}
+
+.home.player-open::after {
+  content: '';
+  display: block;
+  height: calc(100vh + 120px);
+}
+
+.home.player-open::-webkit-scrollbar {
+  width: 6px;
+}
+
+.home.player-open::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.home.player-open::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+.home.player-open::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+

@@ -24,7 +24,7 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/api/admin/users")
+    api.get("/admin/users")
       .then((res) => setUsers(res.data))
       .catch(() => alert("유저 목록을 불러오는데 실패했습니다."))
       .finally(() => setLoading(false));
@@ -32,7 +32,7 @@ export default function AdminUsersPage() {
 
   const handleRoleChange = async (id: number, role: string) => {
     try {
-      await api.patch(`/api/admin/users/${id}/role`, { role });
+      await api.patch(`/admin/users/${id}/role`, { role });
       setUsers((prev) => prev.map((u) => u.id === id ? { ...u, role } : u));
     } catch {
       alert("권한 변경에 실패했습니다.");

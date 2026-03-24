@@ -25,14 +25,14 @@ export interface LoginRequest {
 회원가입 API
 =========================== */
 export const register = (data: RegisterRequest) => {
-  return api.post("/api/auth/register", data);
+  return api.post("/auth/register", data);
 };
 
 /* ===========================
 로그인 API
 =========================== */
 export const login = (data: LoginRequest) => {
-  return api.post("/api/auth/login", data);
+  return api.post("/auth/login", data);
 };
 
 /* ===========================
@@ -43,7 +43,7 @@ export const login = (data: LoginRequest) => {
 이메일 중복체크 API (백엔드 맞춤형)
 =========================== */
 export const checkEmailDuplicate = (email: string) => {
-  return api.get("/api/auth/email-check", {
+  return api.get("/auth/email-check", {
     params: { email },
     // 💡 백엔드가 application/json이 아닌 text/plain을 보내므로 responseType을 text로 고정합니다.
     responseType: "text",
@@ -56,7 +56,7 @@ export const checkEmailDuplicate = (email: string) => {
 /* ===========================
 로그아웃 API (JWT 도입 후)
 =========================== */
-// export const logout = () => api.post("/api/auth/logout");
+// export const logout = () => api.post("/auth/logout");
 
 
 

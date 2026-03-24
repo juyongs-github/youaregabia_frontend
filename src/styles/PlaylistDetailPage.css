@@ -166,6 +166,27 @@
   transform: translate(-50%, -50%) scale(1);
 }
 
+.toggle-play-mode {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.55);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.toggle-play-mode:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
 /* =========================
    더보기 버튼
 ========================= */

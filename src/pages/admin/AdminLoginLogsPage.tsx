@@ -23,7 +23,7 @@ export default function AdminLoginLogsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/api/admin/logs/login")
+    api.get("/admin/logs/login")
       .then((res) => setLogs(res.data))
       .finally(() => setLoading(false));
   }, []);

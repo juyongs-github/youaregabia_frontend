@@ -1,16 +1,16 @@
 import { useEffect, useState, useRef } from "react";
-import type { Song } from "../../Components/ui/SongListItem";
+import type { Song } from "../../components/ui/SongListItem";
 import api from "../../api/axios";
 import { FaMusic, FaSave } from "react-icons/fa";
-import SongListItem from "../../Components/ui/SongListItem";
+import SongListItem from "../../components/ui/SongListItem";
 import { IoWarning } from "react-icons/io5";
 import { useLocation, useNavigate } from "react-router-dom";
 import { HiPencil } from "react-icons/hi2";
 import { BsQuestionCircleFill, BsFillCircleFill } from "react-icons/bs";
 import { RiArrowLeftLine, RiPlayList2Fill } from "react-icons/ri";
-import MusicPlayer from "../../Components/layout/MusicPlayer";
+import MusicPlayer from "../../components/layout/MusicPlayer";
 import { RiResetLeftFill } from "react-icons/ri";
-import PlaylistReviewCreateModal from "../../Components/ui/PlaylistReviewCreateModal";
+import PlaylistReviewCreateModal from "../../components/ui/PlaylistReviewCreateModal";
 import Checkbox from "@mui/material/Checkbox";
 import { playlistApi } from "../../api/playlistApi";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -83,7 +83,7 @@ function RecommendPlaylistResult() {
     setIsLoading(true);
     setIsError(false);
     try {
-      const response = await api.get("/api/recommend", {
+      const response = await api.get("/recommend", {
         params: {
           trackName: trackName,
           artistName: artistName,
