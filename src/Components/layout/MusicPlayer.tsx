@@ -22,6 +22,7 @@ interface MusicPlayerProps {
   onSongEnd?: () => void;
   // 블라인드 추천을 위한 보기 설정
   blind?: boolean;
+  externalPaused?: boolean;
 }
 
 // 음악 재생 바 UI
@@ -33,6 +34,7 @@ function MusicPlayer({
   onSongChange,
   onSongEnd,
   blind = false,
+  externalPaused,
 }: MusicPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -56,6 +58,11 @@ function MusicPlayer({
     if (!audioRef.current) return;
     audioRef.current.volume = volume / 100;
   }, []);
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+    if (externalPaused) audioRef.current.pause();
+  }, [externalPaused]);
 
   useEffect(() => {
     if (!audioRef.current) return;
