@@ -3,9 +3,9 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import api from "../../api/axios";
 import { playlistApi } from "../../api/playlistApi";
-import MusicPlayer from "../../Components/layout/MusicPlayer";
-import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
-import type { Song } from "../../Components/ui/SongListItem";
+import MusicPlayer from "../../components/layout/MusicPlayer";
+import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
+import type { Song } from "../../components/ui/SongListItem";
 
 const TOTAL = 5;
 
@@ -31,7 +31,7 @@ const BlindRecommendPage = () => {
     const results: Song[] = [];
     await Promise.all(
       Array.from({ length: TOTAL }, () =>
-        api.get("/api/random").then((res) => results.push(res.data))
+        api.get("/random").then((res) => results.push(res.data))
       )
     );
     setSongs(results);

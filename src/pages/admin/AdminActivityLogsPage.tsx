@@ -14,7 +14,7 @@ export default function AdminActivityLogsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/api/admin/logs/activity")
+    api.get("/admin/logs/activity")
       .then((res) => setLogs(res.data))
       .finally(() => setLoading(false));
   }, []);

@@ -59,7 +59,7 @@ export default function CartPage() {
                 {/* 이미지 */}
                 <div className="w-20 h-20 bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {item.imageUrl ? (
-                    <img src={`http://localhost:8080${item.imageUrl}`} alt={item.name} className="w-full h-full object-cover" />
+                    <img src={`${import.meta.env.VITE_API_BASE_URL}${item.imageUrl}`} alt={item.name} className="w-full h-full object-cover" />
                   ) : (
                     <FaBox size={24} className="text-gray-600" />
                   )}

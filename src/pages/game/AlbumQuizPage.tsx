@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import type { Song } from "../../Components/ui/SongListItem";
-import GameResult from "../../Components/ui/GameResult";
+import type { Song } from "../../components/ui/SongListItem";
+import GameResult from "../../components/ui/GameResult";
 
 const TOTAL = 5;
 const MAX_TRIES = 5;
@@ -27,7 +27,7 @@ const AlbumQuizPage = () => {
     const results: Song[] = [];
     await Promise.all(
       Array.from({ length: TOTAL }, () =>
-        api.get("/api/random").then((res) => results.push(res.data))
+        api.get("/random").then((res) => results.push(res.data))
       )
     );
     setSongs(results);

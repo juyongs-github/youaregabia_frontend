@@ -49,26 +49,26 @@ function MyPage() {
 
   useEffect(() => {
     if (activeTab === "boards" && myBoards.length === 0) {
-      api.get("/api/mypage/boards").then((res) => setMyBoards(res.data)).catch(() => {});
+      api.get("/mypage/boards").then((res) => setMyBoards(res.data)).catch(() => {});
     }
     if (activeTab === "replies" && myReplies.length === 0) {
-      api.get("/api/mypage/replies").then((res) => setMyReplies(res.data)).catch(() => {});
+      api.get("/mypage/replies").then((res) => setMyReplies(res.data)).catch(() => {});
     }
     if (activeTab === "profile") {
-      api.get("/api/notifications").then((res) => setNotifications(res.data)).catch(() => {});
+      api.get("/notifications").then((res) => setNotifications(res.data)).catch(() => {});
     }
   }, [activeTab]);
 
   const handleNotifClick = async (n: NotificationItem) => {
     if (!n.isRead) {
-      await api.patch(`/api/notifications/${n.id}/read`);
+      await api.patch(`/notifications/${n.id}/read`);
       setNotifications((prev) => prev.map((x) => x.id === n.id ? { ...x, isRead: true } : x));
     }
     if (n.boardId) navigate(`/community/share/${n.boardId}`);
   };
 
   const handleMarkAllRead = async () => {
-    await api.patch("/api/notifications/read-all");
+    await api.patch("/notifications/read-all");
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
   };
 
@@ -80,7 +80,7 @@ function MyPage() {
     const formData = new FormData();
     formData.append("email", user.email);
     formData.append("image", file);
-    const res = await api.patch("/api/auth/update-image", formData, {
+    const res = await api.patch("/auth/update-image", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     dispatch(updateProfile({ imgUrl: res.data.imgUrl }));
@@ -92,7 +92,7 @@ function MyPage() {
     );
     if (!confirmed) return;
     try {
-      const res = await api.delete("/api/auth/withdraw", { data: { email: user?.email } });
+      const res = await api.delete("/auth/withdraw", { data: { email: user?.email } });
       if (res.status === 200) {
         alert("회원탈퇴가 완료됐습니다.");
         cartUtils.clear();
@@ -118,7 +118,7 @@ function MyPage() {
         <div className="relative">
           <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-700 bg-gray-800 flex items-center justify-center">
             {user?.imgUrl ? (
-              <img src={`http://localhost:8080${user.imgUrl}`} alt="Profile" className="w-full h-full object-cover" />
+              <img src={`${import.meta.env.VITE_API_BASE_URL}${user.imgUrl}`} alt="Profile" className="w-full h-full object-cover" />
             ) : (
               <span className="text-gray-500 text-sm">이미지 없음</span>
             )}

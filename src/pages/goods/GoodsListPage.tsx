@@ -122,7 +122,7 @@ export default function GoodsListPage() {
               {/* 이미지 */}
               <div className="aspect-square bg-gray-800 flex items-center justify-center overflow-hidden">
                 {item.imageUrl ? (
-                  <img src={`http://localhost:8080${item.imageUrl}`} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <img src={`${import.meta.env.VITE_API_BASE_URL}${item.imageUrl}`} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 ) : (
                   <FaBox size={48} className="text-gray-600" />
                 )}

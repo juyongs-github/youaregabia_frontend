@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
 import type { Board, PageResult } from "../../types/board";
-import Pagination from "../../Components/ui/Pagination";
+import Pagination from "../../components/ui/Pagination";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import BoardSortBar from "../../Components/ui/BoardSortBar";
-import BoardItem from "../../Components/ui/BoardItem";
+import BoardSortBar from "../../components/ui/BoardSortBar";
+import BoardItem from "../../components/ui/BoardItem";
 
 const CriticListPage = () => {
   const [pageData, setPageData] = useState<PageResult<Board> | null>(null);

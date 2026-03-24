@@ -2,7 +2,7 @@ import axios from "axios";
 import { store } from "../store";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080", // 스프링 부트 서버의 baseURL
+  baseURL: "/api", // nginx proxy 기준 baseURL
   // headers: {
   //   "Content-Type": "application/json; charset=UTF-8", // 인코딩 설정 추가
   // },

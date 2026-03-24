@@ -85,7 +85,7 @@ export default function GoodsDetailPage() {
         {/* 이미지 */}
         <div className="w-full md:w-96 aspect-square bg-gray-900 border border-gray-800 rounded-xl flex items-center justify-center flex-shrink-0">
           {goods.imageUrl ? (
-            <img src={`http://localhost:8080${goods.imageUrl}`} alt={goods.name} className="w-full h-full object-cover rounded-xl" />
+            <img src={`${import.meta.env.VITE_API_BASE_URL}${goods.imageUrl}`} alt={goods.name} className="w-full h-full object-cover rounded-xl" />
           ) : (
             <FaBox size={80} className="text-gray-600" />
           )}

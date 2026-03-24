@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import type { Song } from "../../Components/ui/SongListItem";
-import GameResult from "../../Components/ui/GameResult";
+import type { Song } from "../../components/ui/SongListItem";
+import GameResult from "../../components/ui/GameResult";
 
 interface Card {
   id: number;
@@ -39,7 +39,7 @@ const MatchingGamePage = () => {
 
       // 8개의 고유한 쌍이 모일 때까지 반복
       while (results.length < TOTAL_PAIRS) {
-        const res = await api.get("/api/random");
+        const res = await api.get("/random");
         const s = res.data;
 
         // 가수나 제목이 겹치면 패스

@@ -20,7 +20,7 @@ function CriticSongSelectModal({ onClose, onSelect }: Props) {
 
   const handleSearch = async () => {
     if (!keyword.trim()) return;
-    const res = await api.get("/api/search", { params: { q: keyword } });
+    const res = await api.get("/search", { params: { q: keyword } });
     setResults(res.data || []);
   };
 

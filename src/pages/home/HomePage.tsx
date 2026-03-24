@@ -4,12 +4,12 @@ import { playlistApi } from "../../api/playlistApi";
 import type { Playlist } from "../../types/playlist";
 import { useNavigate } from "react-router-dom";
 
-import RankSection from "../../Components/layout/RankSection";
-import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
+import RankSection from "../../components/layout/RankSection";
+import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
 
 function HomePage() {
   const [data, setData] = useState<Playlist[]>([]);
-  const baseURL: string = "http://localhost:8080";
+  const baseURL: string = import.meta.env.VITE_API_BASE_URL;
   const [, setIsLoading] = useState<boolean>(false);
   const [, setIsError] = useState<boolean>(false);
 

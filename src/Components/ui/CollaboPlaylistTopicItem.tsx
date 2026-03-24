@@ -44,7 +44,7 @@ function CollaborationPlaylistTopicItem({ playlists }: Props) {
             <div className="relative flex items-center justify-center flex-shrink-0 w-32 h-32 rounded-lg overflow-hidden bg-slate-700">
               {playlist.imageUrl ? (
                 <img
-                  src={`http://localhost:8080${playlist.imageUrl}`}
+                  src={`${import.meta.env.VITE_API_BASE_URL}${playlist.imageUrl}`}
                   alt=""
                   className="object-cover w-full h-full"
                 />

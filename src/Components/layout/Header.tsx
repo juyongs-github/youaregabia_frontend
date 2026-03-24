@@ -73,7 +73,7 @@ function Header() {
 
   const fetchNotifications = async () => {
     try {
-      const res = await api.get("/api/notifications");
+      const res = await api.get("/notifications");
       setNotifications(res.data);
       setUnreadCount(res.data.filter((n: NotificationItem) => !n.isRead).length);
     } catch {
@@ -101,7 +101,7 @@ function Header() {
 
   const handleNotifClick = async (n: NotificationItem) => {
     if (!n.isRead) {
-      await api.patch(`/api/notifications/${n.id}/read`);
+      await api.patch(`/notifications/${n.id}/read`);
     }
     setNotifOpen(false);
     if (n.boardId) navigate(`/community/share/${n.boardId}`);
@@ -109,7 +109,7 @@ function Header() {
   };
 
   const handleMarkAllRead = async () => {
-    await api.patch("/api/notifications/read-all");
+    await api.patch("/notifications/read-all");
     fetchNotifications();
   };
 
@@ -240,7 +240,7 @@ function Header() {
         {/* 아바타 메뉴 */}
         <IconButton onClick={handleClick} size="small">
           <Avatar
-            src={user?.imgUrl ? `http://localhost:8080${user.imgUrl}` : undefined}
+            src={user?.imgUrl ? `${import.meta.env.VITE_API_BASE_URL}${user.imgUrl}` : undefined}
             sx={{
               width: 35,
               height: 35,

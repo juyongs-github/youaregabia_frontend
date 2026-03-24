@@ -36,19 +36,19 @@ export interface OrderResult {
 
 export const goodsApi = {
   getGoodsList: (category?: string) =>
-    api.get<Goods[]>("/api/goods", { params: category ? { category } : {} }).then((r) => r.data),
+    api.get<Goods[]>("/goods", { params: category ? { category } : {} }).then((r) => r.data),
 
   getGoodsDetail: (goodsId: number) =>
-    api.get<Goods>(`/api/goods/${goodsId}`).then((r) => r.data),
+    api.get<Goods>(`/goods/${goodsId}`).then((r) => r.data),
 
   createOrder: (data: CreateOrderRequest) =>
-    api.post<OrderResult>("/api/orders", data).then((r) => r.data),
+    api.post<OrderResult>("/orders", data).then((r) => r.data),
 
   getMyOrders: () =>
-    api.get<OrderResult[]>("/api/orders/me").then((r) => r.data),
+    api.get<OrderResult[]>("/orders/me").then((r) => r.data),
 
   confirmPayment: (data: { paymentKey: string; orderId: string; amount: number }) =>
-    api.post<void>("/api/payments/confirm", data).then((r) => r.data),
+    api.post<void>("/payments/confirm", data).then((r) => r.data),
 };
 
 // 장바구니 localStorage 유틸

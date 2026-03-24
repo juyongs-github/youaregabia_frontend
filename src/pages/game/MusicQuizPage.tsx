@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import MusicPlayer from "../../Components/layout/MusicPlayer";
-import type { Song } from "../../Components/ui/SongListItem";
-import GameResult from "../../Components/ui/GameResult";
+import MusicPlayer from "../../components/layout/MusicPlayer";
+import type { Song } from "../../components/ui/SongListItem";
+import GameResult from "../../components/ui/GameResult";
 
 const TOTAL = 10;
 
@@ -24,7 +24,7 @@ const MusicQuizPage = () => {
     setIsLoading(true);
     const results: Song[] = [];
     const promises = Array.from({ length: TOTAL }, () =>
-      api.get("/api/random").then((res) => results.push(res.data))
+      api.get("/random").then((res) => results.push(res.data))
     );
     await Promise.all(promises);
     setSongs(results);

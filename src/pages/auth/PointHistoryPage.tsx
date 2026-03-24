@@ -3,7 +3,7 @@ import { pointApi, type PointHistoryDto } from "../../api/pointApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import type { PageResult } from "../../types/board";
-import Pagination from "../../Components/ui/Pagination";
+import Pagination from "../../components/ui/Pagination";
 
 const POINT_TYPE_LABEL: Record<string, string> = {
   BOARD_WRITE: "게시글 작성",

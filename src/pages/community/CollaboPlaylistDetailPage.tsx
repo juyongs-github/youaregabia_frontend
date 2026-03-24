@@ -7,10 +7,10 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { playlistApi } from "../../api/playlistApi";
 import { playlistSongApi, type SongSuggestion } from "../../api/playlistSongApi";
-import type { Song } from "../../Components/ui/SongListItem";
+import type { Song } from "../../components/ui/SongListItem";
 import type { CollaboPlaylist } from "../../types/playlist";
-import MusicPlayer from "../../Components/layout/MusicPlayer";
-import Spinner from "../../Components/ui/Spinner";
+import MusicPlayer from "../../components/layout/MusicPlayer";
+import Spinner from "../../components/ui/Spinner";
 import api from "../../api/axios";
 
 interface PlaylistSong extends Song {
@@ -74,7 +74,7 @@ function CollaboPlaylistDetailPage() {
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setIsSearching(true); setHasSearched(true);
-    try { const res = await api.get("/api/search", { params: { q: searchQuery } }); setSearchResults(res.data || []); }
+    try { const res = await api.get("/search", { params: { q: searchQuery } }); setSearchResults(res.data || []); }
     catch (e) { console.error(e); setSearchResults([]); }
     finally { setIsSearching(false); }
   };
@@ -130,7 +130,7 @@ function CollaboPlaylistDetailPage() {
       <div className="flex gap-8">
         <div className="flex-shrink-0 w-52 h-52 bg-slate-700 rounded-2xl overflow-hidden">
           {playlist?.imageUrl
-            ? <img src={"http://localhost:8080" + playlist.imageUrl} alt="" className="w-full h-full object-cover" />
+            ? <img src={import.meta.env.VITE_API_BASE_URL + playlist.imageUrl} alt="" className="w-full h-full object-cover" />
             : <div className="flex items-center justify-center w-full h-full"><FaMusic size={48} className="text-white opacity-40" /></div>
           }
         </div>

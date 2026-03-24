@@ -6,9 +6,9 @@ import "../../styles/MyplaylistPage.css";
 import { FaPlay, FaPlus, FaTrash } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
 import { useSelector } from "react-redux";
-import type { Song } from "../../Components/ui/SongListItem";
-import MusicPlayer from "../../Components/layout/MusicPlayer";
-import AddSongsModal from "../../Components/ui/AddSongsModal";
+import type { Song } from "../../components/ui/SongListItem";
+import MusicPlayer from "../../components/layout/MusicPlayer";
+import AddSongsModal from "../../components/ui/AddSongsModal";
 
 function PlaylistDetailPage() {
   const navigate = useNavigate();
@@ -177,7 +177,7 @@ function PlaylistDetailPage() {
             {preview ? (
               <img src={preview} alt="playlist cover" />
             ) : (
-              <img src={`http://localhost:8080${data?.imageUrl}`} alt="playlist cover" />
+              <img src={`${import.meta.env.VITE_API_BASE_URL}${data?.imageUrl}`} alt="playlist cover" />
             )}
             {isEditMode && (
               <input
