@@ -1,7 +1,8 @@
 import "./App.css";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "./store";
+import { loginSuccess, REMEMBER_KEY } from "./store/authSlice";
 import SearchResult from "./pages/home/SearchResult";
 import RecommendPlaylistResult from "./pages/recommend/RecommendPlaylistResult";
 import HomePage from "./pages/home/HomePage";
@@ -61,12 +62,29 @@ interface RateLimitInfo {
 }
 
 function App() {
+  const dispatch = useDispatch();
   // 2. Redux Store에서 로그인 여부 가져오기
   const isLogin = useSelector((state: RootState) => state.auth.isLoggedIn);
   const userRole = useSelector((state: RootState) => state.auth.user?.role);
   const loginRedirect = userRole === "ADMIN" ? "/admin" : "/home";
   // 매크로 방지 alert
   const [rateLimitInfo, setRateLimitInfo] = useState<RateLimitInfo | null>(null);
+
+  // 로그인 상태 유지 체크 시 localStorage에서 복원
+  useEffect(() => {
+    if (!isLogin) {
+      try {
+        const saved = localStorage.getItem(REMEMBER_KEY);
+        if (saved) {
+          const { user } = JSON.parse(saved);
+          dispatch(loginSuccess(user));
+        }
+      } catch {
+        localStorage.removeItem(REMEMBER_KEY);
+      }
+    }
+  }, []);
+
   // axios interceptor에서 호출할 수 있도록 핸들러 등록
   useEffect(() => {
     setRateLimitHandler((message, remainSeconds) => {

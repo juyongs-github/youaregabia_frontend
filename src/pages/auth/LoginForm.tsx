@@ -9,6 +9,7 @@ function LoginForm() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -59,6 +60,7 @@ function LoginForm() {
           imgUrl: response.data.imgUrl || undefined,
           token: response.data.token,
           role: response.data.role,
+          rememberMe,
         })
       );
 
@@ -103,6 +105,17 @@ function LoginForm() {
             value={form.password}
             onChange={handleChange}
           />
+        </div>
+
+        <div className="remember-me-row">
+          <label className="remember-me-label">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            <span>로그인 상태 유지</span>
+          </label>
         </div>
 
         <div className="social-login-row">
