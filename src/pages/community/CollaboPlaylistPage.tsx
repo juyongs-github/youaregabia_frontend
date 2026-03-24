@@ -25,7 +25,7 @@ function CollaboPlaylistPage() {
   const fetchPlaylists = async () => {
     setIsLoading(true);
     try {
-      const res = await playlistApi.getAllCollaborativePlaylist(user?.email);
+      const res = await playlistApi.getAllCollaborativePlaylist();
       setPlaylists(res.data || []);
     } catch (e) {
       console.error(e);
@@ -39,9 +39,9 @@ function CollaboPlaylistPage() {
     if (!user?.email) { alert("로그인이 필요합니다."); return; }
     try {
       if (playlist.hasLiked) {
-        await playlistApi.unlikeCollabo(playlist.id, user.email);
+        await playlistApi.unlikeCollabo(playlist.id);
       } else {
-        await playlistApi.likeCollabo(playlist.id, user.email);
+        await playlistApi.likeCollabo(playlist.id);
       }
       setPlaylists(prev =>
         prev.map(p =>

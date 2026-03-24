@@ -18,27 +18,27 @@ export const playlistSongApi = {
     api.get<Song[]>(`/playlist/${playlistId}/songs`),
 
   // 공동 플레이리스트 곡 목록 (투표수 + 내 투표 여부 포함)
-  getCollaborativeSongs: (playlistId: number, email?: string) =>
-    api.get<CollaboSong[]>(`/playlist/${playlistId}/collabo/songs`, { params: { email } }),
+  getCollaborativeSongs: (playlistId: number) =>
+    api.get<CollaboSong[]>(`/playlist/${playlistId}/collabo/songs`),
 
   // 곡 제안 (유저당 최대 5곡)
-  suggestSong: (playlistId: number, songId: number, email: string, reason?: string) =>
-    api.post(`/playlist/${playlistId}/songs/suggest`, null, { params: { songId, email, ...(reason ? { reason } : {}) } }),
+  suggestSong: (playlistId: number, songId: number, reason?: string) =>
+    api.post(`/playlist/${playlistId}/songs/suggest`, null, { params: { songId, ...(reason ? { reason } : {}) } }),
 
   // 곡 삭제 (작성자 or 등록자)
-  removeSongFromPlaylist: (playlistSongId: number, email: string) =>
-    api.delete(`/playlist/songs/${playlistSongId}`, { params: { email } }),
+  removeSongFromPlaylist: (playlistSongId: number) =>
+    api.delete(`/playlist/songs/${playlistSongId}`),
 
   // 투표
-  vote: (playlistId: number, playlistSongId: number, email: string) =>
-    api.post(`/playlist/${playlistId}/songs/${playlistSongId}/vote`, null, { params: { email } }),
+  vote: (playlistId: number, playlistSongId: number) =>
+    api.post(`/playlist/${playlistId}/songs/${playlistSongId}/vote`),
 
   // 투표 취소
-  cancelVote: (playlistId: number, playlistSongId: number, email: string) =>
-    api.delete(`/playlist/${playlistId}/songs/${playlistSongId}/vote`, { params: { email } }),
+  cancelVote: (playlistId: number, playlistSongId: number) =>
+    api.delete(`/playlist/${playlistId}/songs/${playlistSongId}/vote`),
 
   // 추가 이유 수정
-  updateReason: (playlistSongId: number, email: string, reason: string) =>
-    api.patch(`/playlist/songs/${playlistSongId}/reason`, null, { params: { email, reason } }),
+  updateReason: (playlistSongId: number, reason: string) =>
+    api.patch(`/playlist/songs/${playlistSongId}/reason`, null, { params: { reason } }),
 
 };

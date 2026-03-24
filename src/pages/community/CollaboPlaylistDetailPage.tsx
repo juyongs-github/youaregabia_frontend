@@ -117,7 +117,7 @@ function CollaboPlaylistDetailPage() {
 
   const fetchPlaylist = async () => {
     if (!id) return;
-    try { const res = await playlistApi.getPlaylist(id, user?.email ?? ""); setPlaylist(res.data as CollaboPlaylist); }
+    try { const res = await playlistApi.getCollaborativePlaylist(Number(id)); setPlaylist(res.data); }
     catch (e) { console.error(e); }
   };
 
@@ -125,7 +125,7 @@ function CollaboPlaylistDetailPage() {
     if (!id) return;
     setIsSongsLoading(true);
     try {
-      const res = await playlistSongApi.getCollaborativeSongs(Number(id), user?.email);
+      const res = await playlistSongApi.getCollaborativeSongs(Number(id));
       setSongs((res.data || []).slice().sort((a, b) => (b.voteCount ?? 0) - (a.voteCount ?? 0)));
     } catch (e) {
       console.error(e);
@@ -137,7 +137,7 @@ function CollaboPlaylistDetailPage() {
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setIsSearching(true); setHasSearched(true);
-    try { const res = await api.get("/api/search", { params: { q: searchQuery } }); setSearchResults(res.data || []); }
+    try { const res = await api.get("/search", { params: { q: searchQuery } }); setSearchResults(res.data || []); }
     catch (e) { console.error(e); setSearchResults([]); }
     finally { setIsSearching(false); }
   };
@@ -150,7 +150,7 @@ function CollaboPlaylistDetailPage() {
     }
 
     try {
-      await playlistSongApi.suggestSong(Number(id), song.id, user.email, reason || undefined);
+      await playlistSongApi.suggestSong(Number(id), song.id, reason || undefined);
       alert("곡이 추가되었습니다.");
       setAddedSongIds((prev) => new Set(prev).add(song.id));
       fetchSongs();
@@ -167,7 +167,7 @@ function CollaboPlaylistDetailPage() {
       return;
     }
     try {
-      await playlistSongApi.updateReason(playlistSongId, user.email, editingReasonText);
+      await playlistSongApi.updateReason(playlistSongId, editingReasonText);
       setSongs((prev) =>
         prev.map((s) =>
           s.playlistSongId === playlistSongId ? { ...s, reason: editingReasonText } : s
@@ -184,7 +184,7 @@ function CollaboPlaylistDetailPage() {
     if (!user?.email) return;
     if (!window.confirm("이 곡을 삭제하시겠습니까?")) return;
     try {
-      await playlistSongApi.removeSongFromPlaylist(playlistSongId, user.email);
+      await playlistSongApi.removeSongFromPlaylist(playlistSongId);
       fetchSongs();
     } catch (e) {
       alert("곡 삭제에 실패했습니다.");
@@ -199,9 +199,9 @@ function CollaboPlaylistDetailPage() {
     }
     try {
       if (song.hasVoted) {
-        await playlistSongApi.cancelVote(Number(id), song.playlistSongId, user.email);
+        await playlistSongApi.cancelVote(Number(id), song.playlistSongId);
       } else {
-        await playlistSongApi.vote(Number(id), song.playlistSongId, user.email);
+        await playlistSongApi.vote(Number(id), song.playlistSongId);
       }
       setSongs((prev) =>
         prev.map((s) =>
@@ -255,9 +255,9 @@ function CollaboPlaylistDetailPage() {
     }
     try {
       if (playlist?.hasLiked) {
-        await playlistApi.unlikeCollabo(Number(id), user.email);
+        await playlistApi.unlikeCollabo(Number(id));
       } else {
-        await playlistApi.likeCollabo(Number(id), user.email);
+        await playlistApi.likeCollabo(Number(id));
       }
       setPlaylist((prev) =>
         prev
@@ -297,7 +297,7 @@ function CollaboPlaylistDetailPage() {
     const d = reopenDeadlineDate;
     const newDeadline = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}T23:59:59`;
     try {
-      await playlistApi.reopenCollabo(Number(id), user.email, newDeadline);
+      await playlistApi.reopenCollabo(Number(id), newDeadline);
       setShowReopenPanel(false);
       setReopenDeadlineDate(null);
       fetchPlaylist();
@@ -315,7 +315,7 @@ function CollaboPlaylistDetailPage() {
     if (!id || !user?.email) return;
     setIsImporting(true);
     try {
-      await playlistApi.importCollabo(Number(id), user.email);
+      await playlistApi.importCollabo(Number(id));
       setPlaylist((prev) => (prev ? { ...prev, hasImported: true } : prev));
       alert("내 플레이리스트로 가져왔습니다.");
     } catch (e) {
