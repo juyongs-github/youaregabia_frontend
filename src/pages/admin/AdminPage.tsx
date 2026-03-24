@@ -163,7 +163,7 @@ function AdminPage() {
   };
 
   const loadGoods = () => {
-    api.get("/goods").then((res) => setGoodsList(res.data)).catch(() => {});
+    api.get("/api/goods").then((res) => setGoodsList(res.data)).catch(() => {});
   };
 
   const handleGoodsFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -206,7 +206,7 @@ function AdminPage() {
       if (goodsForm.goodsId) {
         await api.put(`/goods/${goodsForm.goodsId}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
       } else {
-        await api.post("/goods", formData, { headers: { "Content-Type": "multipart/form-data" } });
+        await api.post("/api/goods", formData, { headers: { "Content-Type": "multipart/form-data" } });
       }
       setShowGoodsForm(false);
       setGoodsForm(EMPTY_FORM);

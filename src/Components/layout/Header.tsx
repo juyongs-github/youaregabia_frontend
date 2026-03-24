@@ -73,7 +73,7 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
 
   const fetchNotifications = async () => {
     try {
-      const res = await api.get("/notifications");
+      const res = await api.get("/api/notifications");
       setNotifications(res.data);
       setUnreadCount(res.data.filter((n: NotificationItem) => !n.isRead).length);
     } catch {
@@ -109,7 +109,7 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
   };
 
   const handleMarkAllRead = async () => {
-    await api.patch("/notifications/read-all");
+    await api.patch("/api/notifications/read-all");
     fetchNotifications();
   };
 

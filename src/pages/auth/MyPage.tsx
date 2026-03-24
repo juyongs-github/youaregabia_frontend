@@ -77,7 +77,7 @@ function MyPage() {
   };
 
   const handleMarkAllRead = async () => {
-    await api.patch("/notifications/read-all");
+    await api.patch("/api/notifications/read-all");
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
   };
 

@@ -17,7 +17,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     Promise.all([
       api.get("/admin/users"),
-      api.get("/goods"),
+      api.get("/api/goods"),
       api.get("/admin/orders"),
       api.get("/admin/logs/login"),
     ])

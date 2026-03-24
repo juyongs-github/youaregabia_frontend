@@ -41,7 +41,7 @@ export default function AdminGoodsPage() {
   useEffect(() => { loadGoods(); }, []);
 
   const loadGoods = () => {
-    api.get("/goods").then((res) => setGoodsList(res.data)).catch(() => {});
+    api.get("/api/goods").then((res) => setGoodsList(res.data)).catch(() => {});
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -84,7 +84,7 @@ export default function AdminGoodsPage() {
       if (form.goodsId) {
         await api.put(`/goods/${form.goodsId}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
       } else {
-        await api.post("/goods", formData, { headers: { "Content-Type": "multipart/form-data" } });
+        await api.post("/api/goods", formData, { headers: { "Content-Type": "multipart/form-data" } });
       }
       setShowForm(false);
       setForm(EMPTY_FORM);
