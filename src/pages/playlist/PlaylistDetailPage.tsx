@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import type { Playlist } from "../../types/playlist";
 import { playlistApi } from "../../api/playlistApi";
 import "../../styles/MyplaylistPage.css";
+import "../../styles/PlaylistDetailPage.css";
 import { FaPlay, FaPlus, FaTrash } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
 import { useSelector } from "react-redux";
@@ -205,16 +206,10 @@ function PlaylistDetailPage() {
                   onClick={() => {
                     if (!songs.length) return;
 
-                    // 이미 재생 중이어도 강제로 처음부터 재시작
-                    setIsPlayerVisible(false);
-                    setSelectSong(null);
-                    setCurrentIndex(null);
-
-                    setTimeout(() => {
-                      setCurrentIndex(0);
-                      setSelectSong(sortedSongs[0]);
-                      setIsPlayerVisible(true);
-                    }, 0);
+                    // 기존 플레이어가 있으면 첫 곡으로 변경, 없으면 플레이어 열기
+                    setCurrentIndex(0);
+                    setSelectSong(sortedSongs[0]);
+                    setIsPlayerVisible(true);
                   }}
                 >
                   <FaPlay />
