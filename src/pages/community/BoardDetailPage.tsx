@@ -8,13 +8,9 @@ import ReplyItem from "../../Components/ui/replyItem";
 import Pagination from "../../Components/ui/Pagination";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-<<<<<<< HEAD
+
 import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
 import { refreshPoint } from "../../Components/ui/refreshPoint";
-=======
-import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
-import { refreshPoint } from "../../components/ui/refreshPoint";
->>>>>>> origin/deploy/test5
 
 const BoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();

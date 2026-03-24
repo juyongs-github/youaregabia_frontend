@@ -117,11 +117,7 @@ function CollaboPlaylistDetailPage() {
 
   const fetchPlaylist = async () => {
     if (!id) return;
-<<<<<<< HEAD
-    try { const res = await playlistApi.getPlaylist(id); setPlaylist(res.data as CollaboPlaylist); }
-=======
     try { const res = await playlistApi.getCollaborativePlaylist(Number(id)); setPlaylist(res.data); }
->>>>>>> origin/deploy/test5
     catch (e) { console.error(e); }
   };
 

@@ -54,7 +54,7 @@ import PointHistoryPage from "./pages/auth/PointHistoryPage";
 import IdealTypeWorldCupPage from "./pages/recommend/IdealTypeWorldCupPage";
 import { useEffect, useState } from "react";
 import { setRateLimitHandler } from "./api/axios";
-import RateLimitToast from "./components/ui/RateLimitToast";
+import RateLimitToast from "./Components/ui/RateLimitToast";
 
 interface RateLimitInfo {
   message: string;
