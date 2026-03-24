@@ -27,12 +27,12 @@ import { playlistApi } from "../../api/playlistApi";
 import type { Playlist } from "../../types/playlist";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../../api/axios";
-import type { Song } from "../../components/ui/SongListItem";
-import MusicPlayer from "../../components/layout/MusicPlayer";
-import SongDetailModal from "../../components/ui/SongDetailModal";
-import RankSection from "../../components/layout/RankSection";
-import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
-import Header from "../../components/layout/Header";
+import type { Song } from "../../Components/ui/SongListItem";
+import MusicPlayer from "../../Components/layout/MusicPlayer";
+import SongDetailModal from "../../Components/ui/SongDetailModal";
+import RankSection from "../../Components/layout/RankSection";
+import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
+import Header from "../../Components/layout/Header";
 
 function HomePage() {
   const [data, setData] = useState<Playlist[]>([]);

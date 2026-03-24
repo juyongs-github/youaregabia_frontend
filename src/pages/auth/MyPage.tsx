@@ -49,7 +49,6 @@ function MyPage() {
 
   useEffect(() => {
     if (activeTab === "boards" && myBoards.length === 0) {
-<<<<<<< HEAD
       api
         .get("/api/mypage/boards")
         .then((res) => setMyBoards(res.data))
@@ -66,27 +65,13 @@ function MyPage() {
         .get("/api/notifications")
         .then((res) => setNotifications(res.data))
         .catch(() => {});
-=======
-      api.get("/mypage/boards").then((res) => setMyBoards(res.data)).catch(() => {});
-    }
-    if (activeTab === "replies" && myReplies.length === 0) {
-      api.get("/mypage/replies").then((res) => setMyReplies(res.data)).catch(() => {});
-    }
-    if (activeTab === "profile") {
-      api.get("/notifications").then((res) => setNotifications(res.data)).catch(() => {});
->>>>>>> d2ef0f87159588a80ec266cf3bce1def7ba156a3
     }
   }, [activeTab]);
 
   const handleNotifClick = async (n: NotificationItem) => {
     if (!n.isRead) {
-<<<<<<< HEAD
       await api.patch(`/api/notifications/${n.id}/read`);
       setNotifications((prev) => prev.map((x) => (x.id === n.id ? { ...x, isRead: true } : x)));
-=======
-      await api.patch(`/notifications/${n.id}/read`);
-      setNotifications((prev) => prev.map((x) => x.id === n.id ? { ...x, isRead: true } : x));
->>>>>>> d2ef0f87159588a80ec266cf3bce1def7ba156a3
     }
     if (n.boardId) navigate(`/community/share/${n.boardId}`);
   };
@@ -116,11 +101,7 @@ function MyPage() {
     );
     if (!confirmed) return;
     try {
-<<<<<<< HEAD
-      const res = await api.delete("/api/auth/withdraw"); // body 제거
-=======
-      const res = await api.delete("/auth/withdraw", { data: { email: user?.email } });
->>>>>>> d2ef0f87159588a80ec266cf3bce1def7ba156a3
+      const res = await api.delete("/api/auth/withdraw");
       if (res.status === 200) {
         alert("회원탈퇴가 완료됐습니다.");
         cartUtils.clear();
@@ -146,15 +127,11 @@ function MyPage() {
         <div className="relative">
           <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-700 bg-gray-800 flex items-center justify-center">
             {user?.imgUrl ? (
-<<<<<<< HEAD
               <img
                 src={`http://localhost:8080${user.imgUrl}`}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
-=======
-              <img src={`${import.meta.env.VITE_API_BASE_URL}${user.imgUrl}`} alt="Profile" className="w-full h-full object-cover" />
->>>>>>> d2ef0f87159588a80ec266cf3bce1def7ba156a3
             ) : (
               <span className="text-gray-500 text-sm">이미지 없음</span>
             )}

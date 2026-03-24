@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { Playlist } from "../../types/playlist";
 import { playlistApi } from "../../api/playlistApi";
 import { FaPlay, FaPlus } from "react-icons/fa";
-import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
+import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
 
 
 function MyPlaylistPage() {

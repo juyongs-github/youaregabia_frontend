@@ -7,9 +7,9 @@ import "../../styles/PlaylistDetailPage.css";
 import { FaPlay, FaPlus, FaTrash } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
 import { useSelector } from "react-redux";
-import type { Song } from "../../components/ui/SongListItem";
-import MusicPlayer from "../../components/layout/MusicPlayer";
-import AddSongsModal from "../../components/ui/AddSongsModal";
+import type { Song } from "../../Components/ui/SongListItem";
+import MusicPlayer from "../../Components/layout/MusicPlayer";
+import AddSongsModal from "../../Components/ui/AddSongsModal";
 
 function PlaylistDetailPage() {
   const navigate = useNavigate();

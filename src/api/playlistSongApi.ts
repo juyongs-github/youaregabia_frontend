@@ -1,5 +1,5 @@
 import api from "./axios";
-import type { Song } from "../components/ui/SongListItem";
+import type { Song } from "../Components/ui/SongListItem";
 
 // 공동 플레이리스트 곡 (투표 정보 포함)
 export interface CollaboSong extends Song {

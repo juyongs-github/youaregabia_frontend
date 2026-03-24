@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { boardApi } from "../../api/boardApi";
 import type { Board, PageResult } from "../../types/board";
 import { useNavigate } from "react-router-dom";
-import Pagination from "../../components/ui/Pagination";
-import BoardSortBar from "../../components/ui/BoardSortBar";
-import BoardItem from "../../components/ui/BoardItem";
+import Pagination from "../../Components/ui/Pagination";
+import BoardSortBar from "../../Components/ui/BoardSortBar";
+import BoardItem from "../../Components/ui/BoardItem";
 
 const FreeBoardListPage = () => {
   // 페이징 관리

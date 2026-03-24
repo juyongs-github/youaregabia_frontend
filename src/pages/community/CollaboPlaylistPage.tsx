@@ -5,11 +5,11 @@ import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import CollaborationPlaylistTopicItem from "../../components/ui/CollaboPlaylistTopicItem";
-import CollaboPlaylistCreateModal from "../../components/ui/CollaboPlaylistCreateModal";
+import CollaborationPlaylistTopicItem from "../../Components/ui/CollaboPlaylistTopicItem";
+import CollaboPlaylistCreateModal from "../../Components/ui/CollaboPlaylistCreateModal";
 import { playlistApi } from "../../api/playlistApi";
 import type { CollaboPlaylist } from "../../types/playlist";
-import Spinner from "../../components/ui/Spinner";
+import Spinner from "../../Components/ui/Spinner";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 
