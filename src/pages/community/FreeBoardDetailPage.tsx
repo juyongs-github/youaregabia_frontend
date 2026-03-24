@@ -133,6 +133,7 @@ const FreeBoardDetailPage = () => {
                 reply={reply}
                 onRefresh={refresh}
                 boardId={Number(boardId)}
+                isAnonymous={true}
               />
             ))}
           </ul>

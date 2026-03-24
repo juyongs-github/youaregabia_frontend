@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
+import { refreshPoint } from "../../Components/ui/refreshPoint";
 
 const FreeBoardCreatePage = () => {
   const [title, setTitle] = useState("");
@@ -19,12 +20,13 @@ const FreeBoardCreatePage = () => {
       boardType: "FREE",
       boardGenre: "FREE",
     });
+    refreshPoint();
     navigate(`/community/share/${boardId}`);
   };
 
   return (
     <div>
-      <h2 className="mb-4 text-2xl font-bold">플레이리스트 공유</h2>
+      <h2 className="mb-4 text-2xl font-bold">자유게시판</h2>
 
       <input
         className="mb-3 w-full rounded border px-3 py-2"

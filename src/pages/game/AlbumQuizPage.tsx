@@ -158,7 +158,7 @@ const AlbumQuizPage = () => {
       <div className="mb-6 h-2 w-full rounded-full bg-neutral-700">
         <div
           className="h-2 rounded-full bg-indigo-600 transition-all"
-          style={{ width: `${(currentIndex / TOTAL) * 100}%` }}
+          style={{ width: `${((currentIndex + 1) / TOTAL) * 100}%` }}
         />
       </div>
 
@@ -215,6 +215,7 @@ const AlbumQuizPage = () => {
           <input
             type="text"
             value={artistInput}
+            autoFocus
             onChange={(e) => setArtistInput(e.target.value)}
             onKeyDown={handleEnter}
             placeholder="아티스트 이름..."

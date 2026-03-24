@@ -11,6 +11,7 @@ import type { RootState } from "../../store";
 const DELIVERY_FEE = 3000;
 const FREE_DELIVERY_THRESHOLD = 50000;
 const CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY as string;
+const POINT_SESSION_KEY = "order_points_to_use";
 
 const PAYMENT_METHODS = [
   { key: "CARD", label: "카드", icon: <FaCreditCard size={18} /> },
@@ -38,6 +39,9 @@ export default function OrderPage() {
   const [useSameInfo, setUseSameInfo] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodKey>("CARD");
   const [loading, setLoading] = useState(false);
+  const [myPoint, setMyPoint] = useState(0);
+  const [pointsToUse, setPointsToUse] = useState(0);
+  const [pointInput, setPointInput] = useState("");
   const detailAddressRef = useRef<HTMLInputElement>(null);
 
   // 카카오(다음) 주소 API 스크립트 로드
@@ -60,9 +64,17 @@ export default function OrderPage() {
     if (user) setForm((f) => ({ ...f, receiverName: user.name || "" }));
   }, []);
 
+  // 포인트 조회
+  useEffect(() => {
+    api.get<{ totalPoint: number }>("/api/points/me")
+      .then((res) => setMyPoint(res.data.totalPoint))
+      .catch(() => {});
+  }, []);
+
   const subtotal = cart.reduce((sum, c) => sum + c.price * c.quantity, 0);
   const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE;
   const total = subtotal + deliveryFee;
+  const finalAmount = Math.max(0, total - pointsToUse);
 
   const phoneValid = isValidPhone(form.receiverPhone);
 
@@ -123,8 +135,11 @@ export default function OrderPage() {
         receiverName: form.receiverName,
         receiverPhone: form.receiverPhone,
         deliveryAddress: `${form.deliveryAddress} ${form.detailAddress}`.trim(),
-        totalAmount: total,
+        totalAmount: finalAmount,
       });
+
+      // 결제 완료 후 포인트 차감을 위해 사용 포인트 저장
+      sessionStorage.setItem(POINT_SESSION_KEY, String(pointsToUse));
 
       const tossPayments = await loadTossPayments(CLIENT_KEY);
       const payment = tossPayments.payment({ customerKey: user!.email });
@@ -132,7 +147,7 @@ export default function OrderPage() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (payment.requestPayment as any)({
         method: paymentMethod,
-        amount: { currency: "KRW", value: total },
+        amount: { currency: "KRW", value: finalAmount },
         orderId: result.tossOrderId,
         orderName: cart.length === 1 ? cart[0].name : `${cart[0].name} 외 ${cart.length - 1}건`,
         customerName: form.receiverName,
@@ -238,6 +253,46 @@ export default function OrderPage() {
             </div>
           </div>
 
+          {/* 포인트 사용 */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+            <h2 className="font-bold text-lg mb-4">포인트 사용</h2>
+            <div className="flex items-center justify-between text-sm text-gray-400 mb-3">
+              <span>보유 포인트</span>
+              <span className="text-yellow-400 font-semibold">{myPoint.toLocaleString()}P</span>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                min={0}
+                max={Math.min(myPoint, total)}
+                value={pointInput}
+                onChange={(e) => {
+                  const val = Math.min(Number(e.target.value), Math.min(myPoint, total));
+                  setPointInput(String(val));
+                  setPointsToUse(val);
+                }}
+                placeholder="사용할 포인트 입력"
+                className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-yellow-500"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const max = Math.min(myPoint, total);
+                  setPointInput(String(max));
+                  setPointsToUse(max);
+                }}
+                className="px-4 py-2.5 bg-yellow-600 hover:bg-yellow-700 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors"
+              >
+                모두 사용
+              </button>
+            </div>
+            {pointsToUse > 0 && (
+              <p className="text-yellow-400 text-xs mt-2">
+                {pointsToUse.toLocaleString()}P 사용 → {(myPoint - pointsToUse).toLocaleString()}P 남음
+              </p>
+            )}
+          </div>
+
           {/* 결제 수단 */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
             <h2 className="font-bold text-lg mb-4">결제 수단</h2>
@@ -288,9 +343,15 @@ export default function OrderPage() {
                   {deliveryFee === 0 ? "무료" : `${deliveryFee.toLocaleString()}원`}
                 </span>
               </div>
+              {pointsToUse > 0 && (
+                <div className="flex justify-between text-gray-400">
+                  <span>포인트 차감</span>
+                  <span className="text-yellow-400">-{pointsToUse.toLocaleString()}P</span>
+                </div>
+              )}
               <div className="border-t border-gray-700 pt-3 flex justify-between font-bold text-base">
                 <span>최종 결제금액</span>
-                <span className="text-red-400">{total.toLocaleString()}원</span>
+                <span className="text-red-400">{finalAmount.toLocaleString()}원</span>
               </div>
             </div>
             <button
@@ -298,7 +359,7 @@ export default function OrderPage() {
               disabled={loading}
               className="w-full mt-5 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold rounded-xl transition-colors"
             >
-              {loading ? "처리 중..." : `${total.toLocaleString()}원 결제하기`}
+              {loading ? "처리 중..." : `${finalAmount.toLocaleString()}원 결제하기`}
             </button>
           </div>
         </div>

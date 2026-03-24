@@ -37,6 +37,7 @@ const MusicQuizPage = () => {
 
   const currentSong = songs[currentIndex];
 
+  // 대소문자 구별x, 띄어쓰기x
   const normalize = (str: string) => str.toLowerCase().replace(/\s/g, "");
 
   const handleSubmit = () => {
@@ -44,7 +45,7 @@ const MusicQuizPage = () => {
 
     const answer = normalize(currentSong.trackName);
     const userInput = normalize(input);
-    const isCorrect = answer.includes(userInput) || userInput.includes(answer);
+    const isCorrect = answer.includes(userInput) || userInput.includes(answer); // include여서 부분일치 허용
 
     if (isCorrect) {
       let gained = 0;
@@ -172,7 +173,7 @@ const MusicQuizPage = () => {
       <div className="mb-8 h-2 w-full rounded-full bg-neutral-700">
         <div
           className="h-2 rounded-full bg-indigo-600 transition-all"
-          style={{ width: `${(currentIndex / TOTAL) * 100}%` }}
+          style={{ width: `${((currentIndex + 1) / TOTAL) * 100}%` }}
         />
       </div>
 
@@ -194,6 +195,7 @@ const MusicQuizPage = () => {
         <input
           type="text"
           value={input}
+          autoFocus
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleEnter}
           placeholder="곡 제목을 입력하세요..."
@@ -213,7 +215,7 @@ const MusicQuizPage = () => {
         {timer >= 10 && currentSong && (
           <p>
             🎤 힌트 1: 가수는{" "}
-            <span className="text-indigo-400 font-semibold">{currentSong.artistName}</span> 이에요
+            <span className="text-indigo-400 font-semibold">{currentSong.artistName}</span> 입니다.
           </p>
         )}
         {timer >= 20 && currentSong && (
@@ -222,7 +224,7 @@ const MusicQuizPage = () => {
             <span className="text-indigo-400 font-semibold">
               {currentSong.trackName.length}글자
             </span>{" "}
-            예요
+            입니다.
           </p>
         )}
       </div>
