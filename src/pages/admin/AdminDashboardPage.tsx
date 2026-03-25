@@ -16,10 +16,10 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     Promise.all([
-      api.get("/admin/users"),
+      api.get("/api/admin/users"),
       api.get("/api/goods"),
-      api.get("/admin/orders"),
-      api.get("/admin/logs/login"),
+      api.get("/api/admin/orders"),
+      api.get("/api/admin/logs/login"),
     ])
       .then(([users, goods, orders, logs]) => {
         setStats({

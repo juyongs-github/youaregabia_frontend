@@ -124,22 +124,22 @@ function AdminPage() {
   useEffect(() => {
     if (user?.role !== "ADMIN") return;
     if (activeTab === "loginLogs" && loginLogs.length === 0) {
-      api.get("/admin/logs/login").then((res) => setLoginLogs(res.data));
+      api.get("/api/admin/logs/login").then((res) => setLoginLogs(res.data));
     }
     if (activeTab === "activityLogs" && activityLogs.length === 0) {
-      api.get("/admin/logs/activity").then((res) => setActivityLogs(res.data));
+      api.get("/api/admin/logs/activity").then((res) => setActivityLogs(res.data));
     }
     if (activeTab === "goods") loadGoods();
     if (activeTab === "orders") loadOrders();
   }, [activeTab, user?.role]);
 
   const loadOrders = () => {
-    api.get("/admin/orders").then((res) => setOrders(res.data)).catch(() => {});
+    api.get("/api/admin/orders").then((res) => setOrders(res.data)).catch(() => {});
   };
 
   const handleOrderStatusChange = async (orderId: number, status: string) => {
     try {
-      await api.patch(`/admin/orders/${orderId}/status`, { status });
+      await api.patch(`/api/admin/orders/${orderId}/status`, { status });
       setOrders((prev) => prev.map((o) => o.orderId === orderId ? { ...o, status } : o));
     } catch {
       alert("상태 변경에 실패했습니다.");
@@ -149,7 +149,7 @@ function AdminPage() {
   const handleTrackingSubmit = async (orderId: number) => {
     if (!trackingEdit) return;
     try {
-      await api.patch(`/admin/orders/${orderId}/tracking`, {
+      await api.patch(`/api/admin/orders/${orderId}/tracking`, {
         carrierId: trackingEdit.carrierId,
         trackingNumber: trackingEdit.trackingNumber,
       });
@@ -220,7 +220,7 @@ function AdminPage() {
 
   const handleRoleChange = async (id: number, role: string) => {
     try {
-      await api.patch(`/admin/users/${id}/role`, { role });
+      await api.patch(`/api/admin/users/${id}/role`, { role });
       setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role } : u)));
     } catch {
       alert("권한 변경에 실패했습니다.");

@@ -2,11 +2,10 @@ import axios from "axios";
 import { store } from "../store";
 
 const api = axios.create({
-
   baseURL: "http://localhost:8080",
-  // headers: {
-  //   "Content-Type": "application/json; charset=UTF-8",
-  // },
+  headers: {
+    "Content-Type": "application/json; charset=UTF-8",
+  },
   timeout: 60000,
 });
 
