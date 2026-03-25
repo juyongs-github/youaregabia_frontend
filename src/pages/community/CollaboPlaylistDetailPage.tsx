@@ -8,7 +8,6 @@ import {
   FaEdit,
   FaExclamationTriangle,
   FaHeart,
-  FaInfoCircle,
   FaMusic,
   FaPause,
   FaPlay,

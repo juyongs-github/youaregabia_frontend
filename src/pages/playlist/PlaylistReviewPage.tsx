@@ -180,12 +180,6 @@ function PlaylistReviewPage() {
     }
   };
 
-  const maskEmail = (email?: string) => {
-    if (!email) return "익명";
-    const [local, domain] = email.split("@");
-    if (!local || !domain) return email;
-    return `${local.slice(0, 3)}***@${domain}`;
-  };
 
   const getFilteredReviews = (reviews: Review[]) => {
     let result = [...reviews].sort((a, b) => b.id - a.id);
