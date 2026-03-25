@@ -36,7 +36,7 @@ import Header from "../../components/layout/Header";
 
 function HomePage() {
   const [data, setData] = useState<Playlist[]>([]);
-  const baseURL: string = "http://localhost:8080";
+  const baseURL: string = import.meta.env.VITE_API_BASE_URL ?? "";
   const [, setIsLoading] = useState<boolean>(false);
   const [, setIsError] = useState<boolean>(false);
 

@@ -342,7 +342,7 @@ function CollaboPlaylistDetailPage() {
       <div className="flex gap-8">
         <div className="flex-shrink-0 w-52 h-52 bg-slate-700 rounded-2xl overflow-hidden">
           {playlist?.imageUrl
-            ? <img src={"http://localhost:8080" + playlist.imageUrl} alt="" className="w-full h-full object-cover" />
+            ? <img src={(import.meta.env.VITE_API_BASE_URL ?? "") + playlist.imageUrl} alt="" className="w-full h-full object-cover" />
             : <div className="flex items-center justify-center w-full h-full"><FaMusic size={48} className="text-white opacity-40" /></div>
           }
         </div>
