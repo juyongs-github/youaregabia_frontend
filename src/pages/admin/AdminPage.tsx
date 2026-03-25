@@ -178,7 +178,7 @@ function AdminPage() {
   const handleGoodsDelete = async (goodsId: number) => {
     if (!confirm("상품을 삭제하시겠습니까?")) return;
     try {
-      await api.delete(`/goods/${goodsId}`);
+      await api.delete(`/api/goods/${goodsId}`);
       loadGoods();
     } catch {
       alert("삭제에 실패했습니다.");
@@ -204,7 +204,7 @@ function AdminPage() {
       if (goodsForm.imageFile) formData.append("image", goodsForm.imageFile);
 
       if (goodsForm.goodsId) {
-        await api.put(`/goods/${goodsForm.goodsId}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
+        await api.put(`/api/goods/${goodsForm.goodsId}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
       } else {
         await api.post("/api/goods", formData, { headers: { "Content-Type": "multipart/form-data" } });
       }

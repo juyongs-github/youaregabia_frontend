@@ -101,7 +101,7 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
 
   const handleNotifClick = async (n: NotificationItem) => {
     if (!n.isRead) {
-      await api.patch(`/notifications/${n.id}/read`);
+      await api.patch(`/api/notifications/${n.id}/read`);
     }
     setNotifOpen(false);
     if (n.boardId) navigate(`/community/share/${n.boardId}`);
