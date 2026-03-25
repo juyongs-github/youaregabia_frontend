@@ -119,6 +119,7 @@ function CollaboPlaylistDetailPage() {
     if (!id) return;
     try { const res = await playlistApi.getCollaborativePlaylist(Number(id)); setPlaylist(res.data); }
     catch (e) { console.error(e); }
+    finally { setIsPlaylistLoading(false); }
   };
 
   const fetchSongs = async () => {
