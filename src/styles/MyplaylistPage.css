@@ -40,6 +40,7 @@
 /* 카드 */
 .top-playlist-card-small {
   width: 160px;
+  aspect-ratio: 1 / 1;
 }
 
 /* 이미지 wrapper */

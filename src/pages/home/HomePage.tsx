@@ -120,8 +120,8 @@ function HomePage() {
       { icon: <FaPen size={20} />, label: "음악 평론", path: "/recommend/critic" },
     ],
     community: [
-      { icon: <FaShareAlt size={20} />, label: "플레이리스트 공유", path: "/community/share" },
-      { icon: <FaHandshake size={20} />, label: "공동 제작", path: "/community/collabo" },
+      { icon: <FaShareAlt size={20} />, label: "플리 공유", path: "/community/share" },
+      { icon: <FaHandshake size={20} />, label: "공동 플리 제작", path: "/community/collabo" },
       { icon: <FaComments size={20} />, label: "자유게시판", path: "/community/free" },
     ],
     game: [
@@ -166,7 +166,10 @@ function HomePage() {
       <div className="center-area">
         <h1 className="main-title">너가 갑이야</h1>
 
-        <div className={`search-bar relative${isDropdownOpen ? " dropdown-open" : ""}`} ref={searchRef}>
+        <div
+          className={`search-bar relative${isDropdownOpen ? " dropdown-open" : ""}`}
+          ref={searchRef}
+        >
           <input
             type="text"
             placeholder="검색하고 싶은 곡 제목 또는 가수명를 입력해주세요."
@@ -191,7 +194,11 @@ function HomePage() {
           />
           {searchValue ? (
             <button
-              onClick={() => { setSearchValue(""); setDropdownSongs([]); setIsDropdownOpen(false); }}
+              onClick={() => {
+                setSearchValue("");
+                setDropdownSongs([]);
+                setIsDropdownOpen(false);
+              }}
               className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
             >
               <FaTimes size={20} />
@@ -230,9 +237,15 @@ function HomePage() {
                             <FaHeadphones size={13} />
                           </button>
                           <button
-                            onClick={() => navigate("/recommend/result", {
-                              state: { trackName: song.trackName, artistName: song.artistName, coverImageUrl: song.imgUrl },
-                            })}
+                            onClick={() =>
+                              navigate("/recommend/result", {
+                                state: {
+                                  trackName: song.trackName,
+                                  artistName: song.artistName,
+                                  coverImageUrl: song.imgUrl,
+                                },
+                              })
+                            }
                             title="유사 곡 추천"
                           >
                             <FaMusic size={13} />
@@ -315,19 +328,25 @@ function HomePage() {
           </button>
 
           <div className="playlist-row" ref={rowRef}>
-            {data.map((item) => (
-              <div
-                className="playlist-card"
-                key={item.id}
-                onClick={() => navigate(`/playlist/me/${item.id}`)}
-              >
-                <img src={`${baseURL}${item.imageUrl}`} />
-                <button className="play-button">
-                  <FaPlay />
-                </button>
-                <span>{item.title}</span>
+            {data.length === 0 ? (
+              <div className="playlist-empty">
+                <span>플레이리스트가 없습니다</span>
               </div>
-            ))}
+            ) : (
+              data.map((item) => (
+                <div
+                  className="playlist-card"
+                  key={item.id}
+                  onClick={() => navigate(`/playlist/me/${item.id}`)}
+                >
+                  <img src={`${baseURL}${item.imageUrl}`} />
+                  <button className="play-button">
+                    <FaPlay />
+                  </button>
+                  <span>{item.title}</span>
+                </div>
+              ))
+            )}
           </div>
 
           <button className="slider-btn right" onClick={scrollRight}>
@@ -365,14 +384,16 @@ function HomePage() {
       {/* ===== 미리듣기 플레이어 ===== */}
       {selectSong && (
         <div className="fixed bottom-0 left-0 z-50 w-full">
-          <MusicPlayer song={selectSong} setIsPlayerVisible={() => setSelectSong(null)} onSongEnd={() => setSelectSong(null)} />
+          <MusicPlayer
+            song={selectSong}
+            setIsPlayerVisible={() => setSelectSong(null)}
+            onSongEnd={() => setSelectSong(null)}
+          />
         </div>
       )}
 
       {/* ===== 상세보기 모달 ===== */}
-      {detailSong && (
-        <SongDetailModal song={detailSong} onClose={() => setDetailSong(null)} />
-      )}
+      {detailSong && <SongDetailModal song={detailSong} onClose={() => setDetailSong(null)} />}
     </div>
   );
 }
