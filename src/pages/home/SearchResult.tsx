@@ -36,7 +36,7 @@ function SearchResult() {
     setIsLoading(true);
     setIsError(false);
     try {
-      const response = await api.get("/search", {
+      const response = await api.get("/api/search", {
         params: { q: query },
       });
 

@@ -138,7 +138,7 @@ function CollaboPlaylistDetailPage() {
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setIsSearching(true); setHasSearched(true);
-    try { const res = await api.get("/search", { params: { q: searchQuery } }); setSearchResults(res.data || []); }
+    try { const res = await api.get("/api/search", { params: { q: searchQuery } }); setSearchResults(res.data || []); }
     catch (e) { console.error(e); setSearchResults([]); }
     finally { setIsSearching(false); }
   };

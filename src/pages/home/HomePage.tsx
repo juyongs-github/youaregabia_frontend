@@ -82,7 +82,7 @@ function HomePage() {
     const timer = setTimeout(async () => {
       setIsDropdownLoading(true);
       try {
-        const res = await api.get("/search", { params: { q: searchValue } });
+        const res = await api.get("/api/search", { params: { q: searchValue } });
         const songs: Song[] = res.data || [];
         setDropdownSongs(songs);
         setIsDropdownOpen(true);

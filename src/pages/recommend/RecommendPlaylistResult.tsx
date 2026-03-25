@@ -83,7 +83,7 @@ function RecommendPlaylistResult() {
     setIsLoading(true);
     setIsError(false);
     try {
-      const response = await api.get("/recommend", {
+      const response = await api.get("/api/recommend", {
         params: {
           trackName: trackName,
           artistName: artistName,

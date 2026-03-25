@@ -31,7 +31,7 @@ const BlindRecommendPage = () => {
     const results: Song[] = [];
     await Promise.all(
       Array.from({ length: TOTAL }, () =>
-        api.get("/random").then((res) => results.push(res.data))
+        api.get("/api/random").then((res) => results.push(res.data))
       )
     );
     setSongs(results);

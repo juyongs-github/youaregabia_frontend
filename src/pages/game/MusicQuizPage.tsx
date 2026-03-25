@@ -24,7 +24,7 @@ const MusicQuizPage = () => {
     setIsLoading(true);
     const results: Song[] = [];
     const promises = Array.from({ length: TOTAL }, () =>
-      api.get("/random").then((res) => results.push(res.data))
+      api.get("/api/random").then((res) => results.push(res.data))
     );
     await Promise.all(promises);
     setSongs(results);
