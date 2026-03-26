@@ -18,7 +18,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  z-index: 2;
+  z-index: 3;
 }
 
 .main-title {
@@ -194,6 +194,7 @@
   bottom: max(24px, 3.5vh);
   left: 50%;
   transform: translateX(-50%);
+  width: clamp(320px, 28vw, 420px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -204,14 +205,27 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
 
-  padding: 12px 20px;
-  border-radius: 20px;
+  padding: 12px 24px;
+  border-radius: 40px 40px 0 0;
 
-  background: rgba(20, 20, 20, 0.92);
-  backdrop-filter: blur(16px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  background: rgba(45, 45, 45, 0.95);
   white-space: nowrap;
+}
+
+.center-icons-wrapper:has(.icon-popup) {
+  gap: 0;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  border-radius: 40px;
+}
+
+.icon-popup + .center-icons {
+  border-radius: 0 0 40px 40px;
+  backdrop-filter: none;
+  box-shadow: none;
 }
 
 .icon-popup button {
@@ -240,7 +254,10 @@
 .center-icons {
   display: flex;
   align-items: center;
+  justify-content: space-around;
   gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
 
   padding: 14px 24px;
   border-radius: 40px;
@@ -256,6 +273,7 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  position: relative;
 
   background: none;
   border: none;
@@ -272,6 +290,155 @@
   color: white;
   background: rgba(255, 255, 255, 0.08);
   transform: translateY(-2px);
+}
+
+.center-icons button.active {
+  color: white;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.center-icons button.active {
+  transform: none !important;
+}
+
+.center-icons button.active::before {
+  content: '';
+  position: absolute;
+  top: -17px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 4px;
+  background: rgba(45, 45, 45, 0.95);
+  border-radius: 3px 3px 0 0;
+}
+
+/* =========================
+   오늘의 추천 음악
+========================= */
+.daily-recommend {
+  position: absolute;
+  top: max(54vh, calc(100vh - max(24px, 3.5vh) - clamp(300px, 42vh, 420px)));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(15, 15, 20, 0.88), rgba(30, 30, 40, 0.78));
+  border: 1px solid rgba(192, 200, 215, 0.4);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 0.5px rgba(192, 200, 215, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  width: clamp(320px, 28vw, 420px);
+  z-index: 2;
+}
+
+.daily-recommend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.daily-recommend-header span {
+  font-size: clamp(16px, 1.4vw, 22px);
+  color: #c8cdd8;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.daily-recommend-header button {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.daily-recommend-header button:hover {
+  color: #ccc;
+}
+
+.daily-recommend-header button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.daily-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.daily-card-cover {
+  width: clamp(56px, 6vw, 80px);
+  height: clamp(56px, 6vw, 80px);
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.daily-card-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.daily-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e8e8e8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.daily-card-artist {
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 6px;
+}
+
+.daily-card-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.daily-card-actions button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 0;
+  border-radius: 8px;
+  background: rgba(192, 200, 215, 0.08);
+  border: 1px solid rgba(192, 200, 215, 0.25);
+  color: #a8b0c0;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.daily-card-actions button:hover,
+.daily-card-actions button.active {
+  background: rgba(192, 200, 215, 0.2);
+  border-color: rgba(192, 200, 215, 0.55);
+  color: #e2e6f0;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* =========================
@@ -827,6 +994,217 @@
 
 .home.player-open::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+/* =========================
+   반응형 (≤ 1400px) — 세로 스택 + 앱형 하단 메뉴바
+========================= */
+@media (max-width: 1400px) {
+  /* body 레벨 스크롤 */
+  html, body {
+    overflow-y: auto;
+    height: auto;
+    background: black;
+  }
+
+  body::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  body::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+  }
+
+  body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  /* 홈 컨테이너: 세로 플렉스 */
+  .home {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+    padding-bottom: 80px;
+  }
+
+  /* 헤더: invisible 검색바 공간 제거 + 패딩 축소 */
+  header .invisible {
+    display: none;
+  }
+
+  header {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    gap: 12px !important;
+  }
+
+  /* 중앙 검색 영역 */
+  .center-area {
+    position: static;
+    transform: none;
+    padding: 104px 24px 28px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    order: 0;
+  }
+
+  .home .search-bar input {
+    width: calc(100vw - 48px);
+    max-width: 900px;
+    box-sizing: border-box;
+  }
+
+  /* 오늘의 추천 음악 */
+  .daily-recommend {
+    position: static;
+    transform: none;
+    top: auto;
+    left: auto;
+    width: calc(100% - 48px);
+    margin: 0 auto 16px;
+    box-sizing: border-box;
+    order: 1;
+  }
+
+  /* 내 플레이리스트 */
+  .bottom-left {
+    position: static;
+    width: calc(100% - 48px);
+    height: auto;
+    min-height: clamp(300px, 42vh, 420px);
+    margin: 0 auto 16px;
+    box-sizing: border-box;
+    order: 2;
+  }
+
+  /* 공동 플레이리스트 */
+  .right-area {
+    position: static;
+    width: calc(100% - 48px);
+    height: auto;
+    min-height: clamp(300px, 42vh, 420px);
+    margin: 0 auto 16px;
+    box-sizing: border-box;
+    order: 3;
+  }
+
+  .shared-body {
+    flex: none;
+    height: auto;
+    min-height: 180px;
+  }
+
+  .shared-wrapper,
+  .shared-container {
+    flex: none;
+    min-height: 0;
+  }
+
+  .rank-section {
+    flex: none;
+    min-height: 180px;
+  }
+
+  .rank-list {
+    flex: none;
+    min-height: 100px;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .shared-cover-left {
+    width: clamp(80px, 20vw, 120px);
+  }
+
+  /* 하단 메뉴바: 앱형 fixed */
+  .center-icons-wrapper {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100% !important;
+    transform: none;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px 16px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 100;
+    padding: 8px 0;
+    gap: 0;
+  }
+
+  .center-icons {
+    width: 100% !important;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    padding: 8px 16px;
+    justify-content: space-around;
+  }
+
+  /* 아이콘 팝업: 메뉴바 위에 표시 */
+  .icon-popup {
+    position: fixed;
+    bottom: 72px;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-wrap: wrap;
+    width: calc(100% - 48px);
+    border-radius: 16px;
+    justify-content: center;
+  }
+
+  /* 뮤직 플레이어: 메뉴바 바로 위에 고정 */
+  .music-player-bar {
+    bottom: 76px !important;
+    z-index: 150 !important;
+  }
+
+  /* 플레이어 활성 시 콘텐츠가 플레이어 뒤에 안 가리도록 */
+  .home.player-open {
+    overflow: visible;
+    padding-bottom: 188px;
+  }
+
+  /* 데스크탑용 ::after 공간 확장 불필요 */
+  .home.player-open::after {
+    display: none;
+  }
+
+  /* 플레이어 활성 시 팝업은 플레이어 위로 */
+  .home.player-open .icon-popup {
+    bottom: 188px;
+  }
+
+  /* 메뉴바 아이콘·텍스트 크기 축소 */
+  .center-icons button {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .center-icons button svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .icon-popup button {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .icon-popup button svg {
+    width: 18px;
+    height: 18px;
+  }
 }
 
 
