@@ -3,17 +3,21 @@ import { store } from "../store";
 
 const api = axios.create({
   baseURL: "http://localhost:8080",
-  // headers: {
-  //   "Content-Type": "application/json; charset=UTF-8",
-  // },
-  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json; charset=UTF-8",
+  },
+  timeout: 60000,
 });
 
-// 요청마다 토큰 자동 첨부 (localStorage 폴백 포함)
+// 요청마다 토큰 자동 첨부 + FormData 시 Content-Type 자동 제거
 api.interceptors.request.use((config) => {
   const token = store.getState().auth.user?.token ?? localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  // FormData는 브라우저가 multipart/form-data; boundary=... 자동 설정
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
   }
   return config;
 });

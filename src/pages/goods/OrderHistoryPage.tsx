@@ -75,7 +75,7 @@ export default function OrderHistoryPage() {
     setTrackingLoading((prev) => ({ ...prev, [order.orderId]: true }));
     try {
       const res = await api.get<{ trackingDetails: TrackingEvent[] }>(
-        `/api/orders/track?carrierId=${order.carrierId}&trackingNumber=${order.trackingNumber}`
+        `/orders/track?carrierId=${order.carrierId}&trackingNumber=${order.trackingNumber}`
       );
       setTrackingData((prev) => ({ ...prev, [order.orderId]: res.data.trackingDetails ?? [] }));
     } catch (e: unknown) {
@@ -161,7 +161,7 @@ export default function OrderHistoryPage() {
                       {trackingLoading[order.orderId] ? "조회 중..." : events !== undefined ? "조회 닫기" : "배송 조회"}
                     </button>
                     <button
-                      onClick={() => window.open(`http://localhost:8080/api/orders/track-popup?carrierId=${order.carrierId}&trackingNumber=${order.trackingNumber}`, "_blank", "width=500,height=700")}
+                      onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL}/api/orders/track-popup?carrierId=${order.carrierId}&trackingNumber=${order.trackingNumber}`, "_blank", "width=500,height=700")}
                       className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-semibold transition-colors"
                     >
                       <FaTruck size={13} />

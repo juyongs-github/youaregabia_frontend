@@ -10,7 +10,7 @@ import {
   PURGE,
   REGISTER,
 } from "redux-persist";
-import storage from "redux-persist/lib/storage";
+import storageSession from "redux-persist/lib/storage/session";
 
 // 1. 리듀서 통합
 const rootReducer = combineReducers({
@@ -20,8 +20,8 @@ const rootReducer = combineReducers({
 // 2. Persist 설정
 const persistConfig = {
   key: "root",
-  storage,
-  whitelist: ["auth"], // auth 상태만 로컬스토리지에 저장
+  storage: storageSession,
+  whitelist: ["auth"], // auth 상태를 sessionStorage에 저장 (브라우저 종료 시 로그아웃)
 };
 
 // 3. Persisted Reducer 생성

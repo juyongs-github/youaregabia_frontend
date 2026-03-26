@@ -101,7 +101,7 @@ function MyPage() {
     );
     if (!confirmed) return;
     try {
-      const res = await api.delete("/api/auth/withdraw"); // body 제거
+      const res = await api.delete("/api/auth/withdraw");
       if (res.status === 200) {
         alert("회원탈퇴가 완료됐습니다.");
         cartUtils.clear();
@@ -143,13 +143,7 @@ function MyPage() {
           >
             <MdEdit size={20} color="white" />
           </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            className="hidden"
-            accept="image/*"
-          />
+          <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
         </div>
         <div>
           <h1 className="text-3xl font-bold">{user?.name}</h1>
@@ -161,15 +155,9 @@ function MyPage() {
 
       {/* 탭 */}
       <div className="flex border-b border-gray-700 mb-6">
-        <button className={tabStyle("profile")} onClick={() => setActiveTab("profile")}>
-          내 정보
-        </button>
-        <button className={tabStyle("boards")} onClick={() => setActiveTab("boards")}>
-          내가 쓴 게시글
-        </button>
-        <button className={tabStyle("replies")} onClick={() => setActiveTab("replies")}>
-          내가 쓴 댓글
-        </button>
+        <button className={tabStyle("profile")} onClick={() => setActiveTab("profile")}>내 정보</button>
+        <button className={tabStyle("boards")} onClick={() => setActiveTab("boards")}>내가 쓴 게시글</button>
+        <button className={tabStyle("replies")} onClick={() => setActiveTab("replies")}>내가 쓴 댓글</button>
       </div>
 
       {/* 내 정보 탭 */}
@@ -177,21 +165,11 @@ function MyPage() {
         <div className="space-y-6 bg-gray-900/50 p-6 rounded-xl border border-gray-800">
           <div>
             <label className="block text-sm text-gray-400 mb-1">이름</label>
-            <input
-              type="text"
-              value={user?.name || ""}
-              readOnly
-              className="w-full bg-gray-800 border-none rounded-lg p-3"
-            />
+            <input type="text" value={user?.name || ""} readOnly className="w-full bg-gray-800 border-none rounded-lg p-3" />
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-1">이메일</label>
-            <input
-              type="email"
-              value={user?.email || ""}
-              readOnly
-              className="w-full bg-gray-800 border-none rounded-lg p-3"
-            />
+            <input type="email" value={user?.email || ""} readOnly className="w-full bg-gray-800 border-none rounded-lg p-3" />
           </div>
           <div className="pt-4 text-right">
             <button

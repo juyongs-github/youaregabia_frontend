@@ -115,7 +115,7 @@ function AdminPage() {
   useEffect(() => {
     if (user?.role !== "ADMIN") return;
     api
-      .get("/api/admin/users")
+      .get("/admin/users")
       .then((res) => setUsers(res.data))
       .catch(() => alert("유저 목록을 불러오는데 실패했습니다."))
       .finally(() => setLoading(false));
@@ -443,7 +443,7 @@ function AdminPage() {
                   <tr key={g.goodsId} className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors whitespace-nowrap">
                     <td className="px-6 py-4">
                       <div className="w-12 h-12 bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden">
-                        {g.imageUrl ? <img src={`http://localhost:8080${g.imageUrl}`} alt={g.name} className="w-full h-full object-cover" /> : <FaBox size={16} className="text-gray-500" />}
+                        {g.imageUrl ? <img src={`${import.meta.env.VITE_API_BASE_URL}${g.imageUrl}`} alt={g.name} className="w-full h-full object-cover" /> : <FaBox size={16} className="text-gray-500" />}
                       </div>
                     </td>
                     <td className="px-6 py-4 font-medium">{g.name}</td>

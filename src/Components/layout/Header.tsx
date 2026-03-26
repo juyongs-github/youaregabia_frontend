@@ -23,7 +23,7 @@ interface NotificationItem {
   createdAt: string;
 }
 
-function Header() {
+function Header({ showSearch = true }: { showSearch?: boolean }) {
   const isLogin = useSelector((state: RootState) => state.auth.isLoggedIn);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -129,38 +129,38 @@ function Header() {
       </div>
 
       {/* 검색바 부분 */}
-      <div className="relative flex-shrink-0">
-        <input
-          type="text"
-          placeholder="검색"
-          value={searchValue}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              if (!searchValue.trim()) {
-                alert("검색어를 입력 해주세요.");
-                return;
+      <div className={`relative flex-shrink-0 ${!showSearch ? "invisible" : ""}`}>
+          <input
+            type="text"
+            placeholder="검색"
+            value={searchValue}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                if (!searchValue.trim()) {
+                  alert("검색어를 입력 해주세요.");
+                  return;
+                }
+                const url = `/search?q=${encodeURIComponent(searchValue)}`;
+                if (location.pathname + location.search === url) {
+                  navigate(url, { replace: true, state: { refresh: Date.now() } });
+                } else {
+                  navigate(url);
+                }
               }
-              const url = `/search?q=${encodeURIComponent(searchValue)}`;
-              if (location.pathname + location.search === url) {
-                navigate(url, { replace: true, state: { refresh: Date.now() } });
-              } else {
-                navigate(url);
-              }
-            }
-          }}
-          className="px-16 py-3 text-white bg-gray-800 rounded-full w-[50rem] focus:outline-none focus:ring-2 focus:ring-white"
-        />
-        <FaSearch className="absolute text-gray-400 left-6 top-3.5" size={20} />
-        {searchValue && (
-          <button
-            onClick={() => setSearchValue("")}
-            className="absolute text-gray-400 right-6 top-3.5 hover:text-white transition-colors"
-          >
-            <FaTimes size={20} />
-          </button>
-        )}
-      </div>
+            }}
+            className="px-16 py-3 text-white bg-gray-800 rounded-full w-[50rem] focus:outline-none focus:ring-2 focus:ring-white"
+          />
+          <FaSearch className="absolute text-gray-400 left-6 top-3.5" size={20} />
+          {searchValue && (
+            <button
+              onClick={() => setSearchValue("")}
+              className="absolute text-gray-400 right-6 top-3.5 hover:text-white transition-colors"
+            >
+              <FaTimes size={20} />
+            </button>
+          )}
+        </div>
 
       {/* 알림 + 유저 프로필 */}
       <div className="flex items-center gap-4">
@@ -240,7 +240,7 @@ function Header() {
         {/* 아바타 메뉴 */}
         <IconButton onClick={handleClick} size="small">
           <Avatar
-            src={user?.imgUrl ? `http://localhost:8080${user.imgUrl}` : undefined}
+            src={user?.imgUrl ? `${import.meta.env.VITE_API_BASE_URL}${user.imgUrl}` : undefined}
             sx={{
               width: 35,
               height: 35,

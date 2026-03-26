@@ -56,7 +56,7 @@ export const checkEmailDuplicate = (email: string) => {
 /* ===========================
 로그아웃 API (JWT 도입 후)
 =========================== */
-// export const logout = () => api.post("/api/auth/logout");
+// export const logout = () => api.post("/auth/logout");
 
 
 
