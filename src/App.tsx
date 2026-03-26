@@ -54,6 +54,7 @@ import IdealTypeWorldCupPage from "./pages/recommend/IdealTypeWorldCupPage";
 import { useEffect, useState } from "react";
 import { setRateLimitHandler } from "./api/axios";
 import RateLimitToast from "./components/ui/RateLimitToast";
+import ChatbotButton from "./components/ui/ChatbotButton";
 
 interface RateLimitInfo {
   message: string;
@@ -152,6 +153,7 @@ function App() {
         <Route path="/" element={<Navigate to={isLogin ? loginRedirect : "/login"} replace />} />
       </Routes>
       {/* 전역 UI — 어느 페이지에서든 표시됨-> 매크로방지 alert */}
+      {isLogin && <ChatbotButton />}
       {rateLimitInfo && (
         <RateLimitToast
           message={rateLimitInfo.message}
