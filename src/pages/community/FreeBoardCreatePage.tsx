@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import { refreshPoint } from "../../Components/ui/refreshPoint";
+import { refreshPoint } from "../../components/ui/refreshPoint";
 
 const FreeBoardCreatePage = () => {
   const [title, setTitle] = useState("");
