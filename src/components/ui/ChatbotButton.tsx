@@ -6,8 +6,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import api from "../../api/axios";
-import MusicPlayer from "../layout/MusicPlayer";
 import type { Song } from "./SongListItem";
+import { usePlayer } from "../../contexts/PlayerContext";
 import { playlistApi } from "../../api/playlistApi";
 import type { RootState } from "../../store";
 
@@ -21,15 +21,29 @@ interface iTunesTrack {
   reason?: string;
 }
 
+interface InquiryItem {
+  id: number;
+  type: string;
+  content: string;
+  status: string;
+  createdAt: string;
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
+  isRule?: boolean;
   tracks?: iTunesTrack[];
+  inquiries?: InquiryItem[];
+  link?: string;
+  linkLabel?: string;
+  links?: { label: string; path: string }[];
 }
 
 interface ChatResponse {
   message: string;
   type: "rule" | "ai";
+  sessionId?: string;
 }
 
 // **"곡 제목" - 아티스트** 또는 **"곡 제목"** 패턴만 파싱 (따옴표 필수)
@@ -96,7 +110,7 @@ async function fetchItunesTracks(songs: { title: string; artist: string; reason:
   return results.filter(Boolean) as iTunesTrack[];
 }
 
-type Category = "main" | "feature" | "recommend" | "recommend_mood" | "recommend_vibe" | "faq" | "genre";
+type Category = "main" | "feature" | "recommend" | "recommend_mood" | "recommend_vibe" | "faq" | "genre" | "inquiry";
 
 const PARENT_CATEGORY: Partial<Record<Category, Category>> = {
   feature: "main",
@@ -104,7 +118,8 @@ const PARENT_CATEGORY: Partial<Record<Category, Category>> = {
   recommend_mood: "recommend",
   recommend_vibe: "recommend",
   faq: "main",
-  genre: "main",
+  genre: "recommend",
+  inquiry: "main",
 };
 
 const WELCOME_MESSAGE =
@@ -121,86 +136,164 @@ const MOODS = [
   { emoji: "🌙", label: "몽환적", value: "몽환적이고 감성적인 기분일 때 들을 음악을 추천해줘" },
 ];
 
-const CATEGORIES: Record<Category, { label: string; options: { label: string; value: string; link?: string }[] }> = {
+const CATEGORIES: Record<Category, { label: string; options: { label: string; value: string; link?: string; links?: { label: string; path: string }[] }[] }> = {
   main: {
     label: "메인",
     options: [
-      { label: "🛠 기능 사용법", value: "feature" },
-      { label: "🎵 음악 추천", value: "recommend" },
-      { label: "❓ 자주 묻는 질문", value: "faq" },
-      { label: "🎧 장르 탐험", value: "genre" },
+      { label: "1. 기능 사용법", value: "feature" },
+      { label: "2. AI 음악 추천", value: "recommend" },
+      { label: "3. 자주 묻는 질문", value: "faq" },
+      { label: "4. 문의하기", value: "inquiry" },
     ],
   },
   feature: {
     label: "기능 사용법",
     options: [
-      { label: "📋 플레이리스트 만들기", value: "플레이리스트 만드는 방법을 알려줘", link: "/playlist/me" },
-      { label: "🔍 음악 검색하기", value: "음악 검색 방법을 알려줘" },
-      { label: "🎯 추천 기능 사용법", value: "추천 기능 사용 방법을 알려줘" },
-      { label: "🏆 랭킹 보기", value: "랭킹 기능을 알려줘", link: "/home" },
-      { label: "💬 음악 공유 게시판", value: "공유 게시판 커뮤니티 이용 방법을 알려줘", link: "/community/share" },
-      { label: "📝 자유게시판 이용", value: "자유게시판 이용 방법을 알려줘", link: "/community/free" },
-      { label: "✍️ 음악 평론", value: "뮤직 크리틱 평론 이용 방법을 알려줘", link: "/recommend/critic" },
-      { label: "🤝 공동 플레이리스트 제작", value: "콜라보 공동 플레이리스트 제작 기능을 알려줘", link: "/community/collabo" },
-      { label: "🎮 게임 방법", value: "퀴즈 게임 이용 방법을 알려줘", link: "/game/music-quiz" },
-      { label: "⭐ 좋아요 기능", value: "좋아요 즐겨찾기 기능을 알려줘" },
-      { label: "💎 포인트 & 등급", value: "포인트 등급 적립 시스템을 알려줘", link: "/profile/points" },
-      { label: "🛍 굿즈 구매", value: "굿즈 상품 구매 방법을 알려줘", link: "/goods" },
-      { label: "📦 주문 내역 확인", value: "주문 내역 조회 방법을 알려줘", link: "/goods/orders" },
-      { label: "👤 마이페이지 이용", value: "마이페이지 이용 방법을 알려줘", link: "/profile/me" },
+      { label: "1. 플레이리스트 만들기", value: "플레이리스트 만드는 방법을 알려줘", link: "/playlist/me" },
+      { label: "2. 음악 검색하기", value: "음악 검색 방법을 알려줘" },
+      { label: "3. 추천 기능 사용법", value: "추천 기능 사용 방법을 알려줘", links: [
+        { label: "블라인드 곡 추천", path: "/recommend/blind" },
+        { label: "이상형 월드컵 곡 추천", path: "/recommend/worldcup" },
+      ]},
+      { label: "4. 랭킹 보기", value: "랭킹 기능을 알려줘", link: "/home" },
+      { label: "5. 음악 공유 게시판", value: "공유 게시판 커뮤니티 이용 방법을 알려줘", link: "/community/share" },
+      { label: "6. 자유게시판 이용", value: "자유게시판 이용 방법을 알려줘", link: "/community/free" },
+      { label: "7. 음악 평론", value: "뮤직 크리틱 평론 이용 방법을 알려줘", link: "/recommend/critic" },
+      { label: "8. 공동 플레이리스트 제작", value: "콜라보 공동 플레이리스트 제작 기능을 알려줘", link: "/community/collabo" },
+      { label: "9. 게임 방법", value: "퀴즈 게임 이용 방법을 알려줘", links: [
+        { label: "노래 맞추기", path: "/game/music-quiz" },
+        { label: "앨범 맞추기", path: "/game/album-quiz" },
+        { label: "카드 맞추기", path: "/game/card-match" },
+      ]},
+      { label: "10. 포인트 & 등급", value: "포인트 등급 적립 시스템을 알려줘", link: "/profile/points" },
+      { label: "11. 굿즈 구매", value: "굿즈 상품 구매 방법을 알려줘", link: "/goods" },
+      { label: "12. 주문 내역 확인", value: "주문 내역 조회 방법을 알려줘", link: "/goods/orders" },
+      { label: "13. 마이페이지 이용", value: "마이페이지 이용 방법을 알려줘", link: "/profile/me" },
     ],
   },
   recommend: {
-    label: "음악 추천",
+    label: "AI 음악 추천",
     options: [
-      { label: "💭 기분으로 추천", value: "recommend_mood" },
-      { label: "🌆 분위기로 추천", value: "recommend_vibe" },
+      { label: "1. 기분별 추천", value: "recommend_mood" },
+      { label: "2. 분위기별 추천", value: "recommend_vibe" },
+      { label: "3. 장르별 추천", value: "genre" },
     ],
   },
   recommend_mood: {
-    label: "기분으로 추천",
+    label: "기분별 추천",
     options: [], // MOODS 컴포넌트로 별도 렌더링
   },
   recommend_vibe: {
-    label: "분위기로 추천",
+    label: "분위기별 추천",
     options: [
-      { label: "🌅 오늘의 추천곡", value: "오늘 들을 만한 노래를 추천해줘" },
-      { label: "🚗 드라이브", value: "드라이브할 때 들을 신나는 노래 추천해줘" },
-      { label: "😴 공부/집중", value: "공부하거나 집중할 때 들을 음악 추천해줘" },
-      { label: "💪 운동", value: "운동할 때 들을 신나는 음악 추천해줘" },
-      { label: "😢 감성 발라드", value: "감성적인 발라드 노래 추천해줘" },
-      { label: "🌙 잠들기 전", value: "자기 전에 들을 잔잔한 음악 추천해줘" },
-      { label: "🎉 파티/신남", value: "파티 분위기에 어울리는 신나는 음악 추천해줘" },
-      { label: "☕ 카페 분위기", value: "카페에서 틀 것 같은 분위기 있는 음악 추천해줘" },
+      { label: "1. 오늘의 추천곡", value: "오늘 들을 만한 노래를 추천해줘" },
+      { label: "2. 드라이브", value: "드라이브할 때 들을 신나는 노래 추천해줘" },
+      { label: "3. 공부/집중", value: "공부하거나 집중할 때 들을 음악 추천해줘" },
+      { label: "4. 운동", value: "운동할 때 들을 신나는 음악 추천해줘" },
+      { label: "5. 감성 발라드", value: "감성적인 발라드 노래 추천해줘" },
+      { label: "6. 잠들기 전", value: "자기 전에 들을 잔잔한 음악 추천해줘" },
+      { label: "7. 파티/신남", value: "파티 분위기에 어울리는 신나는 음악 추천해줘" },
+      { label: "8. 카페 분위기", value: "카페에서 틀 것 같은 분위기 있는 음악 추천해줘" },
     ],
   },
   faq: {
     label: "자주 묻는 질문",
     options: [
-      { label: "💰 포인트는 어떻게 적립되나요?", value: "포인트 적립 방법을 알려줘" },
-      { label: "🏅 등급 기준이 어떻게 되나요?", value: "등급 기준을 알려줘" },
-      { label: "🔒 비밀번호를 잊어버렸어요", value: "비밀번호 찾는 방법을 알려줘", link: "/find" },
-      { label: "🚫 계정 문제가 생겼어요", value: "계정 문제 해결 방법을 알려줘" },
-      { label: "🎵 음악이 재생이 안돼요", value: "음악 재생 오류 해결 방법을 알려줘" },
-      { label: "📱 소셜 로그인이 안돼요", value: "소셜 로그인 문제 해결 방법을 알려줘" },
+      { label: "1. 포인트는 어떻게 적립되나요?", value: "포인트 적립 방법을 알려줘" },
+      { label: "2. 등급 기준이 어떻게 되나요?", value: "등급 기준을 알려줘" },
+      { label: "3. 비밀번호를 잊어버렸어요", value: "비밀번호 찾는 방법을 알려줘", link: "/find" },
+      { label: "4. 계정 문제가 생겼어요", value: "계정 문제 해결 방법을 알려줘" },
+      { label: "5. 기능 오류가 발생했어요", value: "기능 오류 해결 방법을 알려줘" },
+      { label: "6. 소셜 로그인이 안돼요", value: "소셜 로그인 문제 해결 방법을 알려줘" },
     ],
   },
   genre: {
-    label: "장르 탐험",
+    label: "장르별 추천",
     options: [
-      { label: "🇰🇷 K-POP 입문", value: "K-POP 장르를 처음 접하는 사람에게 입문곡을 추천해줘" },
-      { label: "🎷 재즈 입문", value: "재즈 장르를 처음 접하는 사람에게 입문곡을 추천해줘" },
-      { label: "🌆 시티팝 입문", value: "시티팝 장르를 처음 접하는 사람에게 입문곡을 추천해줘" },
-      { label: "🎹 클래식 입문", value: "클래식 음악을 처음 접하는 사람에게 입문곡을 추천해줘" },
-      { label: "🎤 힙합/R&B 입문", value: "힙합과 R&B 장르를 처음 접하는 사람에게 입문곡을 추천해줘" },
-      { label: "🎸 록/인디 입문", value: "록과 인디 장르를 처음 접하는 사람에게 입문곡을 추천해줘" },
-      { label: "🌊 보사노바 입문", value: "보사노바 장르를 처음 접하는 사람에게 입문곡을 추천해줘" },
-      { label: "🎻 클래식 크로스오버", value: "클래식과 팝이 결합된 크로스오버 음악을 추천해줘" },
+      { label: "1. K-POP", value: "K-POP 장르 중 인기곡을 추천해줘" },
+      { label: "2. 재즈", value: "재즈 장르 중 인기곡을 추천해줘" },
+      { label: "3. 시티팝", value: "시티팝 장르 중 인기곡을 추천해줘" },
+      { label: "4. 클래식", value: "클래식 음악을 처음 접하는 사람에게 입문곡을 추천해줘" },
+      { label: "5. 힙합/R&B", value: "힙합과 R&B 장르 중 인기곡을 추천해줘" },
+      { label: "6. 록/인디", value: "록과 인디 장르 중 인기곡을 추천해줘" },
+      { label: "7. 팝", value: "팝 장르 중 인기곡을 추천해줘" },
+      { label: "8. EDM", value: "EDM 일렉트로닉 장르 중 인기곡을 추천해줘" },
+    ],
+  },
+  inquiry: {
+    label: "문의하기",
+    options: [
+      { label: "1. 계정 문제", value: "__inquiry__계정 문제" },
+      { label: "2. 기능 오류", value: "__inquiry__기능 오류" },
+      { label: "3. 기타 문의", value: "__inquiry__기타 문의" },
+      { label: "4. 내 문의 내역", value: "__inquiry_history__" },
     ],
   },
 };
 
-// **bold**, "따옴표", URL 렌더링
+// 규칙 응답 제목에서 아이콘 결정
+function getGuideIcon(title: string): string {
+  if (title.includes("플레이리스트")) return "📋";
+  if (title.includes("검색")) return "🔍";
+  if (title.includes("추천")) return "🎵";
+  if (title.includes("랭킹") || title.includes("순위")) return "🏆";
+  if (title.includes("게시판") || title.includes("커뮤니티") || title.includes("자유")) return "✍️";
+  if (title.includes("평론") || title.includes("크리틱")) return "📝";
+  if (title.includes("콜라보") || title.includes("공동")) return "🤝";
+  if (title.includes("게임") || title.includes("퀴즈")) return "🎮";
+  if (title.includes("포인트") || title.includes("등급")) return "⭐";
+  if (title.includes("굿즈") || title.includes("상품")) return "🛍️";
+  if (title.includes("주문") || title.includes("배송")) return "📦";
+  if (title.includes("마이페이지") || title.includes("내 정보")) return "👤";
+  if (title.includes("계정") || title.includes("비밀번호")) return "🔐";
+  if (title.includes("오류") || title.includes("버그")) return "🔧";
+  if (title.includes("문의")) return "💬";
+  if (title.includes("GAP Music") || title.includes("기능")) return "🎶";
+  return "📌";
+}
+
+interface GuideItem {
+  type: "step" | "bullet" | "note";
+  number?: number;
+  text: string;
+}
+interface GuideCardData {
+  title: string;
+  items: GuideItem[];
+}
+
+// 규칙 응답 텍스트를 제목 + 항목 구조로 파싱
+function parseGuideCard(content: string): GuideCardData | null {
+  const lines = content.split("\n").map((l) => l.trim()).filter(Boolean);
+  if (lines.length < 2) return null;
+
+  // 첫 줄이 ':'으로 끝나야 제목으로 인식
+  if (!lines[0].endsWith(":")) return null;
+  const title = lines[0].slice(0, -1).trim();
+  const items: GuideItem[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    const stepMatch = line.match(/^(\d+)\.\s+(.+)/);
+    if (stepMatch) {
+      items.push({ type: "step", number: parseInt(stepMatch[1]), text: stepMatch[2] });
+      continue;
+    }
+    if (line.startsWith("※") || line.startsWith("이메일:") || line.startsWith("📧")) {
+      items.push({ type: "note", text: line.startsWith("※") ? line.slice(1).trim() : line });
+      continue;
+    }
+    // 이모지 불릿 (전체 기능 안내용)
+    if (/^[\p{Emoji}]/u.test(line)) {
+      items.push({ type: "bullet", text: line });
+      continue;
+    }
+  }
+
+  return items.length > 0 ? { title, items } : null;
+}
+
+// AI 답변 응답값 **bold**, "따옴표", URL 렌더링
 function renderContent(content: string) {
   const tokenRegex = /(\*\*(.+?)\*\*|[\u201C"]([^\u201C\u201D"\n]{2,})[\u201D"]|https?:\/\/[^\s]+)/g;
   const parts: React.ReactNode[] = [];
@@ -233,6 +326,7 @@ function renderContent(content: string) {
 }
 
 const STORAGE_KEY = "chatbot_messages";
+const SESSION_KEY = "chatbot_session_id";
 
 function ChatbotButton() {
   const navigate = useNavigate();
@@ -246,12 +340,18 @@ function ChatbotButton() {
     return [{ role: "assistant", content: WELCOME_MESSAGE }];
   });
 
+  const [sessionId, setSessionId] = useState<string | null>(() => localStorage.getItem(SESSION_KEY));
+
   const [isOpen, setIsOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [category, setCategory] = useState<Category>("main");
-  const [previewSong, setPreviewSong] = useState<Song | null>(null);
+
+  const [inquiryStep, setInquiryStep] = useState<null | "email" | "content">(null);
+  const [inquiryType, setInquiryType] = useState("");
+  const [inquiryEmail, setInquiryEmail] = useState("");
+  const { play: playGlobal, stop: stopGlobal, song: previewSong } = usePlayer();
 
   // 플레이리스트 추가
   const [playlists, setPlaylists] = useState<{ id: number; title: string; imageUrl: string }[]>([]);
@@ -292,7 +392,7 @@ function ChatbotButton() {
   const handlePreview = (track: iTunesTrack) => {
     if (!track.previewUrl) return;
     if (previewSong?.id === track.trackId) {
-      setPreviewSong(null);
+      stopGlobal();
       return;
     }
     const song: Song = {
@@ -305,7 +405,7 @@ function ChatbotButton() {
       durationMs: 30000,
       releaseDate: "",
     };
-    setPreviewSong(song);
+    playGlobal(song, { onClose: () => stopGlobal() });
   };
 
   // 플레이리스트 목록 불러오기
@@ -358,9 +458,49 @@ function ChatbotButton() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const sendMessage = async (text?: string, displayText?: string) => {
+  const sendMessage = async (text?: string, displayText?: string, link?: string, linkLabel?: string, links?: { label: string; path: string }[]) => {
     const msg = (text ?? input).trim();
     if (!msg || isLoading) return;
+
+    // 문의 이메일 입력 단계
+    if (inquiryStep === "email") {
+      const userMsg: Message = { role: "user", content: msg };
+      setInput("");
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(msg)) {
+        setMessages((prev) => [...prev, userMsg, { role: "assistant", content: "올바른 이메일 형식이 아닙니다. 다시 입력해주세요." }]);
+        return;
+      }
+      setInquiryEmail(msg);
+      setInquiryStep("content");
+      setMessages((prev) => [...prev, userMsg, { role: "assistant", content: `이메일이 확인되었습니다.\n${inquiryType}에 대한 문의 내용을 아래 입력창에 자세히 입력해주세요.\n\n접수된 문의는 담당자 이메일로 전달되며, 빠른 시일 내에 답변드리겠습니다.` }]);
+      return;
+    }
+
+    // 문의 내용 입력 단계
+    if (inquiryStep === "content") {
+      const userMsg: Message = { role: "user", content: msg };
+      setMessages((prev) => [...prev, userMsg]);
+      setInput("");
+      setIsLoading(true);
+      try {
+        await api.post("/inquiry", {
+          type: inquiryType,
+          content: msg,
+          email: inquiryEmail || undefined,
+        });
+        setMessages((prev) => [...prev, { role: "assistant", content: "문의가 접수되었습니다! 빠른 시일 내에 답변 드리겠습니다 😊" }]);
+      } catch {
+        setMessages((prev) => [...prev, { role: "assistant", content: "문의 접수에 실패했습니다. 잠시 후 다시 시도해주세요." }]);
+      } finally {
+        setInquiryStep(null);
+        setInquiryType("");
+        setInquiryEmail("");
+        setIsLoading(false);
+        setTimeout(() => inputRef.current?.focus(), 50);
+      }
+      return;
+    }
 
     const userMessage: Message = { role: "user", content: displayText ?? msg };
     const updatedMessages = [...messages, userMessage];
@@ -372,9 +512,13 @@ function ChatbotButton() {
     try {
       const res = await api.post<ChatResponse>("/chatbot/message", {
         message: msg,
-        history: messages,
+        sessionId,
       });
-      const assistantMessage: Message = { role: "assistant", content: res.data.message };
+      if (res.data.sessionId && res.data.sessionId !== sessionId) {
+        setSessionId(res.data.sessionId);
+        localStorage.setItem(SESSION_KEY, res.data.sessionId);
+      }
+      const assistantMessage: Message = { role: "assistant", content: res.data.message, isRule: res.data.type === "rule", link, linkLabel, links };
       if (res.data.type === "ai") {
         const songs = parseSongs(res.data.message);
         if (songs.length > 0) {
@@ -398,23 +542,72 @@ function ChatbotButton() {
     }
   };
 
-  const handleOption = (label: string, value: string, link?: string) => {
+  const handleOption = async (label: string, value: string, link?: string, links?: { label: string; path: string }[]) => {
+    if (value === "__inquiry_history__") {
+      setCategory("main");
+      if (!isLoggedIn) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "user", content: "[문의] 내 문의 내역" },
+          { role: "assistant", content: "문의 내역은 로그인 후 확인할 수 있습니다." },
+        ]);
+        return;
+      }
+      setMessages((prev) => [...prev, { role: "user", content: "[문의] 내 문의 내역" }]);
+      setIsLoading(true);
+      try {
+        const res = await api.get<InquiryItem[]>("/inquiry/my");
+        const list = res.data;
+        if (list.length === 0) {
+          setMessages((prev) => [...prev, { role: "assistant", content: "아직 접수된 문의가 없습니다." }]);
+        } else {
+          setMessages((prev) => [...prev, { role: "assistant", content: `내 문의 내역 (${list.length}건)`, inquiries: list }]);
+        }
+      } catch {
+        setMessages((prev) => [...prev, { role: "assistant", content: "문의 내역을 불러오는 데 실패했습니다." }]);
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    if (value.startsWith("__inquiry__")) {
+      const type = value.replace("__inquiry__", "");
+      setInquiryType(type);
+      setCategory("main");
+      const botMsg = isLoggedIn
+        ? `${type}에 대한 문의 내용을 아래 입력창에 자세히 입력해주세요.\n\n접수된 문의는 담당자 이메일로 전달되며, 빠른 시일 내에 답변드리겠습니다.`
+        : `문의 답변을 받으실 이메일 주소를 먼저 입력해주세요.`;
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", content: `[문의] ${type}` },
+        { role: "assistant", content: botMsg },
+      ]);
+      setInquiryStep(isLoggedIn ? "content" : "email");
+      return;
+    }
     const isSubCategory = value in PARENT_CATEGORY;
     if (isSubCategory) {
       setCategory(value as Category);
     } else {
-      if (link) {
-        sendMessage(value, label).then(() => navigate(link));
-      } else {
-        sendMessage(value, label);
-      }
+      sendMessage(value, label, link, label, links);
     }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
+    if (sessionId) {
+      try {
+        await api.delete(`/chatbot/sessions/${sessionId}`);
+      } catch {}
+      setSessionId(null);
+      localStorage.removeItem(SESSION_KEY);
+    }
     setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
     setInput("");
     setCategory("main");
+    setInquiryStep(null);
+    setInquiryType("");
+    setInquiryEmail("");
     localStorage.removeItem(STORAGE_KEY);
   };
 
@@ -424,7 +617,7 @@ function ChatbotButton() {
     <>
       {/* 채팅창 */}
       <div
-        className={`fixed right-6 z-50 w-80 h-[680px] bg-[#0f0f1a] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 ${
+        className={`fixed right-6 z-50 w-80 top-[5.5rem] bg-[#0f0f1a] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 ${
           previewSong ? "bottom-40" : "bottom-24"
         } ${isOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none"}`}
       >
@@ -457,7 +650,46 @@ function ChatbotButton() {
                     <FaRobot size={10} />
                   </div>
                 )}
-                {msg.tracks && msg.tracks.length > 0 ? (
+                {msg.isRule && msg.role === "assistant" ? (
+                  (() => {
+                    const guide = parseGuideCard(msg.content);
+                    if (!guide) return (
+                      <div className="max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap bg-white/10 text-gray-100 rounded-bl-sm">
+                        {renderContent(msg.content)}
+                      </div>
+                    );
+                    return (
+                      <div className="max-w-[85%] rounded-2xl overflow-hidden border border-white/10 rounded-bl-sm">
+                        {/* 카드 헤더 */}
+                        <div className="bg-red-600/25 border-b border-red-500/20 px-3 py-2 flex items-center gap-2">
+                          <span className="text-base leading-none">{getGuideIcon(guide.title)}</span>
+                          <span className="text-sm font-semibold text-white">{guide.title}</span>
+                        </div>
+                        {/* 항목 목록 */}
+                        <div className="bg-white/5 px-3 py-2.5 flex flex-col gap-2">
+                          {guide.items.map((item, idx) =>
+                            item.type === "step" ? (
+                              <div key={idx} className="flex items-start gap-2">
+                                <span className="flex-shrink-0 w-[18px] h-[18px] rounded-full bg-red-600/80 text-white text-[10px] font-bold flex items-center justify-center mt-0.5">
+                                  {item.number}
+                                </span>
+                                <span className="text-xs text-gray-200 leading-relaxed">{renderContent(item.text)}</span>
+                              </div>
+                            ) : item.type === "bullet" ? (
+                              <div key={idx} className="text-xs text-gray-200 leading-relaxed pl-1">
+                                {item.text}
+                              </div>
+                            ) : (
+                              <div key={idx} className="text-[11px] text-gray-400 pl-1 border-t border-white/5 pt-1.5">
+                                {renderContent(item.text)}
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()
+                ) : msg.tracks && msg.tracks.length > 0 ? (
                   <div className="max-w-[75%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap bg-white/10 text-gray-100 rounded-bl-sm">
                     {renderContent(msg.content.split("\n").find(l => l.trim() && !/[\u201C"]/.test(l) && !/^\d+\./.test(l.trim())) ?? "")}
                   </div>
@@ -473,6 +705,57 @@ function ChatbotButton() {
                   </div>
                 )}
               </div>
+
+              {msg.role === "assistant" && msg.link && (
+                <div className="pl-8">
+                  <button
+                    onClick={() => navigate(msg.link!)}
+                    className="flex items-center gap-1.5 text-[11px] font-semibold text-indigo-300 hover:text-indigo-200 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 hover:border-indigo-500/50 rounded-full px-3 py-1 transition-all"
+                  >
+                    <FaChevronRight size={8} />
+                    {"페이지 바로가기"}
+                  </button>
+                </div>
+              )}
+              {msg.role === "assistant" && msg.links && msg.links.length > 0 && (
+                <div className="pl-8 flex flex-wrap gap-1.5">
+                  {msg.links.map((l) => (
+                    <button
+                      key={l.path}
+                      onClick={() => navigate(l.path)}
+                      className="flex items-center gap-1.5 text-[11px] font-semibold text-indigo-300 hover:text-indigo-200 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 hover:border-indigo-500/50 rounded-full px-3 py-1 transition-all"
+                    >
+                      <FaChevronRight size={8} />
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {msg.inquiries && msg.inquiries.length > 0 && (
+                <div className="flex flex-col gap-2 w-full pl-8">
+                  {msg.inquiries.map((item) => (
+                    <div key={item.id} className="flex flex-col gap-1.5 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-semibold text-white bg-white/10 rounded-full px-2 py-0.5 truncate">
+                          {item.type}
+                        </span>
+                        <span className={`text-[10px] font-semibold rounded-full px-2 py-0.5 flex-shrink-0 ${
+                          item.status === "접수중"
+                            ? "bg-yellow-500/20 text-yellow-300"
+                            : "bg-green-500/20 text-green-300"
+                        }`}>
+                          {item.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed line-clamp-2">{item.content}</p>
+                      <p className="text-[10px] text-gray-500">
+                        {new Date(item.createdAt).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {msg.tracks && msg.tracks.length > 0 && (
                 <div className="flex flex-col gap-2 w-full pl-8">
@@ -686,7 +969,7 @@ function ChatbotButton() {
                   {currentOptions.map((opt) => (
                     <button
                       key={opt.value}
-                      onClick={() => handleOption(opt.label, opt.value, opt.link)}
+                      onClick={() => handleOption(opt.label, opt.value, opt.link, opt.links)}
                       className="px-2.5 py-1 rounded-full bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 hover:border-indigo-500/50 text-xs text-indigo-300 hover:text-indigo-200 transition-all whitespace-nowrap"
                     >
                       {opt.label}
@@ -746,15 +1029,6 @@ function ChatbotButton() {
         </div>
       )}
 
-      {/* 미리듣기 MusicPlayer */}
-      {previewSong && (
-        <div className="fixed bottom-0 left-0 right-0 z-40">
-          <MusicPlayer
-            song={previewSong}
-            setIsPlayerVisible={() => setPreviewSong(null)}
-          />
-        </div>
-      )}
     </>
   );
 }

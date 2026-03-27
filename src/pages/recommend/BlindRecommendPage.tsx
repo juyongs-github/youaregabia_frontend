@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import api from "../../api/axios";
 import { playlistApi } from "../../api/playlistApi";
-import MusicPlayer from "../../components/layout/MusicPlayer";
+import { usePlayer } from "../../contexts/PlayerContext";
 import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
 import type { Song } from "../../components/ui/SongListItem";
 
@@ -55,6 +55,16 @@ const BlindRecommendPage = () => {
   }, []);
 
   const currentSong = songs[currentIndex];
+
+  const { play, stop } = usePlayer();
+
+  useEffect(() => {
+    if (currentSong && !isRevealed && phase === "playing") {
+      play(currentSong, { blind: true, onClose: handleDislike });
+    } else {
+      stop();
+    }
+  }, [currentIndex, isRevealed, phase]);
 
   const goNext = () => {
     setIsRevealed(false);
@@ -250,12 +260,6 @@ const BlindRecommendPage = () => {
         </div>
       )}
 
-      {/* 뮤직 플레이어 */}
-      {currentSong && !isRevealed && (
-        <div className="fixed bottom-0 left-0 z-50 w-full">
-          <MusicPlayer song={currentSong} setIsPlayerVisible={handleDislike} blind={true} />
-        </div>
-      )}
     </div>
   );
 };

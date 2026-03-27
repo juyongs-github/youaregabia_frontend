@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import MusicPlayer from "../../components/layout/MusicPlayer";
+import { usePlayer } from "../../contexts/PlayerContext";
 import type { Song } from "../../components/ui/SongListItem";
 import GameResult from "../../components/ui/GameResult";
 
@@ -36,6 +36,16 @@ const MusicQuizPage = () => {
   }, []);
 
   const currentSong = songs[currentIndex];
+
+  const { play, stop } = usePlayer();
+
+  useEffect(() => {
+    if (currentSong && !feedback && phase === "playing") {
+      play(currentSong, { blind: true, onClose: handleSkip });
+    } else {
+      stop();
+    }
+  }, [currentIndex, feedback, phase]);
 
   // 대소문자 구별x, 띄어쓰기x
   const normalize = (str: string) => str.toLowerCase().replace(/\s/g, "");
@@ -236,12 +246,6 @@ const MusicQuizPage = () => {
         모르겠어요 → 넘기기
       </button>
 
-      {/* 뮤직 플레이어 - blind 모드 */}
-      {currentSong && !feedback && (
-        <div className="fixed bottom-0 left-0 z-50 w-full">
-          <MusicPlayer song={currentSong} setIsPlayerVisible={handleSkip} blind={true} />
-        </div>
-      )}
     </div>
   );
 };

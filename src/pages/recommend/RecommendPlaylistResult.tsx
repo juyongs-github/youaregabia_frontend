@@ -8,7 +8,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { HiPencil } from "react-icons/hi2";
 import { BsQuestionCircleFill, BsFillCircleFill } from "react-icons/bs";
 import { RiArrowLeftLine, RiPlayList2Fill } from "react-icons/ri";
-import MusicPlayer from "../../components/layout/MusicPlayer";
+import { usePlayer } from "../../contexts/PlayerContext";
 import { RiResetLeftFill } from "react-icons/ri";
 import PlaylistReviewCreateModal from "../../components/ui/PlaylistReviewCreateModal";
 import Checkbox from "@mui/material/Checkbox";
@@ -30,7 +30,8 @@ function RecommendPlaylistResult() {
   const [isError, setIsError] = useState<boolean>(false);
 
   // 곡 정보 UI에서 선택한 곡(미리듣기, 유사 곡 추천)
-  const [selectSong, setSelectSong] = useState<Song | null>(null);
+  const { play, stop } = usePlayer();
+  const setSelectSong = (song: Song | null) => song ? play(song, { onClose: stop }) : stop();
 
   // 리뷰 작성 Modal
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -585,13 +586,6 @@ function RecommendPlaylistResult() {
               )
             )}
           </div>
-        </div>
-      )}
-
-      {/* 음악 플레이어 (미리듣기용) */}
-      {selectSong && (
-        <div className="fixed bottom-0 left-0 z-50 w-full">
-          <MusicPlayer song={selectSong} setIsPlayerVisible={() => setSelectSong(null)} />
         </div>
       )}
 

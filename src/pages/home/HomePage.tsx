@@ -28,8 +28,8 @@ import type { Playlist } from "../../types/playlist";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../../api/axios";
 import type { Song } from "../../components/ui/SongListItem";
-import MusicPlayer from "../../components/layout/MusicPlayer";
 import SongDetailModal from "../../components/ui/SongDetailModal";
+import { usePlayer } from "../../contexts/PlayerContext";
 import RankSection from "../../components/layout/RankSection";
 import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
 import Header from "../../components/layout/Header";
@@ -48,7 +48,8 @@ function HomePage() {
   const [dropdownSongs, setDropdownSongs] = useState<Song[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownLoading, setIsDropdownLoading] = useState(false);
-  const [selectSong, setSelectSong] = useState<Song | null>(null);
+  const { play, stop, song: selectSong } = usePlayer();
+  const setSelectSong = (song: Song | null) => song ? play(song, { onClose: stop, onSongEnd: stop }) : stop();
   const [detailSong, setDetailSong] = useState<Song | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -362,12 +363,6 @@ function HomePage() {
         <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
       )}
 
-      {/* ===== 미리듣기 플레이어 ===== */}
-      {selectSong && (
-        <div className="fixed bottom-0 left-0 z-50 w-full">
-          <MusicPlayer song={selectSong} setIsPlayerVisible={() => setSelectSong(null)} onSongEnd={() => setSelectSong(null)} />
-        </div>
-      )}
 
       {/* ===== 상세보기 모달 ===== */}
       {detailSong && (

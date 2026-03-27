@@ -5,8 +5,8 @@ import api from "../../api/axios";
 import Spinner from "../../components/ui/Spinner";
 import { BsQuestionCircleFill } from "react-icons/bs";
 import { IoWarning } from "react-icons/io5";
-import MusicPlayer from "../../components/layout/MusicPlayer";
 import { RiResetLeftFill } from "react-icons/ri";
+import { usePlayer } from "../../contexts/PlayerContext";
 
 interface Song {
   id: number;
@@ -29,8 +29,8 @@ function SearchResult() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
 
-  // 곡 정보 UI에서 선택한 곡(미리듣기, 유사 곡 추천)
-  const [selectSong, setSelectSong] = useState<Song | null>(null);
+  const { play, stop } = usePlayer();
+  const setSelectSong = (song: Song | null) => song ? play(song, { onClose: stop }) : stop();
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -103,15 +103,6 @@ function SearchResult() {
         </div>
       )}
 
-      {/* 음악 플레이어 (미리듣기용) */}
-      {selectSong && (
-        <div className="fixed bottom-0 left-0 z-50 w-full">
-          <MusicPlayer
-            song={selectSong}
-            setIsPlayerVisible={() => setSelectSong(null)}
-          />
-        </div>
-      )}
     </div>
   );
 }

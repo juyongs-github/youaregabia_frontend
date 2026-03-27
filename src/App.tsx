@@ -1,5 +1,7 @@
 import "./App.css";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { PlayerProvider, usePlayer } from "./contexts/PlayerContext";
+import MusicPlayer from "./components/layout/MusicPlayer";
 import { useSelector } from "react-redux";
 import type { RootState } from "./store";
 import SearchResult from "./pages/home/SearchResult";
@@ -61,6 +63,26 @@ interface RateLimitInfo {
   remainSeconds: number;
 }
 
+function GlobalMusicPlayer() {
+  const { song, songs, songIndex, blind, externalPaused, playKey, onSongEnd, onSongChange, onClose, stop, setSongIndex } = usePlayer();
+  if (!song) return null;
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-40">
+      <MusicPlayer
+        key={playKey}
+        song={song}
+        songs={songs.length > 0 ? songs : undefined}
+        songIndex={songs.length > 0 ? songIndex : undefined}
+        blind={blind}
+        externalPaused={externalPaused}
+        onSongEnd={onSongEnd}
+        onSongChange={(index) => { setSongIndex(index); onSongChange?.(index); }}
+        setIsPlayerVisible={() => { onClose?.(); stop(); }}
+      />
+    </div>
+  );
+}
+
 function App() {
   // 2. Redux Store에서 로그인 여부 가져오기
   const isLogin = useSelector((state: RootState) => state.auth.isLoggedIn);
@@ -76,7 +98,7 @@ function App() {
   }, []);
 
   return (
-    <>
+    <PlayerProvider>
       <Routes>
         {/* HomePage — 자체 Header/풀페이지 레이아웃, Layout 없이 */}
         <Route path="/home" element={isLogin ? <HomePage /> : <Navigate to="/login" replace />} />
@@ -154,6 +176,7 @@ function App() {
       </Routes>
       {/* 전역 UI — 어느 페이지에서든 표시됨-> 매크로방지 alert */}
       {isLogin && <ChatbotButton />}
+      {isLogin && <GlobalMusicPlayer />}
       {rateLimitInfo && (
         <RateLimitToast
           message={rateLimitInfo.message}
@@ -161,7 +184,7 @@ function App() {
           onClose={() => setRateLimitInfo(null)}
         />
       )}
-    </>
+    </PlayerProvider>
   );
 }
 
