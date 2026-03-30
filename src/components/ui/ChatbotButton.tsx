@@ -201,10 +201,9 @@ const CATEGORIES: Record<Category, { label: string; options: { label: string; va
     options: [
       { label: "1. 포인트는 어떻게 적립되나요?", value: "포인트 적립 방법을 알려줘" },
       { label: "2. 등급 기준이 어떻게 되나요?", value: "등급 기준을 알려줘" },
-      { label: "3. 비밀번호를 잊어버렸어요", value: "비밀번호 찾는 방법을 알려줘", link: "/find" },
+      { label: "3. 비밀번호를 변경하고 싶어요", value: "비밀번호 변경 방법을 알려줘", link: "/profile/me" },
       { label: "4. 계정 문제가 생겼어요", value: "계정 문제 해결 방법을 알려줘" },
       { label: "5. 기능 오류가 발생했어요", value: "기능 오류 해결 방법을 알려줘" },
-      { label: "6. 소셜 로그인이 안돼요", value: "소셜 로그인 문제 해결 방법을 알려줘" },
     ],
   },
   genre: {
