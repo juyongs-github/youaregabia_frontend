@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { Playlist } from "../../types/playlist";
 import { playlistApi } from "../../api/playlistApi";
-import "../../styles/MyplaylistPage.css";
 import "../../styles/PlaylistDetailPage.css";
 import { FaPlay, FaPlus, FaTrash } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
@@ -177,7 +176,7 @@ function PlaylistDetailPage() {
             {preview ? (
               <img src={preview} alt="playlist cover" />
             ) : (
-              <img src={`${import.meta.env.VITE_API_BASE_URL}${data?.imageUrl}`} alt="playlist cover" />
+              <img src={`${import.meta.env.VITE_API_BASE_URL ?? ""}${data?.imageUrl}`} alt="playlist cover" />
             )}
             {isEditMode && (
               <input
@@ -404,28 +403,26 @@ function PlaylistDetailPage() {
       </section>
 
       {isPlayerVisible && selectSong && (
-        <div className="fixed bottom-0 left-0 z-50 w-full">
-          <MusicPlayer
-            song={selectSong}
-            setIsPlayerVisible={() => {
+        <MusicPlayer
+          song={selectSong}
+          setIsPlayerVisible={() => {
+            setIsPlayerVisible(false);
+            setSelectSong(null);
+            setCurrentIndex(null);
+          }}
+          songs={sortedSongs}
+          songIndex={currentIndex ?? 0}
+          onSongChange={(index: number) => {
+            if (index < sortedSongs.length) {
+              setCurrentIndex(index);
+              setSelectSong(sortedSongs[index]);
+            } else {
               setIsPlayerVisible(false);
               setSelectSong(null);
               setCurrentIndex(null);
-            }}
-            songs={sortedSongs}
-            songIndex={currentIndex ?? 0}
-            onSongChange={(index: number) => {
-              if (index < sortedSongs.length) {
-                setCurrentIndex(index);
-                setSelectSong(sortedSongs[index]);
-              } else {
-                setIsPlayerVisible(false);
-                setSelectSong(null);
-                setCurrentIndex(null);
-              }
-            }}
-          />
-        </div>
+            }
+          }}
+        />
       )}
 
       {isAddModalOpen && playlistId && (

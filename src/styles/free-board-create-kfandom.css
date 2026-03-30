@@ -1,0 +1,9 @@
+@import "./community-kfandom-core.css";
+.kf-free-board-create .kf-community-page__shell > div {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 26px;
+}
+.kf-free-board-create textarea {
+  min-height: 360px;
+}

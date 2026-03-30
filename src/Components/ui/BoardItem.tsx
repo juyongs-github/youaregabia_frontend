@@ -8,11 +8,18 @@ interface Props {
   basePath?: string;
 }
 
+const GENRE_STYLE: Record<string, { bg: string; color: string }> = {
+  KPOP:   { bg: "rgba(109,94,252,0.10)",  color: "#6d5efc" },
+  JPOP:   { bg: "rgba(255,92,168,0.10)",  color: "#e0468a" },
+  POP:    { bg: "rgba(56,152,255,0.10)",  color: "#2d7fd9" },
+  HIPHOP: { bg: "rgba(255,182,72,0.12)",  color: "#b86a00" },
+  ROCK:   { bg: "rgba(255,102,122,0.10)", color: "#d63048" },
+};
+
 const BoardItem = ({ board, basePath }: Props) => {
   const navigate = useNavigate();
   const userEmail = useSelector((state: RootState) => state.auth.user?.email);
 
-  // basePath 자동 결정
   const resolvedPath =
     basePath ??
     (board.boardType === "CRITIC"
@@ -25,54 +32,53 @@ const BoardItem = ({ board, basePath }: Props) => {
   const isCritic = board.boardType === "CRITIC";
   const isFree = board.boardType === "FREE";
 
+  const genreStyle = board.boardGenre ? GENRE_STYLE[board.boardGenre] ?? { bg: "rgba(95,103,145,0.10)", color: "#677086" } : null;
+
   return (
     <li>
       <button
-        className="block w-full px-4 py-3 text-left hover:bg-neutral-800"
+        className="kf-board-item"
         onClick={() => navigate(`${resolvedPath}/${board.boardId}`)}
       >
         {/* 평론 - 대상 곡 표시 */}
         {isCritic && board.songs && board.songs.length > 0 && (
-          <div className="mb-2 flex items-center gap-2">
-            <img src={board.songs[0].imgUrl} className="w-8 h-8 rounded object-cover" />
-            <span className="text-xs text-gray-400">
-              {board.songs[0].trackName} - {board.songs[0].artistName}
+          <div className="kf-board-item__song">
+            <img src={board.songs[0].imgUrl} className="kf-board-item__song-img" alt="" />
+            <span className="kf-board-item__song-name">
+              {board.songs[0].trackName} — {board.songs[0].artistName}
             </span>
           </div>
         )}
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 truncate mr-4">
-            {/* 평론 뱃지 */}
-            {isCritic && (
-              <span className="flex-shrink-0 text-xs font-bold text-yellow-400 border border-yellow-400 px-1.5 py-0.5 rounded">
-                평론
-              </span>
-            )}
-            <span className="text-indigo-400 font-medium truncate">
-              {!isFree && !isCritic && `[${board.boardGenre}] `}
-              {board.title}
+        {/* 뱃지 행 */}
+        <div className="kf-board-item__badges">
+          {isCritic && (
+            <span className="kf-genre-badge" style={{ background: "rgba(255,182,72,0.12)", color: "#b86a00" }}>
+              평론
             </span>
-            {/* 내 글 표시 */}
-            {isMyBoard && (
-              <span className="flex-shrink-0 text-xs text-indigo-300 border border-indigo-300 px-1.5 py-0.5 rounded">
-                내 글
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            {/* 익명 처리 */}
-            <span className="text-sm text-gray-400">{isFree ? "익명" : board.writer}</span>
-            <span className="text-xs text-gray-500 border-l border-neutral-700 pl-3">
-              조회 {board.viewCount}
+          )}
+          {!isFree && !isCritic && genreStyle && (
+            <span className="kf-genre-badge" style={{ background: genreStyle.bg, color: genreStyle.color }}>
+              {board.boardGenre}
             </span>
-            <span className="text-xs text-gray-500">❤️ {board.likeCount}</span>
-          </div>
+          )}
+          {isMyBoard && <span className="kf-mine-badge">내 글</span>}
         </div>
 
-        <div className="mt-1 text-xs text-gray-500">
-          {new Date(board.createdAt).toLocaleDateString("ko-KR")}
+        {/* 제목 */}
+        <div className="kf-board-item__title">{board.title}</div>
+
+        {/* 메타 정보 */}
+        <div className="kf-board-item__meta">
+          <span className="kf-board-item__writer">{isFree ? "익명" : board.writer}</span>
+          <span className="kf-board-item__dot">·</span>
+          <span className="kf-board-item__date">
+            {new Date(board.createdAt).toLocaleDateString("ko-KR")}
+          </span>
+          <span className="kf-board-item__stats">
+            <span>조회 {board.viewCount}</span>
+            <span className="kf-board-item__like">❤ {board.likeCount}</span>
+          </span>
         </div>
       </button>
     </li>

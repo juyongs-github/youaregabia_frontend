@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import "../../styles/auth.css";
+import "../../styles/auth-kfandom-core.css";
 import { register, checkEmailDuplicate } from "../../api/auth";
 import { useNavigate, useLocation } from "react-router-dom";
 

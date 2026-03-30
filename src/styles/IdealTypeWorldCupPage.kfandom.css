@@ -1,0 +1,14 @@
+@import "./expansion-kfandom-core.css";
+
+.wc-page {
+  padding: 28px !important;
+}
+
+.wc-page [class*="rounded-2xl"],
+.wc-page [class*="rounded-xl"] {
+  border-radius: 22px !important;
+}
+
+.wc-page img {
+  border-radius: 18px;
+}

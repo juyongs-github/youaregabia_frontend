@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
+import "../../styles/OrderCompletePage.kfandom.css";
 
 export default function OrderCompletePage() {
   const navigate = useNavigate();
@@ -8,7 +9,7 @@ export default function OrderCompletePage() {
   const total = state?.total;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-white gap-6">
+    <div className="kf-expansion-page kf-order-complete">
       <FaCheckCircle size={64} className="text-green-400" />
       <h1 className="text-3xl font-bold">주문이 완료됐습니다!</h1>
       {orderId && <p className="text-gray-400 text-sm">주문번호: #{orderId}</p>}

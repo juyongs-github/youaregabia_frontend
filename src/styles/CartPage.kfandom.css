@@ -1,0 +1,9 @@
+@import "./expansion-kfandom-core.css";
+
+.kf-cart-page > div:first-child {
+  padding: 28px !important;
+}
+
+.kf-cart-page [class*="grid-cols-"] {
+  align-items: start;
+}

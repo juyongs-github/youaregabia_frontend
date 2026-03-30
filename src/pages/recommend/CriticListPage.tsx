@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
 import type { Board, PageResult } from "../../types/board";
 import Pagination from "../../Components/ui/Pagination";
+import "../../styles/CriticListPage.kfandom.css";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import BoardSortBar from "../../Components/ui/BoardSortBar";
@@ -73,9 +74,9 @@ const CriticListPage = () => {
   }
 
   return (
-    <div className="mx-auto max-w-4xl p-4 text-white">
+    <div className="kf-expansion-page kf-critic-list">
       {/* 헤더 */}
-      <div className="mt-8 mb-6 flex items-end justify-between border-b border-neutral-700 pb-5">
+      <div className="flex items-end justify-between px-6 py-5">
         <div>
           <h2 className="text-3xl font-bold text-white">음악 평론</h2>
           <p className="mt-2 text-sm text-gray-400">전문 평론가들의 음악 이야기를 만나보세요.</p>
@@ -91,7 +92,9 @@ const CriticListPage = () => {
       </div>
 
       {/* 정렬 바 */}
-      <BoardSortBar sortBy={sortBy} onChange={handleSortChange} />
+      <div className="mt-5">
+        <BoardSortBar sortBy={sortBy} onChange={handleSortChange} />
+      </div>
 
       {/* 평론 목록 */}
       <ul className="divide-y divide-neutral-700 rounded border border-neutral-700">

@@ -1,27 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import "../../styles/HomePage.css";
 import {
-  FaPlus,
-  FaChevronLeft,
-  FaChevronRight,
-  FaPlay,
-  FaSearch,
-  FaTimes,
-  FaCompass,
-  FaUsers,
-  FaShoppingBag,
-  FaGamepad,
-  FaEyeSlash,
-  FaTrophy,
-  FaPen,
-  FaShareAlt,
-  FaHandshake,
-  FaComments,
-  FaMusic,
-  FaCompactDisc,
-  FaClone,
-  FaHeadphones,
-  FaInfoCircle,
+  FaPlus, FaChevronLeft, FaChevronRight, FaPlay, FaSearch, FaTimes,
+  FaCompass, FaUsers, FaShoppingBag, FaGamepad,
+  FaEyeSlash, FaTrophy, FaPen, FaShareAlt, FaHandshake, FaComments,
+  FaMusic, FaCompactDisc, FaClone, FaHeadphones, FaInfoCircle,
 } from "react-icons/fa";
 import { playlistApi } from "../../api/playlistApi";
 import type { Playlist } from "../../types/playlist";
@@ -44,7 +27,6 @@ function HomePage() {
   const location = useLocation();
   const [searchValue, setSearchValue] = useState<string>("");
 
-  // 검색 드롭다운
   const [dropdownSongs, setDropdownSongs] = useState<Song[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownLoading, setIsDropdownLoading] = useState(false);
@@ -55,7 +37,6 @@ function HomePage() {
   const fetchData = async () => {
     setIsLoading(true);
     setIsError(false);
-
     try {
       const res = await playlistApi.getAllPlaylist();
       setData([...(res.data || [])].reverse());
@@ -68,48 +49,33 @@ function HomePage() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
-  // 디바운스 검색
   useEffect(() => {
-    if (!searchValue.trim()) {
-      setDropdownSongs([]);
-      setIsDropdownOpen(false);
-      return;
-    }
+    if (!searchValue.trim()) { setDropdownSongs([]); setIsDropdownOpen(false); return; }
     const timer = setTimeout(async () => {
       setIsDropdownLoading(true);
       try {
         const res = await api.get("/api/search", { params: { q: searchValue } });
-        const songs: Song[] = res.data || [];
-        setDropdownSongs(songs);
+        setDropdownSongs(res.data || []);
         setIsDropdownOpen(true);
-      } catch {
-        setDropdownSongs([]);
-      } finally {
-        setIsDropdownLoading(false);
-      }
+      } catch { setDropdownSongs([]); }
+      finally { setIsDropdownLoading(false); }
     }, 400);
     return () => clearTimeout(timer);
   }, [searchValue]);
 
-  // 검색창 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setIsDropdownOpen(false);
-      }
+    const handler = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setIsDropdownOpen(false);
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   const rowRef = useRef<HTMLDivElement>(null);
   const sharedRef = useRef<HTMLDivElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
 
@@ -132,78 +98,54 @@ function HomePage() {
   };
 
   useEffect(() => {
-    const handleOutside = (e: MouseEvent) => {
-      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
-        setOpenMenu(null);
-      }
+    const handler = (e: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(e.target as Node)) setOpenMenu(null);
     };
-    document.addEventListener("mousedown", handleOutside);
-    return () => document.removeEventListener("mousedown", handleOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const scrollLeft = () => {
-    rowRef.current?.scrollBy({ left: -320, behavior: "smooth" });
-  };
-
-  const scrollRight = () => {
-    rowRef.current?.scrollBy({ left: 320, behavior: "smooth" });
-  };
-
-  const scrollSharedLeft = () => {
-    const w = sharedRef.current?.offsetWidth ?? 0;
-    sharedRef.current?.scrollBy({ left: -w, behavior: "smooth" });
-  };
-
-  const scrollSharedRight = () => {
-    const w = sharedRef.current?.offsetWidth ?? 0;
-    sharedRef.current?.scrollBy({ left: w, behavior: "smooth" });
-  };
+  const scrollLeft = () => rowRef.current?.scrollBy({ left: -320, behavior: "smooth" });
+  const scrollRight = () => rowRef.current?.scrollBy({ left: 320, behavior: "smooth" });
+  const scrollSharedLeft = () => { const w = sharedRef.current?.offsetWidth ?? 0; sharedRef.current?.scrollBy({ left: -w, behavior: "smooth" }); };
+  const scrollSharedRight = () => { const w = sharedRef.current?.offsetWidth ?? 0; sharedRef.current?.scrollBy({ left: w, behavior: "smooth" }); };
 
   return (
     <div className={`home${selectSong ? " player-open" : ""}`}>
+      <div className="spotlight spotlight-left" />
+      <div className="spotlight spotlight-center" />
+      <div className="spotlight spotlight-right" />
       <Header showSearch={false} />
-      {/* ===== 중앙 영역 ===== */}
+
+      {/* 중앙 영역 */}
       <div className="center-area">
         <h1 className="main-title">너가 갑이야</h1>
 
-        <div className={`search-bar relative${isDropdownOpen ? " dropdown-open" : ""}`} ref={searchRef}>
+        <div className={`search-bar${isDropdownOpen ? " dropdown-open" : ""}`} ref={searchRef}>
           <input
             type="text"
-            placeholder="검색하고 싶은 곡 제목 또는 가수명를 입력해주세요."
+            placeholder="검색하고 싶은 곡 제목 또는 가수명을 입력해주세요."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             onFocus={() => dropdownSongs.length > 0 && setIsDropdownOpen(true)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                if (!searchValue.trim()) {
-                  alert("검색어를 입력 해주세요.");
-                  return;
-                }
+                if (!searchValue.trim()) { alert("검색어를 입력 해주세요."); return; }
                 setIsDropdownOpen(false);
                 const url = `/search?q=${encodeURIComponent(searchValue)}`;
-                if (location.pathname + location.search === url) {
-                  navigate(url, { replace: true, state: { refresh: Date.now() } });
-                } else {
-                  navigate(url);
-                }
+                if (location.pathname + location.search === url) navigate(url, { replace: true, state: { refresh: Date.now() } });
+                else navigate(url);
               }
             }}
           />
           {searchValue ? (
-            <button
-              onClick={() => { setSearchValue(""); setDropdownSongs([]); setIsDropdownOpen(false); }}
-              className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-            >
-              <FaTimes size={20} />
+            <button onClick={() => { setSearchValue(""); setDropdownSongs([]); setIsDropdownOpen(false); }} className="search-clear">
+              <FaTimes size={18} />
             </button>
           ) : (
-            <FaSearch
-              className="absolute text-gray-400 right-6 top-1/2 -translate-y-1/2"
-              size={20}
-            />
+            <button className="search-submit"><FaSearch size={18} /></button>
           )}
 
-          {/* 검색 드롭다운 */}
           {isDropdownOpen && (
             <div className="search-dropdown">
               {isDropdownLoading ? (
@@ -212,45 +154,21 @@ function HomePage() {
                 <div className="search-dropdown-empty">검색 결과가 없습니다.</div>
               ) : (
                 <>
-                  {dropdownSongs.slice(0, 1).map((song, idx) => (
-                    <div key={song.id}>
-                      {idx > 0 && <div className="search-dropdown-divider" />}
-                      <div className="search-dropdown-item">
-                        <img src={song.imgUrl} alt="" className="search-dropdown-img" />
-                        <div className="search-dropdown-info">
-                          <span className="search-dropdown-title">{song.trackName}</span>
-                          <span className="search-dropdown-artist">{song.artistName}</span>
-                        </div>
-                        <div className="search-dropdown-actions">
-                          <button
-                            onClick={() => setSelectSong(song)}
-                            title="미리듣기"
-                            className={selectSong?.id === song.id ? "active" : ""}
-                          >
-                            <FaHeadphones size={13} />
-                          </button>
-                          <button
-                            onClick={() => navigate("/recommend/result", {
-                              state: { trackName: song.trackName, artistName: song.artistName, coverImageUrl: song.imgUrl },
-                            })}
-                            title="유사 곡 추천"
-                          >
-                            <FaMusic size={13} />
-                          </button>
-                          <button onClick={() => setDetailSong(song)} title="상세보기">
-                            <FaInfoCircle size={13} />
-                          </button>
-                        </div>
+                  {dropdownSongs.slice(0, 1).map((song) => (
+                    <div key={song.id} className="search-dropdown-item">
+                      <img src={song.imgUrl} alt="" className="search-dropdown-img" />
+                      <div className="search-dropdown-info">
+                        <span className="search-dropdown-title">{song.trackName}</span>
+                        <span className="search-dropdown-artist">{song.artistName}</span>
+                      </div>
+                      <div className="search-dropdown-actions">
+                        <button onClick={() => setSelectSong(song)} title="미리듣기" className={selectSong?.id === song.id ? "active" : ""}><FaHeadphones size={13} /></button>
+                        <button onClick={() => navigate("/recommend/result", { state: { trackName: song.trackName, artistName: song.artistName, coverImageUrl: song.imgUrl } })} title="유사 곡 추천"><FaMusic size={13} /></button>
+                        <button onClick={() => setDetailSong(song)} title="상세보기"><FaInfoCircle size={13} /></button>
                       </div>
                     </div>
                   ))}
-                  <button
-                    className="search-dropdown-more"
-                    onClick={() => {
-                      setIsDropdownOpen(false);
-                      navigate(`/search?q=${encodeURIComponent(searchValue)}`);
-                    }}
-                  >
+                  <button className="search-dropdown-more" onClick={() => { setIsDropdownOpen(false); navigate(`/search?q=${encodeURIComponent(searchValue)}`); }}>
                     전체 검색 결과 보기 →
                   </button>
                 </>
@@ -260,119 +178,70 @@ function HomePage() {
         </div>
       </div>
 
-      {/* ===== 하단 중앙 - 아이콘 ===== */}
+      {/* 하단 중앙 아이콘 */}
       <div className="center-icons-wrapper" ref={popupRef}>
         {openMenu && menuItems[openMenu] && (
           <div className="icon-popup">
             {menuItems[openMenu].map((item) => (
-              <button
-                key={item.path}
-                onClick={() => {
-                  navigate(item.path);
-                  setOpenMenu(null);
-                }}
-              >
+              <button key={item.path} onClick={() => { navigate(item.path); setOpenMenu(null); }}>
                 {item.icon}
                 <span>{item.label}</span>
               </button>
             ))}
           </div>
         )}
-        <div className="center-icons">
-          <button onClick={() => setOpenMenu(openMenu === "recommend" ? null : "recommend")}>
-            <FaCompass size={28} />
-            <span>추천</span>
-          </button>
-          <button onClick={() => navigate("/goods")}>
-            <FaShoppingBag size={28} />
-            <span>굿즈샵</span>
-          </button>
-          <button onClick={() => setOpenMenu(openMenu === "community" ? null : "community")}>
-            <FaUsers size={28} />
-            <span>커뮤니티</span>
-          </button>
-          <button onClick={() => setOpenMenu(openMenu === "game" ? null : "game")}>
-            <FaGamepad size={28} />
-            <span>게임</span>
-          </button>
+        <div className="center-icons-outer">
+          <div className="center-icons">
+            <button onClick={() => setOpenMenu(openMenu === "recommend" ? null : "recommend")}><FaCompass size={24} /><span>추천</span></button>
+            <button onClick={() => navigate("/goods")}><FaShoppingBag size={24} /><span>굿즈샵</span></button>
+            <button onClick={() => setOpenMenu(openMenu === "community" ? null : "community")}><FaUsers size={24} /><span>커뮤니티</span></button>
+            <button onClick={() => setOpenMenu(openMenu === "game" ? null : "game")}><FaGamepad size={24} /><span>게임</span></button>
+          </div>
         </div>
       </div>
 
-      {/* ===== 좌하단 - 내 플레이리스트 ===== */}
+      {/* 좌하단 - 내 플레이리스트 */}
       <div className="bottom-left">
         <div className="section-header">
-          <h2 onClick={() => navigate("/playlist/me")} style={{ cursor: "pointer" }}>
-            내 플레이리스트
-          </h2>
-          <button onClick={() => setIsModalOpen(true)}>
-            <FaPlus />
-          </button>
+          <h2 onClick={() => navigate("/playlist/me")} style={{ cursor: "pointer" }}>내 플레이리스트</h2>
+          <button onClick={() => setIsModalOpen(true)}><FaPlus /></button>
         </div>
-
         <div className="playlist-slider">
-          <button className="slider-btn left" onClick={scrollLeft}>
-            <FaChevronLeft />
-          </button>
-
+          <button className="slider-btn left" onClick={scrollLeft}><FaChevronLeft /></button>
           <div className="playlist-row" ref={rowRef}>
             {data.map((item) => (
-              <div
-                className="playlist-card"
-                key={item.id}
-                onClick={() => navigate(`/playlist/me/${item.id}`)}
-              >
-                <img src={`${baseURL}${item.imageUrl}`} />
-                <button className="play-button">
-                  <FaPlay />
-                </button>
+              <div className="playlist-card" key={item.id} onClick={() => navigate(`/playlist/me/${item.id}`)}>
+                <img src={`${baseURL}${item.imageUrl}`} alt={item.title} />
+                <button className="play-button"><FaPlay /></button>
                 <span>{item.title}</span>
               </div>
             ))}
           </div>
-
-          <button className="slider-btn right" onClick={scrollRight}>
-            <FaChevronRight />
-          </button>
+          <button className="slider-btn right" onClick={scrollRight}><FaChevronRight /></button>
         </div>
       </div>
 
-      {/* ===== 우측 - 공동 플레이리스트 (가로 스크롤) ===== */}
+      {/* 우측 - 공동 플레이리스트 */}
       <div className="right-area">
         <h2>공동 플레이리스트</h2>
-
         <div className="shared-wrapper">
-          <button className="nav left" onClick={scrollSharedLeft}>
-            <FaChevronLeft />
-          </button>
-
+          <button className="nav left" onClick={scrollSharedLeft}><FaChevronLeft /></button>
           <div className="shared-container" ref={sharedRef}>
             <RankSection title="주제 1" />
             <RankSection title="주제 2" />
             <RankSection title="주제 3" />
           </div>
-
-          <button className="nav right" onClick={scrollSharedRight}>
-            <FaChevronRight />
-          </button>
+          <button className="nav right" onClick={scrollSharedRight}><FaChevronRight /></button>
         </div>
       </div>
 
-      {/* ===== 모달 ===== */}
-      {isModalOpen && (
-        <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
-      )}
-
-      {/* ===== 미리듣기 플레이어 ===== */}
+      {isModalOpen && <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />}
       {selectSong && (
         <div className="fixed bottom-0 left-0 z-50 w-full">
           <MusicPlayer song={selectSong} setIsPlayerVisible={() => setSelectSong(null)} onSongEnd={() => setSelectSong(null)} />
         </div>
       )}
-
-      {/* ===== 상세보기 모달 ===== */}
-      {detailSong && (
-        <SongDetailModal song={detailSong} onClose={() => setDetailSong(null)} />
-      )}
+      {detailSong && <SongDetailModal song={detailSong} onClose={() => setDetailSong(null)} />}
     </div>
   );
 }

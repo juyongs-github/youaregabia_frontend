@@ -9,8 +9,15 @@ html {
 }
 
 body {
-  background-color: white;
-  color: white;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(247, 215, 209, 0.92) 0%, transparent 27%),
+    radial-gradient(circle at 50% 14%, rgba(211, 221, 235, 0.90) 0%, transparent 24%),
+    radial-gradient(circle at 84% 18%, rgba(235, 210, 242, 0.92) 0%, transparent 27%),
+    radial-gradient(circle at 20% 62%, rgba(245, 216, 210, 0.26) 0%, transparent 24%),
+    radial-gradient(circle at 76% 58%, rgba(214, 222, 235, 0.24) 0%, transparent 24%),
+    radial-gradient(circle at 52% 84%, rgba(241, 233, 236, 0.14) 0%, transparent 22%),
+    linear-gradient(180deg, #F4F3F7 0%, #FBF7F4 12%, #F5F5FA 100%);
+  color: #1f2430;
 
   margin: 0;
   height: 100%;
@@ -25,9 +32,9 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a3d52;
+  background: #e5e5ea;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a5068;
+  background: #aeaeb2;
 }

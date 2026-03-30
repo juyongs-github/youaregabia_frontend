@@ -5,16 +5,16 @@ export default {
     extend: {
       colors: {
         bg: {
-          base: '#0f0f0f',
-          surface: '#181818',
+          base: '#ede8d8',
+          surface: '#ffffff',
         },
         border: {
-          base: '#2a2a2a',
+          base: '#d2d2d7',
         },
         accent: {
           purple: '#8b5cf6',
-          blue: '#3b82f6',
-          lavender: '#a78bfa',
+          blue: '#0071e3',
+          lavender: '#6e6e73',
         },
       },
     },

@@ -7,6 +7,7 @@ import ReplyItem from "../../Components/ui/replyItem";
 import Pagination from "../../Components/ui/Pagination";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
+import "../../styles/free-board-detail-kfandom.css";
 
 const FreeBoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();
@@ -85,10 +86,12 @@ const FreeBoardDetailPage = () => {
   };
 
   // 오류 시 로딩중 이라고 보여주기
-  if (!board) return <div>로딩 중...</div>;
+  if (!board) return <div className="kf-community-loading">로딩 중...</div>;
 
   return (
-    <div>
+    <div className="kf-community-page kf-free-board-detail">
+      <div className="kf-community-page__shell">
+      <div>
       <div className="mb-6 border-b border-neutral-700 pb-6">
         <h1 className="text-4xl font-extrabold tracking-tight text-white mb-3">{board.title}</h1>
         <span className="text-sm font-semibold text-neutral-500">작성자: {board.writer}</span>
@@ -107,16 +110,16 @@ const FreeBoardDetailPage = () => {
       <hr />
 
       <h3>댓글</h3>
-      <div className="min-h-[50px]">
+      <div className="min-h-[50px]" style={{ display: "flex", gap: 8, alignItems: "center" }}>
         <button
           onClick={() => setSortBy("latest")}
-          style={{ fontWeight: sortBy === "latest" ? "bold" : "normal" }}
+          className={`kf-sort-btn ${sortBy === "latest" ? "kf-sort-btn--active" : ""}`}
         >
           최신순
         </button>
         <button
           onClick={() => setSortBy("likes")}
-          style={{ fontWeight: sortBy === "likes" ? "bold" : "normal", marginLeft: "10px" }}
+          className={`kf-sort-btn ${sortBy === "likes" ? "kf-sort-btn--active" : ""}`}
         >
           추천순
         </button>
@@ -152,7 +155,7 @@ const FreeBoardDetailPage = () => {
         </>
       )}
 
-      <textarea value={replyContent} onChange={(e) => setReplyContent(e.target.value)} rows={3} />
+      <textarea value={replyContent} onChange={(e) => setReplyContent(e.target.value)} rows={3} placeholder="댓글을 입력해 보세요..." />
 
       <button
         onClick={createReply}
@@ -160,6 +163,8 @@ const FreeBoardDetailPage = () => {
       >
         댓글 작성
       </button>
+      </div>
+      </div>
     </div>
   );
 };

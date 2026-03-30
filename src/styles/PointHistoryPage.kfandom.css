@@ -1,0 +1,9 @@
+@import "./expansion-kfandom-core.css";
+
+.kf-point-history {
+  padding: 28px !important;
+}
+
+.kf-point-history [class*="rounded-xl"] {
+  border-radius: 24px !important;
+}

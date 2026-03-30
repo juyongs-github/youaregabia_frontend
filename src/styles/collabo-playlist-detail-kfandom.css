@@ -1,0 +1,28 @@
+@import "./community-kfandom-core.css";
+.kf-collabo-detail .kf-community-page__shell > div {
+  padding: 24px;
+}
+.kf-collabo-detail [class*="flex gap-8"] {
+  align-items: stretch;
+}
+.kf-collabo-detail [class*="w-52 h-52"] {
+  background: linear-gradient(135deg, rgba(109,94,252,0.14), rgba(255,92,168,0.14)) !important;
+  border: 1px solid rgba(255,255,255,0.7);
+  box-shadow: var(--kf-shadow-md);
+}
+.kf-collabo-detail [class*="fixed inset-0 z-50"],
+.kf-collabo-detail [class*="fixed inset-0 z-[60]"] {
+  backdrop-filter: blur(6px);
+}
+.kf-collabo-detail [class*="max-w-sm"],
+.kf-collabo-detail [class*="max-w-lg"],
+.kf-collabo-detail [class*="max-w-md"] {
+  border: 1px solid rgba(255,255,255,0.82) !important;
+  box-shadow: var(--kf-shadow-lg) !important;
+}
+.kf-collabo-detail [class*="space-y-2 max-h"] > div {
+  border: 1px solid rgba(95,103,145,0.10);
+}
+.kf-collabo-detail [class*="bg-black/60"] {
+  background: rgba(30, 36, 60, 0.38) !important;
+}

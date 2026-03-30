@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaBoxOpen, FaTruck } from "react-icons/fa";
 import api from "../../api/axios";
+import "../../styles/OrderHistoryPage.kfandom.css";
 
 interface OrderItem {
   goodsId: number;
@@ -94,7 +95,7 @@ export default function OrderHistoryPage() {
   if (loading) return <div className="text-white text-center mt-20">로딩 중...</div>;
 
   return (
-    <div className="p-8 text-white min-h-screen max-w-3xl">
+    <div className="kf-expansion-page kf-order-history">
       <div className="flex items-center gap-4 mb-8">
         <button onClick={() => navigate("/goods")} className="text-gray-400 hover:text-white transition-colors">
           <FaArrowLeft size={18} />

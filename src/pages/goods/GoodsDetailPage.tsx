@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaBox, FaShoppingCart, FaMinus, FaPlus } from "react-icons/fa";
 import { goodsApi, cartUtils, type Goods } from "../../api/goodsApi";
+import "../../styles/GoodsDetailPage.kfandom.css";
 
 const categoryLabel: Record<string, string> = {
   CLOTHING: "의류", ACCESSORIES: "악세사리", ALBUM: "앨범", ETC: "기타",
@@ -60,7 +61,7 @@ export default function GoodsDetailPage() {
   }
 
   return (
-    <div className="p-8 text-white min-h-screen max-w-5xl">
+    <div className="kf-expansion-page kf-goods-detail">
       {/* 상단 네비 */}
       <div className="flex items-center justify-between mb-8">
         <button onClick={() => navigate("/goods")} className="text-gray-400 hover:text-white text-sm transition-colors">
@@ -85,7 +86,7 @@ export default function GoodsDetailPage() {
         {/* 이미지 */}
         <div className="w-full md:w-96 aspect-square bg-gray-900 border border-gray-800 rounded-xl flex items-center justify-center flex-shrink-0">
           {goods.imageUrl ? (
-            <img src={`${import.meta.env.VITE_API_BASE_URL}${goods.imageUrl}`} alt={goods.name} className="w-full h-full object-cover rounded-xl" />
+            <img src={`${import.meta.env.VITE_API_BASE_URL ?? ""}${goods.imageUrl}`} alt={goods.name} className="w-full h-full object-cover rounded-xl" />
           ) : (
             <FaBox size={80} className="text-gray-600" />
           )}

@@ -1,0 +1,15 @@
+@import "./community-kfandom-core.css";
+.kf-free-board-detail .kf-community-page__shell > div {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px;
+}
+.kf-free-board-detail textarea {
+  min-height: 120px;
+  margin: 14px 0 12px;
+  padding: 14px 16px !important;
+}
+.kf-free-board-detail h3 {
+  margin: 0 0 12px;
+  font-size: 22px;
+}

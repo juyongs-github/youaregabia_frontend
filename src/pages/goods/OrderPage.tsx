@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaCreditCard, FaMoneyBill, FaSearch } from "react-icons/fa";
+import "../../styles/OrderPage.kfandom.css";
 import { SiKakaotalk } from "react-icons/si";
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
 import { cartUtils, goodsApi, type CartItem } from "../../api/goodsApi";
@@ -165,7 +166,7 @@ export default function OrderPage() {
   };
 
   return (
-    <div className="p-8 text-white min-h-screen max-w-4xl">
+    <div className="kf-expansion-page kf-order-page">
       <div className="flex items-center gap-4 mb-8">
         <button onClick={() => navigate("/goods/cart")} className="text-gray-400 hover:text-white transition-colors">
           <FaArrowLeft size={18} />
@@ -236,7 +237,7 @@ export default function OrderPage() {
                   <button
                     type="button"
                     onClick={openAddressSearch}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-semibold text-white transition-colors whitespace-nowrap"
                   >
                     <FaSearch size={13} /> 주소 검색
                   </button>
@@ -281,7 +282,7 @@ export default function OrderPage() {
                   setPointInput(String(max));
                   setPointsToUse(max);
                 }}
-                className="px-4 py-2.5 bg-yellow-600 hover:bg-yellow-700 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors"
+                className="px-4 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-gray-900 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors"
               >
                 모두 사용
               </button>

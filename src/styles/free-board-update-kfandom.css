@@ -1,0 +1,9 @@
+@import "./community-kfandom-core.css";
+.kf-free-board-update .kf-community-page__shell > div {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 26px;
+}
+.kf-free-board-update button:last-child {
+  background: linear-gradient(135deg, #ff7a8a, #ff5ca8) !important;
+}

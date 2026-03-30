@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import api from "../../api/axios";
+import "../../styles/CriticSongSelectModal.kfandom.css";
 
 interface Song {
   id: number;
@@ -25,7 +26,7 @@ function CriticSongSelectModal({ onClose, onSelect }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+    <div className="kf-expansion-modal fixed inset-0 z-50 flex items-center justify-center">
       <div className="w-full max-w-md rounded-2xl bg-neutral-900 overflow-hidden shadow-xl">
         {/* 헤더 */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-700">

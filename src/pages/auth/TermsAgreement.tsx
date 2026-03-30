@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../styles/terms.css";
+import "../../styles/auth-kfandom-core.css";
+import "../../styles/terms-kfandom.css";
 import TermsDetailModal from "./TermsDetailModal";
 
 function TermsAgreement() {
@@ -10,8 +11,6 @@ function TermsAgreement() {
   type TermType = "service" | "privacy" | "thirdParty" | "marketing";
   const [openTerm, setOpenTerm] = useState<TermType | null>(null);
 
-  const [agreeAll, setAgreeAll] = useState(false);
-
   const [terms, setTerms] = useState({
     service: false,     // 필수
     privacy: false,     // 필수
@@ -19,12 +18,11 @@ function TermsAgreement() {
     marketing: false,   // 선택
   });
 
-  // 필수 동의 체크 여부
+  const agreeAll = terms.service && terms.privacy && terms.thirdParty && terms.marketing;
   const isRequiredAgreed = terms.service && terms.privacy && terms.thirdParty;
 
   // 전체 동의 클릭
   const handleAgreeAll = (checked: boolean) => {
-    setAgreeAll(checked);
     setTerms({
       service: checked,
       privacy: checked,
@@ -40,15 +38,6 @@ function TermsAgreement() {
       [key]: !prev[key],
     }));
   };
-
-  // 개별 동의 변경 시 전체 동의 자동 동기화
-  useEffect(() => {
-    if (terms.service && terms.privacy && terms.thirdParty && terms.marketing) {
-      setAgreeAll(true);
-    } else {
-      setAgreeAll(false);
-    }
-  }, [terms]);
 
   return (
     <div className="terms-container">

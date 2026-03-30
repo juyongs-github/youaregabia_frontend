@@ -1,0 +1,15 @@
+@import "./expansion-kfandom-core.css";
+
+.kf-critic-list {
+  padding: 28px !important;
+}
+
+.kf-critic-list ul[class*="divide-y"] {
+  background: rgba(255, 255, 255, 0.56);
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.kf-critic-list [class*="divide-y"] > li + li {
+  border-top-color: rgba(92, 103, 151, 0.10) !important;
+}

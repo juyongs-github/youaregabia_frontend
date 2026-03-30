@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { sendSmsCode, verifySmsCode } from "../../api/sms";
-import "../../styles/auth.css";
-import "../../styles/find-account.css";
+import "../../styles/auth-kfandom-core.css";
+import "../../styles/find-account-kfandom.css";
 
 type Tab = "id" | "password";
 type Step = "input" | "verify" | "result";

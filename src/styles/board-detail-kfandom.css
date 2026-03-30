@@ -1,0 +1,19 @@
+@import "./community-kfandom-core.css";
+.kf-board-detail .kf-community-page__shell > div {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px;
+}
+.kf-board-detail textarea {
+  min-height: 120px;
+  margin-top: 14px;
+  margin-bottom: 12px;
+  padding: 14px 16px !important;
+}
+.kf-board-detail h3 {
+  margin: 0 0 12px;
+  font-size: 22px;
+}
+.kf-board-detail [class*="rounded-xl border"] {
+  border-radius: 26px !important;
+}

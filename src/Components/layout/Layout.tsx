@@ -2,18 +2,21 @@ import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
 
-// 공통 Layout
 function Layout() {
   return (
-    <div className="flex flex-col min-h-screen text-white bg-black">
+    <div style={{ minHeight: "100vh" }}>
       <Header />
-      <div className="flex">
+      <div style={{ display: "flex" }}>
         <Sidebar />
-        <main className="flex-1 ml-80 mt-20 overflow-y-auto h-[calc(100vh-5rem)]">
-          <div className="flex justify-center">
-            <div className="w-full p-20 max-w-7xl">
-              <Outlet />
-            </div>
+        <main style={{
+          flex: 1,
+          marginLeft: 320,
+          paddingTop: 96,
+          height: "100vh",
+          overflowY: "auto",
+        }}>
+          <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px 80px" }}>
+            <Outlet />
           </div>
         </main>
       </div>

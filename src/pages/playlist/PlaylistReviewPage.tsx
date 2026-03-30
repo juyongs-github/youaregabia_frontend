@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { reviewApi } from "../../api/reviewApi";
+import "../../styles/PlaylistReviewPage.kfandom.css";
 import { playlistSongApi } from "../../api/playlistSongApi";
 import type { Song } from "../../Components/ui/SongListItem";
 import Rating from "@mui/material/Rating";
@@ -205,7 +206,7 @@ function PlaylistReviewPage() {
 
   return (
     <div
-      className="min-h-screen px-8 py-10 text-white"
+      className="kf-expansion-page kf-playlist-review"
       style={{ paddingBottom: isPlayerVisible ? "160px" : undefined }}
     >
       <div className="max-w-5xl mx-auto">

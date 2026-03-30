@@ -3,6 +3,7 @@ import { pointApi, type PointHistoryDto } from "../../api/pointApi";
 import { rankingApi, type UserRankingDto } from "../../api/rankingApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
+import "../../styles/PointHistoryPage.kfandom.css";
 import type { PageResult } from "../../types/board";
 import Pagination from "../../Components/ui/Pagination";
 
@@ -165,7 +166,7 @@ const PointHistoryPage = () => {
   const dtoList = pageData?.dtoList ?? [];
 
   return (
-    <div className="mx-auto max-w-2xl p-6 text-white">
+    <div className="kf-expansion-page kf-point-history">
       {/* 등급 요약 카드 */}
       <div className="mb-6 rounded-xl border border-neutral-700 bg-neutral-900 px-6 py-5 shadow-lg">
         <div className="flex items-center justify-between">

@@ -4,7 +4,8 @@ import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../store/authSlice";
 import { sendSmsCode, verifySmsCode } from "../../api/sms";
 import { verifyCiMock } from "../../api/auth";
-import "../../styles/ciAuth.css";
+import "../../styles/auth-kfandom-core.css";
+import "../../styles/ci-auth-kfandom.css";
 
 // 신규 소셜 유저가 본인인증 후 회원가입을 완료하는 페이지
 function SocialRegisterPage() {

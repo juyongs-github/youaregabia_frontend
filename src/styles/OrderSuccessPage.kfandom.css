@@ -1,0 +1,13 @@
+@import "./expansion-kfandom-core.css";
+
+.kf-order-success {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kf-order-success > div {
+  width: min(100%, 560px);
+  padding: 40px 32px;
+}

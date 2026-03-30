@@ -37,6 +37,7 @@ import type { CollaboPlaylist } from "../../types/playlist";
 import MusicPlayer from "../../Components/layout/MusicPlayer";
 import Spinner from "../../Components/ui/Spinner";
 import api from "../../api/axios";
+import "../../styles/collabo-playlist-detail-kfandom.css";
 
 function timeAgo(dateStr?: string): string {
   if (!dateStr) return "";
@@ -54,7 +55,7 @@ function CollaboPlaylistDetailPage() {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const [playlist, setPlaylist] = useState<CollaboPlaylist | null>(null);
-  const [isPlaylistLoading] = useState(true);
+  const [isPlaylistLoading, setIsPlaylistLoading] = useState(true);
   const [songs, setSongs] = useState<CollaboSong[]>([]);
   const [isSongsLoading, setIsSongsLoading] = useState(false);
 
@@ -330,7 +331,9 @@ function CollaboPlaylistDetailPage() {
     !!user?.email && (isCreator || song.suggestedByEmail === user.email);
 
   return (
-    <div className="flex flex-col w-full gap-12">
+    <div className="kf-community-page kf-collabo-detail">
+      <div className="kf-community-page__shell">
+      <div className="flex flex-col w-full gap-12">
       <button
         className="flex items-center self-start gap-3"
         onClick={() => navigate("/community/collabo")}
@@ -343,7 +346,7 @@ function CollaboPlaylistDetailPage() {
       <div className="flex gap-8">
         <div className="flex-shrink-0 w-52 h-52 bg-slate-700 rounded-2xl overflow-hidden">
           {playlist?.imageUrl
-            ? <img src={"http://localhost:8080" + playlist.imageUrl} alt="" className="w-full h-full object-cover" />
+            ? <img src={playlist.imageUrl} alt="" className="w-full h-full object-cover" />
             : <div className="flex items-center justify-center w-full h-full"><FaMusic size={48} className="text-white opacity-40" /></div>
           }
         </div>
@@ -1074,20 +1077,20 @@ function CollaboPlaylistDetailPage() {
       )}
 
       {isPlayerVisible && playerSongs.length > 0 && (
-        <div className="fixed bottom-0 left-0 z-50 w-full">
-          <MusicPlayer
-            song={playerSongs[playerIndex]}
-            setIsPlayerVisible={() => {
-              setIsPlayerVisible(false);
-              setIsPreviewPaused(false);
-            }}
-            songs={playerSongs}
-            songIndex={playerIndex}
-            onSongChange={(index) => setPlayerIndex(index)}
-            externalPaused={isPreviewPaused}
-          />
-        </div>
+        <MusicPlayer
+          song={playerSongs[playerIndex]}
+          setIsPlayerVisible={() => {
+            setIsPlayerVisible(false);
+            setIsPreviewPaused(false);
+          }}
+          songs={playerSongs}
+          songIndex={playerIndex}
+          onSongChange={(index) => setPlayerIndex(index)}
+          externalPaused={isPreviewPaused}
+        />
       )}
+      </div>
+      </div>
     </div>
   );
 }

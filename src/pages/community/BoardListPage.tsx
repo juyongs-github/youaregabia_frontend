@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import Pagination from "../../Components/ui/Pagination";
 import BoardItem from "../../Components/ui/BoardItem";
 import BoardSortBar from "../../Components/ui/BoardSortBar";
+import "../../styles/board-list-kfandom.css";
 
 const BoardListPage = () => {
   // 페이징 관리
@@ -87,11 +88,13 @@ const BoardListPage = () => {
 
   //  로딩 중
   if (!pageData) {
-    return <div className="p-4 text-center">로딩 중...</div>;
+    return <div className="kf-community-loading">로딩 중...</div>;
   }
 
   return (
-    <div className="mx-auto max-w-4xl p-4">
+    <div className="kf-community-page kf-board-list">
+      <div className="kf-community-page__shell">
+      <div className="mx-auto max-w-4xl p-4">
       {/* 상단 헤더 */}
       <div className="mt-8 mb-6 flex items-end justify-between border-b border-neutral-700 pb-5">
         <div>
@@ -183,6 +186,8 @@ const BoardListPage = () => {
       {/* 페이지 정보 */}
       <div className="mt-4 text-center text-sm text-gray-400">
         전체 {pageData.totalCount}개 · {pageData.current} 페이지
+      </div>
+      </div>
       </div>
     </div>
   );

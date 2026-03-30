@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FaRegStar, FaStar, FaTimes } from "react-icons/fa";
 import { reviewApi } from "../../api/reviewApi";
 import { useSelector } from "react-redux";
+import "../../styles/PlaylistReviewCreateModal.kfandom.css";
 
 interface Props {
   onClose: () => void;
@@ -19,7 +20,7 @@ function PlaylistReviewCreateModal({ onClose, playlistId, onSuccess }: Props) {
   const user = useSelector((state: any) => state.auth.user);
 
   return (
-    <div className="modal-overlay">
+    <div className="kf-expansion-modal modal-overlay">
       <div className="modal-container">
         <div className="modal-header">
           <h2>리뷰 작성</h2>

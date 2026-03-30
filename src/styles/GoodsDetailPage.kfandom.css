@@ -1,0 +1,10 @@
+@import "./expansion-kfandom-core.css";
+
+.kf-goods-detail > div:first-child {
+  padding: 28px !important;
+}
+
+.kf-goods-detail [class*="rounded-2xl"],
+.kf-goods-detail [class*="rounded-xl"] {
+  border-radius: 22px !important;
+}

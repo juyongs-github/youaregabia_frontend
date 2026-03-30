@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
 import { goodsApi, cartUtils } from "../../api/goodsApi";
 import api from "../../api/axios";
+import "../../styles/OrderSuccessPage.kfandom.css";
 
 const POINT_SESSION_KEY = "order_points_to_use";
 
@@ -61,7 +62,7 @@ export default function OrderSuccessPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-white p-8">
+      <div className="kf-expansion-page kf-order-success">
         <div className="text-center max-w-md">
           <p className="text-red-400 text-lg mb-6">{error}</p>
           <button
@@ -76,7 +77,7 @@ export default function OrderSuccessPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center text-white p-8">
+    <div className="kf-expansion-page kf-order-success">
       <div className="text-center max-w-md w-full">
         <FaCheckCircle className="text-green-400 mx-auto mb-5" size={64} />
         <h1 className="text-2xl font-bold mb-2">결제가 완료되었습니다!</h1>

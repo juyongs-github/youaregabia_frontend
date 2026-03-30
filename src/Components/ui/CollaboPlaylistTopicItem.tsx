@@ -85,7 +85,7 @@ function PlaylistCard({
         <div className="relative flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg w-36 h-36 bg-slate-700">
           {playlist.imageUrl ? (
             <img
-              src={`${import.meta.env.VITE_API_BASE_URL}${playlist.imageUrl}`}
+              src={playlist.imageUrl}
               alt=""
               className="object-cover w-full h-full"
             />

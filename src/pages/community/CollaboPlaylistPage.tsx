@@ -12,6 +12,7 @@ import type { CollaboPlaylist } from "../../types/playlist";
 import Spinner from "../../Components/ui/Spinner";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
+import "../../styles/collabo-playlist-page-kfandom.css";
 
 // 공동 플레이리스트 제작 페이지
 function CollaboPlaylistPage() {
@@ -75,7 +76,9 @@ function CollaboPlaylistPage() {
   );
 
   return (
-    <div>
+    <div className="kf-community-page kf-collabo-page">
+      <div className="kf-community-page__shell">
+      <div>
       {/* 제목 부분 */}
       <div className="flex items-center justify-between mb-8 tracking-tighter">
         <div>
@@ -119,9 +122,9 @@ function CollaboPlaylistPage() {
                 onChange={(_, v) => setTab(v)}
                 aria-label="공동 플레이리스트 제작 Filter Tab"
                 sx={{
-                  "& .MuiTab-root": { color: "#ffffff", fontWeight: 600, fontSize: 16 },
-                  "& .Mui-selected": { color: "#ffffff" },
-                  "& .MuiTabs-indicator": { backgroundColor: "#ffffff" },
+                  "& .MuiTab-root": { color: "#677086", fontWeight: 600, fontSize: 16 },
+                  "& .Mui-selected": { color: "#212738" },
+                  "& .MuiTabs-indicator": { backgroundColor: "#6d5efc" },
                 }}
               >
                 <Tab label="전체" value="1" />
@@ -152,6 +155,8 @@ function CollaboPlaylistPage() {
           }}
         />
       )}
+      </div>
+      </div>
     </div>
   );
 }

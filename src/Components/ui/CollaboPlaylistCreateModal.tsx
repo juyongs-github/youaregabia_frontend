@@ -6,6 +6,7 @@ import type { RootState } from "../../store";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from "date-fns/locale";
+import "../../styles/modal.css";
 
 interface Props {
   onClose: () => void;
@@ -93,7 +94,7 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
         {/* 썸네일 */}
         <label className="thumbnail-box">
           {preview ? (
-            <img src={preview} className="absolute inset-0 w-full h-full rounded-[18px]" />
+            <img src={preview} className="absolute inset-0 w-full h-full rounded-2xl" />
           ) : (
             <>
               <FaPlus size={20} />
@@ -150,8 +151,8 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
             locale={ko}
             dateFormat="yyyy년 MM월 dd일"
             placeholderText="날짜를 선택하세요"
-            popperPlacement="right-start"
-            popperProps={{ strategy: "fixed" }}
+            popperPlacement="bottom-start"
+            portalId="collabo-datepicker-portal"
             wrapperClassName="w-full"
             customInput={
               <div
@@ -159,16 +160,19 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  padding: "14px",
-                  borderRadius: "12px",
-                  background: "#1b2b3b",
-                  border: "1.5px solid transparent",
-                  color: deadlineDate ? "white" : "#6b8099",
-                  fontSize: "15px",
+                  padding: "10px 16px",
+                  borderRadius: "16px",
+                  background: "rgba(247, 248, 255, 0.88)",
+                  border: "1.5px solid rgba(88, 95, 138, 0.22)",
+                  color: deadlineDate ? "#1f2430" : "#8e97ab",
+                  fontSize: "14px",
+                  fontWeight: 500,
                   cursor: "pointer",
-                  transition: "border-color 0.2s",
+                  transition: "border-color 0.2s, box-shadow 0.2s",
                   userSelect: "none",
                   width: "100%",
+                  boxShadow: "0 2px 8px rgba(80, 90, 140, 0.06)",
+                  boxSizing: "border-box",
                 }}
               >
                 <span>{deadlineDate
@@ -184,7 +188,7 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
                       ×
                     </span>
                   )}
-                  <FaCalendarAlt size={14} style={{ opacity: 0.6 }} />
+                  <FaCalendarAlt size={14} style={{ opacity: 0.5, color: "#677086" }} />
                 </div>
               </div>
             }

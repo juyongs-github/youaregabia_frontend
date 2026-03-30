@@ -1,0 +1,10 @@
+@import "./expansion-kfandom-core.css";
+
+.kf-playlist-review > div:first-child {
+  padding: 28px !important;
+}
+
+.kf-playlist-review [class*="rounded-2xl"],
+.kf-playlist-review [class*="rounded-xl"] {
+  border-radius: 22px !important;
+}

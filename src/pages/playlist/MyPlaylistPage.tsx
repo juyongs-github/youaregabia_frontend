@@ -4,20 +4,15 @@ import type { Playlist } from "../../types/playlist";
 import { playlistApi } from "../../api/playlistApi";
 import { FaPlay, FaPlus } from "react-icons/fa";
 import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
-
+import "../../styles/playlist-kfandom.css";
 
 function MyPlaylistPage() {
   const navigate = useNavigate();
 
-  // 플레이리스트 정보
   const [data, setData] = useState<Playlist[]>([]);
   const [, setIsLoading] = useState<boolean>(false);
   const [, setIsError] = useState<boolean>(false);
-
-  // Create Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // 정렬 State
   const [sortType, setSortType] = useState("oldest");
 
   const fetchData = async () => {
@@ -39,32 +34,21 @@ function MyPlaylistPage() {
     fetchData();
   }, []);
 
-  // 데이터 정렬
   const sortedData = [...data].sort((a, b) => {
-    if (sortType === "latest") {
-      return b.id - a.id;
-    }
-
-    if (sortType === "oldest") {
-      return a.id - b.id;
-    }
-
-    if (sortType === "title") {
-      return a.title.localeCompare(b.title);
-    }
-
+    if (sortType === "latest") return b.id - a.id;
+    if (sortType === "oldest") return a.id - b.id;
+    if (sortType === "title") return a.title.localeCompare(b.title);
     return 0;
   });
 
   return (
-    <div>
-      <div className="flex justify-between items-center py-3">
-        <h1 className="page-title">내 플레이리스트</h1>
-
+    <div className="kf-pl-page">
+      <div className="kf-pl-header">
+        <h1 className="kf-pl-title">내 플레이리스트</h1>
         <select
+          className="kf-pl-sort"
           value={sortType}
           onChange={(e) => setSortType(e.target.value)}
-          className="sort-select"
         >
           <option value="oldest">오래된 순</option>
           <option value="latest">최신순</option>
@@ -72,40 +56,32 @@ function MyPlaylistPage() {
         </select>
       </div>
 
-      <div className="flex flex-wrap gap-7">
-        {/* 정렬 */}
-
+      <div className="kf-pl-grid">
         {sortedData.map((item) => (
           <div
             key={item.id}
-            className="playlist-card top-playlist-card top-playlist-card-small"
-            onClick={() => {
-              navigate(`/playlist/me/${item.id}`);
-            }}
+            className="kf-pl-card"
+            onClick={() => navigate(`/playlist/me/${item.id}`)}
           >
-            <div className="playlist-image-wrapper">
-              <img src={`${import.meta.env.VITE_API_BASE_URL}${item.imageUrl}`} />
-              <button className="play-button">
-                <FaPlay />
+            <div className="kf-pl-card__img-wrap">
+              <img src={`${import.meta.env.VITE_API_BASE_URL ?? ""}${item.imageUrl}`} alt={item.title} />
+              <button className="kf-pl-card__play" onClick={(e) => e.stopPropagation()}>
+                <FaPlay size={16} />
               </button>
-              <span className="playlist-title-small">{item.title}</span>
+              <span className="kf-pl-card__name">{item.title}</span>
             </div>
           </div>
         ))}
-        <div
-          className="playlist-card top-playlist-card top-playlist-card-small add-playlist-card"
-          onClick={() => setIsModalOpen(true)}
-        >
-          <div className="add-playlist-inner">
-            <FaPlus />
-            <span>플레이리스트 추가</span>
-          </div>
+
+        <div className="kf-pl-add" onClick={() => setIsModalOpen(true)}>
+          <FaPlus size={22} />
+          <span>플레이리스트 추가</span>
         </div>
-        {/* ===== 플레이리스트 생성 모달 ===== */}
-        {isModalOpen && (
-          <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
-        )}
       </div>
+
+      {isModalOpen && (
+        <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
+      )}
     </div>
   );
 }

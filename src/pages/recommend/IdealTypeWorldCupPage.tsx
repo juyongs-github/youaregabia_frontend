@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import "../../styles/IdealTypeWorldCupPage.css";
+import "../../styles/IdealTypeWorldCupPage.kfandom.css";
 import { playlistApi } from "../../api/playlistApi";
 import type {
   SongDTO,
@@ -572,7 +573,7 @@ export default function IdealTypeWorldCupPage() {
     .map((item) => item.song);
 
   return (
-    <div className="wc-page">
+    <div className="kf-expansion-page wc-page">
       <div className="wc-inner">
         {/* ━━━━━━━━━━━━━━ START — 강 수 선택 화면 ━━━━━━━━━━━━━━ */}
         {screen === "start" && (

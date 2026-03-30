@@ -1,0 +1,166 @@
+html:has(.ci-page),
+body:has(.ci-page) {
+  overflow: auto !important;
+  height: auto !important;
+}
+
+.ci-page {
+  min-height: 100vh;
+  padding: 40px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(132, 195, 255, 0.16), transparent 26%),
+    radial-gradient(circle at 82% 16%, rgba(255, 230, 180, 0.18), transparent 24%),
+    radial-gradient(circle at 78% 70%, rgba(255, 153, 198, 0.18), transparent 24%),
+    radial-gradient(circle at 24% 82%, rgba(146, 128, 255, 0.16), transparent 28%),
+    linear-gradient(180deg, #fcfcff 0%, #f7f8ff 44%, #f9fbff 100%);
+}
+
+.ci-page::before,
+.ci-page::after {
+  content: "";
+  position: fixed;
+  border-radius: 999px;
+  filter: blur(72px);
+  opacity: 0.84;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ci-page::before {
+  width: 320px;
+  height: 320px;
+  top: 72px;
+  left: -48px;
+  background: rgba(132, 195, 255, 0.18);
+}
+
+.ci-page::after {
+  width: 360px;
+  height: 360px;
+  right: 2%;
+  bottom: 8%;
+  background: rgba(255, 92, 168, 0.14);
+}
+
+.ci-card {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 540px);
+  padding: 34px 32px;
+  border-radius: var(--kf-radius-xl);
+  background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(255,255,255,0.62));
+  border: 1px solid rgba(255,255,255,0.72);
+  box-shadow: var(--kf-shadow-lg);
+  backdrop-filter: blur(24px);
+}
+
+.ci-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(109,94,252,0.14), rgba(255,92,168,0.12));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.ci-badge-wrap {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.ci-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(109,94,252,0.10), rgba(255,92,168,0.10));
+  border: 1px solid rgba(109,94,252,0.12);
+  color: var(--kf-brand);
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.ci-title {
+  margin: 0;
+  font-size: 38px;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  text-align: center;
+  font-weight: 800;
+  color: var(--kf-text-main);
+}
+
+.ci-desc {
+  margin: 12px 0 26px;
+  text-align: center;
+  color: var(--kf-text-sub);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.ci-field {
+  margin-bottom: 18px;
+}
+
+.ci-field label {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: var(--kf-text-main);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ci-sub-btn {
+  white-space: nowrap;
+}
+
+.ci-actions {
+  margin-top: 24px;
+  display: grid;
+  gap: 12px;
+}
+
+.ci-main-btn:disabled,
+.ci-sub-btn:disabled {
+  box-shadow: none;
+}
+
+.ci-cancel-btn {
+  background: rgba(255,255,255,0.52);
+}
+
+@media (max-width: 640px) {
+  .ci-page {
+    padding: 18px 14px 28px;
+    align-items: flex-start;
+  }
+
+  .ci-card {
+    padding: 24px 18px;
+    border-radius: 24px;
+  }
+
+  .ci-title {
+    font-size: 30px;
+  }
+
+  .ci-badge {
+    width: 100%;
+    white-space: normal;
+    text-align: center;
+    padding: 8px 14px;
+  }
+}

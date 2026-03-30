@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaBox, FaMinus, FaPlus, FaTrash, FaArrowLeft } from "react-icons/fa";
 import { cartUtils, type CartItem } from "../../api/goodsApi";
+import "../../styles/CartPage.kfandom.css";
 
 const DELIVERY_FEE = 3000;
 const FREE_DELIVERY_THRESHOLD = 50000;
@@ -32,7 +33,7 @@ export default function CartPage() {
   const total = subtotal + deliveryFee;
 
   return (
-    <div className="p-8 text-white min-h-screen max-w-4xl">
+    <div className="kf-expansion-page kf-cart-page">
       {/* 헤더 */}
       <div className="flex items-center gap-4 mb-8">
         <button onClick={() => navigate("/goods")} className="text-gray-400 hover:text-white transition-colors">

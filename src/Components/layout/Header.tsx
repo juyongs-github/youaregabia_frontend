@@ -1,11 +1,9 @@
-import Avatar from "@mui/material/Avatar";
-import IconButton from "@mui/material/IconButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { useEffect, useRef, useState } from "react";
-import { FaHeadphones, FaSearch, FaTimes, FaBell, FaShoppingCart, FaClipboardList } from "react-icons/fa";
+import { FaSearch, FaTimes, FaShoppingCart, FaClipboardList } from "react-icons/fa";
 import { BiSolidUser } from "react-icons/bi";
 import { RiLogoutBoxRLine } from "react-icons/ri";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -14,6 +12,7 @@ import type { RootState } from "../../store";
 import { logout } from "../../store/authSlice";
 import api from "../../api/axios";
 import { usePoint } from "../../store/usePoint";
+import "../../styles/header-kfandom.css";
 
 interface NotificationItem {
   id: number;
@@ -37,14 +36,6 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
     navigate("/login");
   };
 
-  const gradeColor = {
-    ENSEMBLE: "text-black-400",
-    SESSION: "text-amber-600",
-    SOLOIST: "text-gray-300",
-    MAESTRO: "text-yellow-400",
-    LEGEND: "text-cyan-400",
-  };
-
   const goPage = (path: string) => {
     if (location.pathname === path) {
       window.location.reload();
@@ -65,7 +56,6 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
     setAnchorEl(null);
   };
 
-  // 알림 상태
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -84,11 +74,10 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
   useEffect(() => {
     if (!isLogin) return;
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000); // 30초마다 폴링
+    const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, [isLogin]);
 
-  // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
@@ -114,210 +103,214 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-20 px-10 py-5 bg-black border-b border-gray-800 gap-7">
-      {/* 로고 부분 */}
-      <div className="flex items-center flex-shrink-0 gap-8">
+    <div className="kf-header-wrap">
+      <header className="kf-header">
+        {/* 브랜드 */}
         <button
-          className="flex items-center gap-3"
+          className="kf-header__brand"
           onClick={() => goPage(user?.role === "ADMIN" ? "/admin" : "/home")}
         >
-          <div className="flex items-center justify-center w-8 h-8 bg-red-600 rounded-full">
-            <FaHeadphones size={20} color="white" />
-          </div>
-          <span className="text-2xl font-semibold">GAP Music</span>
+          <span className="kf-header__brandMark">G</span>
+          <span className="kf-header__brandCopy">
+            <strong className="kf-header__brandTitle">GAP Music</strong>
+            <span className="kf-header__brandSub">K-Fandom Hub Edition</span>
+          </span>
         </button>
-      </div>
 
-      {/* 검색바 부분 */}
-      <div className={`relative flex-shrink-0 ${!showSearch ? "invisible" : ""}`}>
-          <input
-            type="text"
-            placeholder="검색"
-            value={searchValue}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                if (!searchValue.trim()) {
-                  alert("검색어를 입력 해주세요.");
-                  return;
+        {/* 검색바 */}
+        {showSearch && (
+          <div className="kf-header__search">
+            <input
+              type="text"
+              placeholder="검색"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  if (!searchValue.trim()) {
+                    alert("검색어를 입력해주세요.");
+                    return;
+                  }
+                  const url = `/search?q=${encodeURIComponent(searchValue)}`;
+                  if (location.pathname + location.search === url) {
+                    navigate(url, { replace: true, state: { refresh: Date.now() } });
+                  } else {
+                    navigate(url);
+                  }
                 }
-                const url = `/search?q=${encodeURIComponent(searchValue)}`;
-                if (location.pathname + location.search === url) {
-                  navigate(url, { replace: true, state: { refresh: Date.now() } });
-                } else {
-                  navigate(url);
-                }
-              }
-            }}
-            className="px-16 py-3 text-white bg-gray-800 rounded-full w-[50rem] focus:outline-none focus:ring-2 focus:ring-white"
-          />
-          <FaSearch className="absolute text-gray-400 left-6 top-3.5" size={20} />
-          {searchValue && (
-            <button
-              onClick={() => setSearchValue("")}
-              className="absolute text-gray-400 right-6 top-3.5 hover:text-white transition-colors"
-            >
-              <FaTimes size={20} />
-            </button>
-          )}
-        </div>
-
-      {/* 알림 + 유저 프로필 */}
-      <div className="flex items-center gap-4">
-        {/* 포인트/등급 표시 */}
-        {isLogin && (
-          <button
-            onClick={() => navigate("/profile/points")}
-            className="flex items-center gap-2 rounded-full border border-neutral-700 px-3 py-1.5 hover:bg-neutral-800 transition-colors"
-          >
-            <span
-              className={`text-xs font-bold ${gradeColor[grade as keyof typeof gradeColor] ?? "text-amber-600"}`}
-            >
-              {grade}
-            </span>
-            <span className="text-xs text-gray-400">{totalPoint.toLocaleString()}P</span>
-          </button>
-        )}
-        {/* 알림 벨 */}
-        {isLogin && (
-          <div className="relative" ref={notifRef}>
-            <button
-              onClick={() => setNotifOpen((prev) => !prev)}
-              className="relative p-2 text-gray-300 hover:text-white transition-colors"
-            >
-              <FaBell size={22} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </span>
-              )}
-            </button>
-
-            {/* 알림 드롭다운 */}
-            {notifOpen && (
-              <div className="absolute right-0 top-12 w-80 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700">
-                  <span className="font-bold text-white text-sm">알림</span>
-                  {unreadCount > 0 && (
-                    <button
-                      onClick={handleMarkAllRead}
-                      className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
-                    >
-                      모두 읽음
-                    </button>
-                  )}
-                </div>
-                <div className="max-h-96 overflow-y-auto">
-                  {notifications.length === 0 ? (
-                    <p className="text-gray-500 text-sm text-center py-8">알림이 없습니다.</p>
-                  ) : (
-                    notifications.slice(0, 4).map((n) => (
-                      <button
-                        key={n.id}
-                        onClick={() => handleNotifClick(n)}
-                        className={`w-full text-left px-4 py-3 border-b border-gray-800 hover:bg-gray-800 transition-colors ${
-                          !n.isRead ? "bg-gray-800/50" : ""
-                        }`}
-                      >
-                        <div className="flex items-start gap-2">
-                          {!n.isRead && (
-                            <span className="mt-1.5 w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
-                          )}
-                          <div className={!n.isRead ? "" : "ml-4"}>
-                            <p className="text-sm text-white leading-snug">{n.message}</p>
-                            <p className="text-xs text-gray-500 mt-1">{n.createdAt.slice(0, 10)}</p>
-                          </div>
-                        </div>
-                      </button>
-                    ))
-                  )}
-                </div>
-              </div>
+              }}
+              className="kf-header__searchInput"
+            />
+            {searchValue ? (
+              <button className="kf-header__searchClear" onClick={() => setSearchValue("")}>
+                <FaTimes size={16} />
+              </button>
+            ) : (
+              <span className="kf-header__searchIcon">
+                <FaSearch size={16} />
+              </span>
             )}
           </div>
         )}
 
-        {/* 아바타 메뉴 */}
-        <IconButton onClick={handleClick} size="small">
-          <Avatar
-            src={user?.imgUrl ? `${import.meta.env.VITE_API_BASE_URL}${user.imgUrl}` : undefined}
-            sx={{
-              width: 35,
-              height: 35,
-              bgcolor: user?.imgUrl ? "transparent" : "#3b82f6",
-            }}
-          >
-            {!user?.imgUrl && (user?.name ? user.name[0] : "U")}
-          </Avatar>
-        </IconButton>
+        {/* 우측 액션 영역 */}
+        <div className="kf-header__actions">
+          {/* 등급/포인트 칩 */}
+          {isLogin && (
+            <button
+              className="kf-header__chip"
+              onClick={() => navigate("/profile/points")}
+            >
+              <span className="kf-header__chipDot" />
+              {grade} · {totalPoint.toLocaleString()}P
+            </button>
+          )}
 
-        <Menu
-          anchorEl={anchorEl}
-          id="account-menu"
-          open={open}
-          onClose={handleClose}
-          onClick={handleClose}
-          transformOrigin={{ vertical: "top", horizontal: "right" }}
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          slotProps={{
-            paper: {
-              style: { backgroundColor: "#2c2c2c", marginTop: "8px" },
-            },
-          }}
-        >
-          <MenuItem
-            onClick={() => goPage("/profile/me")}
-            sx={{
-              color: "white",
-              fontWeight: "bold",
-              py: 1.5,
-              "&:hover": { backgroundColor: "#3d3d3d" },
+          {/* 알림 버튼 */}
+          {isLogin && (
+            <div style={{ position: "relative" }} ref={notifRef}>
+              <button
+                className="kf-header__iconBtn"
+                aria-label="알림"
+                onClick={() => setNotifOpen((prev) => !prev)}
+              >
+                {unreadCount > 0 && (
+                  <span className="kf-header__iconBadge">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M10 17a2 2 0 0 0 4 0"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+
+              {notifOpen && (
+                <div className="kf-notif-dropdown">
+                  <div className="kf-notif-header">
+                    <span>알림</span>
+                    {unreadCount > 0 && (
+                      <button onClick={handleMarkAllRead}>모두 읽음</button>
+                    )}
+                  </div>
+                  <div className="kf-notif-list">
+                    {notifications.length === 0 ? (
+                      <p className="kf-notif-empty">알림이 없습니다.</p>
+                    ) : (
+                      notifications.slice(0, 4).map((n) => (
+                        <button
+                          key={n.id}
+                          className={`kf-notif-item${!n.isRead ? " unread" : ""}`}
+                          onClick={() => handleNotifClick(n)}
+                        >
+                          {!n.isRead && <span className="kf-notif-dot" />}
+                          <div style={n.isRead ? { marginLeft: 18 } : {}}>
+                            <p className="kf-notif-msg">{n.message}</p>
+                            <p className="kf-notif-date">{n.createdAt.slice(0, 10)}</p>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 프로필 버튼 */}
+          <button
+            className="kf-header__profileBtn"
+            aria-label="프로필"
+            onClick={handleClick}
+          >
+            {user?.imgUrl ? (
+              <img
+                src={`${import.meta.env.VITE_API_BASE_URL ?? ""}${user.imgUrl}`}
+                alt="프로필"
+                style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover" }}
+              />
+            ) : (
+              user?.name ? user.name[0] : "U"
+            )}
+          </button>
+
+          <Menu
+            anchorEl={anchorEl}
+            id="account-menu"
+            open={open}
+            onClose={handleClose}
+            onClick={handleClose}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            slotProps={{
+              paper: {
+                style: {
+                  backgroundColor: "rgba(255,255,255,0.96)",
+                  backdropFilter: "blur(18px)",
+                  borderRadius: 16,
+                  border: "1px solid rgba(88,95,138,0.10)",
+                  boxShadow: "0 24px 60px rgba(80,90,140,0.16)",
+                  marginTop: 8,
+                },
+              },
             }}
           >
-            <ListItemIcon sx={{ color: "white" }}>
-              <BiSolidUser size={20} />
-            </ListItemIcon>
-            <ListItemText>내 프로필</ListItemText>
-          </MenuItem>
-          {user?.role !== "ADMIN" && (
             <MenuItem
-              onClick={() => goPage("/goods/cart")}
-              sx={{ color: "white", fontWeight: "bold", py: 1.5, "&:hover": { backgroundColor: "#3d3d3d" } }}
+              onClick={() => goPage("/profile/me")}
+              sx={{ color: "#1f2430", fontWeight: 700, py: 1.5, "&:hover": { backgroundColor: "rgba(109,94,252,0.06)" } }}
             >
-              <ListItemIcon sx={{ color: "white" }}>
-                <FaShoppingCart size={18} />
+              <ListItemIcon sx={{ color: "#6d5efc" }}>
+                <BiSolidUser size={20} />
               </ListItemIcon>
-              <ListItemText>장바구니</ListItemText>
+              <ListItemText>내 프로필</ListItemText>
             </MenuItem>
-          )}
-          {user?.role !== "ADMIN" && (
+            {user?.role !== "ADMIN" && (
+              <MenuItem
+                onClick={() => goPage("/goods/cart")}
+                sx={{ color: "#1f2430", fontWeight: 700, py: 1.5, "&:hover": { backgroundColor: "rgba(109,94,252,0.06)" } }}
+              >
+                <ListItemIcon sx={{ color: "#6d5efc" }}>
+                  <FaShoppingCart size={18} />
+                </ListItemIcon>
+                <ListItemText>장바구니</ListItemText>
+              </MenuItem>
+            )}
+            {user?.role !== "ADMIN" && (
+              <MenuItem
+                onClick={() => goPage("/goods/orders")}
+                sx={{ color: "#1f2430", fontWeight: 700, py: 1.5, "&:hover": { backgroundColor: "rgba(109,94,252,0.06)" } }}
+              >
+                <ListItemIcon sx={{ color: "#6d5efc" }}>
+                  <FaClipboardList size={18} />
+                </ListItemIcon>
+                <ListItemText>주문 내역</ListItemText>
+              </MenuItem>
+            )}
             <MenuItem
-              onClick={() => goPage("/goods/orders")}
-              sx={{ color: "white", fontWeight: "bold", py: 1.5, "&:hover": { backgroundColor: "#3d3d3d" } }}
+              onClick={handleLogout}
+              sx={{ color: "#ff5b6e", fontWeight: 700, py: 1.5, "&:hover": { backgroundColor: "rgba(255,91,110,0.06)" } }}
             >
-              <ListItemIcon sx={{ color: "white" }}>
-                <FaClipboardList size={18} />
+              <ListItemIcon sx={{ color: "#ff5b6e" }}>
+                <RiLogoutBoxRLine size={20} />
               </ListItemIcon>
-              <ListItemText>주문 내역</ListItemText>
+              <ListItemText>로그아웃</ListItemText>
             </MenuItem>
-          )}
-          <MenuItem
-            onClick={handleLogout}
-            sx={{
-              color: "white",
-              fontWeight: "bold",
-              py: 1.5,
-              "&:hover": { backgroundColor: "#3d3d3d" },
-            }}
-          >
-            <ListItemIcon sx={{ color: "white" }}>
-              <RiLogoutBoxRLine size={20} />
-            </ListItemIcon>
-            <ListItemText>로그아웃</ListItemText>
-          </MenuItem>
-        </Menu>
-      </div>
-    </header>
+          </Menu>
+        </div>
+      </header>
+    </div>
   );
 }
 

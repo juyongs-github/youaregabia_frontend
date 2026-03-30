@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
+import "../../styles/CriticWrite.kfandom.css";
 import CriticSongSelectModal from "../../Components/ui/CriticSongSelectModal";
 
 interface SelectedSong {
@@ -74,7 +75,7 @@ const CriticWrite = () => {
   };
 
   return (
-    <div className="mx-auto max-w-2xl p-6 text-white">
+    <div className="kf-expansion-page kf-critic-write">
       <h2 className="mb-6 text-2xl font-bold">평론 작성</h2>
 
       {/* 곡 선택 영역 */}

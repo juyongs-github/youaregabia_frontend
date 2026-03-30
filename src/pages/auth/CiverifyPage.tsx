@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../styles/ciAuth.css";
+import "../../styles/auth-kfandom-core.css";
+import "../../styles/ci-auth-kfandom.css";
 
 import { sendSmsCode, verifySmsCode } from "../../api/sms";
 import { verifyCiMock } from "../../api/auth";
-
 
 export default function CiVerifyPage() {
   const navigate = useNavigate();
@@ -23,14 +23,13 @@ export default function CiVerifyPage() {
   const [loadingSms, setLoadingSms] = useState(false);
   const [loadingCi, setLoadingCi] = useState(false);
 
-  // --- 실시간 유효성 검사 (입력창 색상용) ---
   const isNameValid = /^[가-힣]{2,10}$/.test(name.trim());
   const isNameError = name.length > 0 && !isNameValid;
   const nameErrorMsg = isNameError ? "이름은 한글 2~10자로 입력해주세요." : null;
 
   const birthError = useMemo(() => {
-    if (!birth) return null; // 입력 전엔 에러 아님
-    if (birth.length < 10) return null; // 입력 중엔 에러 아님 (다 쳤을 때 판단)
+    if (!birth) return null;
+    if (birth.length < 10) return null;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(birth)) return "생년월일 형식이 올바르지 않습니다.";
 
     const parts = birth.split("-");
@@ -44,18 +43,14 @@ export default function CiVerifyPage() {
     return null;
   }, [birth]);
 
-  // 생년월일: 10자리이고 에러가 없으면 성공(Green)
   const isBirthValid = birth.length === 10 && !birthError;
-  // 생년월일: 10자리인데 에러가 있으면 실패(Red)
   const isBirthError = birth.length === 10 && !!birthError;
 
   const phoneDigits = useMemo(() => phone.replace(/\D/g, ""), [phone]);
   const isPhoneValid = /^01[016789]\d{7,8}$/.test(phoneDigits);
-  // 휴대폰: 정규식 통과하면 성공, 입력은 했는데 틀리면 에러
   const isPhoneError = phone.length > 3 && !isPhoneValid;
   const phoneErrorMsg = isPhoneError ? "올바른 휴대폰 번호를 입력해주세요. (예: 010-1234-5678)" : null;
 
-  // 인증코드: 6자리 숫자면 형식은 OK
   const isSmsCodeFormatValid = /^\d{6}$/.test(smsCode);
 
   function formatPhone(value: string) {
@@ -72,12 +67,10 @@ export default function CiVerifyPage() {
     return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)}`;
   }
 
-  /* --- 버튼 활성화 조건 --- */
   const canRequestSms = isNameValid && isBirthValid && isPhoneValid && !smsVerified && !loadingSms;
   const canVerifySms = smsSent && !smsVerified && isSmsCodeFormatValid && !loadingSms;
   const canVerifyCi = smsVerified && isNameValid && isBirthValid && !loadingCi;
 
-  /* --- 핸들러 함수들 --- */
   async function onSendSms() {
     setSmsError(null);
     setSmsMsg(null);
@@ -139,7 +132,6 @@ export default function CiVerifyPage() {
     }
   };
 
-  /* --- 헬퍼: 클래스네임 생성기 --- */
   const getInputClass = (isValid: boolean, isError: boolean) => {
     if (isValid) return "input-success";
     if (isError) return "input-error";
@@ -149,6 +141,10 @@ export default function CiVerifyPage() {
   return (
     <div className="ci-page">
       <div className="ci-card">
+        <div className="ci-badge-wrap">
+          <span className="ci-badge">가입 전 마지막 확인 단계</span>
+        </div>
+
         <h1 className="ci-title">본인인증</h1>
         <p className="ci-desc">회원가입을 위해 본인 정보를 입력해 주세요.</p>
 
@@ -185,7 +181,6 @@ export default function CiVerifyPage() {
               onChange={(e) => setPhone(formatPhone(e.target.value))}
               disabled={smsVerified}
               placeholder="010-0000-0000"
-              // 인증 완료되면 무조건 성공색(연두), 아니면 유효성 따라감
               className={smsVerified ? "input-success" : getInputClass(isPhoneValid, isPhoneError)}
             />
             <button
@@ -194,13 +189,12 @@ export default function CiVerifyPage() {
               disabled={!canRequestSms}
               onClick={!smsVerified ? onSendSms : undefined}
             >
-              {smsVerified ? "인증완료" : "인증번호 요청"}
+              {smsVerified ? "인증완료" : loadingSms && !smsSent ? "전송 중..." : "인증번호 요청"}
             </button>
           </div>
 
-          {/* 인증번호 입력창 간격 벌림 (marginTop style 사용) */}
           {smsSent && !smsVerified && (
-            <div className="ci-sms-row" style={{ marginTop: '15px' }}>
+            <div className="ci-sms-row" style={{ marginTop: "15px" }}>
               <input
                 value={smsCode}
                 onChange={(e) => setSmsCode(e.target.value.slice(0, 6))}
@@ -213,20 +207,25 @@ export default function CiVerifyPage() {
                 disabled={!canVerifySms}
                 onClick={onVerifySms}
               >
-                인증하기
+                {loadingSms ? "확인 중..." : "인증하기"}
               </button>
             </div>
           )}
 
           {phoneErrorMsg && <p className="ci-msg error">{phoneErrorMsg}</p>}
-          {smsMsg && <p className={`ci-msg ${smsVerified ? "success" : "success"}`}>{smsMsg}</p>}
+          {smsMsg && <p className="ci-msg success">{smsMsg}</p>}
           {smsError && <p className="ci-msg error">{smsError}</p>}
         </div>
 
         <div className="ci-actions">
-          <button type="button" className="ci-main-btn" disabled={!canVerifyCi} onClick={onVerifyCi}>인증완료</button>
-          <button className="ci-cancel-btn" onClick={() => navigate(-1)}>이전</button>
+          <button type="button" className="ci-main-btn" disabled={!canVerifyCi} onClick={onVerifyCi}>
+            {loadingCi ? "처리 중..." : "인증완료"}
+          </button>
+          <button type="button" className="ci-cancel-btn" onClick={() => navigate(-1)}>
+            이전
+          </button>
         </div>
+
         {ciError && <p className="ci-msg error">{ciError}</p>}
       </div>
     </div>

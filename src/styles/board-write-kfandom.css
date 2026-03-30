@@ -1,0 +1,16 @@
+@import "./community-kfandom-core.css";
+.kf-board-write .kf-community-page__shell > div {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 26px;
+}
+.kf-board-write h2 {
+  margin-bottom: 18px !important;
+}
+.kf-board-write [class*="border-dashed"] {
+  border-style: solid !important;
+  background: rgba(109,94,252,0.06) !important;
+}
+.kf-board-write [class*="overflow-hidden"] {
+  border-radius: 24px !important;
+}

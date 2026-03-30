@@ -1,0 +1,10 @@
+@import "./expansion-kfandom-core.css";
+
+.kf-critic-write {
+  padding: 28px !important;
+}
+
+.kf-critic-write [class*="rounded-2xl"],
+.kf-critic-write [class*="rounded-xl"] {
+  border-radius: 22px !important;
+}

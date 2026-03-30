@@ -5,6 +5,7 @@ import { playlistApi } from "../../api/playlistApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { refreshPoint } from "../../Components/ui/refreshPoint";
+import "../../styles/board-write-kfandom.css";
 
 interface PlaylistSong {
   id: number;
@@ -88,7 +89,9 @@ const BoardWrite = () => {
   };
 
   return (
-    <div className="mx-auto max-w-2xl p-6 text-white">
+    <div className="kf-community-page kf-board-write">
+      <div className="kf-community-page__shell">
+      <div className="mx-auto max-w-2xl p-6">
       <h2 className="mb-6 text-2xl font-bold">플레이리스트 공유</h2>
 
       {/* 제목 */}
@@ -191,6 +194,8 @@ const BoardWrite = () => {
       >
         등록
       </button>
+      </div>
+      </div>
     </div>
   );
 };

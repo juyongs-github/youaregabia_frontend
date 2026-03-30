@@ -11,6 +11,7 @@ import type { RootState } from "../../store";
 
 import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
 import { refreshPoint } from "../../Components/ui/refreshPoint";
+import "../../styles/board-detail-kfandom.css";
 
 const BoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();
@@ -187,13 +188,15 @@ const BoardDetailPage = () => {
     }
   };
 
-  if (!board) return <div>로딩 중...</div>;
+  if (!board) return <div className="kf-community-loading">로딩 중...</div>;
 
   // 본인 글 여부
   const isMyBoard = !!(userEmail && board.writerEmail === userEmail);
 
   return (
-    <div className="max-w-4xl mx-auto p-4 text-white">
+    <div className="kf-community-page kf-board-detail">
+      <div className="kf-community-page__shell">
+      <div className="max-w-4xl mx-auto p-4">
       {/* 헤더 */}
       <div className="mb-6 border-b border-neutral-700 pb-6">
         <h1 className="text-4xl font-extrabold tracking-tight text-white mb-3">{board.title}</h1>
@@ -350,7 +353,7 @@ const BoardDetailPage = () => {
           className={`flex items-center gap-3 rounded-full px-6 py-3 text-lg font-bold transition-all active:scale-95 ${
             likedByMe
               ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30"
-              : "border-2 border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-white"
+              : "border-2 border-neutral-300 text-neutral-700 hover:border-indigo-400 hover:text-indigo-600"
           }`}
         >
           <span className={likedByMe ? "animate-bounce" : ""}>❤️</span>
@@ -362,16 +365,16 @@ const BoardDetailPage = () => {
 
       {/* 댓글 */}
       <h3>댓글</h3>
-      <div className="min-h-[50px]">
+      <div className="min-h-[50px]" style={{ display: "flex", gap: 8, alignItems: "center" }}>
         <button
           onClick={() => setSortBy("latest")}
-          style={{ fontWeight: sortBy === "latest" ? "bold" : "normal" }}
+          className={`kf-sort-btn ${sortBy === "latest" ? "kf-sort-btn--active" : ""}`}
         >
           최신순
         </button>
         <button
           onClick={() => setSortBy("likes")}
-          style={{ fontWeight: sortBy === "likes" ? "bold" : "normal", marginLeft: "10px" }}
+          className={`kf-sort-btn ${sortBy === "likes" ? "kf-sort-btn--active" : ""}`}
         >
           추천순
         </button>
@@ -406,7 +409,7 @@ const BoardDetailPage = () => {
         </>
       )}
 
-      <textarea value={replyContent} onChange={(e) => setReplyContent(e.target.value)} rows={3} />
+      <textarea value={replyContent} onChange={(e) => setReplyContent(e.target.value)} rows={3} placeholder="댓글을 입력해 보세요..." />
       <button
         onClick={createReply}
         className="rounded bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-500"
@@ -424,6 +427,8 @@ const BoardDetailPage = () => {
           }}
         />
       )}
+      </div>
+      </div>
     </div>
   );
 };

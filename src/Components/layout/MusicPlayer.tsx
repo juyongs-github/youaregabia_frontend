@@ -12,6 +12,7 @@ import Slider from "@mui/material/Slider";
 import Box from "@mui/material/Box";
 import { GoDotFill } from "react-icons/go";
 import type { Song } from "../ui/SongListItem";
+import "../../styles/musicplayer-kfandom.css";
 
 interface MusicPlayerProps {
   song: Song;
@@ -52,7 +53,6 @@ function MusicPlayer({
     return `${minute}:${String(second).padStart(2, "0")}`;
   };
 
-  // 곡 변경 시 재생
   useEffect(() => {
     if (!audioRef.current) return;
     if (externalPaused) audioRef.current.pause();
@@ -66,7 +66,6 @@ function MusicPlayer({
     audioRef.current.play();
   }, [song]);
 
-  // 볼륨 초기화
   useEffect(() => {
     if (!audioRef.current) return;
     audioRef.current.volume = volume / 100;
@@ -108,7 +107,7 @@ function MusicPlayer({
   };
 
   return (
-    <div className="px-10 pt-10 bg-black border-t border-gray-800 pb-7">
+    <div className="kf-player-wrap">
       <audio
         ref={audioRef}
         src={song.previewUrl}
@@ -116,10 +115,10 @@ function MusicPlayer({
         onPause={() => setIsPlaying(false)}
         onTimeUpdate={() => {
           if (!audioRef.current) return;
-          const currentTime = audioRef.current.currentTime;
-          const totalTime = audioRef.current.duration;
-          setProgress((currentTime / totalTime) * 100);
-          setCurrentTime(currentTime);
+          const ct = audioRef.current.currentTime;
+          const total = audioRef.current.duration;
+          setProgress((ct / total) * 100);
+          setCurrentTime(ct);
         }}
         onLoadedMetadata={() => {
           if (!audioRef.current) return;
@@ -134,78 +133,100 @@ function MusicPlayer({
         }}
       />
 
-      {/* 진행 바 */}
-      <Box sx={{ position: "absolute", top: 0, left: 0, width: "100%" }}>
-        <Slider value={progress} onChange={handleSeek} sx={{ color: "red" }} />
-      </Box>
-
-      <div className="flex items-center justify-between">
-        {/* 왼쪽: 이전/재생/다음 + 시간 */}
-        <div className="flex items-center gap-7">
-          <button
-            onClick={() => isPlaylist && onSongChange!(songIndex! - 1)}
-            disabled={!hasPrev}
-            className="disabled:opacity-30"
-          >
-            <FaStepBackward size={24} color="white" />
-          </button>
-
-          <button onClick={handlePlayPause}>
-            {isPlaying ? <FaPause size={40} color="white" /> : <FaPlay size={40} color="white" />}
-          </button>
-
-          <button
-            onClick={() => isPlaylist && onSongChange!(songIndex! + 1)}
-            disabled={!hasNext}
-            className="disabled:opacity-30"
-          >
-            <FaStepForward size={24} color="white" />
-          </button>
-
-          <div className="text-lg">
-            <span>{formatTime(currentTime)}</span>
-            <span> / </span>
-            <span>{formatTime(duration)}</span>
-          </div>
+      <div className="kf-player">
+        {/* Progress bar */}
+        <div className="kf-player__progress">
+          <Box sx={{ width: "100%" }}>
+            <Slider
+              value={progress}
+              onChange={handleSeek}
+              size="small"
+              sx={{
+                color: "#6d5efc",
+                height: 3,
+                padding: "4px 0",
+                "& .MuiSlider-thumb": {
+                  width: 10,
+                  height: 10,
+                  "&:hover": { boxShadow: "0 0 0 6px rgba(109,94,252,0.16)" },
+                },
+                "& .MuiSlider-track": { border: "none" },
+                "& .MuiSlider-rail": { opacity: 0.2, backgroundColor: "#8e97ab" },
+              }}
+            />
+          </Box>
         </div>
 
-        {/* 가운데: 곡 정보 */}
-        <div className="flex items-center gap-5">
+        {/* Song info */}
+        <div className="kf-player__info">
           {!blind && (
-            <div className="flex items-center justify-center w-12 h-12 overflow-hidden bg-orange-500 rounded-2xl">
-              <img src={song.imgUrl} alt="" className="object-cover w-full h-full" />
+            <div className="kf-player__thumb">
+              <img src={song.imgUrl} alt="" />
             </div>
           )}
           {!blind && (
-            <div className="flex flex-col">
-              <span className="text-lg font-bold">{song.trackName}</span>
-              <div className="flex items-center gap-2 text-base">
-                <span>{song.artistName}</span>
-                <GoDotFill size={10} />
-                <span>{song.genreName}</span>
+            <div className="kf-player__meta">
+              <div className="kf-player__title">{song.trackName}</div>
+              <div className="kf-player__sub">
+                {song.artistName}
+                <GoDotFill size={8} style={{ display: "inline", margin: "0 4px", verticalAlign: "middle" }} />
+                {song.genreName}
               </div>
             </div>
           )}
         </div>
 
-        {/* 오른쪽: 볼륨 + 닫기 */}
-        <div className="flex items-center gap-7">
-          <div className="flex items-center w-40 gap-7">
-            <button onClick={handleMute}>
-              {isMute ? (
-                <FaVolumeMute size={30} color="white" />
-              ) : (
-                <FaVolumeUp size={30} color="white" />
-              )}
-            </button>
-            <Box sx={{ width: "100%", display: "flex" }}>
-              <Slider value={volume} onChange={handleVolume} sx={{ color: "grey" }} />
-            </Box>
-          </div>
-          <button onClick={setIsPlayerVisible}>
-            <FaChevronDown size={20} />
+        {/* Controls */}
+        <div className="kf-player__controls">
+          <button
+            className="kf-player__btn"
+            onClick={() => isPlaylist && onSongChange!(songIndex! - 1)}
+            disabled={!hasPrev}
+          >
+            <FaStepBackward size={18} />
           </button>
+
+          <button className="kf-player__playBtn" onClick={handlePlayPause}>
+            {isPlaying ? <FaPause size={18} /> : <FaPlay size={18} />}
+          </button>
+
+          <button
+            className="kf-player__btn"
+            onClick={() => isPlaylist && onSongChange!(songIndex! + 1)}
+            disabled={!hasNext}
+          >
+            <FaStepForward size={18} />
+          </button>
+
+          <div className="kf-player__time">
+            {formatTime(currentTime)} / {formatTime(duration)}
+          </div>
         </div>
+
+        {/* Volume */}
+        <div className="kf-player__volume">
+          <button className="kf-player__btn" onClick={handleMute}>
+            {isMute ? <FaVolumeMute size={18} /> : <FaVolumeUp size={18} />}
+          </button>
+          <Box sx={{ width: 90, display: "flex" }}>
+            <Slider
+              value={volume}
+              onChange={handleVolume}
+              size="small"
+              sx={{
+                color: "#8e97ab",
+                height: 3,
+                "& .MuiSlider-thumb": { width: 10, height: 10 },
+                "& .MuiSlider-rail": { opacity: 0.2 },
+              }}
+            />
+          </Box>
+        </div>
+
+        {/* Close */}
+        <button className="kf-player__closeBtn" onClick={setIsPlayerVisible}>
+          <FaChevronDown size={14} />
+        </button>
       </div>
     </div>
   );

@@ -1,0 +1,94 @@
+.find-account-box {
+  width: min(100%, 620px);
+}
+
+.find-title {
+  margin: 0;
+  text-align: center;
+  font-size: 34px;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+}
+
+.find-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 24px 0 26px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.42);
+  border: 1px solid rgba(88,95,138,0.08);
+}
+
+.find-tab {
+  min-height: 48px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--kf-text-sub);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.find-tab.active {
+  background: linear-gradient(135deg, rgba(109,94,252,0.96), rgba(255,92,168,0.92));
+  color: white;
+  box-shadow: 0 12px 24px rgba(109,94,252,0.22);
+}
+
+.find-content {
+  min-height: 0;
+}
+
+.find-result {
+  padding: 16px 4px 4px;
+  text-align: center;
+}
+
+.find-result-label {
+  margin: 0;
+  color: var(--kf-text-sub);
+  font-size: 15px;
+}
+
+.find-result-email {
+  margin: 14px 0 6px;
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--kf-brand);
+  word-break: break-all;
+}
+
+.find-result-sub {
+  margin: 0;
+  color: var(--kf-text-sub);
+}
+
+.find-result-buttons {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.find-btn.secondary {
+  width: 100%;
+}
+
+.find-back-link {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .find-title {
+    font-size: 28px;
+  }
+
+  .find-result-email {
+    font-size: 22px;
+  }
+}

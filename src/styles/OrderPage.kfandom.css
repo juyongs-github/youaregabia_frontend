@@ -1,0 +1,10 @@
+@import "./expansion-kfandom-core.css";
+
+.kf-order-page > div:first-child {
+  padding: 28px !important;
+}
+
+.kf-order-page [class*="rounded-2xl"],
+.kf-order-page [class*="rounded-xl"] {
+  border-radius: 22px !important;
+}

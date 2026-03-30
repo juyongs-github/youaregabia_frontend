@@ -1,0 +1,247 @@
+:root {
+  --kf-bg: #f7f8ff;
+  --kf-bg-blue: rgba(132, 195, 255, 0.18);
+  --kf-bg-pink: rgba(255, 153, 198, 0.18);
+  --kf-bg-cream: rgba(255, 230, 180, 0.16);
+  --kf-bg-violet: rgba(146, 128, 255, 0.14);
+  --kf-surface: rgba(255,255,255,0.76);
+  --kf-surface-strong: rgba(255,255,255,0.9);
+  --kf-surface-soft: rgba(255,255,255,0.6);
+  --kf-border: rgba(92, 103, 151, 0.14);
+  --kf-border-strong: rgba(92, 103, 151, 0.24);
+  --kf-text: #22283a;
+  --kf-sub: #677086;
+  --kf-muted: #9199ad;
+  --kf-brand: #6d5efc;
+  --kf-brand-pink: #ff5ca8;
+  --kf-brand-mint: #38c7aa;
+  --kf-warning: #ffb347;
+  --kf-danger: #ff687d;
+  --kf-shadow-lg: 0 28px 68px rgba(86, 93, 146, 0.16);
+  --kf-shadow-md: 0 16px 38px rgba(86, 93, 146, 0.12);
+  --kf-shadow-sm: 0 10px 24px rgba(86, 93, 146, 0.08);
+  --kf-radius-2xl: 34px;
+  --kf-radius-xl: 28px;
+  --kf-radius-lg: 22px;
+  --kf-radius-md: 18px;
+  --kf-radius-sm: 14px;
+  --kf-pill: 999px;
+}
+
+.kf-expansion-page {
+  min-height: 100vh;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 36px 20px 72px !important;
+  color: var(--kf-text);
+  position: relative;
+}
+
+.kf-expansion-page > *,
+.kf-expansion-modal .modal-container,
+.kf-expansion-modal > div:last-child {
+  position: relative;
+  z-index: 1;
+}
+
+.kf-expansion-page > div:first-child,
+.kf-expansion-page > section:first-child,
+.kf-expansion-page > main:first-child,
+.kf-expansion-page > form:first-child,
+.kf-expansion-modal .modal-container,
+.kf-expansion-modal > div:last-child {
+  background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,255,255,0.68));
+  border: 1px solid rgba(255,255,255,0.84);
+  box-shadow: var(--kf-shadow-lg);
+  backdrop-filter: blur(24px);
+  border-radius: var(--kf-radius-2xl);
+}
+
+/* 텍스트 색상 */
+.kf-expansion-page h1,
+.kf-expansion-page h2,
+.kf-expansion-page h3,
+.kf-expansion-page h4,
+.kf-expansion-page strong,
+.kf-expansion-modal h1,
+.kf-expansion-modal h2,
+.kf-expansion-page [class*="font-bold"],
+.kf-expansion-page [class*="font-semibold"],
+.kf-expansion-modal [class*="font-bold"],
+.kf-expansion-modal [class*="font-semibold"] {
+  color: var(--kf-text) !important;
+}
+
+.kf-expansion-page [class*="text-white"],
+.kf-expansion-modal [class*="text-white"] { color: var(--kf-text) !important; }
+
+.kf-expansion-page [class*="text-gray-400"],
+.kf-expansion-page [class*="text-gray-500"],
+.kf-expansion-page [class*="text-gray-600"],
+.kf-expansion-page [class*="text-neutral-400"],
+.kf-expansion-page [class*="text-neutral-500"],
+.kf-expansion-modal [class*="text-gray-400"],
+.kf-expansion-modal [class*="text-gray-500"] {
+  color: var(--kf-sub) !important;
+}
+
+.kf-expansion-page [class*="text-red-400"],
+.kf-expansion-page [class*="text-indigo-400"],
+.kf-expansion-page [class*="text-indigo-500"],
+.kf-expansion-modal [class*="text-red-400"],
+.kf-expansion-modal [class*="text-indigo-400"] {
+  color: var(--kf-brand) !important;
+}
+
+/* 배경 */
+.kf-expansion-page [class*="bg-gray-900"],
+.kf-expansion-page [class*="bg-gray-950"],
+.kf-expansion-page [class*="bg-gray-800"],
+.kf-expansion-page [class*="bg-neutral-900"],
+.kf-expansion-page [class*="bg-neutral-800"],
+.kf-expansion-page [class*="bg-black/"],
+.kf-expansion-modal .modal-container,
+.kf-expansion-modal [class*="bg-neutral-900"] {
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.72)) !important;
+  border-color: var(--kf-border) !important;
+  color: var(--kf-text) !important;
+  box-shadow: var(--kf-shadow-sm);
+}
+
+/* 테두리 */
+.kf-expansion-page [class*="border-gray-800"],
+.kf-expansion-page [class*="border-gray-700"],
+.kf-expansion-page [class*="border-neutral-700"],
+.kf-expansion-page [class*="border-neutral-800"],
+.kf-expansion-modal [class*="border-gray-800"],
+.kf-expansion-modal [class*="border-neutral-700"] {
+  border-color: var(--kf-border) !important;
+}
+
+/* 브랜드 버튼 */
+.kf-expansion-page [class*="bg-indigo-600"],
+.kf-expansion-page [class*="bg-red-600"],
+.kf-expansion-page [class*="bg-red-500"],
+.kf-expansion-page [class*="bg-green-600"],
+.kf-expansion-page [class*="bg-blue-600"],
+.kf-expansion-modal [class*="bg-indigo-600"],
+.kf-expansion-modal [class*="bg-red-600"] {
+  background: linear-gradient(135deg, var(--kf-brand), var(--kf-brand-pink)) !important;
+  color: #fff !important;
+  border: 0 !important;
+  box-shadow: 0 18px 32px rgba(109,94,252,0.24) !important;
+}
+
+/* 인풋 */
+.kf-expansion-page input,
+.kf-expansion-page select,
+.kf-expansion-page textarea,
+.kf-expansion-modal input,
+.kf-expansion-modal select,
+.kf-expansion-modal textarea {
+  background: rgba(255,255,255,0.86) !important;
+  color: var(--kf-text) !important;
+  border: 1px solid var(--kf-border) !important;
+  border-radius: var(--kf-radius-lg) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.58), var(--kf-shadow-sm);
+}
+
+.kf-expansion-page input::placeholder,
+.kf-expansion-page textarea::placeholder,
+.kf-expansion-modal input::placeholder,
+.kf-expansion-modal textarea::placeholder {
+  color: var(--kf-muted) !important;
+}
+
+.kf-expansion-page input:focus,
+.kf-expansion-page select:focus,
+.kf-expansion-page textarea:focus,
+.kf-expansion-modal input:focus {
+  outline: none !important;
+  border-color: rgba(109, 94, 252, 0.35) !important;
+  box-shadow: 0 0 0 4px rgba(109, 94, 252, 0.12), var(--kf-shadow-sm) !important;
+}
+
+/* 버튼 트랜지션 */
+.kf-expansion-page button,
+.kf-expansion-modal button {
+  transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+}
+
+.kf-expansion-page button:hover,
+.kf-expansion-modal button:hover {
+  transform: translateY(-1px);
+}
+
+
+/* 모달 오버레이 */
+.kf-expansion-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(232, 236, 255, 0.48) !important;
+  backdrop-filter: blur(18px);
+}
+
+.kf-expansion-modal .modal-container,
+.kf-expansion-modal > div:last-child {
+  border-radius: 28px !important;
+}
+
+/* MUI Rating */
+.kf-expansion-page .MuiRating-iconFilled,
+.kf-expansion-modal .MuiRating-iconFilled {
+  color: #ffb347 !important;
+}
+
+.kf-expansion-page .MuiRating-iconEmpty,
+.kf-expansion-modal .MuiRating-iconEmpty {
+  color: rgba(145, 153, 173, 0.5) !important;
+}
+
+/* 결제/주문 완료 페이지 */
+.kf-order-complete,
+.kf-order-fail,
+.kf-order-success {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kf-order-complete > div,
+.kf-order-fail > div,
+.kf-order-success > div {
+  width: min(100%, 560px);
+  padding: 40px 32px;
+}
+
+/* 페이지별 inner padding */
+.kf-goods-list > div:first-child,
+.kf-goods-detail > div:first-child,
+.kf-cart-page > div:first-child,
+.kf-order-page > div:first-child,
+.kf-order-history > div:first-child,
+.kf-critic-list,
+.kf-critic-write,
+.kf-point-history,
+.kf-playlist-review > div:first-child {
+  padding: 28px !important;
+}
+
+@media (max-width: 920px) {
+  .kf-expansion-page {
+    padding: 22px 14px 48px !important;
+  }
+
+  .kf-goods-list > div:first-child,
+  .kf-goods-detail > div:first-child,
+  .kf-cart-page > div:first-child,
+  .kf-order-page > div:first-child,
+  .kf-order-history > div:first-child,
+  .kf-critic-list,
+  .kf-critic-write,
+  .kf-point-history,
+  .kf-playlist-review > div:first-child {
+    padding: 20px !important;
+  }
+}

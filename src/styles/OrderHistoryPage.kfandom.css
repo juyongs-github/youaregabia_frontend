@@ -1,0 +1,10 @@
+@import "./expansion-kfandom-core.css";
+
+.kf-order-history > div:first-child {
+  padding: 28px !important;
+}
+
+.kf-order-history [class*="rounded-2xl"],
+.kf-order-history [class*="rounded-xl"] {
+  border-radius: 22px !important;
+}

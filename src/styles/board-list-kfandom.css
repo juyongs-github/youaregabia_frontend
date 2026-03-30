@@ -1,0 +1,20 @@
+@import "./community-kfandom-core.css";
+.kf-board-list .kf-community-page__shell > div {
+  padding: 12px;
+}
+.kf-board-list [class*="mt-8 mb-6 flex items-end justify-between"] {
+  align-items: flex-start !important;
+  gap: 16px;
+  margin-top: 8px !important;
+  padding: 10px 8px 22px;
+}
+.kf-board-list [class*="divide-y"] {
+  margin-top: 18px;
+  background: rgba(255,255,255,0.56);
+  border-radius: 24px;
+  overflow: hidden;
+}
+.kf-board-list [class*="mb-4 flex gap-2"] {
+  margin-top: 18px;
+  align-items: center;
+}

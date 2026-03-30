@@ -4,6 +4,7 @@ import { FaShoppingCart, FaBox } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { goodsApi, cartUtils, type Goods } from "../../api/goodsApi";
+import "../../styles/GoodsListPage.kfandom.css";
 
 const CATEGORIES = [
   { key: "", label: "전체" },
@@ -63,7 +64,7 @@ export default function GoodsListPage() {
   };
 
   return (
-    <div className="p-8 text-white min-h-screen">
+    <div className="kf-expansion-page kf-goods-list">
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -122,7 +123,7 @@ export default function GoodsListPage() {
               {/* 이미지 */}
               <div className="aspect-square bg-gray-800 flex items-center justify-center overflow-hidden">
                 {item.imageUrl ? (
-                  <img src={`${import.meta.env.VITE_API_BASE_URL}${item.imageUrl}`} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <img src={`${import.meta.env.VITE_API_BASE_URL ?? ""}${item.imageUrl}`} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 ) : (
                   <FaBox size={48} className="text-gray-600" />
                 )}
