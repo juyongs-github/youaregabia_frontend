@@ -46,6 +46,8 @@ function MyPage() {
   const [myBoards, setMyBoards] = useState<MyBoard[]>([]);
   const [myReplies, setMyReplies] = useState<MyReply[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const checked = useSelector((state: RootState) => state.attendance.checked);
+  const streak = useSelector((state: RootState) => state.attendance.streak);
 
   useEffect(() => {
     if (activeTab === "boards" && myBoards.length === 0) {
@@ -143,7 +145,13 @@ function MyPage() {
           >
             <MdEdit size={20} color="white" />
           </button>
-          <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden"
+            accept="image/*"
+          />
         </div>
         <div>
           <h1 className="text-3xl font-bold">{user?.name}</h1>
@@ -155,9 +163,28 @@ function MyPage() {
 
       {/* 탭 */}
       <div className="flex border-b border-gray-700 mb-6">
-        <button className={tabStyle("profile")} onClick={() => setActiveTab("profile")}>내 정보</button>
-        <button className={tabStyle("boards")} onClick={() => setActiveTab("boards")}>내가 쓴 게시글</button>
-        <button className={tabStyle("replies")} onClick={() => setActiveTab("replies")}>내가 쓴 댓글</button>
+        <button className={tabStyle("profile")} onClick={() => setActiveTab("profile")}>
+          내 정보
+        </button>
+        <button className={tabStyle("boards")} onClick={() => setActiveTab("boards")}>
+          내가 쓴 게시글
+        </button>
+        <button className={tabStyle("replies")} onClick={() => setActiveTab("replies")}>
+          내가 쓴 댓글
+        </button>
+        {/* 우측 정렬된 작은 출석 버튼 */}
+        <button
+          onClick={() => navigate("/profile/check")}
+          className={`ml-auto mb-2 flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium transition-all
+      ${
+        checked
+          ? "border-indigo-500/50 bg-indigo-500/10 text-indigo-400"
+          : "border-yellow-500/50 bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20"
+      }`}
+        >
+          <span>📅</span>
+          <span>{checked ? "출석 완료" : "출석 체크"}</span>
+        </button>
       </div>
 
       {/* 내 정보 탭 */}
@@ -165,11 +192,21 @@ function MyPage() {
         <div className="space-y-6 bg-gray-900/50 p-6 rounded-xl border border-gray-800">
           <div>
             <label className="block text-sm text-gray-400 mb-1">이름</label>
-            <input type="text" value={user?.name || ""} readOnly className="w-full bg-gray-800 border-none rounded-lg p-3" />
+            <input
+              type="text"
+              value={user?.name || ""}
+              readOnly
+              className="w-full bg-gray-800 border-none rounded-lg p-3"
+            />
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-1">이메일</label>
-            <input type="email" value={user?.email || ""} readOnly className="w-full bg-gray-800 border-none rounded-lg p-3" />
+            <input
+              type="email"
+              value={user?.email || ""}
+              readOnly
+              className="w-full bg-gray-800 border-none rounded-lg p-3"
+            />
           </div>
           <div className="pt-4 text-right">
             <button

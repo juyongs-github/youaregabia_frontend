@@ -1,5 +1,6 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit"; // combineReducers 추가
 import authReducer from "./authSlice";
+import attendanceReducer from "../components/ui/attendanceSlice";
 import {
   persistStore,
   persistReducer,
@@ -15,6 +16,7 @@ import storageSession from "redux-persist/lib/storage/session";
 // 1. 리듀서 통합
 const rootReducer = combineReducers({
   auth: authReducer,
+  attendance: attendanceReducer,
 });
 
 // 2. Persist 설정

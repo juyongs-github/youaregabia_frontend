@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
+import CustomEditor from "../../components/ui/CustomEditor";
 
 const FreeBoardUpdate = () => {
   const { boardId } = useParams<{ boardId: string }>();
@@ -66,12 +67,12 @@ const FreeBoardUpdate = () => {
         <option value="JPOP">JPOP</option>
         <option value="HIPHOP">HIPHOP</option>
       </select>
-      <textarea
-        className="mb-4 w-full min-h-[400px] resize-y rounded border px-4 py-3 leading-normal"
-        rows={6}
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-      />
+      <div className="mb-4">
+        <CustomEditor
+          onChange={(html) => setContent(html)}
+          placeholder="추가로 하고 싶은 말을 입력하세요... (선택)"
+        />
+      </div>
 
       <div className="flex gap-2">
         <button

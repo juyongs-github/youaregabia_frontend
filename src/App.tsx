@@ -10,7 +10,7 @@ import BoardListPage from "./pages/community/BoardListPage";
 import BoardDetailPage from "./pages/community/BoardDetailPage";
 import BoardWrite from "./pages/community/BoardWrite";
 import BoardUpdate from "./pages/community/BoardUpdate";
-import Layout from "./Components/layout/Layout";
+import Layout from "./components/layout/Layout";
 import LoginForm from "./pages/auth/LoginForm";
 import RegisterForm from "./pages/auth/RegisterForm";
 import TermsAgreement from "./pages/auth/TermsAgreement";
@@ -54,7 +54,9 @@ import PointHistoryPage from "./pages/auth/PointHistoryPage";
 import IdealTypeWorldCupPage from "./pages/recommend/IdealTypeWorldCupPage";
 import { useEffect, useState } from "react";
 import { setRateLimitHandler } from "./api/axios";
-import RateLimitToast from "./Components/ui/RateLimitToast";
+import RateLimitToast from "./components/ui/RateLimitToast";
+import { useAttendance } from "./components/ui/useAttendance";
+import AttendancePage from "./pages/auth/AttendancePage";
 
 interface RateLimitInfo {
   message: string;
@@ -92,6 +94,8 @@ function App() {
     });
   }, []);
 
+  useAttendance(); // 🆕 로그인 시 자동 출석 체크
+
   return (
     <>
       <Routes>
@@ -125,6 +129,7 @@ function App() {
           <Route path="/community/free/:boardId/update" element={<FreeBoardUpdate />} />
           <Route path="/profile/me" element={<MyPage />} />
           <Route path="/profile/points" element={<PointHistoryPage />} />
+          <Route path="/profile/check" element={<AttendancePage />} />
           <Route path="/goods" element={<GoodsListPage />} />
           <Route path="/goods/cart" element={<CartPage />} />
           <Route path="/goods/order/complete" element={<OrderCompletePage />} />

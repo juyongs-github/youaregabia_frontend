@@ -53,4 +53,11 @@ export const boardApi = {
     api
       .post<{ likeCount: number; likedByMe: boolean }>(`/api/boards/${boardId}/like`, null)
       .then((res) => res.data),
+
+  // 인기글 조회
+  getPopularBoards: async (boardType?: string): Promise<Board[]> => {
+    const params = boardType ? { boardType } : {};
+    const res = await api.get("/api/community/share/popular", { params });
+    return res.data;
+  },
 };

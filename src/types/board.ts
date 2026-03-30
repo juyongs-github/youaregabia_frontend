@@ -25,6 +25,7 @@ export interface Board {
   likeCount: number;
   likedByMe: boolean;
 }
+export type TabType = "ALL" | "POPULAR";
 
 export interface BoardSong {
   songId: number;

@@ -3,6 +3,7 @@ import api from "../../api/axios";
 import MusicPlayer from "../../Components/layout/MusicPlayer";
 import type { Song } from "../../Components/ui/SongListItem";
 import GameResult from "../../Components/ui/GameResult";
+import GameCountdown from "../../components/ui/GameCountdown";
 
 const TOTAL = 10;
 
@@ -18,6 +19,7 @@ const MusicQuizPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [correctSongIds, setCorrectSongIds] = useState<Set<number>>(new Set());
   const [wrongSongIds, setWrongSongIds] = useState<Set<number>>(new Set());
+  const [started, setStarted] = useState(false);
 
   // 게임 시작 시 10곡 미리 로드
   const loadSongs = async () => {
@@ -76,14 +78,17 @@ const MusicQuizPage = () => {
 
   // 곡 바뀔 때마다 타이머 리셋 및 30초 제한 감시
   useEffect(() => {
-    let isTransitioning = false; // 해당 이펙트 안에서만 사용할 로컬 플래그
+    // 1. 아직 시작 버튼을 누르지 않았거나 곡이 로딩 중이면 타이머를 돌리지 않음
+    if (!started || isLoading || phase !== "playing") return;
+
+    let isTransitioning = false;
     setTimer(0);
 
     const interval = setInterval(() => {
       setTimer((prev) => {
         if (prev >= 29) {
           if (!isTransitioning) {
-            isTransitioning = true; // 중복 호출 방지
+            isTransitioning = true;
             handleSkip();
           }
           clearInterval(interval);
@@ -94,10 +99,10 @@ const MusicQuizPage = () => {
     }, 1000);
 
     return () => {
-      isTransitioning = true; // 언마운트 시 플래그 정리
+      isTransitioning = true;
       clearInterval(interval);
     };
-  }, [currentIndex, songs]);
+  }, [currentIndex, songs, started, isLoading, phase]);
 
   const handleEnter = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSubmit();
@@ -125,6 +130,7 @@ const MusicQuizPage = () => {
     setInput("");
     setFeedback(null);
     setPhase("playing");
+    setStarted(false);
     loadSongs();
     setCorrectSongIds(new Set());
     setWrongSongIds(new Set());
@@ -133,6 +139,24 @@ const MusicQuizPage = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64 text-white">🎵 곡 불러오는 중...</div>
+    );
+  }
+  // 카운트다운
+  if (!started) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[80vh] text-white px-4 animate-in fade-in duration-700">
+        {/* 상단 문구 영역 */}
+        <div className="text-center mb-16 space-y-4">
+          <div className="text-6xl mb-6 animate-bounce">🎧</div>
+          <h1 className="text-4xl font-black mb-3 tracking-tight">노래 맞추기</h1>
+          <p className="text-gray-400 text-sm">음악을 듣고 제목을 맞혀보세요!</p>
+        </div>
+
+        {/* 카운트다운 컴포넌트 (내부의 START 버튼이 이 자리에 위치함) */}
+        <div className="w-full flex justify-center scale-110">
+          <GameCountdown onStart={() => setStarted(true)} />
+        </div>
+      </div>
     );
   }
 

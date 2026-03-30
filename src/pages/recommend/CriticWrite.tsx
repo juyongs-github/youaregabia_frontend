@@ -3,7 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import CriticSongSelectModal from "../../Components/ui/CriticSongSelectModal";
+import CriticSongSelectModal from "../../components/ui/CriticSongSelectModal";
+import CustomEditor from "../../components/ui/CustomEditor";
 
 interface SelectedSong {
   id: number;
@@ -110,13 +111,12 @@ const CriticWrite = () => {
         onChange={(e) => setTitle(e.target.value)}
       />
 
-      <textarea
-        className="mb-4 w-full min-h-[400px] resize-y rounded border border-neutral-700 bg-neutral-900 px-4 py-3 text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
-        placeholder="평론 내용을 작성하세요..."
-        rows={10}
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-      />
+      <div className="mb-4">
+        <CustomEditor
+          onChange={(html) => setContent(html)}
+          placeholder="추가로 하고 싶은 말을 입력하세요... (선택)"
+        />
+      </div>
 
       <button
         className="rounded bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500 w-full"
