@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { playlistApi } from "../../api/playlistApi";
-import type { Song } from "../ui/SongListItem";
+import type { Song } from "./SongListItem";
 import PlaylistCreateModal from "./PlaylistCreateModal";
 import { pointApi } from "../../api/pointApi";
-import { refreshPoint } from "../../components/ui/refreshPoint";
+import { refreshPoint } from "./refreshPoint";
 
 interface Props {
   songs: Song[];
