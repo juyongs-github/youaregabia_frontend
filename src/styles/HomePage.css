@@ -199,6 +199,7 @@
   flex-direction: column;
   align-items: center;
   gap: clamp(8px, 1vh, 14px);
+  z-index: 10;
 }
 
 .icon-popup {
@@ -514,8 +515,10 @@
   align-items: center;
   justify-content: center;
   width: 100%;
+  flex: 1;
   color: rgba(255, 255, 255, 0.4);
   font-size: 16px;
+  text-align: center;
 }
 
 .playlist-card {
@@ -714,6 +717,22 @@
   position: relative;
   width: 100%;
   cursor: pointer;
+}
+
+.shared-cover-empty {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.shared-cover-empty svg {
+  width: 60%;
+  height: 60%;
 }
 
 .shared-cover-large {
@@ -1151,22 +1170,34 @@
     justify-content: space-around;
   }
 
-  /* 아이콘 팝업: 메뉴바 위에 표시 */
+  /* 아이콘 팝업: 하단바 바로 위에 연결 */
   .icon-popup {
-    position: fixed;
-    bottom: 72px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    transform: none;
     flex-wrap: wrap;
-    width: calc(100% - 48px);
-    border-radius: 16px;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
     justify-content: center;
   }
 
-  /* 뮤직 플레이어: 메뉴바 바로 위에 고정 */
+  /* 팝업 열릴 때 하단바 상단 모서리 평평하게 → 팝업과 연결 */
+  .center-icons-wrapper:has(.icon-popup) {
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  /* 뮤직 플레이어: 화면 맨 아래 고정 */
   .music-player-bar {
-    bottom: 76px !important;
+    bottom: 0 !important;
     z-index: 150 !important;
+  }
+
+  /* 플레이어 활성 시 하단바를 플레이어 위로 올림 */
+  .home.player-open .center-icons-wrapper {
+    bottom: 112px;
   }
 
   /* 플레이어 활성 시 콘텐츠가 플레이어 뒤에 안 가리도록 */
@@ -1180,10 +1211,6 @@
     display: none;
   }
 
-  /* 플레이어 활성 시 팝업은 플레이어 위로 */
-  .home.player-open .icon-popup {
-    bottom: 188px;
-  }
 
   /* 메뉴바 아이콘·텍스트 크기 축소 */
   .center-icons button {

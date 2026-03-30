@@ -99,7 +99,7 @@ function HomePage() {
       .catch(() => setCollaboPlaylists([]));
   }, []);
 
-  // 디바운스 검색
+  // 디바운스 검색(입력이 멈춘 후 400ms 기다렸다가 검색)
   useEffect(() => {
     if (!searchValue.trim()) {
       setDropdownSongs([]);
@@ -214,7 +214,7 @@ function HomePage() {
     const playlist = collaboPlaylists[currentSharedIndex];
     if (!playlist) return;
     const liked = playlist.hasLiked;
-    // 낙관적 업데이트
+    // 낙관적 업데이트 (UI 즉시 반영)
     setCollaboPlaylists((prev) =>
       prev.map((p, i) =>
         i === currentSharedIndex
@@ -531,15 +531,19 @@ function HomePage() {
                 className="shared-cover-wrap shared-animate"
                 onClick={handlePlayAll}
               >
-                <img
-                  className="shared-cover-large"
-                  src={
-                    collaboPlaylists[currentSharedIndex]?.imageUrl
-                      ? `${baseURL}${collaboPlaylists[currentSharedIndex].imageUrl}`
-                      : ""
-                  }
-                  alt={collaboPlaylists[currentSharedIndex]?.title ?? ""}
-                />
+                {collaboPlaylists.length === 0 ? (
+                  <div className="shared-cover-empty" />
+                ) : (
+                  <img
+                    className="shared-cover-large"
+                    src={
+                      collaboPlaylists[currentSharedIndex]?.imageUrl
+                        ? `${baseURL}${collaboPlaylists[currentSharedIndex].imageUrl}`
+                        : ""
+                    }
+                    alt={collaboPlaylists[currentSharedIndex]?.title ?? ""}
+                  />
+                )}
                 <button className="shared-cover-play" tabIndex={-1}>
                   <FaPlay />
                 </button>
@@ -561,7 +565,9 @@ function HomePage() {
           <div className="shared-right-panel">
             <div className="shared-wrapper">
               <div key={currentSharedIndex} className="shared-container shared-animate">
-                {collaboPlaylists[currentSharedIndex] && (
+                {collaboPlaylists.length === 0 ? (
+                  <div className="playlist-empty">공동 플레이리스트가 없습니다.</div>
+                ) : collaboPlaylists[currentSharedIndex] && (
                   <RankSection
                     playlist={collaboPlaylists[currentSharedIndex]}
                     onSongClick={(song) => {
