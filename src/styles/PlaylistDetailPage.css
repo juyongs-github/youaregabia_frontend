@@ -336,22 +336,41 @@
   word-break: break-word;
 }
 
-.playlist-description-edit {
-  width: 100%;
-  background: #0f0f0f;
+.playlist-description-edit-wrap {
   border: 1px solid #333;
   border-radius: 12px;
+  overflow: hidden;
+  background: #0f0f0f;
+  max-height: 120px;
+  transition: border-color 0.15s;
+}
+
+.playlist-description-edit-wrap:focus-within {
+  border-color: #ff4d4f;
+}
+
+.playlist-description-edit {
+  width: 100%;
+  background: transparent;
+  border: none;
   padding: 14px 16px;
 
   color: white;
   font-size: 14px;
   resize: none;
   box-sizing: border-box;
+
+  max-height: 120px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.playlist-description-edit::-webkit-scrollbar {
+  display: none;
 }
 
 .playlist-description-edit:focus {
   outline: none;
-  border-color: #ff4d4f;
 }
 
 /* =========================
@@ -544,6 +563,13 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
+.track-empty {
+  padding: 40px 0;
+  text-align: center;
+  color: #555;
+  font-size: 14px;
+}
+
 .track-item {
   display: flex;
   align-items: center;
@@ -621,6 +647,65 @@
 
 .track-delete:hover {
   color: #ff4d4f;
+}
+
+/* 선택 모드 */
+.track-item.selected {
+  background: rgba(255, 77, 79, 0.1);
+}
+
+.track-checkbox {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: #ff4d4f;
+}
+
+/* 선택/취소 토글 버튼 */
+.btn-select-toggle {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: transparent;
+  color: #ccc;
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+  white-space: nowrap;
+}
+
+.btn-select-toggle:hover {
+  border-color: #888;
+  color: #fff;
+}
+
+.btn-select-toggle.active {
+  border-color: #ff4d4f;
+  color: #ff4d4f;
+}
+
+/* 다중 삭제 버튼 */
+.btn-bulk-delete {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: none;
+  background: #ff4d4f;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.btn-bulk-delete:hover {
+  background: #ff2f31;
 }
 
 /* =========================

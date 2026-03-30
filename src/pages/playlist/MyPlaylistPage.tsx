@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Playlist } from "../../types/playlist";
 import { playlistApi } from "../../api/playlistApi";
-import { FaPlay, FaPlus } from "react-icons/fa";
+import { FaPlay, FaPlus, FaTrash } from "react-icons/fa";
 import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
+import "../../styles/MyplaylistPage.css";
 
 
 function MyPlaylistPage() {
@@ -19,6 +20,9 @@ function MyPlaylistPage() {
 
   // 정렬 State
   const [sortType, setSortType] = useState("oldest");
+
+  // 검색 State
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -39,8 +43,27 @@ function MyPlaylistPage() {
     fetchData();
   }, []);
 
-  // 데이터 정렬
-  const sortedData = [...data].sort((a, b) => {
+  // 플레이리스트 삭제
+  const handleDelete = async (e: React.MouseEvent, playlistId: number) => {
+    e.stopPropagation();
+
+    if (!window.confirm("정말로 삭제하시겠습니까?")) return;
+
+    try {
+      await playlistApi.deletePlaylist(playlistId);
+      setData((prev) => prev.filter((p) => p.id !== playlistId));
+    } catch (error) {
+      console.error(error);
+      alert("삭제에 실패하였습니다.");
+    }
+  };
+
+  // 데이터 정렬 + 검색 필터
+  const filteredData = searchQuery.trim()
+    ? data.filter((p) => p.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    : data;
+
+  const sortedData = [...filteredData].sort((a, b) => {
     if (sortType === "latest") {
       return b.id - a.id;
     }
@@ -61,15 +84,24 @@ function MyPlaylistPage() {
       <div className="flex justify-between items-center py-3">
         <h1 className="page-title">내 플레이리스트</h1>
 
-        <select
-          value={sortType}
-          onChange={(e) => setSortType(e.target.value)}
-          className="sort-select"
-        >
-          <option value="oldest">오래된 순</option>
-          <option value="latest">최신순</option>
-          <option value="title">이름순</option>
-        </select>
+        <div className="playlist-header-right">
+          <input
+            type="text"
+            className="playlist-search-input"
+            placeholder="플레이리스트 검색"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <select
+            value={sortType}
+            onChange={(e) => setSortType(e.target.value)}
+            className="sort-select"
+          >
+            <option value="oldest">오래된 순</option>
+            <option value="latest">최신순</option>
+            <option value="title">이름순</option>
+          </select>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-7">
@@ -87,6 +119,13 @@ function MyPlaylistPage() {
               <img src={`${import.meta.env.VITE_API_BASE_URL}${item.imageUrl}`} />
               <button className="play-button">
                 <FaPlay />
+              </button>
+              <button
+                className="playlist-delete-btn"
+                title="삭제"
+                onClick={(e) => handleDelete(e, item.id)}
+              >
+                <FaTrash />
               </button>
               <span className="playlist-title-small">{item.title}</span>
             </div>

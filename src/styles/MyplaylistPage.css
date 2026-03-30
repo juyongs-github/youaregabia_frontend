@@ -111,3 +111,60 @@
   border-color: white;
   background: #1a1a1a;
 }
+
+/* ===== 헤더 우측 (검색 + 정렬) ===== */
+.playlist-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ===== 검색 입력창 ===== */
+.playlist-search-input {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #ccc;
+  font-size: 12px;
+  padding: 6px 12px;
+  width: 180px;
+  outline: none;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.playlist-search-input::placeholder {
+  color: #666;
+}
+
+.playlist-search-input:focus {
+  border-color: #666;
+  color: #fff;
+}
+
+/* ===== 카드 삭제 버튼 ===== */
+.playlist-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, color 0.15s;
+  z-index: 10;
+}
+
+.playlist-image-wrapper:hover .playlist-delete-btn {
+  opacity: 1;
+}
+
+.playlist-delete-btn:hover {
+  color: #ff5555;
+}

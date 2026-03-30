@@ -32,6 +32,9 @@ function PlaylistDetailPage() {
 
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
+  // 다중선택
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedSongs, setSelectedSongs] = useState<Set<number>>(new Set());
 
   // 정렬된 곡 목록 (playlistSongId 기준 — desc: 최신순, asc: 오래된 순)
   const sortedSongs = [...songs].sort((a, b) =>
@@ -108,10 +111,55 @@ function PlaylistDetailPage() {
 
       alert("곡이 삭제되었습니다.");
 
+      if (selectSong && songs.find((s) => s.playlistSongId === playlistSongId)?.id === selectSong.id) {
+        setIsPlayerVisible(false);
+        setSelectSong(null);
+        setCurrentIndex(null);
+      }
+
       setSongs((prev) => prev.filter((song) => song.playlistSongId !== playlistSongId));
     } catch (e) {
       alert("삭제 실패");
     }
+  };
+
+  // 다중 곡 삭제
+  const handleRemoveSelectedSongs = async () => {
+    if (selectedSongs.size === 0) return;
+
+    const ok = window.confirm(`선택한 ${selectedSongs.size}곡을 삭제하시겠습니까?`);
+    if (!ok) return;
+
+    try {
+      await Promise.all(
+        [...selectedSongs].map((id) => playlistApi.removeSongFromPlaylist(id))
+      );
+
+      if (selectSong && songs.find((s) => s.id === selectSong.id && selectedSongs.has(s.playlistSongId))) {
+        setIsPlayerVisible(false);
+        setSelectSong(null);
+        setCurrentIndex(null);
+      }
+
+      setSongs((prev) => prev.filter((song) => !selectedSongs.has(song.playlistSongId)));
+      setSelectedSongs(new Set());
+      setIsSelectMode(false);
+      alert("선택한 곡이 삭제되었습니다.");
+    } catch (e) {
+      alert("삭제 실패");
+    }
+  };
+
+  const toggleSongSelection = (playlistSongId: number) => {
+    setSelectedSongs((prev) => {
+      const next = new Set(prev);
+      if (next.has(playlistSongId)) {
+        next.delete(playlistSongId);
+      } else {
+        next.add(playlistSongId);
+      }
+      return next;
+    });
   };
   // 조회
   const fetchData = async () => {
@@ -148,12 +196,14 @@ function PlaylistDetailPage() {
     fetchData();
   }, [playlistId]);
 
-  // 수정모드 켜질 시 플레이어 종료
+  // 수정모드 켜질 시 플레이어 종료 + 선택모드 초기화
   useEffect(() => {
     if (isEditMode) {
       setIsPlayerVisible(false);
       setSelectSong(null);
       setCurrentIndex(null);
+      setIsSelectMode(false);
+      setSelectedSongs(new Set());
     }
   }, [isEditMode]);
   // 플레이리스트 공유
@@ -273,12 +323,14 @@ function PlaylistDetailPage() {
                 {data?.description || "플레이리스트 설명이 없습니다."}
               </p>
             ) : (
-              <textarea
-                className="playlist-description-edit"
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-                placeholder="플레이리스트에 대한 설명을 입력하세요."
-              />
+              <div className="playlist-description-edit-wrap">
+                <textarea
+                  className="playlist-description-edit"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  placeholder="플레이리스트에 대한 설명을 입력하세요."
+                />
+              </div>
             )}
           </div>
 
@@ -314,29 +366,50 @@ function PlaylistDetailPage() {
           <h2>곡 목록</h2>
 
           <div className="track-header-actions">
-            {/* 정렬 드롭다운 */}
-            <select
-              className="sort-select"
-              value={sortOrder}
-              onChange={(e) => {
-                const newOrder = e.target.value as "asc" | "desc";
-                setSortOrder(newOrder);
+            {/* edit 모드: 다중선택 삭제 버튼 */}
+            {isEditMode && isSelectMode && selectedSongs.size > 0 && (
+              <button className="btn-bulk-delete" onClick={handleRemoveSelectedSongs}>
+                {selectedSongs.size}곡 삭제
+              </button>
+            )}
 
-                // 재생 중인 곡이 있으면 새 정렬 기준으로 인덱스 재계산
-                if (selectSong && isPlayerVisible) {
-                  const newSorted = [...songs].sort((a, b) =>
-                    newOrder === "asc"
-                      ? a.playlistSongId - b.playlistSongId
-                      : b.playlistSongId - a.playlistSongId
-                  );
-                  const newIndex = newSorted.findIndex((s) => s.id === selectSong.id);
-                  if (newIndex !== -1) setCurrentIndex(newIndex);
-                }
-              }}
-            >
-              <option value="desc">최신순</option>
-              <option value="asc">오래된 순</option>
-            </select>
+            {/* edit 모드: 선택 모드 토글 */}
+            {isEditMode && songs.length > 0 && (
+              <button
+                className={`btn-select-toggle${isSelectMode ? " active" : ""}`}
+                onClick={() => {
+                  setIsSelectMode((prev) => !prev);
+                  setSelectedSongs(new Set());
+                }}
+              >
+                {isSelectMode ? "취소" : "선택"}
+              </button>
+            )}
+
+            {/* 정렬 드롭다운 (edit 모드 아닐 때만) */}
+            {!isEditMode && (
+              <select
+                className="sort-select"
+                value={sortOrder}
+                onChange={(e) => {
+                  const newOrder = e.target.value as "asc" | "desc";
+                  setSortOrder(newOrder);
+
+                  if (selectSong && isPlayerVisible) {
+                    const newSorted = [...songs].sort((a, b) =>
+                      newOrder === "asc"
+                        ? a.playlistSongId - b.playlistSongId
+                        : b.playlistSongId - a.playlistSongId
+                    );
+                    const newIndex = newSorted.findIndex((s) => s.id === selectSong.id);
+                    if (newIndex !== -1) setCurrentIndex(newIndex);
+                  }
+                }}
+              >
+                <option value="desc">최신순</option>
+                <option value="asc">오래된 순</option>
+              </select>
+            )}
 
             {!isEditMode && (
               <button
@@ -356,12 +429,18 @@ function PlaylistDetailPage() {
         </div>
 
         <ul className="track-list">
+          {sortedSongs.length === 0 && (
+            <li className="track-empty">곡이 없습니다.</li>
+          )}
           {sortedSongs.map((song) => (
             <li
               key={song.playlistSongId}
-              className={`track-item ${!isEditMode && selectSong?.id === song.id ? "playing" : ""}`}
+              className={`track-item ${!isEditMode && selectSong?.id === song.id ? "playing" : ""} ${isEditMode && isSelectMode && selectedSongs.has(song.playlistSongId) ? "selected" : ""}`}
               onClick={() => {
-                if (isEditMode) return;
+                if (isEditMode) {
+                  if (isSelectMode) toggleSongSelection(song.playlistSongId);
+                  return;
+                }
 
                 const index = sortedSongs.findIndex(
                   (s) => s.playlistSongId === song.playlistSongId
@@ -372,6 +451,16 @@ function PlaylistDetailPage() {
                 setIsPlayerVisible(true);
               }}
             >
+              {isEditMode && isSelectMode && (
+                <input
+                  type="checkbox"
+                  className="track-checkbox"
+                  checked={selectedSongs.has(song.playlistSongId)}
+                  onChange={() => toggleSongSelection(song.playlistSongId)}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              )}
+
               <img className="track-thumb" src={song.imgUrl} alt="" />
 
               <div className="track-info">
@@ -386,7 +475,7 @@ function PlaylistDetailPage() {
                 </span>
               )}
 
-              {isEditMode && (
+              {isEditMode && !isSelectMode && (
                 <button
                   className="track-delete"
                   title="곡 삭제"
