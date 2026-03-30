@@ -81,7 +81,7 @@ function HomePage() {
   const fetchDailySongs = async () => {
     setDailyLoading(true);
     try {
-      const res = await api.get<Song[]>("/randoms", { params: { limit: 1 } });
+      const res = await api.get<Song[]>("/api/randoms", { params: { limit: 1 } });
       setDailySongs(res.data || []);
     } catch {
       setDailySongs([]);
