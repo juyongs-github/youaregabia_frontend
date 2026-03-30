@@ -8,7 +8,6 @@ interface Props {
 
 const CustomEditor = ({ onChange, placeholder, initialValue }: Props) => {
   const editorRef = useRef<HTMLDivElement>(null);
-  // 커서 위치를 저장할 Ref
   const selectionRef = useRef<Range | null>(null);
 
   useEffect(() => {
@@ -17,7 +16,6 @@ const CustomEditor = ({ onChange, placeholder, initialValue }: Props) => {
     }
   }, [initialValue]);
 
-  // 커서 위치 저장 함수
   const saveSelection = () => {
     const sel = window.getSelection();
     if (sel && sel.rangeCount > 0) {
@@ -27,36 +25,43 @@ const CustomEditor = ({ onChange, placeholder, initialValue }: Props) => {
 
   const exec = (command: string, value?: string) => {
     editorRef.current?.focus();
-
-    // 저장된 커서 위치가 있다면 복구
     const sel = window.getSelection();
     if (selectionRef.current && sel) {
       sel.removeAllRanges();
       sel.addRange(selectionRef.current);
     }
-
     document.execCommand(command, false, value);
     handleChange();
   };
 
   const handleChange = () => {
     onChange(editorRef.current?.innerHTML ?? "");
-    saveSelection(); // 내용 변경 시마다 커서 위치 업데이트
+    saveSelection();
   };
 
-  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64Tag = reader.result as string;
-      // 직접 img 태그를 삽입하는 방식이 더 확실합니다.
-      const imgHtml = `<img src="${base64Tag}" style="max-width: 100%; height: auto;" /><br/>`;
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/image`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      const imageUrl = `${import.meta.env.VITE_API_BASE_URL}${data.url}`;
+
+      const imgHtml = `<img src="${imageUrl}" style="max-width: 100%; height: auto;" /><br/>`;
       exec("insertHTML", imgHtml);
-    };
-    reader.readAsDataURL(file);
-    e.target.value = ""; // 동일 파일 재선택 가능하도록 초기화
+    } catch (err) {
+      console.error("이미지 업로드 실패", err);
+      alert("이미지 업로드에 실패했습니다.");
+    }
+
+    e.target.value = "";
   };
 
   return (
@@ -96,7 +101,7 @@ const CustomEditor = ({ onChange, placeholder, initialValue }: Props) => {
 
         <label
           className="px-2 py-1 rounded text-sm text-white hover:bg-neutral-600 cursor-pointer"
-          onMouseDown={saveSelection} // 클릭하는 순간 커서 위치 저장
+          onMouseDown={saveSelection}
         >
           🖼
           <input type="file" accept="image/*" className="hidden" onChange={handleImage} />
@@ -108,7 +113,8 @@ const CustomEditor = ({ onChange, placeholder, initialValue }: Props) => {
         contentEditable
         suppressContentEditableWarning
         onInput={handleChange}
-        onBlur={saveSelection} // 포커스가 나갈 때 커서 위치 저장
+        onBlur={saveSelection}
+        data-placeholder={placeholder || "내용을 입력하세요."}
         className="min-h-[200px] px-4 py-3 text-white bg-neutral-900 focus:outline-none"
         style={{ whiteSpace: "pre-wrap" }}
       />
