@@ -37,6 +37,7 @@ import { usePlayer } from "../../contexts/PlayerContext";
 import RankSection from "../../components/layout/RankSection";
 import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
 import Header from "../../components/layout/Header";
+import RankingWidget from "../../components/ui/RankingWidget";
 
 function HomePage() {
   const [data, setData] = useState<Playlist[]>([]);
@@ -54,9 +55,11 @@ function HomePage() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownLoading, setIsDropdownLoading] = useState(false);
   const { play, stop, song: selectSong } = usePlayer();
-  const setSelectSong = (song: Song | null) => song ? play(song, { onClose: stop, onSongEnd: stop }) : stop();
+  const setSelectSong = (song: Song | null) =>
+    song ? play(song, { onClose: stop, onSongEnd: stop }) : stop();
   const [detailSong, setDetailSong] = useState<Song | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const [rightView, setRightView] = useState<"collabo" | "ranking">("collabo");
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -498,95 +501,114 @@ function HomePage() {
         </div>
       </div>
 
-      {/* ===== 우측 - 공동 플레이리스트 ===== */}
+      {/* ===== 우측 - 공동 플레이리스트 / 랭킹 ===== */}
       <div className="right-area">
-        {/* 상단 제목 */}
+        {/* 상단 제목 + 뷰 전환 버튼 */}
         <div className="section-header">
-          <h2
-            onClick={() =>
-              collaboPlaylists[currentSharedIndex] &&
-              navigate(`/community/collabo/detail/${collaboPlaylists[currentSharedIndex].id}`)
-            }
-            style={{ cursor: collaboPlaylists.length > 0 ? "pointer" : "default" }}
-          >
-            {collaboPlaylists[currentSharedIndex]?.title ?? "공동 플레이리스트"}
-          </h2>
+          {rightView === "collabo" ? (
+            <h2
+              onClick={() =>
+                collaboPlaylists[currentSharedIndex] &&
+                navigate(`/community/collabo/detail/${collaboPlaylists[currentSharedIndex].id}`)
+              }
+              style={{ cursor: collaboPlaylists.length > 0 ? "pointer" : "default" }}
+            >
+              {collaboPlaylists[currentSharedIndex]?.title ?? "공동 플레이리스트"}
+            </h2>
+          ) : (
+            <h2>이번 주 랭킹</h2>
+          )}
+
           <div className="shared-nav-row">
-            <button className="shared-nav-btn" onClick={scrollSharedLeft}>
-              <FaChevronLeft />
+            {/* 뷰 전환 토글 버튼 */}
+            <button
+              className={`shared-nav-btn${rightView === "ranking" ? " active" : ""}`}
+              onClick={() => setRightView(rightView === "collabo" ? "ranking" : "collabo")}
+              title={rightView === "collabo" ? "랭킹 보기" : "공동 플레이리스트 보기"}
+            >
+              {rightView === "collabo" ? <FaTrophy size={14} /> : <FaHandshake size={14} />}
             </button>
-            <button className="shared-nav-btn" onClick={scrollSharedRight}>
-              <FaChevronRight />
-            </button>
+
+            {/* 공동 플레이리스트 탐색 버튼 - collabo 뷰일 때만 */}
+            {rightView === "collabo" && (
+              <>
+                <button className="shared-nav-btn" onClick={scrollSharedLeft}>
+                  <FaChevronLeft />
+                </button>
+                <button className="shared-nav-btn" onClick={scrollSharedRight}>
+                  <FaChevronRight />
+                </button>
+              </>
+            )}
           </div>
         </div>
 
-        {/* 하단 본문: 왼쪽 이미지 + 오른쪽 곡 리스트 */}
-        <div className="shared-body">
-          {/* 왼쪽: 화살표+재생 버튼 위에, 이미지 세로 중앙 */}
-          <div className="shared-cover-left">
-            <div className="shared-cover-group">
-              <div
-                key={currentSharedIndex}
-                className="shared-cover-wrap shared-animate"
-                onClick={handlePlayAll}
-              >
-                {collaboPlaylists.length === 0 ? (
-                  <div className="shared-cover-empty" />
-                ) : (
-                  <img
-                    className="shared-cover-large"
-                    src={
-                      collaboPlaylists[currentSharedIndex]?.imageUrl
-                        ? `${baseURL}${collaboPlaylists[currentSharedIndex].imageUrl}`
-                        : ""
-                    }
-                    alt={collaboPlaylists[currentSharedIndex]?.title ?? ""}
-                  />
-                )}
-                <button className="shared-cover-play" tabIndex={-1}>
-                  <FaPlay />
-                </button>
+        {/* 본문 */}
+        {rightView === "collabo" ? (
+          <div className="shared-body">
+            {/* 기존 공동 플레이리스트 내용 그대로 */}
+            <div className="shared-cover-left">
+              <div className="shared-cover-group">
+                <div
+                  key={currentSharedIndex}
+                  className="shared-cover-wrap shared-animate"
+                  onClick={handlePlayAll}
+                >
+                  {collaboPlaylists.length === 0 ? (
+                    <div className="shared-cover-empty" />
+                  ) : (
+                    <img
+                      className="shared-cover-large"
+                      src={
+                        collaboPlaylists[currentSharedIndex]?.imageUrl
+                          ? `${baseURL}${collaboPlaylists[currentSharedIndex].imageUrl}`
+                          : ""
+                      }
+                      alt={collaboPlaylists[currentSharedIndex]?.title ?? ""}
+                    />
+                  )}
+                  <button className="shared-cover-play" tabIndex={-1}>
+                    <FaPlay />
+                  </button>
+                </div>
+                <div className="shared-like-row">
+                  <button className="shared-like-btn" onClick={handleLike}>
+                    <FaHeart
+                      className={`shared-like-heart${collaboPlaylists[currentSharedIndex]?.hasLiked ? " liked" : ""}`}
+                    />
+                  </button>
+                  <span className="shared-like-count">
+                    {collaboPlaylists[currentSharedIndex]?.likeCount ?? 0}
+                  </span>
+                </div>
               </div>
-              <div className="shared-like-row">
-                <button className="shared-like-btn" onClick={handleLike}>
-                  <FaHeart
-                    className={`shared-like-heart${collaboPlaylists[currentSharedIndex]?.hasLiked ? " liked" : ""}`}
-                  />
-                </button>
-                <span className="shared-like-count">
-                  {collaboPlaylists[currentSharedIndex]?.likeCount ?? 0}
-                </span>
+            </div>
+            <div className="shared-right-panel">
+              <div className="shared-wrapper">
+                <div key={currentSharedIndex} className="shared-container shared-animate">
+                  {collaboPlaylists.length === 0 ? (
+                    <div className="playlist-empty">공동 플레이리스트가 없습니다.</div>
+                  ) : (
+                    collaboPlaylists[currentSharedIndex] && (
+                      <RankSection
+                        playlist={collaboPlaylists[currentSharedIndex]}
+                        onSongClick={(song) => setSelectSong(song)}
+                        onModalOpenChange={setIsRankModalOpen}
+                      />
+                    )
+                  )}
+                </div>
               </div>
             </div>
           </div>
-
-          {/* 오른쪽: 곡 리스트 */}
-          <div className="shared-right-panel">
-            <div className="shared-wrapper">
-              <div key={currentSharedIndex} className="shared-container shared-animate">
-                {collaboPlaylists.length === 0 ? (
-                  <div className="playlist-empty">공동 플레이리스트가 없습니다.</div>
-                ) : collaboPlaylists[currentSharedIndex] && (
-                  <RankSection
-                    playlist={collaboPlaylists[currentSharedIndex]}
-                    onSongClick={(song) => {
-                      setSelectSong(song);
-                    }}
-                    onModalOpenChange={setIsRankModalOpen}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        ) : (
+          <RankingWidget />
+        )}
       </div>
-
       {/* ===== 모달 ===== */}
       {isModalOpen && (
         <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
       )}
-
 
       {/* ===== 상세보기 모달 ===== */}
       {detailSong && <SongDetailModal song={detailSong} onClose={() => setDetailSong(null)} />}

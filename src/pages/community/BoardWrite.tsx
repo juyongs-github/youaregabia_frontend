@@ -76,6 +76,11 @@ const BoardWrite = () => {
       refreshPoint();
       return;
     }
+    // 추가
+    if (!selectedPlaylist) {
+      alert("플레이리스트 공유를 안하셨습니다.");
+      return;
+    }
 
     // 플레이리스트 카드
     const boardId = await boardApi.createBoard({

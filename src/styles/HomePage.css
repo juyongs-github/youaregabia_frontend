@@ -27,7 +27,6 @@
   margin-bottom: clamp(16px, 2vh, 28px);
 }
 
-
 /* =========================
    검색창
 ========================= */
@@ -185,7 +184,6 @@
   font-size: 14px;
 }
 
-
 /* =========================
    중앙 아이콘 (하단 고정)
 ========================= */
@@ -303,7 +301,7 @@
 }
 
 .center-icons button.active::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -17px;
   left: 50%;
@@ -330,7 +328,10 @@
   background: linear-gradient(135deg, rgba(15, 15, 20, 0.88), rgba(30, 30, 40, 0.78));
   border: 1px solid rgba(192, 200, 215, 0.4);
   backdrop-filter: blur(16px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 0.5px rgba(192, 200, 215, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 0 0 0.5px rgba(192, 200, 215, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
   width: clamp(320px, 28vw, 420px);
   z-index: 2;
 }
@@ -438,8 +439,12 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* =========================
@@ -584,7 +589,9 @@
   height: 30px;
   border-radius: 50%;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .slider-btn:hover {
@@ -670,7 +677,9 @@
   width: 16px;
   height: 16px;
   flex-shrink: 0;
-  transition: color 0.2s ease, transform 0.15s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.15s ease;
 }
 
 .shared-like-btn:hover .shared-like-heart {
@@ -704,7 +713,9 @@
   background: rgba(0, 0, 0, 0.6);
   color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
   flex-shrink: 0;
 }
 
@@ -763,7 +774,9 @@
   justify-content: center;
   opacity: 0;
   transform: scale(0.8);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
   pointer-events: none;
 }
 
@@ -852,9 +865,15 @@
   font-size: 14px;
 }
 
-.rank-number.gold   { color: #f5c518; }
-.rank-number.silver { color: #b0b8c1; }
-.rank-number.bronze { color: #cd7f32; }
+.rank-number.gold {
+  color: #f5c518;
+}
+.rank-number.silver {
+  color: #b0b8c1;
+}
+.rank-number.bronze {
+  color: #cd7f32;
+}
 
 .rank-album-img {
   width: 44px;
@@ -911,7 +930,6 @@
   opacity: 1;
 }
 
-
 .rank-actions button {
   background: none;
   border: none;
@@ -947,7 +965,9 @@
   background: rgba(0, 0, 0, 0.6);
   color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .nav:hover {
@@ -993,7 +1013,7 @@
 }
 
 .home.player-open::after {
-  content: '';
+  content: "";
   display: block;
   height: calc(100vh + 120px);
 }
@@ -1020,7 +1040,8 @@
 ========================= */
 @media (max-width: 1400px) {
   /* body 레벨 스크롤 */
-  html, body {
+  html,
+  body {
     overflow-y: auto;
     height: auto;
     background: black;
@@ -1211,7 +1232,6 @@
     display: none;
   }
 
-
   /* 메뉴바 아이콘·텍스트 크기 축소 */
   .center-icons button {
     font-size: 11px;
@@ -1233,5 +1253,141 @@
     height: 18px;
   }
 }
+/* ===== 랭킹 위젯 ===== */
+.ranking-widget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 4px 0;
+}
 
+.ranking-tab-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 4px;
+}
 
+.ranking-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 0;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #888;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ranking-tab-btn.active {
+  background: rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+}
+
+.ranking-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  transition: background 0.2s;
+}
+
+.ranking-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.ranking-num {
+  width: 18px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 900;
+  color: #555;
+  flex-shrink: 0;
+}
+
+.ranking-num.rank-1 {
+  color: #facc15;
+}
+.ranking-num.rank-2 {
+  color: #d1d5db;
+}
+.ranking-num.rank-3 {
+  color: #b45309;
+}
+
+.ranking-song-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.ranking-artist-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: #a5b4fc;
+  flex-shrink: 0;
+}
+
+.ranking-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ranking-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e5e7eb;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ranking-sub {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ranking-count {
+  font-size: 11px;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.ranking-loading,
+.ranking-empty {
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+  padding: 20px 0;
+}
