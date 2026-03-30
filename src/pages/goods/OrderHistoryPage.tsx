@@ -56,7 +56,7 @@ export default function OrderHistoryPage() {
   const [trackingLoading, setTrackingLoading] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
-    api.get<Order[]>("/orders/me")
+    api.get<Order[]>("/api/orders/me")
       .then((res) => setOrders(res.data))
       .catch(() => alert("주문 내역을 불러오는데 실패했습니다."))
       .finally(() => setLoading(false));

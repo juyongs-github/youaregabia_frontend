@@ -124,22 +124,22 @@ function AdminPage() {
   useEffect(() => {
     if (user?.role !== "ADMIN") return;
     if (activeTab === "loginLogs" && loginLogs.length === 0) {
-      api.get("/admin/logs/login").then((res) => setLoginLogs(res.data));
+      api.get("/api/admin/logs/login").then((res) => setLoginLogs(res.data));
     }
     if (activeTab === "activityLogs" && activityLogs.length === 0) {
-      api.get("/admin/logs/activity").then((res) => setActivityLogs(res.data));
+      api.get("/api/admin/logs/activity").then((res) => setActivityLogs(res.data));
     }
     if (activeTab === "goods") loadGoods();
     if (activeTab === "orders") loadOrders();
   }, [activeTab, user?.role]);
 
   const loadOrders = () => {
-    api.get("/admin/orders").then((res) => setOrders(res.data)).catch(() => {});
+    api.get("/api/admin/orders").then((res) => setOrders(res.data)).catch(() => {});
   };
 
   const handleOrderStatusChange = async (orderId: number, status: string) => {
     try {
-      await api.patch(`/admin/orders/${orderId}/status`, { status });
+      await api.patch(`/api/admin/orders/${orderId}/status`, { status });
       setOrders((prev) => prev.map((o) => o.orderId === orderId ? { ...o, status } : o));
     } catch {
       alert("상태 변경에 실패했습니다.");
@@ -149,7 +149,7 @@ function AdminPage() {
   const handleTrackingSubmit = async (orderId: number) => {
     if (!trackingEdit) return;
     try {
-      await api.patch(`/admin/orders/${orderId}/tracking`, {
+      await api.patch(`/api/admin/orders/${orderId}/tracking`, {
         carrierId: trackingEdit.carrierId,
         trackingNumber: trackingEdit.trackingNumber,
       });
@@ -163,7 +163,7 @@ function AdminPage() {
   };
 
   const loadGoods = () => {
-    api.get("/goods").then((res) => setGoodsList(res.data)).catch(() => {});
+    api.get("/api/goods").then((res) => setGoodsList(res.data)).catch(() => {});
   };
 
   const handleGoodsFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -178,7 +178,7 @@ function AdminPage() {
   const handleGoodsDelete = async (goodsId: number) => {
     if (!confirm("상품을 삭제하시겠습니까?")) return;
     try {
-      await api.delete(`/goods/${goodsId}`);
+      await api.delete(`/api/goods/${goodsId}`);
       loadGoods();
     } catch {
       alert("삭제에 실패했습니다.");
@@ -204,9 +204,9 @@ function AdminPage() {
       if (goodsForm.imageFile) formData.append("image", goodsForm.imageFile);
 
       if (goodsForm.goodsId) {
-        await api.put(`/goods/${goodsForm.goodsId}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
+        await api.put(`/api/goods/${goodsForm.goodsId}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
       } else {
-        await api.post("/goods", formData, { headers: { "Content-Type": "multipart/form-data" } });
+        await api.post("/api/goods", formData, { headers: { "Content-Type": "multipart/form-data" } });
       }
       setShowGoodsForm(false);
       setGoodsForm(EMPTY_FORM);
@@ -220,7 +220,7 @@ function AdminPage() {
 
   const handleRoleChange = async (id: number, role: string) => {
     try {
-      await api.patch(`/admin/users/${id}/role`, { role });
+      await api.patch(`/api/admin/users/${id}/role`, { role });
       setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role } : u)));
     } catch {
       alert("권한 변경에 실패했습니다.");

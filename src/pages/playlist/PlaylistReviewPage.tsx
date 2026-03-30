@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { reviewApi } from "../../api/reviewApi";
 import { playlistSongApi } from "../../api/playlistSongApi";
-import type { Song } from "../../components/ui/SongListItem";
+import type { Song } from "../../Components/ui/SongListItem";
 import Rating from "@mui/material/Rating";
 import {
   FaStar,
@@ -19,7 +19,7 @@ import { HiPencil } from "react-icons/hi2";
 import { TbMessageStar } from "react-icons/tb";
 import { RiPlayList2Fill } from "react-icons/ri";
 import { FiCheck, FiSearch, FiX } from "react-icons/fi";
-import MusicPlayer from "../../components/layout/MusicPlayer";
+import MusicPlayer from "../../Components/layout/MusicPlayer";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 

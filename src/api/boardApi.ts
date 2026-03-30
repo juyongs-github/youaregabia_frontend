@@ -6,12 +6,12 @@ export const boardApi = {
   // 전체 조회
   getBoards: (
     params: PageRequest & { keyword?: string; genre?: string; boardType?: string; sort?: string }
-  ) => api.get<PageResult<Board>>("/community/share", { params }).then((res) => res.data),
+  ) => api.get<PageResult<Board>>("/api/community/share", { params }).then((res) => res.data),
 
   // 상세 조회
   getBoardDetail: (boardId: number, pageRequest: PageRequest = { page: 1, size: 10 }) =>
     api
-      .get<Board>(`/community/share/${boardId}`, {
+      .get<Board>(`/api/community/share/${boardId}`, {
         params: { ...pageRequest },
       })
       .then((res) => res.data),
@@ -24,33 +24,40 @@ export const boardApi = {
     boardGenre: string;
     songIds?: number[];
   }): Promise<number> => {
-    const res = await api.post("/community/share/add", data);
+    const res = await api.post("/api/community/share/add", data);
     return res.data;
   },
 
   // 게시글 수정
   updateBoard: (boardId: number, data: { title: string; content: string; boardGenre: string }) =>
-    api.put(`/community/share/update/${boardId}`, data),
+    api.put(`/api/community/share/update/${boardId}`, data),
 
   // 게시글 삭제
-  deleteBoard: (boardId: number) => api.delete(`/community/share/delete/${boardId}`),
+  deleteBoard: (boardId: number) => api.delete(`/api/community/share/delete/${boardId}`),
 
   getCriticBoards: (songId: number, params: PageRequest) =>
     api
-      .get<PageResult<Board>>("/community/share/critic", {
+      .get<PageResult<Board>>("/api/community/share/critic", {
         params: { songId, ...params },
       })
       .then((res) => res.data),
 
   getCriticList: (params: PageRequest, keyword?: string) =>
     api
-      .get<PageResult<Board>>("/community/share/critic/list", {
+      .get<PageResult<Board>>("/api/community/share/critic/list", {
         params: { ...params, keyword },
       })
       .then((res) => res.data),
 
   toggleBoardLike: (boardId: number) =>
     api
-      .post<{ likeCount: number; likedByMe: boolean }>(`/boards/${boardId}/like`, null)
+      .post<{ likeCount: number; likedByMe: boolean }>(`/api/boards/${boardId}/like`, null)
       .then((res) => res.data),
+
+  // 인기글 조회
+  getPopularBoards: async (boardType?: string): Promise<Board[]> => {
+    const params = boardType ? { boardType } : {};
+    const res = await api.get("/api/community/share/popular", { params });
+    return res.data;
+  },
 };

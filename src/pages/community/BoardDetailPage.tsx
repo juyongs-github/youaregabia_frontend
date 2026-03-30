@@ -4,12 +4,13 @@ import { boardApi } from "../../api/boardApi";
 import type { Board } from "../../types/board";
 import { replyApi } from "../../api/replyApi";
 import { playlistApi } from "../../api/playlistApi";
-import ReplyItem from "../../components/ui/replyItem";
-import Pagination from "../../components/ui/Pagination";
+import ReplyItem from "../../Components/ui/replyItem";
+import Pagination from "../../Components/ui/Pagination";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
-import { refreshPoint } from "../../components/ui/refreshPoint";
+import DOMPurify from "dompurify";
+import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
+import { refreshPoint } from "../../Components/ui/refreshPoint";
 
 const BoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();
@@ -199,7 +200,10 @@ const BoardDetailPage = () => {
         <div className="flex flex-wrap gap-4 text-sm font-semibold text-neutral-500">
           <span>작성자: {board.writer}</span>
           <span>생성일시: {board.createdAt}</span>
-          <span className="text-indigo-400">장르: {board.boardGenre}</span>
+          {/* 장르가 CRITIC이 아닐 때만 렌더링 */}
+          {board.boardGenre !== "FREE" && (
+            <span className="text-indigo-400">장르: {board.boardGenre}</span>
+          )}
         </div>
       </div>
 
@@ -330,9 +334,10 @@ const BoardDetailPage = () => {
       )}
 
       {/* 본문 */}
-      <div className="mb-8 min-h-[100px] whitespace-pre-wrap break-words leading-[1.3] text-white">
-        {board.content}
-      </div>
+      <div
+        className="mb-8 min-h-[100px] break-words leading-[1.3] text-white"
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(board.content) }}
+      />
 
       {/* 좋아요 + 수정 버튼 */}
       <div className="flex items-center justify-end gap-4 mb-8">

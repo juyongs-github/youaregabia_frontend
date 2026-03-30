@@ -97,7 +97,7 @@ export default function OrderPage() {
     setUseSameInfo(checked);
     if (checked) {
       try {
-        const res = await api.get<{ name: string; phoneNumber: string; address: string; addressDetail: string }>("/auth/me");
+        const res = await api.get<{ name: string; phoneNumber: string; address: string; addressDetail: string }>("/api/auth/me");
         setForm((f) => ({
           ...f,
           receiverName: res.data.name || f.receiverName,

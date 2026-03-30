@@ -1,24 +1,31 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
-import type { Board, PageResult } from "../../types/board";
-import Pagination from "../../components/ui/Pagination";
+import type { Board, PageResult, TabType } from "../../types/board";
+import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import BoardSortBar from "../../components/ui/BoardSortBar";
-import BoardItem from "../../components/ui/BoardItem";
+import BoardTabBar from "../../Components/ui/BoardTabBar";
+import PopularTab from "../../Components/ui/PopularTab";
+import BoardListTemplate from "../../Components/ui/BoardListTemplate";
 
 const CriticListPage = () => {
+  const [activeTab, setActiveTab] = useState<TabType>("ALL");
+
+  // 전체글 상태
   const [pageData, setPageData] = useState<PageResult<Board> | null>(null);
   const [keyword, setKeyword] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [sortBy, setSortBy] = useState("latest");
+
+  // 인기글 상태
+  const [popularBoards, setPopularBoards] = useState<Board[]>([]);
+  const [popularLoading, setPopularLoading] = useState(false);
+
   const navigate = useNavigate();
   const userRole = useSelector((state: RootState) => state.auth.user?.role);
-  const [sortBy, setSortBy] = useState("latest");
 
   const loadPage = async (page: number, search?: string, sort?: string) => {
     try {
-      // params 객체 타입을 명시하여 타입 에러 방지
       const params: {
         page: number;
         size: number;
@@ -35,12 +42,34 @@ const CriticListPage = () => {
       console.error("평론 목록 로드 실패:", error);
     }
   };
-  // 초기 로드
+
+  const loadPopularBoards = async () => {
+    if (popularBoards.length > 0) return;
+    try {
+      setPopularLoading(true);
+      const data = await boardApi.getPopularBoards("CRITIC");
+      setPopularBoards(data);
+    } catch (error) {
+      console.error("인기글 로드 실패:", error);
+    } finally {
+      setPopularLoading(false);
+    }
+  };
+
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab);
+    if (tab === "POPULAR") loadPopularBoards();
+  };
+
   useEffect(() => {
     loadPage(1);
   }, []);
 
-  // 검색 실행
+  const handlePageChange = (page: number) => {
+    loadPage(page, searchKeyword);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleSearch = () => {
     setSearchKeyword(keyword);
     loadPage(1, keyword);
@@ -56,25 +85,16 @@ const CriticListPage = () => {
     loadPage(1);
   };
 
-  // 페이지 변경
-  const handlePageChange = (page: number) => {
-    loadPage(page, searchKeyword);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // 정렬 바뀔 때 1페이지로 이동
   const handleSortChange = (sort: string) => {
     setSortBy(sort);
     loadPage(1, searchKeyword, sort);
   };
 
-  if (!pageData) {
-    return <div className="p-4 text-center text-white">로딩 중...</div>;
-  }
+  if (!pageData) return <div className="p-4 text-center text-white">로딩 중...</div>;
 
   return (
     <div className="mx-auto max-w-4xl p-4 text-white">
-      {/* 헤더 */}
+      {/* 상단 헤더 */}
       <div className="mt-8 mb-6 flex items-end justify-between border-b border-neutral-700 pb-5">
         <div>
           <h2 className="text-3xl font-bold text-white">음악 평론</h2>
@@ -83,76 +103,30 @@ const CriticListPage = () => {
         {userRole === "CRITIC" && (
           <button
             onClick={() => navigate("/recommend/critic/write")}
-            className="rounded-md bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+            className="h-[42px] flex items-center justify-center rounded-md bg-indigo-600 px-5 text-sm font-semibold text-white transition-all hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95"
           >
             평론 작성
           </button>
         )}
       </div>
 
-      {/* 정렬 바 */}
-      <BoardSortBar sortBy={sortBy} onChange={handleSortChange} />
+      <BoardTabBar activeTab={activeTab} onChange={handleTabChange} />
 
-      {/* 평론 목록 */}
-      <ul className="divide-y divide-neutral-700 rounded border border-neutral-700">
-        {pageData.dtoList.length > 0 ? (
-          pageData.dtoList.map((board) => (
-            <BoardItem key={board.boardId} board={board} basePath="/recommend/critic" />
-          ))
-        ) : (
-          <li className="px-4 py-8 text-center text-gray-500">평론이 없습니다.</li>
-        )}
-      </ul>
-      {/* 검색바 */}
-      <div className="mb-4 flex gap-2">
-        <input
-          type="text"
-          placeholder="검색"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          onKeyDown={handleEnter}
-          className="flex-1 rounded border border-neutral-700 bg-neutral-900 px-4 py-2 text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+      {activeTab === "POPULAR" && <PopularTab boards={popularBoards} loading={popularLoading} />}
+      {activeTab === "ALL" && (
+        <BoardListTemplate
+          pageData={pageData}
+          keyword={keyword}
+          searchKeyword={searchKeyword}
+          sortBy={sortBy}
+          onKeywordChange={setKeyword}
+          onSearch={handleSearch}
+          onEnter={handleEnter}
+          onReset={handleKeyReset}
+          onSortChange={handleSortChange}
+          onPageChange={handlePageChange}
         />
-        <button
-          onClick={handleSearch}
-          className="rounded bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-500"
-        >
-          검색
-        </button>
-        {searchKeyword && (
-          <button
-            onClick={handleKeyReset}
-            className="rounded border border-neutral-700 px-4 py-2 text-gray-400 hover:bg-neutral-800"
-          >
-            전체
-          </button>
-        )}
-      </div>
-
-      {searchKeyword && (
-        <div className="mb-2 text-sm text-gray-400">
-          '{searchKeyword}' 검색 결과: {pageData.totalCount}개
-        </div>
       )}
-
-      {/* 페이지네이션 */}
-      {pageData.pageNumList.length > 0 && (
-        <div className="mt-6">
-          <Pagination
-            pageNumList={pageData.pageNumList}
-            current={pageData.current}
-            prev={pageData.prev}
-            next={pageData.next}
-            prevPage={pageData.prevPage}
-            nextPage={pageData.nextPage}
-            onPageChange={handlePageChange}
-          />
-        </div>
-      )}
-
-      <div className="mt-4 text-center text-sm text-gray-400">
-        전체 {pageData.totalCount}개 · {pageData.current} 페이지
-      </div>
     </div>
   );
 };

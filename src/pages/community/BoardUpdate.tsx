@@ -1,87 +1,145 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { boardApi } from "../../api/boardApi";
 import { useSelector } from "react-redux";
+import { boardApi } from "../../api/boardApi";
 import type { RootState } from "../../store";
+import CustomEditor from "../../components/ui/CustomEditor";
 
 const BoardUpdate = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const navigate = useNavigate();
-  const userEmail = useSelector((state: RootState) => state.auth.user?.email);
+
+  // 유저 정보 (수정 권한 확인용)
+  const user = useSelector((state: RootState) => state.auth.user);
+  const userEmail = user?.email;
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [genre, setGenre] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
-  // 1️⃣ 기존 게시글 불러오기
+  // 핵심 조건: 장르가 'FREE'인지 확인
+  const isFreeGenre = genre === "FREE";
+
+  // 1. 게시글 데이터 불러오기
   useEffect(() => {
     if (!boardId || !userEmail) return;
 
-    boardApi.getBoardDetail(Number(boardId)).then((board) => {
-      setTitle(board.title);
-      setContent(board.content ?? "");
-      setGenre(board.boardGenre);
-    });
-  }, [boardId]);
+    boardApi
+      .getBoardDetail(Number(boardId))
+      .then((board) => {
+        setTitle(board.title);
+        setContent(board.content ?? "");
+        setGenre(board.boardGenre); // 여기서 genre 상태가 업데이트됨
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error("데이터 로딩 실패:", err);
+        alert("게시글을 불러올 수 없습니다.");
+        navigate(-1);
+      });
+  }, [boardId, userEmail, navigate]);
 
-  // 2️⃣ 수정
+  // 2. 수정 실행
   const update = async () => {
-    if (!boardId || !userEmail) return;
+    if (!title.trim()) {
+      alert("제목을 입력해주세요.");
+      return;
+    }
 
-    await boardApi.updateBoard(Number(boardId), {
-      title,
-      content,
-      boardGenre: genre,
-    });
-
-    navigate(`/community/share/${boardId}`);
+    try {
+      if (!boardId) return;
+      await boardApi.updateBoard(Number(boardId), {
+        title,
+        content,
+        boardGenre: genre,
+      });
+      alert("수정되었습니다.");
+      navigate(`/community/share/${boardId}`);
+    } catch (error) {
+      alert("수정 중 오류가 발생했습니다.");
+    }
   };
 
-  // 3️⃣ 삭제
+  // 3. 삭제 실행
   const remove = async () => {
-    if (!boardId || !userEmail) return;
-
-    if (!confirm("정말 삭제할까요?")) return;
-
-    await boardApi.deleteBoard(Number(boardId));
-    navigate("/community/share");
+    if (!boardId || !window.confirm("정말 삭제하시겠습니까?")) return;
+    try {
+      await boardApi.deleteBoard(Number(boardId));
+      alert("삭제되었습니다.");
+      navigate("/community/share");
+    } catch (error) {
+      alert("삭제 중 오류가 발생했습니다.");
+    }
   };
+
+  if (isLoading) return <div className="p-4 text-white">로딩 중...</div>;
 
   return (
-    <div>
-      <h2 className="mb-4 text-2xl font-bold">플레이리스트 공유 수정</h2>
+    <div className="max-w-4xl mx-auto p-4 text-white">
+      {/* 장르가 FREE이면 '평론 수정', 아니면 '플레이리스트 공유 수정' */}
+      <h2 className="mb-6 text-3xl font-extrabold tracking-tight">
+        {isFreeGenre ? "평론 수정" : "플레이리스트 공유 수정"}
+      </h2>
 
-      <input
-        className="mb-3 w-full rounded border px-3 py-2"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      <select
-        className="mb-3 w-full rounded border px-3 py-2"
-        value={genre}
-        onChange={(e) => setGenre(e.target.value)}
-      >
-        <option value="KPOP">KPOP</option>
-        <option value="POP">POP</option>
-        <option value="JPOP">JPOP</option>
-        <option value="HIPHOP">HIPHOP</option>
-      </select>
-      <textarea
-        className="mb-4 w-full min-h-[400px] resize-y rounded border px-4 py-3 leading-normal"
-        rows={6}
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-      />
+      {/* 제목 입력 */}
+      <div className="mb-4">
+        <label className="block mb-2 text-sm font-medium text-neutral-400">제목</label>
+        <input
+          className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-3 text-white outline-none focus:border-indigo-500"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </div>
 
-      <div className="flex gap-2">
+      {/* 장르가 FREE가 아닐 때만 장르 선택창 노출 (FREE는 평론 고정이므로 숨김) */}
+      {!isFreeGenre && (
+        <div className="mb-4">
+          <label className="block mb-2 text-sm font-medium text-neutral-400">장르</label>
+          <select
+            className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-3 text-white outline-none focus:border-indigo-500"
+            value={genre}
+            onChange={(e) => setGenre(e.target.value)}
+          >
+            <option value="KPOP">KPOP</option>
+            <option value="POP">POP</option>
+            <option value="JPOP">JPOP</option>
+            <option value="HIPHOP">HIPHOP</option>
+          </select>
+        </div>
+      )}
+
+      {/* 에디터 영역 */}
+      <div className="mb-6">
+        <label className="block mb-2 text-sm font-medium text-neutral-400">내용</label>
+        <CustomEditor
+          initialValue={content}
+          onChange={(html) => setContent(html)}
+          // 장르에 따른 Placeholder 변경
+          placeholder={
+            isFreeGenre ? "평론 내용을 수정하세요." : "추가로 하고 싶은 말을 입력하세요..."
+          }
+        />
+      </div>
+
+      <div className="flex justify-end gap-3 border-t border-neutral-800 pt-6">
+        <button
+          onClick={() => navigate(-1)}
+          className="rounded-lg bg-neutral-800 px-6 py-2.5 font-semibold text-neutral-300 hover:bg-neutral-700"
+        >
+          취소
+        </button>
+        <button
+          onClick={remove}
+          className="rounded-lg bg-red-600/20 px-6 py-2.5 font-semibold text-red-500 border border-red-600/50 hover:bg-red-600 hover:text-white"
+        >
+          삭제하기
+        </button>
         <button
           onClick={update}
-          className="rounded bg-neutral-600 px-2  text-white hover:bg-neutral-500"
+          className="rounded-lg bg-indigo-600 px-8 py-2.5 font-semibold text-white hover:bg-indigo-500"
         >
-          수정
-        </button>
-        <button onClick={remove} className="rounded bg-red-600 px-2  text-white hover:bg-red-500">
-          삭제
+          수정 완료
         </button>
       </div>
     </div>

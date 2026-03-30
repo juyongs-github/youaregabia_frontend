@@ -27,7 +27,7 @@ function AddSongsModal({ playlistId, onClose, onAdded, existingSongs }: Props) {
 
   const handleSearch = async () => {
     if (!keyword.trim()) return;
-    const res = await api.get("/search", { params: { q: keyword } });
+    const res = await api.get("/api/search", { params: { q: keyword } });
     setResults(res.data || []);
   };
 
@@ -47,7 +47,7 @@ function AddSongsModal({ playlistId, onClose, onAdded, existingSongs }: Props) {
   const handleAddSongs = async () => {
     try {
       for (const song of selected) {
-        await api.post(`/playlist/${playlistId}/songs/${song.id}`);
+        await api.post(`/api/playlist/${playlistId}/songs/${song.id}`);
       }
       onAdded();
       onClose();

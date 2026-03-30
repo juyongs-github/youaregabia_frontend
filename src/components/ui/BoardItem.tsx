@@ -67,7 +67,15 @@ const BoardItem = ({ board, basePath }: Props) => {
             <span className="text-xs text-gray-500 border-l border-neutral-700 pl-3">
               조회 {board.viewCount}
             </span>
-            <span className="text-xs text-gray-500">❤️ {board.likeCount}</span>
+            {/* 하트 및 추천 수 스타일 수정 */}
+            <span className="text-xs text-gray-500 flex items-center gap-1">
+              <span>❤️</span>
+              <span
+                className={`font-bold ${board.likeCount >= 5 ? "text-blue-400" : "text-gray-500"}`}
+              >
+                {board.likeCount}
+              </span>
+            </span>
           </div>
         </div>
 

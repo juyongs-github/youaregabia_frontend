@@ -30,3 +30,9 @@ margin: 0;
 ::-webkit-scrollbar-thumb:hover {
   background: #3a5068;
 }
+
+[contenteditable][data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: #6b7280;
+  pointer-events: none;
+}

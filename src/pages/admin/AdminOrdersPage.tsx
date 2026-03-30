@@ -40,7 +40,7 @@ export default function AdminOrdersPage() {
   useEffect(() => { loadOrders(); }, []);
 
   const loadOrders = () => {
-    api.get("/admin/orders")
+    api.get("/api/admin/orders")
       .then((res) => setOrders(res.data))
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -48,7 +48,7 @@ export default function AdminOrdersPage() {
 
   const handleStatusChange = async (orderId: number, status: string) => {
     try {
-      await api.patch(`/admin/orders/${orderId}/status`, { status });
+      await api.patch(`/api/admin/orders/${orderId}/status`, { status });
       setOrders((prev) => prev.map((o) => o.orderId === orderId ? { ...o, status } : o));
     } catch {
       alert("상태 변경에 실패했습니다.");
@@ -58,7 +58,7 @@ export default function AdminOrdersPage() {
   const handleTrackingSubmit = async (orderId: number) => {
     if (!trackingEdit) return;
     try {
-      await api.patch(`/admin/orders/${orderId}/tracking`, {
+      await api.patch(`/api/admin/orders/${orderId}/tracking`, {
         carrierId: trackingEdit.carrierId,
         trackingNumber: trackingEdit.trackingNumber,
       });

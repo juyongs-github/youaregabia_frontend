@@ -41,7 +41,7 @@ export default function AdminGoodsPage() {
   useEffect(() => { loadGoods(); }, []);
 
   const loadGoods = () => {
-    api.get("/goods").then((res) => setGoodsList(res.data)).catch(() => {});
+    api.get("/api/goods").then((res) => setGoodsList(res.data)).catch(() => {});
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -56,7 +56,7 @@ export default function AdminGoodsPage() {
   const handleDelete = async (goodsId: number) => {
     if (!confirm("상품을 삭제하시겠습니까?")) return;
     try {
-      await api.delete(`/goods/${goodsId}`);
+      await api.delete(`/api/goods/${goodsId}`);
       loadGoods();
     } catch {
       alert("삭제에 실패했습니다.");
@@ -82,9 +82,9 @@ export default function AdminGoodsPage() {
       if (form.imageFile) formData.append("image", form.imageFile);
 
       if (form.goodsId) {
-        await api.put(`/goods/${form.goodsId}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
+        await api.put(`/api/goods/${form.goodsId}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
       } else {
-        await api.post("/goods", formData, { headers: { "Content-Type": "multipart/form-data" } });
+        await api.post("/api/goods", formData, { headers: { "Content-Type": "multipart/form-data" } });
       }
       setShowForm(false);
       setForm(EMPTY_FORM);

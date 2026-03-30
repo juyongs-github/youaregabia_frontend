@@ -3,10 +3,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
 import type { Board } from "../../types/board";
 import { replyApi } from "../../api/replyApi";
-import ReplyItem from "../../components/ui/replyItem";
-import Pagination from "../../components/ui/Pagination";
+import ReplyItem from "../../Components/ui/replyItem";
+import Pagination from "../../Components/ui/Pagination";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
+import DOMPurify from "dompurify";
 
 const FreeBoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();
@@ -95,9 +96,10 @@ const FreeBoardDetailPage = () => {
         <div className="text-sm font-semibold text-neutral-500">생성일시: {board.createdAt}</div>
         <div className="text-sm font-semibold text-neutral-500">장르: {board.boardGenre}</div>
       </div>
-      <div className="mb-8 min-h-[100px] whitespace-pre-wrap break-words leading-[1.3] text-white">
-        {board.content}
-      </div>
+      <div
+        className="mb-8 min-h-[100px] break-words leading-[1.3] text-white"
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(board.content) }}
+      />
       <div className="flex items-center justify-end">
         {userEmail && board.writerEmail === userEmail && (
           <button onClick={() => navigate(`/community/free/${board.boardId}/update`)}>수정</button>
