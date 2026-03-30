@@ -426,7 +426,7 @@ function ChatbotButton() {
     let succeeded = false;
     let isDuplicate = false;
     try {
-      const res = await api.get("/search", {
+      const res = await api.get("/api/search", {
         params: { q: `${addingTrack.trackName} ${addingTrack.artistName}` },
       });
       const songs: Song[] = res.data || [];
@@ -483,7 +483,7 @@ function ChatbotButton() {
       setInput("");
       setIsLoading(true);
       try {
-        await api.post("/inquiry", {
+        await api.post("/api/inquiry", {
           type: inquiryType,
           content: msg,
           email: inquiryEmail || undefined,
@@ -509,7 +509,7 @@ function ChatbotButton() {
     setIsLoading(true);
 
     try {
-      const res = await api.post<ChatResponse>("/chatbot/message", {
+      const res = await api.post<ChatResponse>("/api/chatbot/message", {
         message: msg,
         sessionId,
       });
@@ -555,7 +555,7 @@ function ChatbotButton() {
       setMessages((prev) => [...prev, { role: "user", content: "[문의] 내 문의 내역" }]);
       setIsLoading(true);
       try {
-        const res = await api.get<InquiryItem[]>("/inquiry/my");
+        const res = await api.get<InquiryItem[]>("/api/inquiry/my");
         const list = res.data;
         if (list.length === 0) {
           setMessages((prev) => [...prev, { role: "assistant", content: "아직 접수된 문의가 없습니다." }]);
@@ -596,7 +596,7 @@ function ChatbotButton() {
   const handleReset = async () => {
     if (sessionId) {
       try {
-        await api.delete(`/chatbot/sessions/${sessionId}`);
+        await api.delete(`/api/chatbot/sessions/${sessionId}`);
       } catch {}
       setSessionId(null);
       localStorage.removeItem(SESSION_KEY);
