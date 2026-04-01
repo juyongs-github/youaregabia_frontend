@@ -91,23 +91,8 @@ const CriticListPage = () => {
         )}
       </div>
 
-      {/* 정렬 바 */}
-      <div className="mt-5">
-        <BoardSortBar sortBy={sortBy} onChange={handleSortChange} />
-      </div>
-
-      {/* 평론 목록 */}
-      <ul className="divide-y divide-neutral-700 rounded border border-neutral-700">
-        {pageData.dtoList.length > 0 ? (
-          pageData.dtoList.map((board) => (
-            <BoardItem key={board.boardId} board={board} basePath="/recommend/critic" />
-          ))
-        ) : (
-          <li className="px-4 py-8 text-center text-gray-500">평론이 없습니다.</li>
-        )}
-      </ul>
       {/* 검색바 */}
-      <div className="mb-4 flex gap-2">
+      <div className="mt-5 mb-4 flex gap-2">
         <input
           type="text"
           placeholder="검색"
@@ -137,6 +122,22 @@ const CriticListPage = () => {
           '{searchKeyword}' 검색 결과: {pageData.totalCount}개
         </div>
       )}
+
+      {/* 정렬 바 */}
+      <div className="mb-4">
+        <BoardSortBar sortBy={sortBy} onChange={handleSortChange} />
+      </div>
+
+      {/* 평론 목록 */}
+      <ul className="divide-y divide-neutral-700 rounded border border-neutral-700">
+        {pageData.dtoList.length > 0 ? (
+          pageData.dtoList.map((board) => (
+            <BoardItem key={board.boardId} board={board} basePath="/recommend/critic" />
+          ))
+        ) : (
+          <li className="px-4 py-8 text-center text-gray-500">평론이 없습니다.</li>
+        )}
+      </ul>
 
       {/* 페이지네이션 */}
       {pageData.pageNumList.length > 0 && (
