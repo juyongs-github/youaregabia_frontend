@@ -147,12 +147,23 @@ const BlindRecommendPage = () => {
   const currentSong = songs[currentIndex];
   const { play, stop } = usePlayer();
 
+  // 페이지를 아예 벗어날 때(Unmount) 음악 정지
+  useEffect(() => {
+    return () => {
+      stop(); // 컴포넌트가 화면에서 사라질 때 플레이어 정지
+    };
+  }, [stop]);
+
   useEffect(() => {
     if (currentSong && !isRevealed && phase === "playing" && started) {
       play(currentSong, { blind: true, onClose: handleDislike });
-    } else {
-      stop();
     }
+
+    // 이 effect가 다시 실행되거나(currentIndex 변경 등)
+    // 조건이 안 맞을 때 이전 곡을 정지
+    return () => {
+      stop();
+    };
   }, [currentIndex, isRevealed, phase, started]);
 
   // ========================================================
@@ -162,80 +173,85 @@ const BlindRecommendPage = () => {
   // 1. 결과 화면
   if (phase === "result") {
     return (
-      <div className="flex flex-col items-center gap-6 py-12 text-white mx-auto max-w-xl px-8 animate-in fade-in duration-500">
-        <h2 className="text-3xl font-bold text-indigo-400">추천 완료!</h2>
-        <p className="text-gray-400">총 {likedSongs.length}곡의 취향을 발견했습니다.</p>
-        <button
-          onClick={handleRestart}
-          className="rounded-full bg-indigo-600 px-10 py-3 font-bold hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20"
-        >
-          처음으로 돌아가기
-        </button>
-
-        {likedSongs.length > 0 && (
-          <div className="w-full mt-6">
-            <h3 className="text-lg font-bold mb-4 border-b border-neutral-800 pb-2">
-              나의 선택목록
-            </h3>
-            {userEmail && (
-              <div className="mb-6 space-y-2">
-                <select
-                  className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none"
-                  value={selectedPlaylistId ?? ""}
-                  onChange={(e) => setSelectedPlaylistId(Number(e.target.value) || null)}
-                  onClick={fetchPlaylists}
-                >
-                  <option value="">저장할 플레이리스트 선택...</option>
-                  {playlists.map((pl) => (
-                    <option key={pl.id} value={pl.id}>
-                      {pl.title}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="text-xs text-indigo-400 hover:underline px-1"
-                >
-                  + 새 플레이리스트 만들기
-                </button>
-              </div>
-            )}
-            <ul className="flex flex-col gap-3">
-              {likedSongs.map((song) => (
-                <li
-                  key={song.id}
-                  className="flex items-center justify-between rounded-xl border border-neutral-800 bg-neutral-900/50 px-4 py-3 hover:bg-neutral-800/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={song.imgUrl}
-                      className="w-12 h-12 rounded-lg object-cover shadow-md"
-                      alt=""
-                    />
-                    <div className="min-w-0">
-                      <p className="font-bold text-sm truncate w-40">{song.trackName}</p>
-                      <p className="text-xs text-gray-500 truncate w-40">{song.artistName}</p>
+      <div className="flex flex-col items-center gap-6 py-12 mx-auto max-w-2xl px-8 animate-in fade-in duration-500">
+        <div className="bg-white/70 backdrop-blur-[24px] border border-white/80 shadow-2xl rounded-[32px] p-10 w-full flex flex-col items-center">
+          <h2 className="text-4xl font-black tracking-tight text-[#2f3863] mb-2">추천 완료!</h2>
+          <p className="text-slate-500 font-medium mb-8">
+            총 {likedSongs.length}곡의 취향을 발견했습니다.
+          </p>
+          <button
+            onClick={handleRestart}
+            className="w-full max-w-xs rounded-full bg-gradient-to-r from-[#6d5efc] to-[#ff5ca8] px-10 py-4 font-extrabold text-white shadow-xl hover:scale-[1.02] transition-all"
+          >
+            다시 시작하기
+          </button>
+          {likedSongs.length > 0 && (
+            <div className="w-full mt-10">
+              <h3 className="text-lg font-extrabold mb-6 text-[#2f3863] border-b border-slate-200/60 pb-3">
+                나의 선택 목록
+              </h3>
+              {userEmail && (
+                <div className="mb-6 space-y-3">
+                  <select
+                    className="w-full rounded-2xl border border-slate-200 bg-white/50 px-4 py-3.5 text-[#2f3863] font-bold focus:ring-2 focus:ring-[#6d5efc]/20 outline-none transition-all"
+                    value={selectedPlaylistId ?? ""}
+                    onChange={(e) => setSelectedPlaylistId(Number(e.target.value) || null)}
+                    onClick={fetchPlaylists}
+                  >
+                    <option value="">저장할 플레이리스트 선택...</option>
+                    {playlists.map((pl) => (
+                      <option key={pl.id} value={pl.id}>
+                        {pl.title}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => setIsCreateModalOpen(true)}
+                    className="text-sm font-extrabold text-[#6d5efc] hover:opacity-70 px-1"
+                  >
+                    + 새 플레이리스트 만들기
+                  </button>
+                </div>
+              )}
+              <ul className="flex flex-col gap-3">
+                {likedSongs.map((song) => (
+                  <li
+                    key={song.id}
+                    className="flex items-center justify-between rounded-3xl border border-white/60 bg-white/40 px-4 py-3 hover:bg-white/60 transition-all shadow-sm"
+                  >
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={song.imgUrl}
+                        className="w-14 h-14 rounded-2xl object-cover shadow-sm"
+                        alt=""
+                      />
+                      <div className="min-w-0">
+                        <p className="font-extrabold text-[#2f3863] text-base truncate w-44">
+                          {song.trackName}
+                        </p>
+                        <p className="text-xs text-slate-400 font-bold">{song.artistName}</p>
+                      </div>
                     </div>
-                  </div>
-                  {userEmail && selectedPlaylistId && (
-                    <button
-                      onClick={() => handleAddSong(song.id)}
-                      className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-                        addedSongIds.has(song.id) || playlistSongIds.has(song.id)
-                          ? "bg-neutral-800 text-gray-500 cursor-default"
-                          : "bg-indigo-600 hover:bg-indigo-500 active:scale-95"
-                      }`}
-                    >
-                      {addedSongIds.has(song.id) || playlistSongIds.has(song.id)
-                        ? "추가됨 ✓"
-                        : "+ 추가"}
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+                    {userEmail && selectedPlaylistId && (
+                      <button
+                        onClick={() => handleAddSong(song.id)}
+                        className={`rounded-full px-5 py-2 text-xs font-black transition-all ${
+                          addedSongIds.has(song.id) || playlistSongIds.has(song.id)
+                            ? "bg-slate-100 text-slate-400 cursor-default"
+                            : "bg-[#6d5efc] text-white hover:shadow-lg active:scale-95"
+                        }`}
+                      >
+                        {addedSongIds.has(song.id) || playlistSongIds.has(song.id)
+                          ? "✓ 추가됨"
+                          : "+ 추가"}
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
         {isCreateModalOpen && (
           <PlaylistCreateModal
             onClose={() => setIsCreateModalOpen(false)}
@@ -249,31 +265,31 @@ const BlindRecommendPage = () => {
   // 2. 인트로 화면
   if (phase === "intro") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] text-white gap-10 px-4 animate-in fade-in duration-700">
-        <div className="text-center space-y-3">
-          <div className="text-6xl mb-4 animate-bounce">🎵</div>
-          <h1 className="text-4xl font-black tracking-tight">블라인드 추천</h1>
-          <p className="text-gray-500 text-sm max-w-xs">
-            곡 정보 없이 듣고 마음에 드는 곡만 골라보세요
+      <div className="flex flex-col items-center justify-center min-h-[90vh] gap-12 px-4 animate-in fade-in duration-700">
+        <div className="text-center space-y-4">
+          <div className="text-7xl mb-6 drop-shadow-xl animate-bounce">🎧</div>
+          <h1 className="text-5xl font-black tracking-tighter text-[#2f3863]">블라인드 추천</h1>
+          <p className="text-slate-500 font-bold text-base max-w-xs mx-auto leading-relaxed">
+            곡 정보 없이 오직 소리만 듣고 <br /> 마음에 드는 곡을 골라보세요.
           </p>
         </div>
-        <div className="flex flex-col gap-4 w-full max-w-xs">
+        <div className="flex flex-col gap-4 w-full max-w-sm">
           {(["infinite", 5, 10] as const).map((mode) => (
             <button
               key={mode}
               onClick={() => handleStart(mode)}
-              className="flex items-center justify-between rounded-2xl px-6 py-4 border border-neutral-800 bg-neutral-900 hover:border-indigo-500/50 hover:bg-neutral-800 transition-all active:scale-95 group"
+              className="group relative flex items-center justify-between rounded-[28px] px-8 py-6 bg-white/70 backdrop-blur-md border border-white hover:border-[#6d5efc]/30 hover:bg-white/90 shadow-lg hover:shadow-2xl transition-all active:scale-[0.98]"
             >
               <div className="text-left">
-                <p className="font-black text-base group-hover:text-indigo-400 transition-colors">
+                <p className="font-black text-xl text-[#2f3863] group-hover:text-[#6d5efc] transition-colors">
                   {mode === "infinite" ? "계속 모드" : `${mode}곡 모드`}
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {mode === "infinite" ? "끝없이 새로운 곡 추천" : `${mode}곡을 듣고 결과 확인`}
+                <p className="text-sm font-bold text-slate-400 mt-1">
+                  {mode === "infinite" ? "끝없이 새로운 취향 발견" : `${mode}곡의 큐레이션`}
                 </p>
               </div>
-              <span className="text-2xl">
-                {mode === "infinite" ? "∞" : mode === 5 ? "🎯" : "🔥"}
+              <span className="text-3xl">
+                {mode === "infinite" ? "♾️" : mode === 5 ? "🎯" : "🔥"}
               </span>
             </button>
           ))}
@@ -282,59 +298,53 @@ const BlindRecommendPage = () => {
     );
   }
 
-  // 3. 카운트다운 화면 (모드 선택 직후)
+  // 3. 카운트다운 화면
   if (phase === "playing" && !started && !isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] text-white animate-in fade-in duration-500">
-        {/* 선택한 모드 강조 표시 */}
-        <div className="mb-8 text-center space-y-2">
-          <div className="text-5xl mb-2">
-            {totalMode === "infinite" ? "∞" : totalMode === 5 ? "🎯" : "🔥"}
+      <div className="flex flex-col items-center justify-center min-h-[90vh] animate-in fade-in duration-500">
+        <div className="mb-10 text-center bg-white/50 backdrop-blur-xl p-8 rounded-[40px] border border-white/80 shadow-xl">
+          <div className="text-6xl mb-4">
+            {totalMode === "infinite" ? "♾️" : totalMode === 5 ? "🎯" : "🔥"}
           </div>
-          <h2 className="text-2xl font-black text-indigo-400">
+          <h2 className="text-3xl font-black text-[#6d5efc]">
             {totalMode === "infinite" ? "계속 모드" : `${totalMode}곡 모드`}
           </h2>
-          <p className="text-gray-500 text-sm">준비되셨나요? 곧 시작합니다!</p>
+          <p className="text-slate-500 font-bold mt-2">당신의 귀를 믿어보세요!</p>
         </div>
-
-        {/* 기존 카운트다운 컴포넌트 */}
-        <div className="relative">
-          <GameCountdown onStart={initiateGame} />
-        </div>
+        <GameCountdown onStart={initiateGame} />
       </div>
     );
   }
 
-  // 4. 로딩 화면 (카운트다운 직후 데이터 페칭 중)
+  // 4. 로딩 화면
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen text-white flex-col gap-6">
-        <div className="relative">
-          <div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
-          <div className="absolute inset-0 flex items-center justify-center text-xl">🎵</div>
+      <div className="flex items-center justify-center min-h-[90vh] flex-col gap-6">
+        <div className="relative w-20 h-20">
+          <div className="absolute inset-0 border-4 border-[#6d5efc]/10 border-t-[#6d5efc] rounded-full animate-spin"></div>
+          <div className="absolute inset-0 flex items-center justify-center text-2xl">🪄</div>
         </div>
-        <p className="animate-pulse text-indigo-300 font-medium">새로운 취향을 찾는 중...</p>
+        <p className="font-black text-[#6d5efc] animate-pulse">취향 상자 여는 중...</p>
       </div>
     );
   }
 
-  // 5. 추천 진행 화면 (started === true인 경우만 렌더링)
+  // 5. 추천 진행 화면
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12 text-white flex flex-col md:flex-row gap-8 items-start relative min-h-[80vh]">
-      <div className="flex-1 w-full max-w-xl mx-auto flex flex-col items-center">
-        {/* 상단 프로그레스 바 */}
-        <div className="w-full mb-10 mt-6">
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-gray-400 font-bold text-sm">
-              ROUND <span className="text-indigo-400">{currentIndex + 1}</span>
-              <span className="text-xs opacity-40 ml-1">
+    <div className="mx-auto max-w-6xl px-6 py-12 flex flex-col md:flex-row gap-10 items-start relative min-h-[90vh]">
+      <div className="flex-1 w-full max-w-2xl mx-auto flex flex-col items-center">
+        <div className="w-full mb-12">
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-[#2f3863] font-black text-sm tracking-widest uppercase">
+              Round <span className="text-[#6d5efc] text-xl ml-1">{currentIndex + 1}</span>
+              <span className="text-slate-400 font-bold ml-1">
                 / {totalMode === "infinite" ? "∞" : totalMode}
               </span>
             </span>
           </div>
-          <div className="h-2 w-full rounded-full bg-neutral-900 border border-neutral-800 overflow-hidden">
+          <div className="h-3 w-full rounded-full bg-white/50 border border-white/80 overflow-hidden shadow-inner">
             <div
-              className={`h-full rounded-full bg-indigo-500 transition-all duration-700 ease-out ${totalMode === "infinite" ? "animate-pulse" : ""}`}
+              className="h-full rounded-full bg-gradient-to-r from-[#6d5efc] to-[#ff5ca8] transition-all duration-700 ease-out"
               style={{
                 width:
                   totalMode === "infinite"
@@ -344,94 +354,103 @@ const BlindRecommendPage = () => {
             />
           </div>
         </div>
-
-        {/* 메인 카드 영역 */}
-        <div className="w-full relative min-h-[450px] flex flex-col items-center justify-center">
+        <div className="w-full relative bg-white/70 backdrop-blur-[32px] border border-white/80 shadow-[0_32px_64px_-16px_rgba(109,94,252,0.15)] rounded-[48px] p-12 flex flex-col items-center justify-center min-h-[500px]">
           {currentSong ? (
             !isRevealed ? (
               <div className="flex flex-col items-center gap-10 animate-in fade-in zoom-in duration-500 w-full">
-                <div className="w-48 h-48 rounded-full bg-gradient-to-br from-neutral-800 to-neutral-900 flex items-center justify-center text-7xl shadow-2xl ring-8 ring-indigo-500/10">
+                <div className="w-56 h-56 rounded-full bg-gradient-to-br from-white to-[#f0f4ff] flex items-center justify-center text-8xl shadow-lg ring-8 ring-white/50">
                   🎵
                 </div>
-                <div className="text-center space-y-2">
-                  <h3 className="text-2xl font-black tracking-tight">이 곡, 마음에 드시나요?</h3>
-                  <p className="text-gray-500 text-sm">곡 정보를 보려면 좋아요를 눌러주세요.</p>
+                <div className="text-center space-y-3">
+                  <h3 className="text-3xl font-black text-[#2f3863] tracking-tight">
+                    이 곡, 느낌이 오나요?
+                  </h3>
+                  <p className="text-slate-400 font-bold text-base">
+                    마음에 들면 정보를 공개할게요!
+                  </p>
                 </div>
-                <div className="flex gap-5">
+                <div className="flex gap-4 w-full">
                   <button
                     onClick={handleLike}
-                    className="group flex items-center gap-2 rounded-2xl bg-indigo-600 px-12 py-4 text-xl font-black hover:bg-indigo-500 transition-all active:scale-95 shadow-xl shadow-indigo-600/30"
+                    className="flex-1 rounded-[24px] bg-[#6d5efc] px-8 py-5 text-xl font-black text-white hover:bg-[#5b4df0] transition-all active:scale-95 shadow-xl shadow-[#6d5efc]/30"
                   >
                     좋아요 👍
                   </button>
                   <button
                     onClick={handleDislike}
-                    className="rounded-2xl bg-neutral-800 px-10 py-4 text-xl font-bold hover:bg-neutral-700 transition-all active:scale-95 text-gray-400"
+                    className="flex-1 rounded-[24px] bg-slate-100 px-8 py-5 text-xl font-black text-slate-400 hover:bg-slate-200 transition-all active:scale-95"
                   >
                     별로에요 👎
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500 w-full text-center">
-                <img
-                  src={currentSong.imgUrl}
-                  alt=""
-                  className="w-56 h-56 rounded-2xl shadow-2xl ring-1 ring-white/10"
-                />
-                <div className="space-y-2">
-                  <h3 className="text-3xl font-black text-white">{currentSong.trackName}</h3>
-                  <p className="text-indigo-400 font-bold text-lg">{currentSong.artistName}</p>
+              <div className="flex flex-col items-center gap-8 animate-in fade-in slide-in-from-bottom-6 duration-500 w-full text-center">
+                <div className="relative">
+                  <img
+                    src={currentSong.imgUrl}
+                    alt=""
+                    className="w-64 h-64 rounded-[40px] shadow-2xl ring-4 ring-white"
+                  />
+                  <div className="absolute -bottom-4 -right-4 bg-white rounded-2xl p-3 shadow-lg text-2xl">
+                    ✨
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-gray-500 text-sm italic">
-                  <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                  곧 다음 곡으로 넘어갑니다...
+                <div className="space-y-2">
+                  <h3 className="text-4xl font-black text-[#2f3863] tracking-tighter">
+                    {currentSong.trackName}
+                  </h3>
+                  <p className="text-[#ff5ca8] font-black text-xl">{currentSong.artistName}</p>
+                </div>
+                <div className="flex items-center gap-3 px-6 py-3 bg-[#6d5efc]/5 rounded-full text-[#6d5efc] text-sm font-black">
+                  <div className="w-4 h-4 border-2 border-[#6d5efc] border-t-transparent rounded-full animate-spin"></div>
+                  다음 곡으로 이동 중...
                 </div>
               </div>
             )
           ) : (
-            <p className="text-gray-500">곡 정보를 불러오는 중입니다...</p>
+            <p className="text-slate-400 font-black">새로운 감각을 찾는 중...</p>
           )}
         </div>
       </div>
-
-      {/* 우측 사이드바 (좋아요 목록) */}
       {likedSongs.length > 0 && (
-        <aside className="w-full md:w-72 bg-neutral-900/40 backdrop-blur-md rounded-3xl p-6 border border-neutral-800 sticky top-12 shadow-2xl">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm font-black text-gray-400">👍 좋아요 목록</p>
-            <span className="bg-indigo-600 text-white text-[11px] px-2.5 py-1 rounded-full font-black">
+        <aside className="w-full md:w-80 bg-white/60 backdrop-blur-2xl rounded-[40px] p-8 border border-white/80 sticky top-12 shadow-2xl">
+          <div className="flex items-center justify-between mb-8">
+            <p className="text-base font-black text-[#2f3863]">👍 발견한 취향</p>
+            <span className="bg-[#ff5ca8] text-white text-xs px-3 py-1.5 rounded-full font-black">
               {likedSongs.length}
             </span>
           </div>
-          <div className="max-h-[45vh] overflow-y-auto pr-1">
-            <ul className="flex flex-col gap-3">
+          <div className="max-h-[50vh] overflow-y-auto pr-2">
+            <ul className="flex flex-col gap-4">
               {[...likedSongs].reverse().map((s, i) => (
-                <li key={i} className="flex gap-3 items-center p-2 rounded-xl bg-neutral-800/30">
+                <li
+                  key={i}
+                  className="flex gap-4 items-center p-3 rounded-2xl bg-white/40 border border-white hover:bg-white/80 transition-all"
+                >
                   <img
                     src={s.imgUrl}
-                    className="w-8 h-8 rounded-md object-cover opacity-80"
+                    className="w-12 h-12 rounded-xl object-cover shadow-sm"
                     alt=""
                   />
                   <div className="min-w-0">
-                    <p className="text-[11px] font-bold text-indigo-300 truncate">{s.trackName}</p>
-                    <p className="text-[9px] text-gray-500 truncate">{s.artistName}</p>
+                    <p className="text-sm font-black text-[#2f3863] truncate">{s.trackName}</p>
+                    <p className="text-[11px] font-bold text-slate-400 truncate">{s.artistName}</p>
                   </div>
                 </li>
               ))}
             </ul>
           </div>
-          <div className="mt-5 pt-4 border-t border-neutral-800 text-center">
+          <div className="mt-8 pt-6 border-t border-slate-100 text-center">
             <button
               onClick={() => setPhase("result")}
-              className="text-xs font-black text-indigo-500 hover:text-indigo-300"
+              className="w-full py-4 rounded-2xl bg-[#6d5efc]/10 text-[#6d5efc] font-black text-sm hover:bg-[#6d5efc] hover:text-white transition-all"
             >
-              여기 클릭하면 결과보기 🏁
+              결과 페이지로 가기 🏁
             </button>
           </div>
         </aside>
       )}
-
     </div>
   );
 };

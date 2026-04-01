@@ -74,78 +74,103 @@ const BoardUpdate = () => {
     }
   };
 
-  if (isLoading) return <div className="kf-community-page kf-board-update"><div className="kf-community-page__shell"><div className="kf-community-loading">로딩 중...</div></div></div>;
+  if (isLoading)
+    return (
+      <div className="kf-community-page kf-board-update">
+        <div className="kf-community-page__shell">
+          <div className="kf-community-loading">로딩 중...</div>
+        </div>
+      </div>
+    );
 
   return (
     <div className="kf-community-page kf-board-update">
       <div className="kf-community-page__shell">
-      <div className="max-w-4xl mx-auto p-4">
-      {/* 장르가 FREE이면 '평론 수정', 아니면 '플레이리스트 공유 수정' */}
-      <h2 className="mb-6 text-3xl font-extrabold tracking-tight">
-        {isFreeGenre ? "평론 수정" : "플레이리스트 공유 수정"}
-      </h2>
+        <div className="max-w-4xl mx-auto p-4">
+          {/* 장르가 FREE이면 '평론 수정', 아니면 '플레이리스트 공유 수정' */}
+          <h2 className="mb-6 text-3xl font-extrabold tracking-tight">
+            {isFreeGenre ? "평론 수정" : "플레이리스트 공유 수정"}
+          </h2>
 
-      {/* 제목 입력 */}
-      <div className="mb-4">
-        <label className="block mb-2 text-sm font-medium text-neutral-400">제목</label>
-        <input
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-3 text-white outline-none focus:border-indigo-500"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-      </div>
+          {/* 제목 입력 */}
+          <div className="mb-4">
+            <label className="block mb-2 text-sm font-medium text-neutral-400">제목</label>
+            <input
+              className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-3 text-white outline-none focus:border-indigo-500"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
 
-      {/* 장르가 FREE가 아닐 때만 장르 선택창 노출 (FREE는 평론 고정이므로 숨김) */}
-      {!isFreeGenre && (
-        <div className="mb-4">
-          <label className="block mb-2 text-sm font-medium text-neutral-400">장르</label>
-          <select
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-3 text-white outline-none focus:border-indigo-500"
-            value={genre}
-            onChange={(e) => setGenre(e.target.value)}
+          {/* 장르가 FREE가 아닐 때만 장르 선택창 노출 (FREE는 평론 고정이므로 숨김) */}
+          {!isFreeGenre && (
+            <div className="mb-4">
+              <label className="block mb-2 text-sm font-medium text-neutral-400">장르</label>
+              <select
+                className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-3 text-white outline-none focus:border-indigo-500"
+                value={genre}
+                onChange={(e) => setGenre(e.target.value)}
+              >
+                <option value="KPOP">KPOP</option>
+                <option value="POP">POP</option>
+                <option value="JPOP">JPOP</option>
+                <option value="HIPHOP">HIPHOP</option>
+              </select>
+            </div>
+          )}
+
+          {/* 에디터 영역 */}
+          <div className="mb-6">
+            <label className="block mb-2 text-sm font-medium text-neutral-400">내용</label>
+            <CustomEditor
+              initialValue={content}
+              onChange={(html) => setContent(html)}
+              // 장르에 따른 Placeholder 변경
+              placeholder={
+                isFreeGenre ? "평론 내용을 수정하세요." : "추가로 하고 싶은 말을 입력하세요..."
+              }
+            />
+          </div>
+
+          <div
+            className="flex justify-end gap-3 pt-6"
+            style={{ borderTop: "1px solid var(--kf-border)" }}
           >
-            <option value="KPOP">KPOP</option>
-            <option value="POP">POP</option>
-            <option value="JPOP">JPOP</option>
-            <option value="HIPHOP">HIPHOP</option>
-          </select>
+            <button
+              onClick={() => navigate(-1)}
+              className="rounded-full px-6 py-2 font-semibold transition-all"
+              style={{
+                background: "rgba(255,255,255,0.72)",
+                color: "var(--kf-text-sub)",
+                border: "1px solid var(--kf-border-strong)",
+              }}
+            >
+              취소
+            </button>
+            <button
+              onClick={remove}
+              className="rounded-full px-6 py-2 font-semibold transition-all"
+              style={{
+                background: "rgba(255,102,122,0.08)",
+                color: "var(--kf-danger)",
+                border: "1px solid rgba(255,102,122,0.28)",
+              }}
+            >
+              삭제하기
+            </button>
+            <button
+              onClick={update}
+              className="rounded-full px-8 py-2 font-semibold text-white transition-all"
+              style={{
+                background: "linear-gradient(135deg, var(--kf-brand), var(--kf-brand-pink))",
+                boxShadow: "0 8px 20px rgba(109,94,252,0.24)",
+                border: "none",
+              }}
+            >
+              수정 완료
+            </button>
+          </div>
         </div>
-      )}
-
-      {/* 에디터 영역 */}
-      <div className="mb-6">
-        <label className="block mb-2 text-sm font-medium text-neutral-400">내용</label>
-        <CustomEditor
-          initialValue={content}
-          onChange={(html) => setContent(html)}
-          // 장르에 따른 Placeholder 변경
-          placeholder={
-            isFreeGenre ? "평론 내용을 수정하세요." : "추가로 하고 싶은 말을 입력하세요..."
-          }
-        />
-      </div>
-
-      <div className="flex justify-end gap-3 border-t border-neutral-800 pt-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="rounded-lg bg-neutral-800 px-6 py-2.5 font-semibold text-neutral-300 hover:bg-neutral-700"
-        >
-          취소
-        </button>
-        <button
-          onClick={remove}
-          className="rounded-lg bg-red-600/20 px-6 py-2.5 font-semibold text-red-500 border border-red-600/50 hover:bg-red-600 hover:text-white"
-        >
-          삭제하기
-        </button>
-        <button
-          onClick={update}
-          className="rounded-lg bg-indigo-600 px-8 py-2.5 font-semibold text-white hover:bg-indigo-500"
-        >
-          수정 완료
-        </button>
-      </div>
-    </div>
       </div>
     </div>
   );

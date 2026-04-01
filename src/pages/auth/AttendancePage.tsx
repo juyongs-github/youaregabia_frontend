@@ -1,3 +1,4 @@
+// AttendancePage.tsx 수정본
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
@@ -14,12 +15,10 @@ const AttendancePage = () => {
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
 
-  // 달력 로드
   useEffect(() => {
     attendanceApi.getCalendar(year, month).then(setCalendarDates);
-  }, [checked]); // 출석 체크 후 달력 갱신
+  }, [checked, year, month]);
 
-  // 출석 체크 버튼
   const handleCheck = async () => {
     const result = await dispatch(checkAttendance()).unwrap();
     if (result.isAlreadyChecked) {
@@ -33,99 +32,153 @@ const AttendancePage = () => {
     }
   };
 
-  // 이번 달 날짜 배열 생성
   const daysInMonth = new Date(year, month, 0).getDate();
-  const firstDay = new Date(year, month - 1, 1).getDay(); // 0=일요일
+  const firstDay = new Date(year, month - 1, 1).getDay();
 
   return (
-    <div className="mx-auto max-w-xl p-6">
-      <h2 className="mb-2 text-2xl font-bold text-white">출석 체크</h2>
-      <p className="mb-6 text-sm text-gray-400">매일 출석하고 포인트를 받아보세요!</p>
+    <div className="kf-community-page kf-attendance-page">
+      <div className="kf-community-page__shell">
+        {/* 게시판 리스트와 폭을 맞춤 (max-w-4xl) */}
+        <div className="mx-auto max-w-4xl p-4">
+          {/* 헤더 부분: 리스트 페이지와 유사한 여백 구성 */}
+          <div className="mt-8 mb-8 pb-6" style={{ borderBottom: "1px solid var(--kf-border)" }}>
+            <h2 className="text-3xl font-bold text-gray-900">출석 체크</h2>
+            <p className="mt-2 text-sm text-gray-500">매일 출석하고 포인트 혜택을 받아보세요!</p>
+          </div>
 
-      {/* streak + 출석 버튼 */}
-      <div className="mb-6 flex items-center justify-between rounded-lg border border-neutral-700 bg-neutral-900 px-6 py-4">
-        <div>
-          <p className="text-sm text-gray-400">연속 출석</p>
-          <p className="text-3xl font-bold text-indigo-400">{streak}일</p>
-          {streak > 0 && streak % 7 !== 0 && (
-            <p className="mt-1 text-xs text-gray-500">
-              7일 보너스까지 {7 - (streak % 7)}일 남았어요
-            </p>
-          )}
-        </div>
-        <button
-          onClick={handleCheck}
-          disabled={checked}
-          className={`rounded-lg px-6 py-3 text-sm font-semibold transition-all ${
-            checked
-              ? "cursor-not-allowed bg-neutral-700 text-gray-500"
-              : "bg-indigo-600 text-white hover:bg-indigo-500 active:scale-95"
-          }`}
-        >
-          {checked ? "✅ 출석 완료" : "출석 체크"}
-        </button>
-      </div>
-
-      {/* 결과 메시지 */}
-      {resultMsg && (
-        <div className="mb-6 rounded-lg border border-indigo-500 bg-indigo-500/10 px-4 py-3 text-sm text-indigo-300">
-          {resultMsg}
-        </div>
-      )}
-
-      {/* 달력 */}
-      <div className="rounded-lg border border-neutral-700 bg-neutral-900 p-4">
-        <p className="mb-4 text-center text-sm font-semibold text-gray-300">
-          {year}년 {month}월
-        </p>
-
-        {/* 요일 헤더 */}
-        <div className="mb-2 grid grid-cols-7 text-center text-xs text-gray-500">
-          {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
-            <span key={d}>{d}</span>
-          ))}
-        </div>
-
-        {/* 날짜 그리드 */}
-        <div className="grid grid-cols-7 gap-1 text-center text-sm">
-          {/* 첫째 날 빈 칸 */}
-          {Array.from({ length: firstDay }).map((_, i) => (
-            <span key={`empty-${i}`} />
-          ))}
-
-          {Array.from({ length: daysInMonth }).map((_, i) => {
-            const day = i + 1;
-            const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-            const isAttended = calendarDates.includes(dateStr);
-            const isToday = day === today.getDate();
-
-            return (
-              <div
-                key={day}
-                className={`flex h-8 w-8 mx-auto items-center justify-center rounded-full text-xs font-medium ${
-                  isAttended
-                    ? "bg-indigo-600 text-white"
-                    : isToday
-                      ? "border border-indigo-500 text-indigo-400"
-                      : "text-gray-500"
-                }`}
-              >
-                {day}
+          {/* 내부 콘텐츠: 너무 퍼져 보이지 않게 안쪽에서 max-w-xl로 제한 */}
+          <div className="mx-auto max-w-xl space-y-6">
+            {/* 연속 출석 + 버튼 카드 */}
+            <div
+              className="flex items-center justify-between rounded-2xl p-8"
+              style={{
+                background: "rgba(255, 255, 255, 0.8)",
+                border: "1px solid var(--kf-border)",
+                boxShadow: "var(--kf-shadow-md)",
+              }}
+            >
+              <div>
+                <p className="text-sm font-medium" style={{ color: "var(--kf-text-sub)" }}>
+                  연속 출석
+                </p>
+                <p className="text-4xl font-black mt-1" style={{ color: "var(--kf-brand)" }}>
+                  {streak}일
+                </p>
+                {streak > 0 && streak % 7 !== 0 && (
+                  <p className="mt-2 text-xs" style={{ color: "var(--kf-brand-pink)" }}>
+                    7일 보너스까지 {7 - (streak % 7)}일 남았어요
+                  </p>
+                )}
               </div>
-            );
-          })}
-        </div>
-      </div>
+              <button
+                onClick={handleCheck}
+                disabled={checked}
+                className={`rounded-xl px-8 py-4 text-sm font-bold transition-all active:scale-95 ${
+                  checked ? "" : "hover:shadow-lg hover:shadow-indigo-500/20"
+                }`}
+                style={
+                  checked
+                    ? {
+                        background: "var(--kf-border)",
+                        color: "var(--kf-text-muted)",
+                        cursor: "not-allowed",
+                      }
+                    : {
+                        background:
+                          "linear-gradient(135deg, var(--kf-brand), var(--kf-brand-pink))",
+                        color: "#fff",
+                      }
+                }
+              >
+                {checked ? "✅ 출석 완료" : "출석 체크하기"}
+              </button>
+            </div>
 
-      {/* 포인트 안내 */}
-      <div className="mt-4 rounded-lg border border-neutral-700 px-4 py-3 text-xs text-gray-400">
-        <p>
-          · 매일 출석 체크 시 <span className="text-indigo-400 font-semibold">50포인트</span> 지급
-        </p>
-        <p>
-          · 7일 연속 출석 시 <span className="text-yellow-400 font-semibold">보너스 300포인트</span>{" "}
-          추가 지급
-        </p>
+            {/* 결과 메시지 */}
+            {resultMsg && (
+              <div
+                className="rounded-xl px-4 py-3 text-sm font-semibold text-center animate-bounce"
+                style={{
+                  background: "rgba(109, 94, 252, 0.1)",
+                  color: "var(--kf-brand)",
+                  border: "1px solid var(--kf-brand)",
+                }}
+              >
+                {resultMsg}
+              </div>
+            )}
+
+            {/* 달력 카드 */}
+            <div
+              className="rounded-2xl p-6"
+              style={{
+                background: "rgba(255, 255, 255, 0.8)",
+                border: "1px solid var(--kf-border)",
+                boxShadow: "var(--kf-shadow-sm)",
+              }}
+            >
+              <p
+                className="mb-6 text-center text-lg font-bold"
+                style={{ color: "var(--kf-text-main)" }}
+              >
+                {year}년 {month}월
+              </p>
+
+              <div
+                className="mb-4 grid grid-cols-7 text-center text-xs font-bold"
+                style={{ color: "var(--kf-text-sub)" }}
+              >
+                {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
+                  <span key={d}>{d}</span>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7 gap-y-3 text-center">
+                {Array.from({ length: firstDay }).map((_, i) => (
+                  <span key={`empty-${i}`} />
+                ))}
+
+                {Array.from({ length: daysInMonth }).map((_, i) => {
+                  const day = i + 1;
+                  const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                  const isAttended = calendarDates.includes(dateStr);
+                  const isToday = day === today.getDate();
+
+                  return (
+                    <div
+                      key={day}
+                      className="flex h-10 w-10 mx-auto items-center justify-center rounded-full text-sm font-bold transition-all"
+                      style={
+                        isAttended
+                          ? { background: "var(--kf-brand)", color: "#fff" }
+                          : isToday
+                            ? { border: "2px solid var(--kf-brand)", color: "var(--kf-brand)" }
+                            : { color: "var(--kf-text-muted)" }
+                      }
+                    >
+                      {day}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 하단 안내 가이드 */}
+            <div
+              className="rounded-xl p-4 text-xs space-y-1"
+              style={{ background: "rgba(0,0,0,0.03)", color: "var(--kf-text-sub)" }}
+            >
+              <p>
+                · 매일 출석 체크 시 <strong style={{ color: "var(--kf-brand)" }}>50포인트</strong>{" "}
+                지급
+              </p>
+              <p>
+                · 7일 연속 출석 시{" "}
+                <strong style={{ color: "var(--kf-warning)" }}>보너스 300포인트</strong> 추가 지급
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
