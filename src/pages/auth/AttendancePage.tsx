@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
 import { attendanceApi } from "../../api/attendanceApi";
-import { checkAttendance } from "../../components/ui/attendanceSlice";
+import { checkAttendance } from "../../components/ui/AttendanceSlice";
 
 const AttendancePage = () => {
   const dispatch = useDispatch<AppDispatch>();

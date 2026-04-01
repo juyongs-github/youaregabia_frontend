@@ -482,11 +482,13 @@ function HomePage() {
                   key={item.id}
                   onClick={() => navigate(`/playlist/me/${item.id}`)}
                 >
-                  <img src={`${baseURL}${item.imageUrl}`} />
-                  <button className="play-button">
-                    <FaPlay />
-                  </button>
-                  <span>{item.title}</span>
+                  <div className="playlist-card-img-wrap">
+                    <img src={`${baseURL}${item.imageUrl}`} alt={item.title} />
+                    <button className="play-button">
+                      <FaPlay />
+                    </button>
+                    <span className="playlist-card-title">{item.title}</span>
+                  </div>
                 </div>
               ))
             )}

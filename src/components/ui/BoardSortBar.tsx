@@ -17,7 +17,7 @@ const BoardSortBar = ({ sortBy, onChange }: Props) => {
           className={`px-3 py-1 rounded text-sm font-semibold transition-colors ${
             sortBy === option.value
               ? "bg-indigo-600 text-white"
-              : "border border-neutral-700 text-gray-400 hover:bg-neutral-800"
+              : "border border-gray-200 text-gray-500 hover:bg-gray-50"
           }`}
         >
           {option.label}

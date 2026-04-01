@@ -1,3 +1,4 @@
+import "../../styles/board-update-kfandom.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -73,10 +74,12 @@ const BoardUpdate = () => {
     }
   };
 
-  if (isLoading) return <div className="p-4 text-white">로딩 중...</div>;
+  if (isLoading) return <div className="kf-community-page kf-board-update"><div className="kf-community-page__shell"><div className="kf-community-loading">로딩 중...</div></div></div>;
 
   return (
-    <div className="max-w-4xl mx-auto p-4 text-white">
+    <div className="kf-community-page kf-board-update">
+      <div className="kf-community-page__shell">
+      <div className="max-w-4xl mx-auto p-4">
       {/* 장르가 FREE이면 '평론 수정', 아니면 '플레이리스트 공유 수정' */}
       <h2 className="mb-6 text-3xl font-extrabold tracking-tight">
         {isFreeGenre ? "평론 수정" : "플레이리스트 공유 수정"}
@@ -141,6 +144,8 @@ const BoardUpdate = () => {
         >
           수정 완료
         </button>
+      </div>
+    </div>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import "../../styles/board-write-kfandom.css";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
@@ -89,7 +90,9 @@ const BoardWrite = () => {
   };
 
   return (
-    <div className="mx-auto max-w-2xl p-6 text-white">
+    <div className="kf-community-page kf-board-write">
+      <div className="kf-community-page__shell">
+      <div className="mx-auto max-w-2xl p-6">
       <h2 className="mb-6 text-2xl font-bold">플레이리스트 공유</h2>
 
       {/* 제목 */}
@@ -191,6 +194,8 @@ const BoardWrite = () => {
       >
         등록
       </button>
+    </div>
+      </div>
     </div>
   );
 };

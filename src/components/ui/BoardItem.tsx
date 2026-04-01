@@ -28,7 +28,7 @@ const BoardItem = ({ board, basePath }: Props) => {
   return (
     <li>
       <button
-        className="block w-full px-4 py-3 text-left hover:bg-neutral-800"
+        className="block w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors"
         onClick={() => navigate(`${resolvedPath}/${board.boardId}`)}
       >
         {/* 평론 - 대상 곡 표시 */}
@@ -45,17 +45,21 @@ const BoardItem = ({ board, basePath }: Props) => {
           <div className="flex items-center gap-2 truncate mr-4">
             {/* 평론 뱃지 */}
             {isCritic && (
-              <span className="flex-shrink-0 text-xs font-bold text-yellow-400 border border-yellow-400 px-1.5 py-0.5 rounded">
+              <span className="flex-shrink-0 text-xs font-bold text-amber-600 border border-amber-400 px-1.5 py-0.5 rounded">
                 평론
               </span>
             )}
-            <span className="text-indigo-400 font-medium truncate">
-              {!isFree && !isCritic && `[${board.boardGenre}] `}
+            {!isFree && !isCritic && (
+              <span className="flex-shrink-0 text-[11px] font-bold text-indigo-500 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded">
+                {board.boardGenre}
+              </span>
+            )}
+            <span className="text-indigo-600 font-medium truncate">
               {board.title}
             </span>
             {/* 내 글 표시 */}
             {isMyBoard && (
-              <span className="flex-shrink-0 text-xs text-indigo-300 border border-indigo-300 px-1.5 py-0.5 rounded">
+              <span className="flex-shrink-0 text-xs text-indigo-500 border border-indigo-300 px-1.5 py-0.5 rounded">
                 내 글
               </span>
             )}
@@ -63,15 +67,15 @@ const BoardItem = ({ board, basePath }: Props) => {
 
           <div className="flex items-center gap-3 shrink-0">
             {/* 익명 처리 */}
-            <span className="text-sm text-gray-400">{isFree ? "익명" : board.writer}</span>
-            <span className="text-xs text-gray-500 border-l border-neutral-700 pl-3">
+            <span className="text-sm text-gray-500">{isFree ? "익명" : board.writer}</span>
+            <span className="text-xs text-gray-400 border-l border-gray-200 pl-3">
               조회 {board.viewCount}
             </span>
             {/* 하트 및 추천 수 스타일 수정 */}
-            <span className="text-xs text-gray-500 flex items-center gap-1">
+            <span className="text-xs text-gray-400 flex items-center gap-1">
               <span>❤️</span>
               <span
-                className={`font-bold ${board.likeCount >= 5 ? "text-blue-400" : "text-gray-500"}`}
+                className={`font-bold ${board.likeCount >= 5 ? "text-blue-500" : "text-gray-400"}`}
               >
                 {board.likeCount}
               </span>
@@ -79,7 +83,7 @@ const BoardItem = ({ board, basePath }: Props) => {
           </div>
         </div>
 
-        <div className="mt-1 text-xs text-gray-500">
+        <div className="mt-1 text-xs text-gray-400">
           {new Date(board.createdAt).toLocaleDateString("ko-KR")}
         </div>
       </button>

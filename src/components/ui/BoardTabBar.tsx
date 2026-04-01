@@ -7,13 +7,13 @@ interface Props {
 
 const BoardTabBar = ({ activeTab, onChange }: Props) => {
   return (
-    <div className="mb-4 flex gap-2 border-b border-neutral-700">
+    <div className="mb-4 flex gap-2 border-b border-gray-200">
       <button
         onClick={() => onChange("ALL")}
         className={`pb-2 px-4 text-sm font-semibold transition-colors ${
           activeTab === "ALL"
-            ? "border-b-2 border-indigo-500 text-indigo-400"
-            : "text-gray-400 hover:text-gray-200"
+            ? "border-b-2 border-indigo-500 text-indigo-600"
+            : "text-gray-500 hover:text-gray-700"
         }`}
       >
         전체글
@@ -22,8 +22,8 @@ const BoardTabBar = ({ activeTab, onChange }: Props) => {
         onClick={() => onChange("POPULAR")}
         className={`pb-2 px-4 text-sm font-semibold transition-colors ${
           activeTab === "POPULAR"
-            ? "border-b-2 border-indigo-500 text-indigo-400"
-            : "text-gray-400 hover:text-gray-200"
+            ? "border-b-2 border-indigo-500 text-indigo-600"
+            : "text-gray-500 hover:text-gray-700"
         }`}
       >
         인기글

@@ -1,10 +1,11 @@
+import "../../styles/free-board-list-kfandom.css";
 import { useEffect, useState } from "react";
 import { boardApi } from "../../api/boardApi";
 import type { Board, PageResult, TabType } from "../../types/board";
 import { useNavigate } from "react-router-dom";
-import BoardTabBar from "../../Components/ui/BoardTabBar";
-import PopularTab from "../../Components/ui/PopularTab";
-import BoardListTemplate from "../../Components/ui/BoardListTemplate";
+import BoardTabBar from "../../components/ui/BoardTabBar";
+import PopularTab from "../../components/ui/PopularTab";
+import BoardListTemplate from "../../components/ui/BoardListTemplate";
 
 const FreeBoardListPage = () => {
   const [activeTab, setActiveTab] = useState<TabType>("ALL");
@@ -91,15 +92,17 @@ const FreeBoardListPage = () => {
     loadPage(1, searchKeyword, sort);
   };
 
-  if (!pageData) return <div className="p-4 text-center">로딩 중...</div>;
+  if (!pageData) return <div className="kf-community-page kf-free-board-list"><div className="kf-community-page__shell"><div className="kf-community-loading">로딩 중...</div></div></div>;
 
   return (
-    <div className="mx-auto max-w-4xl p-4">
+    <div className="kf-community-page kf-free-board-list">
+      <div className="kf-community-page__shell">
+      <div className="mx-auto max-w-4xl p-4">
       {/* 상단 헤더 */}
-      <div className="mt-8 mb-6 flex items-end justify-between border-b border-neutral-700 pb-5">
+      <div className="mt-8 mb-6 flex items-end justify-between border-b border-gray-200 pb-5">
         <div>
-          <h2 className="text-3xl font-bold text-white">자유게시판</h2>
-          <p className="mt-2 text-sm text-gray-400">주제에 상관없이 편한 시간을 보내세요.</p>
+          <h2 className="text-3xl font-bold text-gray-900">자유게시판</h2>
+          <p className="mt-2 text-sm text-gray-500">주제에 상관없이 편한 시간을 보내세요.</p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -128,6 +131,8 @@ const FreeBoardListPage = () => {
           onPageChange={handlePageChange}
         />
       )}
+    </div>
+      </div>
     </div>
   );
 };

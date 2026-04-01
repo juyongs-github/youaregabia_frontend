@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import "../../styles/PointHistoryPage.kfandom.css";
 import type { PageResult } from "../../types/board";
-import Pagination from "../../Components/ui/Pagination";
+import Pagination from "../../components/ui/Pagination";
 
 const GRADE_CONFIG: Record<string, { label: string; color: string; next: number }> = {
   ENSEMBLE: { label: "ENSEMBLE", color: "text-gray-400", next: 10000 },

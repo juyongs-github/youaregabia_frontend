@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import SongListItem from "../../Components/ui/SongListItem";
+import SongListItem from "../../components/ui/SongListItem";
 import { useLocation, useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
-import Spinner from "../../Components/ui/Spinner";
+import Spinner from "../../components/ui/Spinner";
 import { BsQuestionCircleFill } from "react-icons/bs";
 import { IoWarning } from "react-icons/io5";
 import { RiResetLeftFill } from "react-icons/ri";

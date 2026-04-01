@@ -1,11 +1,12 @@
 // pages/BoardListPage.tsx
+import "../../styles/board-list-kfandom.css";
 import { useEffect, useState } from "react";
 import { boardApi } from "../../api/boardApi";
 import type { Board, PageResult, TabType } from "../../types/board";
 import { useNavigate } from "react-router-dom";
-import BoardTabBar from "../../Components/ui/BoardTabBar";
-import PopularTab from "../../Components/ui/PopularTab";
-import BoardListTemplate from "../../Components/ui/BoardListTemplate";
+import BoardTabBar from "../../components/ui/BoardTabBar";
+import PopularTab from "../../components/ui/PopularTab";
+import BoardListTemplate from "../../components/ui/BoardListTemplate";
 
 const BoardListPage = () => {
   const [activeTab, setActiveTab] = useState<TabType>("ALL");
@@ -99,22 +100,24 @@ const BoardListPage = () => {
     loadPage(1, searchKeyword, genre, sort);
   };
 
-  if (!pageData) return <div className="p-4 text-center">로딩 중...</div>;
+  if (!pageData) return <div className="kf-community-page kf-board-list"><div className="kf-community-page__shell"><div className="kf-community-loading">로딩 중...</div></div></div>;
 
   return (
-    <div className="mx-auto max-w-4xl p-4">
+    <div className="kf-community-page kf-board-list">
+      <div className="kf-community-page__shell">
+      <div className="mx-auto max-w-4xl p-4">
       {/* 상단 헤더 */}
-      <div className="mt-8 mb-6 flex items-end justify-between border-b border-neutral-700 pb-5">
+      <div className="mt-8 mb-6 flex items-end justify-between border-b border-gray-200 pb-5">
         <div>
-          <h2 className="text-3xl font-bold text-white">플레이리스트 공유</h2>
-          <p className="mt-2 text-sm text-gray-400">다양한 장르의 음악을 함께 나눠보세요.</p>
+          <h2 className="text-3xl font-bold text-gray-900">플레이리스트 공유</h2>
+          <p className="mt-2 text-sm text-gray-500">다양한 장르의 음악을 함께 나눠보세요.</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
             <select
               value={genre || ""}
               onChange={(e) => setGenre(e.target.value === "" ? undefined : e.target.value)}
-              className="h-[42px] appearance-none rounded-md border border-neutral-700 bg-neutral-900 px-4 py-2 pr-10 text-sm text-gray-300 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="h-[42px] appearance-none rounded-md border border-gray-200 bg-white/80 px-4 py-2 pr-10 text-sm text-gray-700 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
             >
               <option value="">모든 장르</option>
               <option value="KPOP">KPOP</option>
@@ -152,6 +155,8 @@ const BoardListPage = () => {
           onPageChange={handlePageChange}
         />
       )}
+    </div>
+      </div>
     </div>
   );
 };

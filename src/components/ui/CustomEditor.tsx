@@ -6,7 +6,7 @@ interface Props {
   initialValue?: string;
 }
 
-const CustomEditor = ({ onChange, placeholder, initialValue }: Props) => {
+const CustomEditor = ({ onChange, placeholder: _placeholder, initialValue }: Props) => {
   const editorRef = useRef<HTMLDivElement>(null);
   // 커서 위치를 저장할 Ref
   const selectionRef = useRef<Range | null>(null);

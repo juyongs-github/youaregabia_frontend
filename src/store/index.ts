@@ -1,6 +1,6 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit"; // combineReducers 추가
 import authReducer from "./authSlice";
-import attendanceReducer from "../components/ui/attendanceSlice";
+import attendanceReducer from "../components/ui/AttendanceSlice";
 import {
   persistStore,
   persistReducer,

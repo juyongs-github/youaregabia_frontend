@@ -23,7 +23,7 @@ function AddToPlaylistModal({ song, onClose, onSuccess }: Props) {
   const [isDuplicate, setIsDuplicate] = useState(false);
   const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(false);
-  const [adding, setAdding] = useState(false);
+  const [_adding, setAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

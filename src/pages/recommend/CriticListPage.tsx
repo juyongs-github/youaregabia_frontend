@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import "../../styles/CriticListPage.kfandom.css";
 import type { RootState } from "../../store";
-import BoardTabBar from "../../Components/ui/BoardTabBar";
-import PopularTab from "../../Components/ui/PopularTab";
-import BoardListTemplate from "../../Components/ui/BoardListTemplate";
+import BoardTabBar from "../../components/ui/BoardTabBar";
+import PopularTab from "../../components/ui/PopularTab";
+import BoardListTemplate from "../../components/ui/BoardListTemplate";
 
 const CriticListPage = () => {
   const [activeTab, setActiveTab] = useState<TabType>("ALL");
@@ -91,10 +91,11 @@ const CriticListPage = () => {
     loadPage(1, searchKeyword, sort);
   };
 
-  if (!pageData) return <div className="p-4 text-center text-white">로딩 중...</div>;
+  if (!pageData) return <div className="kf-expansion-page kf-critic-list"><div style={{padding:"40px",textAlign:"center",color:"#677086",fontWeight:700}}>로딩 중...</div></div>;
 
   return (
-    <div className="mx-auto max-w-4xl p-4 text-white">
+    <div className="kf-expansion-page kf-critic-list">
+    <div className="mx-auto max-w-4xl p-4">
       {/* 상단 헤더 */}
       <div className="mt-8 mb-6 flex items-end justify-between border-b border-neutral-700 pb-5">
         <div>
@@ -128,6 +129,7 @@ const CriticListPage = () => {
           onPageChange={handlePageChange}
         />
       )}
+    </div>
     </div>
   );
 };

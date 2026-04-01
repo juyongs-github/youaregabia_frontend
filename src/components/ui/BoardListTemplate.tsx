@@ -32,11 +32,11 @@ const BoardListTemplate = ({
     <>
       <BoardSortBar sortBy={sortBy} onChange={onSortChange} />
 
-      <ul className="divide-y divide-neutral-700 rounded border border-neutral-700">
+      <ul className="divide-y divide-gray-200 rounded border border-gray-200">
         {pageData.dtoList.length > 0 ? (
           pageData.dtoList.map((board) => <BoardItem key={board.boardId} board={board} />)
         ) : (
-          <li className="px-4 py-8 text-center text-gray-500">게시글이 없습니다</li>
+          <li className="px-4 py-8 text-center text-gray-400">게시글이 없습니다</li>
         )}
       </ul>
 
@@ -48,7 +48,7 @@ const BoardListTemplate = ({
           value={keyword}
           onChange={(e) => onKeywordChange(e.target.value)}
           onKeyDown={onEnter}
-          className="flex-1 rounded border border-neutral-700 bg-neutral-900 px-4 py-2 text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+          className="flex-1 rounded border border-gray-200 bg-white/80 px-4 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-400 focus:outline-none backdrop-blur-sm"
         />
         <button
           onClick={onSearch}
@@ -59,7 +59,7 @@ const BoardListTemplate = ({
         {searchKeyword && (
           <button
             onClick={onReset}
-            className="rounded border border-neutral-700 px-4 py-2 text-gray-400 hover:bg-neutral-800"
+            className="rounded border border-gray-200 px-4 py-2 text-gray-500 hover:bg-gray-50"
           >
             전체글
           </button>
@@ -67,7 +67,7 @@ const BoardListTemplate = ({
       </div>
 
       {searchKeyword && (
-        <div className="mb-2 text-sm text-gray-400">
+        <div className="mb-2 text-sm text-gray-500">
           '{searchKeyword}' 검색 결과: {pageData.totalCount}개
         </div>
       )}
@@ -86,7 +86,7 @@ const BoardListTemplate = ({
         </div>
       )}
 
-      <div className="mt-4 text-center text-sm text-gray-400">
+      <div className="mt-4 text-center text-sm text-gray-500">
         전체 {pageData.totalCount}개 · {pageData.current} 페이지
       </div>
     </>

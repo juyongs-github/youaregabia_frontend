@@ -1,3 +1,4 @@
+import "../../styles/free-board-update-kfandom.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
@@ -49,7 +50,9 @@ const FreeBoardUpdate = () => {
   };
 
   return (
-    <div>
+    <div className="kf-community-page kf-free-board-update">
+      <div className="kf-community-page__shell">
+      <div>
       <h2 className="mb-4 text-2xl font-bold">플레이리스트 공유 수정</h2>
 
       <input
@@ -84,6 +87,8 @@ const FreeBoardUpdate = () => {
         <button onClick={remove} className="rounded bg-red-600 px-2  text-white hover:bg-red-500">
           삭제
         </button>
+      </div>
+    </div>
       </div>
     </div>
   );

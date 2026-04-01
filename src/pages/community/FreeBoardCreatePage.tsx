@@ -1,3 +1,4 @@
+import "../../styles/free-board-create-kfandom.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
@@ -26,7 +27,9 @@ const FreeBoardCreatePage = () => {
   };
 
   return (
-    <div>
+    <div className="kf-community-page kf-free-board-create">
+      <div className="kf-community-page__shell">
+      <div>
       <h2 className="mb-4 text-2xl font-bold">자유게시판</h2>
 
       <input
@@ -45,6 +48,8 @@ const FreeBoardCreatePage = () => {
       <button className="rounded bg-indigo-600 px-4 py-2 text-white" onClick={submit}>
         등록
       </button>
+    </div>
+      </div>
     </div>
   );
 };

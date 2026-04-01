@@ -76,7 +76,8 @@ const CriticWrite = () => {
   };
 
   return (
-    <div className="mx-auto max-w-2xl p-6 text-white">
+    <div className="kf-expansion-page kf-critic-write">
+    <div className="mx-auto max-w-2xl p-6">
       <h2 className="mb-6 text-2xl font-bold">평론 작성</h2>
 
       {/* 곡 선택 영역 */}
@@ -132,6 +133,7 @@ const CriticWrite = () => {
           onSelect={(song) => setSelectedSong(song)}
         />
       )}
+    </div>
     </div>
   );
 };

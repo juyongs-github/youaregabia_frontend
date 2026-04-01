@@ -1,3 +1,4 @@
+import "../../styles/collabo-playlist-detail-kfandom.css";
 import { useEffect, useState } from "react";
 import {
   FaCalendarAlt,
@@ -23,7 +24,7 @@ import {
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from "date-fns/locale";
-import CollaboPlaylistEditModal from "../../Components/ui/CollaboPlaylistEditModal";
+import CollaboPlaylistEditModal from "../../components/ui/CollaboPlaylistEditModal";
 import { GoDotFill } from "react-icons/go";
 import { GrFormPrevious } from "react-icons/gr";
 import { useNavigate, useParams } from "react-router-dom";
@@ -31,10 +32,10 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { playlistApi } from "../../api/playlistApi";
 import { playlistSongApi, type CollaboSong } from "../../api/playlistSongApi";
-import type { Song } from "../../Components/ui/SongListItem";
+import type { Song } from "../../components/ui/SongListItem";
 import type { CollaboPlaylist } from "../../types/playlist";
-import MusicPlayer from "../../Components/layout/MusicPlayer";
-import Spinner from "../../Components/ui/Spinner";
+import MusicPlayer from "../../components/layout/MusicPlayer";
+import Spinner from "../../components/ui/Spinner";
 import api from "../../api/axios";
 
 function timeAgo(dateStr?: string): string {
@@ -53,7 +54,7 @@ function CollaboPlaylistDetailPage() {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const [playlist, setPlaylist] = useState<CollaboPlaylist | null>(null);
-  const [isPlaylistLoading] = useState(true);
+  const [isPlaylistLoading, setIsPlaylistLoading] = useState(true);
   const [songs, setSongs] = useState<CollaboSong[]>([]);
   const [isSongsLoading, setIsSongsLoading] = useState(false);
 
@@ -329,7 +330,9 @@ function CollaboPlaylistDetailPage() {
     !!user?.email && (isCreator || song.suggestedByEmail === user.email);
 
   return (
-    <div className="flex flex-col w-full gap-12">
+    <div className="kf-community-page kf-collabo-detail">
+      <div className="kf-community-page__shell">
+      <div className="flex flex-col w-full gap-12">
       <button
         className="flex items-center self-start gap-3"
         onClick={() => navigate("/community/collabo")}
@@ -1087,6 +1090,8 @@ function CollaboPlaylistDetailPage() {
           />
         </div>
       )}
+    </div>
+      </div>
     </div>
   );
 }
