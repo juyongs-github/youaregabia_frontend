@@ -47,6 +47,7 @@ function MyPage() {
   const [myBoards, setMyBoards] = useState<MyBoard[]>([]);
   const [myReplies, setMyReplies] = useState<MyReply[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const checked = useSelector((state: RootState) => state.attendance.checked);
 
   useEffect(() => {
     if (activeTab === "boards" && myBoards.length === 0) {
@@ -114,26 +115,35 @@ function MyPage() {
     }
   };
 
-  const roleLabel =
-    user?.role === "ADMIN" ? "관리자" : user?.role === "CRITIC" ? "평론가" : "일반 회원";
+  const tabStyle = (tab: Tab) =>
+    `px-5 py-2 text-sm font-medium border-b-2 transition-colors ${
+      activeTab === tab
+        ? "border-red-500 text-white"
+        : "border-transparent text-gray-400 hover:text-white"
+    }`;
 
   return (
-    <div className="kf-my-page">
-      {/* 프로필 헤더 */}
-      <div className="kf-my-hero">
-        <div className="kf-my-avatar-wrap">
-          <div className="kf-my-avatar">
+    <div className="max-w-4xl mx-auto mt-10 p-8 text-white">
+      {/* 상단 프로필 */}
+      <div className="flex items-center gap-8 mb-8">
+        <div className="relative">
+          <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-700 bg-gray-800 flex items-center justify-center">
             {user?.imgUrl ? (
               <img
                 src={`${import.meta.env.VITE_API_BASE_URL ?? ""}${user.imgUrl}`}
-                alt="프로필"
+                alt="Profile"
+                className="w-full h-full object-cover"
               />
             ) : (
-              <span className="kf-my-avatar__placeholder">이미지 없음</span>
+              <span className="text-gray-500 text-sm">이미지 없음</span>
             )}
           </div>
-          <button className="kf-my-edit-btn" onClick={handleEditClick}>
-            <MdEdit size={14} />
+          <button
+            onClick={handleEditClick}
+            className="absolute bottom-1 right-1 p-2 bg-blue-600 rounded-full hover:bg-blue-500 transition-colors shadow-lg z-10"
+            style={{ transform: "translate(25%, 25%)" }}
+          >
+            <MdEdit size={20} color="white" />
           </button>
           <input
             type="file"
@@ -141,112 +151,143 @@ function MyPage() {
             onChange={handleFileChange}
             className="hidden"
             accept="image/*"
-            style={{ display: "none" }}
           />
         </div>
-        <div className="kf-my-hero-info">
-          <h1 className="kf-my-name">{user?.name}</h1>
-          <span className="kf-my-role">{roleLabel}</span>
+        <div>
+          <h1 className="text-3xl font-bold">{user?.name}</h1>
+          <p className="text-gray-400 text-sm mt-1">
+            {user?.role === "ADMIN" ? "관리자" : user?.role === "CRITIC" ? "평론가" : "일반 회원"}
+          </p>
         </div>
       </div>
 
       {/* 탭 */}
-      <div className="kf-my-tabs">
-        <button
-          className={`kf-my-tab${activeTab === "profile" ? " is-active" : ""}`}
-          onClick={() => setActiveTab("profile")}
-        >
+      <div className="flex border-b border-gray-700 mb-6">
+        <button className={tabStyle("profile")} onClick={() => setActiveTab("profile")}>
           내 정보
         </button>
-        <button
-          className={`kf-my-tab${activeTab === "boards" ? " is-active" : ""}`}
-          onClick={() => setActiveTab("boards")}
-        >
+        <button className={tabStyle("boards")} onClick={() => setActiveTab("boards")}>
           내가 쓴 게시글
         </button>
-        <button
-          className={`kf-my-tab${activeTab === "replies" ? " is-active" : ""}`}
-          onClick={() => setActiveTab("replies")}
-        >
+        <button className={tabStyle("replies")} onClick={() => setActiveTab("replies")}>
           내가 쓴 댓글
+        </button>
+        {/* 우측 정렬된 작은 출석 버튼 */}
+        <button
+          onClick={() => navigate("/profile/check")}
+          className={`ml-auto mb-2 flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium transition-all
+      ${
+        checked
+          ? "border-indigo-500/50 bg-indigo-500/10 text-indigo-400"
+          : "border-yellow-500/50 bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20"
+      }`}
+        >
+          <span>📅</span>
+          <span>{checked ? "출석 완료" : "출석 체크"}</span>
         </button>
       </div>
 
       {/* 내 정보 탭 */}
       {activeTab === "profile" && (
-        <>
-          <div className="kf-my-card">
-            <div className="kf-my-field">
-              <label>이름</label>
-              <input type="text" value={user?.name || ""} readOnly />
-            </div>
-            <div className="kf-my-field">
-              <label>이메일</label>
-              <input type="email" value={user?.email || ""} readOnly />
-            </div>
-            <div className="kf-my-withdraw">
-              <button className="kf-my-withdraw-btn" onClick={handleWithdraw}>
-                회원탈퇴
-              </button>
-            </div>
+        <div className="space-y-6 bg-gray-900/50 p-6 rounded-xl border border-gray-800">
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">이름</label>
+            <input
+              type="text"
+              value={user?.name || ""}
+              readOnly
+              className="w-full bg-gray-800 border-none rounded-lg p-3"
+            />
           </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">이메일</label>
+            <input
+              type="email"
+              value={user?.email || ""}
+              readOnly
+              className="w-full bg-gray-800 border-none rounded-lg p-3"
+            />
+          </div>
+          <div className="pt-4 text-right">
+            <button
+              onClick={handleWithdraw}
+              className="px-4 py-2 text-sm text-gray-500 border border-gray-700 rounded-lg hover:bg-red-900/30 hover:text-red-400 hover:border-red-700 transition-colors"
+            >
+              회원탈퇴
+            </button>
+          </div>
+        </div>
+      )}
 
-          {/* 알림 이력 */}
-          <div className="kf-my-notif-wrap">
-            <div className="kf-my-notif-header">
-              <div className="kf-my-notif-title">
-                <FaBell size={14} color="#677086" />
-                알림 이력
-                <span className="kf-my-notif-count">({notifications.length}건)</span>
-              </div>
-              {notifications.some((n) => !n.isRead) && (
-                <button className="kf-my-notif-read-all" onClick={handleMarkAllRead}>
-                  모두 읽음
-                </button>
-              )}
+      {/* 알림 이력 (내 정보 탭 하단) */}
+      {activeTab === "profile" && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <FaBell size={15} className="text-gray-400" />
+              <h2 className="text-base font-semibold text-white">알림 이력</h2>
+              <span className="text-xs text-gray-500">({notifications.length}건)</span>
             </div>
-
-            {notifications.length === 0 ? (
-              <p className="kf-my-notif-empty">알림 이력이 없습니다.</p>
-            ) : (
-              notifications.map((n) => (
-                <button
-                  key={n.id}
-                  className={`kf-my-notif-item${!n.isRead ? " unread" : ""}`}
-                  onClick={() => handleNotifClick(n)}
-                >
-                  {!n.isRead && <span className="kf-my-notif-dot" />}
-                  <div style={n.isRead ? { marginLeft: 18 } : {}}>
-                    <p className="kf-my-notif-msg">{n.message}</p>
-                    <p className="kf-my-notif-date">{n.createdAt?.slice(0, 10)}</p>
-                  </div>
-                </button>
-              ))
+            {notifications.some((n) => !n.isRead) && (
+              <button
+                onClick={handleMarkAllRead}
+                className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                모두 읽음
+              </button>
             )}
           </div>
-        </>
+
+          {notifications.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-8">알림 이력이 없습니다.</p>
+          ) : (
+            <div className="space-y-2">
+              {notifications.map((n) => (
+                <button
+                  key={n.id}
+                  onClick={() => handleNotifClick(n)}
+                  className={`w-full text-left px-4 py-3 rounded-xl border transition-colors ${
+                    n.isRead
+                      ? "bg-gray-900/50 border-gray-800 hover:border-gray-600"
+                      : "bg-blue-950/30 border-blue-900/50 hover:border-blue-700"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    {!n.isRead && (
+                      <span className="mt-1.5 w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                    )}
+                    <div className={!n.isRead ? "" : "ml-5"}>
+                      <p className="text-sm text-white leading-snug">{n.message}</p>
+                      <p className="text-xs text-gray-500 mt-1">{n.createdAt?.slice(0, 10)}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {/* 내가 쓴 게시글 탭 */}
       {activeTab === "boards" && (
-        <div>
+        <div className="space-y-3">
           {myBoards.length === 0 ? (
-            <p className="kf-my-empty">작성한 게시글이 없습니다.</p>
+            <p className="text-gray-500 text-center py-12">작성한 게시글이 없습니다.</p>
           ) : (
             myBoards.map((b) => (
               <div
                 key={b.boardId}
-                className="kf-my-list-item"
                 onClick={() => navigate(`/community/board/${b.boardId}`)}
+                className="bg-gray-900/50 border border-gray-800 rounded-xl p-4 cursor-pointer hover:border-gray-600 transition-colors"
               >
-                <div className="kf-my-item-top">
-                  <div className="kf-my-item-left">
-                    <span className="kf-my-item-tag">{b.boardType}</span>
-                    <span className="kf-my-item-title">{b.title}</span>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-xs text-gray-500 mr-2">[{b.boardType}]</span>
+                    <span className="font-medium">{b.title}</span>
                   </div>
-                  <span className="kf-my-item-date">{b.createdAt?.slice(0, 10)}</span>
+                  <span className="text-xs text-gray-500">{b.createdAt?.slice(0, 10)}</span>
                 </div>
-                <div className="kf-my-item-meta">
+                <div className="flex gap-4 mt-2 text-xs text-gray-500">
                   <span>조회 {b.viewCount}</span>
                   <span>좋아요 {b.likeCount}</span>
                 </div>
@@ -258,19 +299,19 @@ function MyPage() {
 
       {/* 내가 쓴 댓글 탭 */}
       {activeTab === "replies" && (
-        <div>
+        <div className="space-y-3">
           {myReplies.length === 0 ? (
-            <p className="kf-my-empty">작성한 댓글이 없습니다.</p>
+            <p className="text-gray-500 text-center py-12">작성한 댓글이 없습니다.</p>
           ) : (
             myReplies.map((r) => (
               <div
                 key={r.replyId}
-                className="kf-my-list-item"
                 onClick={() => navigate(`/community/board/${r.boardId}`)}
+                className="bg-gray-900/50 border border-gray-800 rounded-xl p-4 cursor-pointer hover:border-gray-600 transition-colors"
               >
-                <p className="kf-my-reply-board">{r.boardTitle}</p>
-                <p className="kf-my-reply-content">{r.content}</p>
-                <div className="kf-my-reply-bottom">
+                <p className="text-xs text-gray-500 mb-1">{r.boardTitle}</p>
+                <p className="text-sm">{r.content}</p>
+                <div className="flex justify-between mt-2 text-xs text-gray-500">
                   <span>좋아요 {r.likeCount}</span>
                   <span>{r.createdAt?.slice(0, 10)}</span>
                 </div>

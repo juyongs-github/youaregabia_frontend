@@ -1,5 +1,7 @@
 import "./App.css";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { PlayerProvider, usePlayer } from "./contexts/PlayerContext";
+import MusicPlayer from "./components/layout/MusicPlayer";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "./store";
 import { loginSuccess, REMEMBER_KEY } from "./store/authSlice";
@@ -10,7 +12,7 @@ import BoardListPage from "./pages/community/BoardListPage";
 import BoardDetailPage from "./pages/community/BoardDetailPage";
 import BoardWrite from "./pages/community/BoardWrite";
 import BoardUpdate from "./pages/community/BoardUpdate";
-import Layout from "./Components/layout/Layout";
+import Layout from "./components/layout/Layout";
 import LoginForm from "./pages/auth/LoginForm";
 import RegisterForm from "./pages/auth/RegisterForm";
 import TermsAgreement from "./pages/auth/TermsAgreement";
@@ -54,11 +56,34 @@ import PointHistoryPage from "./pages/auth/PointHistoryPage";
 import IdealTypeWorldCupPage from "./pages/recommend/IdealTypeWorldCupPage";
 import { useEffect, useState } from "react";
 import { setRateLimitHandler } from "./api/axios";
-import RateLimitToast from "./Components/ui/RateLimitToast";
+import RateLimitToast from "./components/ui/RateLimitToast";
+import ChatbotButton from "./components/ui/ChatbotButton";
+import { useAttendance } from "./components/ui/useAttendance";
+import AttendancePage from "./pages/auth/AttendancePage";
 
 interface RateLimitInfo {
   message: string;
   remainSeconds: number;
+}
+
+function GlobalMusicPlayer() {
+  const { song, songs, songIndex, blind, externalPaused, playKey, onSongEnd, onSongChange, onClose, stop, setSongIndex } = usePlayer();
+  if (!song) return null;
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-40">
+      <MusicPlayer
+        key={playKey}
+        song={song}
+        songs={songs.length > 0 ? songs : undefined}
+        songIndex={songs.length > 0 ? songIndex : undefined}
+        blind={blind}
+        externalPaused={externalPaused}
+        onSongEnd={onSongEnd}
+        onSongChange={(index) => { setSongIndex(index); onSongChange?.(index); }}
+        setIsPlayerVisible={() => { onClose?.(); stop(); }}
+      />
+    </div>
+  );
 }
 
 function App() {
@@ -92,8 +117,10 @@ function App() {
     });
   }, []);
 
+  useAttendance(); // 🆕 로그인 시 자동 출석 체크
+
   return (
-    <>
+    <PlayerProvider>
       <Routes>
         {/* HomePage — 자체 Header/풀페이지 레이아웃, Layout 없이 */}
         <Route path="/home" element={isLogin ? <HomePage /> : <Navigate to="/login" replace />} />
@@ -125,6 +152,7 @@ function App() {
           <Route path="/community/free/:boardId/update" element={<FreeBoardUpdate />} />
           <Route path="/profile/me" element={<MyPage />} />
           <Route path="/profile/points" element={<PointHistoryPage />} />
+          <Route path="/profile/check" element={<AttendancePage />} />
           <Route path="/goods" element={<GoodsListPage />} />
           <Route path="/goods/cart" element={<CartPage />} />
           <Route path="/goods/order/complete" element={<OrderCompletePage />} />
@@ -170,6 +198,8 @@ function App() {
         <Route path="/" element={<Navigate to={isLogin ? loginRedirect : "/login"} replace />} />
       </Routes>
       {/* 전역 UI — 어느 페이지에서든 표시됨-> 매크로방지 alert */}
+      {isLogin && <ChatbotButton />}
+      {isLogin && <GlobalMusicPlayer />}
       {rateLimitInfo && (
         <RateLimitToast
           message={rateLimitInfo.message}
@@ -177,7 +207,7 @@ function App() {
           onClose={() => setRateLimitInfo(null)}
         />
       )}
-    </>
+    </PlayerProvider>
   );
 }
 

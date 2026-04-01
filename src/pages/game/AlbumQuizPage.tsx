@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import api from "../../api/axios";
 import type { Song } from "../../Components/ui/SongListItem";
 import GameResult from "../../Components/ui/GameResult";
+import GameCountdown from "../../components/ui/GameCountdown";
 
 const TOTAL = 5;
 const MAX_TRIES = 5;
@@ -16,37 +17,40 @@ const AlbumQuizPage = () => {
   const [artistInput, setArtistInput] = useState("");
   const [tries, setTries] = useState(0);
   const [score, setScore] = useState(0);
-  const [gainedScore, setGainedScore] = useState(0); // 추가
+  const [gainedScore, setGainedScore] = useState(0);
   const [phase, setPhase] = useState<Phase>("playing");
   const [feedback, setFeedback] = useState<Feedback>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [started, setStarted] = useState(false); // 게임 시작 상태 추가
 
-  const loadSongs = async () => {
+  // 1. 곡 로드 로직
+  const loadSongs = useCallback(async () => {
     setIsLoading(true);
-    const results: Song[] = [];
-    await Promise.all(
-      Array.from({ length: TOTAL }, () =>
-        api.get("/api/random").then((res) => results.push(res.data))
-      )
-    );
-    setSongs(results);
-    setIsLoading(false);
-  };
+    try {
+      const promises = Array.from(
+        { length: TOTAL },
+        () => api.get("/api/random").then((res) => res.data) // 직접 data를 반환
+      );
 
-  useEffect(() => {
-    loadSongs();
+      const results = await Promise.all(promises); // 모든 데이터가 올 때까지 기다림
+
+      if (results.length > 0) {
+        setSongs(results);
+        setStarted(true);
+      }
+    } catch (error) {
+      console.error("곡 로드 실패:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const currentSong = songs[currentIndex];
   const blurAmount = BLUR_LEVELS[Math.min(tries, BLUR_LEVELS.length - 1)];
 
   const normalize = (str: string) => str.toLowerCase().replace(/\s/g, "");
-
-  const calcScore = (currentTries: number) => {
-    const earned = 10 - currentTries * 2;
-    return earned < 0 ? 0 : earned;
-  };
+  const calcScore = (currentTries: number) => Math.max(0, 10 - currentTries * 2);
 
   const goNext = () => {
     setTimeout(() => {
@@ -65,10 +69,8 @@ const AlbumQuizPage = () => {
 
   const handleSubmit = () => {
     if (!currentSong || feedback) return;
-    // 공백 체크 로직
     if (!artistInput.trim()) {
       setFeedback("empty");
-      // 1초 뒤에 문구를 사라지게 합니다.
       setTimeout(() => setFeedback(null), 1000);
       return;
     }
@@ -79,7 +81,7 @@ const AlbumQuizPage = () => {
 
     if (artistCorrect) {
       const gained = calcScore(tries);
-      setGainedScore(gained); // 현재 tries로 점수 저장
+      setGainedScore(gained);
       setScore((prev) => prev + gained);
       setFeedback("correct");
       setRevealed(true);
@@ -100,18 +102,10 @@ const AlbumQuizPage = () => {
 
   const handleSkip = () => {
     if (!currentSong || feedback) return;
-
-    // 1. 오답 처리 (gainedScore는 0으로 유지)
     setFeedback("wrong");
-    setRevealed(true); // 정답을 보여줌
-    setTries(MAX_TRIES); // 기회를 다 쓴 것으로 처리 (시각적 일관성)
-
-    // 2. 1.5초 뒤 다음 문제로 이동 (기존 goNext 활용)
+    setRevealed(true);
+    setTries(MAX_TRIES);
     goNext();
-  };
-
-  const handleEnter = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") handleSubmit();
   };
 
   const handleRestart = () => {
@@ -123,15 +117,14 @@ const AlbumQuizPage = () => {
     setFeedback(null);
     setRevealed(false);
     setPhase("playing");
-    loadSongs();
+    setStarted(false);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64 text-white">🎨 앨범 불러오는 중...</div>
-    );
-  }
+  // ========================================================
+  // 조건부 렌더링
+  // ========================================================
 
+  // 1. 결과 화면
   if (phase === "result") {
     return (
       <GameResult
@@ -144,98 +137,133 @@ const AlbumQuizPage = () => {
     );
   }
 
+  // 2. 로딩 화면
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-white gap-4">
+        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+        <p className="animate-pulse font-bold text-indigo-300">앨범 데이터 구성 중...</p>
+      </div>
+    );
+  }
+
+  // 3. 인트로 및 카운트다운 화면
+  if (!started) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[80vh] text-white px-4 animate-in fade-in duration-700">
+        <div className="text-center mb-16 space-y-4">
+          <div className="text-6xl mb-6 animate-bounce">🎨</div>
+          <h1 className="text-4xl font-black mb-3 tracking-tight">앨범보고 맞추기</h1>
+          <p className="text-gray-400 text-sm">흐릿한 앨범 이미지를 보고 가수를 맞춰보세요!</p>
+        </div>
+        <div className="w-full flex justify-center scale-110">
+          <GameCountdown onStart={loadSongs} />
+        </div>
+      </div>
+    );
+  }
+
+  // 4. 게임 화면
   return (
-    <div className="mx-auto max-w-xl p-8 text-white">
-      {/* 진행 상황 */}
+    <div className="mx-auto max-w-xl p-8 text-white animate-in fade-in duration-500">
       <div className="mb-4 flex items-center justify-between">
-        <span className="text-gray-400">
+        <span className="text-gray-400 font-bold">
           {currentIndex + 1} / {TOTAL}
         </span>
-        <span className="text-indigo-400 font-semibold">점수: {score}</span>
+        <span className="text-indigo-400 font-bold text-xl">Score: {score}</span>
       </div>
 
-      {/* 진행 바 */}
-      <div className="mb-6 h-2 w-full rounded-full bg-neutral-700">
+      <div className="mb-6 h-2 w-full rounded-full bg-neutral-800 overflow-hidden">
         <div
-          className="h-2 rounded-full bg-indigo-600 transition-all"
+          className="h-full bg-indigo-600 transition-all duration-500"
           style={{ width: `${((currentIndex + 1) / TOTAL) * 100}%` }}
         />
       </div>
 
-      {/* 앨범 아트 */}
-      <div className="mb-6 flex justify-center">
-        <img
-          src={currentSong?.imgUrl}
-          alt="album"
-          className="w-64 h-64 rounded-xl object-cover transition-all duration-700"
-          style={{ filter: revealed ? "blur(0px)" : `blur(${blurAmount}px)` }}
-        />
+      <div className="mb-8 flex flex-col items-center">
+        <div className="relative group">
+          {currentSong?.imgUrl ? (
+            <img
+              src={currentSong.imgUrl}
+              alt="album"
+              className="w-66 h-66 md:w-66 md:h-66 rounded-2xl object-cover shadow-2xl transition-all duration-1000 ease-in-out border-4 border-neutral-800"
+              style={{ filter: revealed ? "blur(0) " : `blur(${blurAmount}px)` }}
+            />
+          ) : (
+            <div className="w-56 h-56 bg-neutral-800 animate-pulse rounded-2xl flex items-center justify-center">
+              <span>이미지 없음</span>
+            </div>
+          )}
+          {!revealed && (
+            <div className="absolute top-2 right-2 bg-black/60 px-3 py-1 rounded-full text-[10px] font-bold tracking-tighter border border-white/10">
+              BLUR: {blurAmount}px
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* 남은 기회 표시 */}
-      <div className="mb-4 flex justify-center gap-2">
+      <div className="mb-6 flex justify-center gap-3">
         {Array.from({ length: MAX_TRIES }).map((_, i) => (
           <div
             key={i}
-            className={`w-3 h-3 rounded-full ${i < tries ? "bg-red-500" : "bg-neutral-600"}`}
+            className={`w-4 h-4 rounded-md rotate-45 transition-colors duration-300 ${
+              i < tries ? "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" : "bg-neutral-700"
+            }`}
           />
         ))}
       </div>
 
-      {/* 피드백 */}
       {feedback && (
         <div
-          className={`mb-4 rounded-lg px-4 py-3 text-center font-semibold ${
+          className={`mb-6 rounded-xl px-4 py-4 text-center font-bold animate-in zoom-in duration-300 ${
             feedback === "correct"
-              ? "bg-green-800 text-green-300"
+              ? "bg-green-500/20 text-green-400 border border-green-500/50"
               : feedback === "empty"
-                ? "bg-yellow-700 text-yellow-100"
-                : "bg-red-900 text-red-300"
+                ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/50"
+                : "bg-red-500/20 text-red-400 border border-red-500/50"
           }`}
         >
           {feedback === "correct" && `정답! 🎉 +${gainedScore}점`}
-          {feedback === "empty" && "정답을 입력해주세요!"}
-          {feedback === "wrong" && tries >= MAX_TRIES
-            ? `기회 소진! 정답: ${currentSong?.artistName}`
-            : feedback === "wrong" && "틀렸어요 😢 블러가 줄어들었어요!"}
+          {feedback === "empty" && "가수 이름을 입력해주세요!"}
+          {feedback === "wrong" &&
+            (tries >= MAX_TRIES
+              ? `기회 소진! 정답: ${currentSong?.artistName}`
+              : "틀렸어요! 이미지가 선명해집니다 🔎")}
         </div>
       )}
 
-      {/* 정답 공개 시 곡 정보 */}
-      {revealed && (
-        <div className="mb-4 text-center">
-          <p className="font-bold text-lg">{currentSong?.trackName}</p>
-          <p className="text-gray-400">{currentSong?.artistName}</p>
+      {revealed && !feedback && (
+        <div className="mb-6 text-center animate-in slide-in-from-bottom-4">
+          <p className="text-2xl font-black text-white leading-tight">{currentSong?.trackName}</p>
+          <p className="text-indigo-400 font-bold">{currentSong?.artistName}</p>
         </div>
       )}
 
-      {/* 입력창 */}
       {!revealed && (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           <input
             type="text"
             value={artistInput}
             autoFocus
             onChange={(e) => setArtistInput(e.target.value)}
-            onKeyDown={handleEnter}
-            placeholder="아티스트 이름..."
+            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+            placeholder="가수 이름을 입력하세요..."
             disabled={!!feedback}
-            className="rounded border border-neutral-700 bg-neutral-900 px-4 py-3 text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+            className="rounded-xl border border-neutral-700 bg-neutral-900 px-5 py-4 text-white focus:border-indigo-500 focus:outline-none disabled:opacity-50 transition-all shadow-inner"
           />
           <button
             onClick={handleSubmit}
             disabled={!!feedback}
-            className="rounded bg-indigo-600 px-5 py-3 font-semibold hover:bg-indigo-500 disabled:opacity-50"
+            className="rounded-xl bg-indigo-600 px-5 py-4 font-bold hover:bg-indigo-500 active:scale-95 disabled:opacity-50 transition-all shadow-lg shadow-indigo-600/20"
           >
-            정답 제출
+            정답 확인
           </button>
-          {/* 스킵 버튼 */}
           <button
             onClick={handleSkip}
             disabled={!!feedback}
-            className="mt-2 text-sm text-gray-500 hover:text-gray-300 transition-colors disabled:opacity-50"
+            className="mt-2 text-sm text-gray-500 hover:text-gray-300 transition-colors"
           >
-            모르겠어요 → 넘기기
+            전혀 모르겠어요 (패스) →
           </button>
         </div>
       )}

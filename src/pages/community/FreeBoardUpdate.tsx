@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import "../../styles/free-board-update-kfandom.css";
+import CustomEditor from "../../components/ui/CustomEditor";
 
 const FreeBoardUpdate = () => {
   const { boardId } = useParams<{ boardId: string }>();
@@ -49,9 +49,7 @@ const FreeBoardUpdate = () => {
   };
 
   return (
-    <div className="kf-community-page kf-free-board-update">
-      <div className="kf-community-page__shell">
-      <div>
+    <div>
       <h2 className="mb-4 text-2xl font-bold">플레이리스트 공유 수정</h2>
 
       <input
@@ -69,12 +67,12 @@ const FreeBoardUpdate = () => {
         <option value="JPOP">JPOP</option>
         <option value="HIPHOP">HIPHOP</option>
       </select>
-      <textarea
-        className="mb-4 w-full min-h-[400px] resize-y rounded border px-4 py-3 leading-normal"
-        rows={6}
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-      />
+      <div className="mb-4">
+        <CustomEditor
+          onChange={(html) => setContent(html)}
+          placeholder="추가로 하고 싶은 말을 입력하세요... (선택)"
+        />
+      </div>
 
       <div className="flex gap-2">
         <button
@@ -86,8 +84,6 @@ const FreeBoardUpdate = () => {
         <button onClick={remove} className="rounded bg-red-600 px-2  text-white hover:bg-red-500">
           삭제
         </button>
-      </div>
-      </div>
       </div>
     </div>
   );

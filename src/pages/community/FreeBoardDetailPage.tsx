@@ -7,7 +7,7 @@ import ReplyItem from "../../Components/ui/replyItem";
 import Pagination from "../../Components/ui/Pagination";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import "../../styles/free-board-detail-kfandom.css";
+import DOMPurify from "dompurify";
 
 const FreeBoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();
@@ -86,21 +86,20 @@ const FreeBoardDetailPage = () => {
   };
 
   // 오류 시 로딩중 이라고 보여주기
-  if (!board) return <div className="kf-community-loading">로딩 중...</div>;
+  if (!board) return <div>로딩 중...</div>;
 
   return (
-    <div className="kf-community-page kf-free-board-detail">
-      <div className="kf-community-page__shell">
-      <div>
+    <div>
       <div className="mb-6 border-b border-neutral-700 pb-6">
         <h1 className="text-4xl font-extrabold tracking-tight text-white mb-3">{board.title}</h1>
         <span className="text-sm font-semibold text-neutral-500">작성자: {board.writer}</span>
         <div className="text-sm font-semibold text-neutral-500">생성일시: {board.createdAt}</div>
         <div className="text-sm font-semibold text-neutral-500">장르: {board.boardGenre}</div>
       </div>
-      <div className="mb-8 min-h-[100px] whitespace-pre-wrap break-words leading-[1.3] text-white">
-        {board.content}
-      </div>
+      <div
+        className="mb-8 min-h-[100px] break-words leading-[1.3] text-white"
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(board.content) }}
+      />
       <div className="flex items-center justify-end">
         {userEmail && board.writerEmail === userEmail && (
           <button onClick={() => navigate(`/community/free/${board.boardId}/update`)}>수정</button>
@@ -110,16 +109,16 @@ const FreeBoardDetailPage = () => {
       <hr />
 
       <h3>댓글</h3>
-      <div className="min-h-[50px]" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <div className="min-h-[50px]">
         <button
           onClick={() => setSortBy("latest")}
-          className={`kf-sort-btn ${sortBy === "latest" ? "kf-sort-btn--active" : ""}`}
+          style={{ fontWeight: sortBy === "latest" ? "bold" : "normal" }}
         >
           최신순
         </button>
         <button
           onClick={() => setSortBy("likes")}
-          className={`kf-sort-btn ${sortBy === "likes" ? "kf-sort-btn--active" : ""}`}
+          style={{ fontWeight: sortBy === "likes" ? "bold" : "normal", marginLeft: "10px" }}
         >
           추천순
         </button>
@@ -155,7 +154,7 @@ const FreeBoardDetailPage = () => {
         </>
       )}
 
-      <textarea value={replyContent} onChange={(e) => setReplyContent(e.target.value)} rows={3} placeholder="댓글을 입력해 보세요..." />
+      <textarea value={replyContent} onChange={(e) => setReplyContent(e.target.value)} rows={3} />
 
       <button
         onClick={createReply}
@@ -163,8 +162,6 @@ const FreeBoardDetailPage = () => {
       >
         댓글 작성
       </button>
-      </div>
-      </div>
     </div>
   );
 };

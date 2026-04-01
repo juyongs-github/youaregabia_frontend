@@ -4,8 +4,8 @@ import { boardApi } from "../../api/boardApi";
 import { playlistApi } from "../../api/playlistApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import { refreshPoint } from "../../Components/ui/refreshPoint";
-import "../../styles/board-write-kfandom.css";
+import { refreshPoint } from "../../components/ui/refreshPoint";
+import CustomEditor from "../../components/ui/CustomEditor";
 
 interface PlaylistSong {
   id: number;
@@ -89,9 +89,7 @@ const BoardWrite = () => {
   };
 
   return (
-    <div className="kf-community-page kf-board-write">
-      <div className="kf-community-page__shell">
-      <div className="mx-auto max-w-2xl p-6">
+    <div className="mx-auto max-w-2xl p-6 text-white">
       <h2 className="mb-6 text-2xl font-bold">플레이리스트 공유</h2>
 
       {/* 제목 */}
@@ -180,13 +178,12 @@ const BoardWrite = () => {
       )}
 
       {/* 추가 텍스트 입력 */}
-      <textarea
-        className="mb-4 w-full min-h-[200px] resize-y rounded border border-neutral-700 bg-neutral-900 px-4 py-3 text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
-        placeholder="추가로 하고 싶은 말을 입력하세요... (선택)"
-        rows={5}
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-      />
+      <div className="mb-4">
+        <CustomEditor
+          onChange={(html) => setContent(html)}
+          placeholder="추가로 하고 싶은 말을 입력하세요... (선택)"
+        />
+      </div>
 
       <button
         className="rounded bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500 w-full"
@@ -194,8 +191,6 @@ const BoardWrite = () => {
       >
         등록
       </button>
-      </div>
-      </div>
     </div>
   );
 };
