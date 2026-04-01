@@ -262,52 +262,60 @@ function HomePage() {
 
       {/* ===== 중앙 영역 ===== */}
       <div className="center-area">
+<<<<<<< HEAD
         <h1 className="main-title">메인 홈페이지에 띄워줄 문구</h1>
+=======
+        <h1 className="main-title">GAP MUSIC</h1>
+
+>>>>>>> origin/04/01-kgm
         <div
-          className={`search-bar relative${isDropdownOpen ? " dropdown-open" : ""}`}
+          className={`search-bar${isDropdownOpen ? " dropdown-open" : ""}`}
           ref={searchRef}
         >
-          <input
-            type="text"
-            placeholder="검색하고 싶은 곡 제목 또는 가수명를 입력해주세요."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            onFocus={() => dropdownSongs.length > 0 && setIsDropdownOpen(true)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                if (!searchValue.trim()) {
-                  alert("검색어를 입력 해주세요.");
-                  return;
+          <div className="search-bar-input-wrap">
+            <input
+              type="text"
+              placeholder="검색하고 싶은 곡 제목 또는 가수명를 입력해주세요."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onFocus={() => dropdownSongs.length > 0 && setIsDropdownOpen(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  if (!searchValue.trim()) {
+                    alert("검색어를 입력 해주세요.");
+                    return;
+                  }
+                  setIsDropdownOpen(false);
+                  const url = `/search?q=${encodeURIComponent(searchValue)}`;
+                  if (location.pathname + location.search === url) {
+                    navigate(url, { replace: true, state: { refresh: Date.now() } });
+                  } else {
+                    navigate(url);
+                  }
                 }
-                setIsDropdownOpen(false);
-                const url = `/search?q=${encodeURIComponent(searchValue)}`;
-                if (location.pathname + location.search === url) {
-                  navigate(url, { replace: true, state: { refresh: Date.now() } });
-                } else {
-                  navigate(url);
-                }
-              }
-            }}
-          />
-          {searchValue ? (
-            <button
-              onClick={() => {
-                setSearchValue("");
-                setDropdownSongs([]);
-                setIsDropdownOpen(false);
               }}
-              className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-            >
-              <FaTimes size={20} />
-            </button>
-          ) : (
-            <FaSearch
-              className="absolute text-gray-400 right-6 top-1/2 -translate-y-1/2"
-              size={20}
             />
-          )}
+            {searchValue ? (
+              <button
+                onClick={() => {
+                  setSearchValue("");
+                  setDropdownSongs([]);
+                  setIsDropdownOpen(false);
+                }}
+                className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+              >
+                <FaTimes size={20} />
+              </button>
+            ) : (
+              <FaSearch
+                className="absolute text-gray-400 right-6 top-1/2 -translate-y-1/2"
+                size={20}
+              />
+            )}
+          </div>
 
           {isDropdownOpen && (
+            <div className="search-dropdown-wrapper">
             <div className="search-dropdown">
               {isDropdownLoading ? (
                 <div className="search-dropdown-empty">검색 중...</div>
@@ -364,6 +372,7 @@ function HomePage() {
                   </button>
                 </>
               )}
+            </div>
             </div>
           )}
         </div>
@@ -485,9 +494,7 @@ function HomePage() {
                 >
                   <div className="playlist-card-img-wrap">
                     <img src={`${baseURL}${item.imageUrl}`} alt={item.title} />
-                    <button className="play-button">
-                      <FaPlay />
-                    </button>
+
                     <span className="playlist-card-title">{item.title}</span>
                   </div>
                 </div>
@@ -782,6 +789,11 @@ function HomePage() {
       {isModalOpen && (
         <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
       )}
+<<<<<<< HEAD
+=======
+
+      {/* ===== 상세보기 모달 ===== */}
+>>>>>>> origin/04/01-kgm
       {detailSong && <SongDetailModal song={detailSong} onClose={() => setDetailSong(null)} />}
       {rankingModalSong && (
         <AddToPlaylistModal
