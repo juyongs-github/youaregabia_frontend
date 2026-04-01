@@ -293,6 +293,7 @@ function PlaylistDetailPage() {
                   {menuOpen && (
                     <div className="playlist-menu">
                       <button
+                        className="edit"
                         onClick={() => {
                           setMenuOpen(false);
                           setIsEditMode(true);

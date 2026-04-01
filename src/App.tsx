@@ -69,11 +69,12 @@ interface RateLimitInfo {
 function GlobalMusicPlayer() {
   const { song, songs, songIndex, blind, externalPaused, playKey, onSongEnd, onSongChange, onClose, stop, setSongIndex } = usePlayer();
   if (!song) return null;
+  const currentSong = songs.length > 0 ? (songs[songIndex] ?? song) : song;
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40">
       <MusicPlayer
         key={playKey}
-        song={song}
+        song={currentSong}
         songs={songs.length > 0 ? songs : undefined}
         songIndex={songs.length > 0 ? songIndex : undefined}
         blind={blind}

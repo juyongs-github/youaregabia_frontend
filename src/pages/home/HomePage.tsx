@@ -54,7 +54,8 @@ function HomePage() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownLoading, setIsDropdownLoading] = useState(false);
   const { play, stop, song: selectSong } = usePlayer();
-  const setSelectSong = (song: Song | null) => song ? play(song, { onClose: stop, onSongEnd: stop }) : stop();
+  const setSelectSong = (song: Song | null) =>
+    song ? play(song, { onClose: stop, onSongEnd: stop }) : stop();
   const [detailSong, setDetailSong] = useState<Song | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -245,51 +246,53 @@ function HomePage() {
       <Header showSearch={false} />
       {/* ===== 중앙 영역 ===== */}
       <div className="center-area">
-        <h1 className="main-title">메인 홈페이지에 띄워줄 문구</h1>
+        <h1 className="main-title">GAP MUSIC</h1>
 
         <div
-          className={`search-bar relative${isDropdownOpen ? " dropdown-open" : ""}`}
+          className={`search-bar${isDropdownOpen ? " dropdown-open" : ""}`}
           ref={searchRef}
         >
-          <input
-            type="text"
-            placeholder="검색하고 싶은 곡 제목 또는 가수명를 입력해주세요."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            onFocus={() => dropdownSongs.length > 0 && setIsDropdownOpen(true)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                if (!searchValue.trim()) {
-                  alert("검색어를 입력 해주세요.");
-                  return;
+          <div className="search-bar-input-wrap">
+            <input
+              type="text"
+              placeholder="검색하고 싶은 곡 제목 또는 가수명를 입력해주세요."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onFocus={() => dropdownSongs.length > 0 && setIsDropdownOpen(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  if (!searchValue.trim()) {
+                    alert("검색어를 입력 해주세요.");
+                    return;
+                  }
+                  setIsDropdownOpen(false);
+                  const url = `/search?q=${encodeURIComponent(searchValue)}`;
+                  if (location.pathname + location.search === url) {
+                    navigate(url, { replace: true, state: { refresh: Date.now() } });
+                  } else {
+                    navigate(url);
+                  }
                 }
-                setIsDropdownOpen(false);
-                const url = `/search?q=${encodeURIComponent(searchValue)}`;
-                if (location.pathname + location.search === url) {
-                  navigate(url, { replace: true, state: { refresh: Date.now() } });
-                } else {
-                  navigate(url);
-                }
-              }
-            }}
-          />
-          {searchValue ? (
-            <button
-              onClick={() => {
-                setSearchValue("");
-                setDropdownSongs([]);
-                setIsDropdownOpen(false);
               }}
-              className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-            >
-              <FaTimes size={20} />
-            </button>
-          ) : (
-            <FaSearch
-              className="absolute text-gray-400 right-6 top-1/2 -translate-y-1/2"
-              size={20}
             />
-          )}
+            {searchValue ? (
+              <button
+                onClick={() => {
+                  setSearchValue("");
+                  setDropdownSongs([]);
+                  setIsDropdownOpen(false);
+                }}
+                className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+              >
+                <FaTimes size={20} />
+              </button>
+            ) : (
+              <FaSearch
+                className="absolute text-gray-400 right-6 top-1/2 -translate-y-1/2"
+                size={20}
+              />
+            )}
+          </div>
 
           {/* 검색 드롭다운 */}
           {isDropdownOpen && (
@@ -484,9 +487,7 @@ function HomePage() {
                 >
                   <div className="playlist-card-img-wrap">
                     <img src={`${baseURL}${item.imageUrl}`} alt={item.title} />
-                    <button className="play-button">
-                      <FaPlay />
-                    </button>
+
                     <span className="playlist-card-title">{item.title}</span>
                   </div>
                 </div>
@@ -582,7 +583,6 @@ function HomePage() {
       {isModalOpen && (
         <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
       )}
-
 
       {/* ===== 상세보기 모달 ===== */}
       {detailSong && <SongDetailModal song={detailSong} onClose={() => setDetailSong(null)} />}
