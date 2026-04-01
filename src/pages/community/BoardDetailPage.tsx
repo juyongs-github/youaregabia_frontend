@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
-import type { Board } from "../../types/board";
+import type { Board, BoardSong } from "../../types/board";
 import { replyApi } from "../../api/replyApi";
 import { playlistApi } from "../../api/playlistApi";
 import ReplyItem from "../../Components/ui/replyItem";
@@ -12,6 +12,8 @@ import DOMPurify from "dompurify";
 import PlaylistCreateModal from "../../Components/ui/PlaylistCreateModal";
 import { refreshPoint } from "../../Components/ui/refreshPoint";
 import "../../styles/board-detail-kfandom.css";
+import { usePlayer } from "../../contexts/PlayerContext"; // 1. PlayerContext 임포트
+import type { Song } from "../../components/ui/SongListItem";
 
 const BoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();
@@ -40,6 +42,8 @@ const BoardDetailPage = () => {
     setBoard(data);
     setReplyPage(page);
   };
+
+  const { play } = usePlayer(); // 2. play 함수 가져오기
 
   useEffect(() => {
     if (boardId && !hasFetched.current) {
@@ -139,6 +143,44 @@ const BoardDetailPage = () => {
     });
   };
 
+  const handleSongClick = (boardSong: BoardSong) => {
+    if (isShareMode) {
+      // 공유 모드 로직 (기존과 동일)
+      const isAlreadyAdded = addedSongIds.has(boardSong.songId);
+      const isInPlaylist = playlistSongIds.has(boardSong.songId);
+      if (!isAlreadyAdded && !isInPlaylist) {
+        toggleSongSelect(boardSong.songId);
+      }
+    } else {
+      // 1. BoardSong 데이터를 Song 타입 규격에 맞게 매핑 (실제 데이터 사용)
+      const playData: Song = {
+        id: boardSong.songId, // 중요: songId -> id
+        trackName: boardSong.trackName,
+        artistName: boardSong.artistName,
+        imgUrl: boardSong.imgUrl,
+        previewUrl: boardSong.previewUrl, // 이제 실제 값이 들어옵니다
+        genreName: boardSong.genreName, // 이제 실제 값이 들어옵니다
+        durationMs: boardSong.durationMs, // 이제 실제 값이 들어옵니다
+        releaseDate: boardSong.releaseDate, // 이제 실제 값이 들어옵니다
+      };
+
+      // 2. 플레이어 실행
+      // 두 번째 인자로 현재 게시글의 모든 곡 리스트를 넘겨주면 다음 곡 재생도 가능해집니다.
+      play(playData, {
+        songs: board?.songs?.map((s) => ({
+          id: s.songId,
+          trackName: s.trackName,
+          artistName: s.artistName,
+          imgUrl: s.imgUrl,
+          previewUrl: s.previewUrl,
+          genreName: s.genreName,
+          durationMs: s.durationMs,
+          releaseDate: s.releaseDate,
+        })) as Song[],
+        songIndex: boardSong.orderIndex,
+      });
+    }
+  };
   const handleAddSelectedSongs = async () => {
     if (!selectedPlaylistId) {
       alert("추가할 플레이리스트를 선택해주세요.");
@@ -193,7 +235,6 @@ const BoardDetailPage = () => {
     <div className="kf-community-page kf-board-detail">
       <div className="kf-community-page__shell">
         <div className="max-w-6xl mx-auto p-6">
-          {/* 헤더 */}
           <header className="mb-8 pb-6" style={{ borderBottom: "1px solid var(--kf-border)" }}>
             <h1 className="text-3xl font-bold mb-2" style={{ color: "var(--kf-brand)" }}>
               {board.title}
@@ -206,11 +247,8 @@ const BoardDetailPage = () => {
             </div>
           </header>
 
-          {/* 메인 그리드 */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* 좌측: 본문 + 댓글 */}
             <div className="lg:col-span-2 space-y-8">
-              {/* 본문 */}
               <div
                 className="min-h-[300px] break-words leading-relaxed text-lg p-6 rounded-xl"
                 style={{
@@ -220,8 +258,6 @@ const BoardDetailPage = () => {
                 }}
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(board.content) }}
               />
-
-              {/* 좋아요 + 수정 + 목록 */}
               <div
                 className="flex items-center justify-between pt-6"
                 style={{ borderTop: "1px solid var(--kf-border)" }}
@@ -237,7 +273,6 @@ const BoardDetailPage = () => {
                 >
                   📋 목록
                 </button>
-
                 <div className="flex items-center gap-4">
                   {isMyBoard && (
                     <button
@@ -273,7 +308,6 @@ const BoardDetailPage = () => {
                 </div>
               </div>
 
-              {/* 댓글 섹션 */}
               <section>
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold" style={{ color: "var(--kf-text-main)" }}>
@@ -294,7 +328,6 @@ const BoardDetailPage = () => {
                     </button>
                   </div>
                 </div>
-
                 {!board.replies || board.replies.dtoList.length === 0 ? (
                   <p style={{ color: "var(--kf-text-muted)" }}>댓글이 없습니다.</p>
                 ) : (
@@ -323,8 +356,6 @@ const BoardDetailPage = () => {
                     )}
                   </>
                 )}
-
-                {/* 댓글 입력 */}
                 <div
                   className="p-4 rounded-xl"
                   style={{
@@ -355,7 +386,6 @@ const BoardDetailPage = () => {
               </section>
             </div>
 
-            {/* 우측: 수록곡 (sticky) */}
             {board.songs && board.songs.length > 0 && (
               <aside className="lg:col-span-1">
                 <div className="sticky top-6">
@@ -367,7 +397,6 @@ const BoardDetailPage = () => {
                       background: "rgba(255,255,255,0.84)",
                     }}
                   >
-                    {/* 수록곡 헤더 */}
                     <div
                       className="px-4 py-3 flex items-center justify-between"
                       style={{
@@ -405,7 +434,6 @@ const BoardDetailPage = () => {
                       )}
                     </div>
 
-                    {/* 담기 모드: 플레이리스트 선택 */}
                     {isShareMode && (
                       <div
                         className="px-4 py-3 flex items-center gap-3 flex-wrap"
@@ -414,7 +442,6 @@ const BoardDetailPage = () => {
                           background: "rgba(109,94,252,0.04)",
                         }}
                       >
-                        {/* ✅ select를 div로 감싸서 CSS 오버라이드 차단 */}
                         <div style={{ flex: 1, minWidth: "160px" }}>
                           <select
                             style={{
@@ -439,7 +466,6 @@ const BoardDetailPage = () => {
                             ))}
                           </select>
                         </div>
-
                         <button
                           onClick={() => setIsCreateModalOpen(true)}
                           className="text-xs font-semibold whitespace-nowrap"
@@ -447,7 +473,6 @@ const BoardDetailPage = () => {
                         >
                           + 새 리스트
                         </button>
-
                         {selectedPlaylistId && selectedSongIds.size > 0 && (
                           <button
                             onClick={handleAddSelectedSongs}
@@ -466,13 +491,9 @@ const BoardDetailPage = () => {
                       </div>
                     )}
 
-                    {/* 곡 목록 */}
                     <ul
                       className="divide-y overflow-y-auto"
-                      style={{
-                        maxHeight: "60vh",
-                        borderColor: "var(--kf-border)",
-                      }}
+                      style={{ maxHeight: "60vh", borderColor: "var(--kf-border)" }}
                     >
                       {board.songs
                         .slice()
@@ -486,19 +507,16 @@ const BoardDetailPage = () => {
                           return (
                             <li
                               key={song.songId}
-                              className="flex items-center gap-3 px-3 py-2 transition-colors"
+                              className={`flex items-center gap-3 px-3 py-2 transition-colors hover:bg-black/5 cursor-pointer`}
                               style={{
-                                opacity: isDisabled ? 0.45 : 1,
-                                cursor: isShareMode && !isDisabled ? "pointer" : "default",
+                                opacity: isShareMode && isDisabled ? 0.45 : 1,
                                 background:
                                   isSelected && isShareMode && !isDisabled
                                     ? "rgba(109,94,252,0.06)"
                                     : "transparent",
                                 borderBottom: "1px solid var(--kf-border)",
                               }}
-                              onClick={() =>
-                                isShareMode && !isDisabled && toggleSongSelect(song.songId)
-                              }
+                              onClick={() => handleSongClick(song)} // 4. 클릭 시 핸들러 실행
                             >
                               {isShareMode && (
                                 <input
@@ -511,7 +529,6 @@ const BoardDetailPage = () => {
                                     height: "16px",
                                     flexShrink: 0,
                                     accentColor: "var(--kf-brand)",
-                                    // ✅ community css가 input에 width:100% 강제 적용하므로 덮어씌우기
                                     minWidth: "16px",
                                     maxWidth: "16px",
                                   }}
@@ -523,11 +540,10 @@ const BoardDetailPage = () => {
                                 style={{
                                   width: "36px",
                                   height: "36px",
-                                  minWidth: "36px", // ✅ flex 환경에서 찌그러짐 방지
+                                  minWidth: "36px",
                                   borderRadius: "8px",
                                   objectFit: "cover",
                                   boxShadow: "var(--kf-shadow-sm)",
-                                  // ✅ CSS가 img에 width:100% 등을 덮어씌울 수 있으므로 명시
                                   display: "block",
                                 }}
                                 alt="cover"

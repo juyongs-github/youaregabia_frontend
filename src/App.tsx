@@ -67,7 +67,19 @@ interface RateLimitInfo {
 }
 
 function GlobalMusicPlayer() {
-  const { song, songs, songIndex, blind, externalPaused, playKey, onSongEnd, onSongChange, onClose, stop, setSongIndex } = usePlayer();
+  const {
+    song,
+    songs,
+    songIndex,
+    blind,
+    externalPaused,
+    playKey,
+    onSongEnd,
+    onSongChange,
+    onClose,
+    stop,
+    setSongIndex,
+  } = usePlayer();
   if (!song) return null;
   const currentSong = songs.length > 0 ? (songs[songIndex] ?? song) : song;
   return (
@@ -80,8 +92,14 @@ function GlobalMusicPlayer() {
         blind={blind}
         externalPaused={externalPaused}
         onSongEnd={onSongEnd}
-        onSongChange={(index) => { setSongIndex(index); onSongChange?.(index); }}
-        setIsPlayerVisible={() => { onClose?.(); stop(); }}
+        onSongChange={(index) => {
+          setSongIndex(index);
+          onSongChange?.(index);
+        }}
+        setIsPlayerVisible={() => {
+          onClose?.();
+          stop();
+        }}
       />
     </div>
   );

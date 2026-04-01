@@ -33,6 +33,10 @@ export interface BoardSong {
   artistName: string;
   imgUrl: string;
   orderIndex: number;
+  previewUrl: string;
+  genreName: string;
+  durationMs: number;
+  releaseDate: string;
 }
 
 export interface PageResult<T> {

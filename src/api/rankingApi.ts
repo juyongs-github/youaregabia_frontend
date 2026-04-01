@@ -14,6 +14,9 @@ export interface SongRankingDto {
   imgUrl: string;
   shareCount: number;
   previewUrl: string;
+  genreName: string;
+  durationMs: number;
+  releaseDate: string;
 }
 
 export interface ArtistRankingDto {
@@ -25,6 +28,8 @@ export const rankingApi = {
   getLikeUsers: () => api.get<UserRankingDto[]>("/api/ranking/like-users").then((r) => r.data),
 
   getPointUsers: () => api.get<UserRankingDto[]>("/api/ranking/point-users").then((r) => r.data),
+
   getTopSharedSongs: () => api.get<SongRankingDto[]>("/api/ranking/songs").then((r) => r.data),
+
   getTopArtists: () => api.get<ArtistRankingDto[]>("/api/ranking/artists").then((r) => r.data),
 };

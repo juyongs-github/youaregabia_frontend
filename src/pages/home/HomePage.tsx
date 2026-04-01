@@ -251,9 +251,9 @@ function HomePage() {
     artistName: s.artistName,
     imgUrl: s.imgUrl,
     previewUrl: s.previewUrl,
-    genreName: "",
-    durationMs: 0,
-    releaseDate: "",
+    genreName: s.genreName,
+    durationMs: s.durationMs,
+    releaseDate: s.releaseDate,
   });
 
   return (
@@ -262,16 +262,9 @@ function HomePage() {
 
       {/* ===== 중앙 영역 ===== */}
       <div className="center-area">
-<<<<<<< HEAD
-        <h1 className="main-title">메인 홈페이지에 띄워줄 문구</h1>
-=======
         <h1 className="main-title">GAP MUSIC</h1>
 
->>>>>>> origin/04/01-kgm
-        <div
-          className={`search-bar${isDropdownOpen ? " dropdown-open" : ""}`}
-          ref={searchRef}
-        >
+        <div className={`search-bar${isDropdownOpen ? " dropdown-open" : ""}`} ref={searchRef}>
           <div className="search-bar-input-wrap">
             <input
               type="text"
@@ -316,63 +309,63 @@ function HomePage() {
 
           {isDropdownOpen && (
             <div className="search-dropdown-wrapper">
-            <div className="search-dropdown">
-              {isDropdownLoading ? (
-                <div className="search-dropdown-empty">검색 중...</div>
-              ) : dropdownSongs.length === 0 ? (
-                <div className="search-dropdown-empty">검색 결과가 없습니다.</div>
-              ) : (
-                <>
-                  {dropdownSongs.slice(0, 1).map((song, idx) => (
-                    <div key={song.id}>
-                      {idx > 0 && <div className="search-dropdown-divider" />}
-                      <div className="search-dropdown-item">
-                        <img src={song.imgUrl} alt="" className="search-dropdown-img" />
-                        <div className="search-dropdown-info">
-                          <span className="search-dropdown-title">{song.trackName}</span>
-                          <span className="search-dropdown-artist">{song.artistName}</span>
-                        </div>
-                        <div className="search-dropdown-actions">
-                          <button
-                            onClick={() => setSelectSong(song)}
-                            title="미리듣기"
-                            className={selectSong?.id === song.id ? "active" : ""}
-                          >
-                            <FaHeadphones size={13} />
-                          </button>
-                          <button
-                            onClick={() =>
-                              navigate("/recommend/result", {
-                                state: {
-                                  trackName: song.trackName,
-                                  artistName: song.artistName,
-                                  coverImageUrl: song.imgUrl,
-                                },
-                              })
-                            }
-                            title="유사 곡 추천"
-                          >
-                            <FaMusic size={13} />
-                          </button>
-                          <button onClick={() => setDetailSong(song)} title="상세보기">
-                            <FaInfoCircle size={13} />
-                          </button>
+              <div className="search-dropdown">
+                {isDropdownLoading ? (
+                  <div className="search-dropdown-empty">검색 중...</div>
+                ) : dropdownSongs.length === 0 ? (
+                  <div className="search-dropdown-empty">검색 결과가 없습니다.</div>
+                ) : (
+                  <>
+                    {dropdownSongs.slice(0, 1).map((song, idx) => (
+                      <div key={song.id}>
+                        {idx > 0 && <div className="search-dropdown-divider" />}
+                        <div className="search-dropdown-item">
+                          <img src={song.imgUrl} alt="" className="search-dropdown-img" />
+                          <div className="search-dropdown-info">
+                            <span className="search-dropdown-title">{song.trackName}</span>
+                            <span className="search-dropdown-artist">{song.artistName}</span>
+                          </div>
+                          <div className="search-dropdown-actions">
+                            <button
+                              onClick={() => setSelectSong(song)}
+                              title="미리듣기"
+                              className={selectSong?.id === song.id ? "active" : ""}
+                            >
+                              <FaHeadphones size={13} />
+                            </button>
+                            <button
+                              onClick={() =>
+                                navigate("/recommend/result", {
+                                  state: {
+                                    trackName: song.trackName,
+                                    artistName: song.artistName,
+                                    coverImageUrl: song.imgUrl,
+                                  },
+                                })
+                              }
+                              title="유사 곡 추천"
+                            >
+                              <FaMusic size={13} />
+                            </button>
+                            <button onClick={() => setDetailSong(song)} title="상세보기">
+                              <FaInfoCircle size={13} />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                  <button
-                    className="search-dropdown-more"
-                    onClick={() => {
-                      setIsDropdownOpen(false);
-                      navigate(`/search?q=${encodeURIComponent(searchValue)}`);
-                    }}
-                  >
-                    전체 검색 결과 보기 →
-                  </button>
-                </>
-              )}
-            </div>
+                    ))}
+                    <button
+                      className="search-dropdown-more"
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        navigate(`/search?q=${encodeURIComponent(searchValue)}`);
+                      }}
+                    >
+                      전체 검색 결과 보기 →
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -789,11 +782,8 @@ function HomePage() {
       {isModalOpen && (
         <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
       )}
-<<<<<<< HEAD
-=======
 
       {/* ===== 상세보기 모달 ===== */}
->>>>>>> origin/04/01-kgm
       {detailSong && <SongDetailModal song={detailSong} onClose={() => setDetailSong(null)} />}
       {rankingModalSong && (
         <AddToPlaylistModal
