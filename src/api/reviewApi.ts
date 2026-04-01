@@ -27,4 +27,8 @@ export const reviewApi = {
   deleteReview: (reviewId: number) => {
       return api.delete(`/api/review/${reviewId}`);
   },
+
+  getReviewSongs: (reviewId: number) => {
+      return api.get(`/api/review/${reviewId}/songs`);
+  },
 };

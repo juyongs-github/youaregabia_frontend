@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { reviewApi } from "../../api/reviewApi";
 import "../../styles/PlaylistReviewPage.kfandom.css";
-import { playlistSongApi } from "../../api/playlistSongApi";
 import type { Song } from "../../components/ui/SongListItem";
 import Rating from "@mui/material/Rating";
 import {
@@ -102,6 +101,8 @@ function PlaylistReviewPage() {
   };
 
   useEffect(() => {
+    setSearchQuery("");
+    setRatingFilter(null);
     if (activeTab === "all") {
       fetchAllReviews();
     } else {
@@ -109,43 +110,43 @@ function PlaylistReviewPage() {
     }
   }, [activeTab]);
 
-  const toggleAccordion = async (playlistId: number) => {
+  const toggleAccordion = async (reviewId: number) => {
     const next = new Set(expandedIds);
 
-    if (next.has(playlistId)) {
-      next.delete(playlistId);
+    if (next.has(reviewId)) {
+      next.delete(reviewId);
       setExpandedIds(next);
       return;
     }
 
-    next.add(playlistId);
+    next.add(reviewId);
     setExpandedIds(next);
 
     // 이미 캐시된 경우 API 재호출 없이 종료
-    if (playlistSongsMap.has(playlistId)) return;
+    if (playlistSongsMap.has(reviewId)) return;
 
-    setLoadingSongIds((prev) => new Set(prev).add(playlistId));
+    setLoadingSongIds((prev) => new Set(prev).add(reviewId));
 
     try {
-      const res = await playlistSongApi.getSongsByPlaylist(playlistId);
+      const res = await reviewApi.getReviewSongs(reviewId);
       const songs: Song[] = res.data ?? [];
 
       setPlaylistSongsMap((prev) => {
         const map = new Map(prev);
-        map.set(playlistId, songs);
+        map.set(reviewId, songs);
         return map;
       });
     } catch (e) {
       console.error(e);
       setPlaylistSongsMap((prev) => {
         const map = new Map(prev);
-        map.set(playlistId, []);
+        map.set(reviewId, []);
         return map;
       });
     } finally {
       setLoadingSongIds((prev) => {
         const set = new Set(prev);
-        set.delete(playlistId);
+        set.delete(reviewId);
         return set;
       });
     }
@@ -308,10 +309,10 @@ function PlaylistReviewPage() {
               const title = review.playlistTitle;
               const imageUrl = review.imageUrl ? `${BASE_URL}${review.imageUrl}` : null;
 
-              const pid = review.playlistId;
-              const isExpanded = pid != null && expandedIds.has(pid);
-              const songs = pid != null ? (playlistSongsMap.get(pid) ?? null) : null;
-              const isSongsLoading = pid != null && loadingSongIds.has(pid);
+              const rid = review.id;
+              const isExpanded = expandedIds.has(rid);
+              const songs = playlistSongsMap.get(rid) ?? null;
+              const isSongsLoading = loadingSongIds.has(rid);
 
               return (
                 <div
@@ -431,9 +432,9 @@ function PlaylistReviewPage() {
                   </div>
 
                   {/* 수록곡 아코디언 버튼 */}
-                  {pid != null && (
+                  {review.playlistId != null && (
                     <button
-                      onClick={() => toggleAccordion(pid)}
+                      onClick={() => toggleAccordion(rid)}
                       className="flex items-center gap-2 w-full justify-center py-2.5 text-sm text-white hover:bg-white/5 transition-all border-t border-white/10"
                     >
                       {isExpanded ? <FaChevronUp size={11} /> : <FaChevronDown size={11} />}

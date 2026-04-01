@@ -8,3 +8,101 @@
 .kf-playlist-review [class*="rounded-xl"] {
   border-radius: 22px !important;
 }
+
+/* 리뷰 카드 */
+.kf-playlist-review [class*="bg-white/5"][class*="border"] {
+  background: rgba(255, 255, 255, 0.82) !important;
+  border: 1.5px solid rgba(109, 94, 252, 0.14) !important;
+  box-shadow: 0 4px 20px rgba(86, 93, 146, 0.10), 0 1px 4px rgba(86, 93, 146, 0.06) !important;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.kf-playlist-review [class*="bg-white/5"][class*="border"]:hover {
+  border-color: rgba(109, 94, 252, 0.28) !important;
+  box-shadow: 0 8px 28px rgba(86, 93, 146, 0.15), 0 1px 4px rgba(86, 93, 146, 0.08) !important;
+}
+
+/* 카드 내 텍스트 */
+.kf-playlist-review [class*="bg-white/5"] [class*="text-white/80"],
+.kf-playlist-review [class*="bg-white/5"] [class*="text-white/70"] {
+  color: var(--kf-text) !important;
+}
+
+.kf-playlist-review [class*="bg-white/5"] [class*="text-white/50"],
+.kf-playlist-review [class*="bg-white/5"] [class*="text-white/40"],
+.kf-playlist-review [class*="bg-white/5"] [class*="text-white/30"] {
+  color: var(--kf-sub) !important;
+}
+
+/* 수록곡 구분선 */
+.kf-playlist-review [class*="border-white/10"] {
+  border-color: rgba(109, 94, 252, 0.10) !important;
+}
+
+/* 수록곡 호버 */
+.kf-playlist-review [class*="hover:bg-white/5"]:hover {
+  background: rgba(109, 94, 252, 0.05) !important;
+}
+
+/* 수록곡 현재 재생 중 */
+.kf-playlist-review [class*="bg-white/10"] {
+  background: rgba(109, 94, 252, 0.08) !important;
+}
+
+/* 수록곡 아코디언 버튼 */
+.kf-playlist-review button[class*="border-t"] {
+  color: var(--kf-sub) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+.kf-playlist-review button[class*="border-t"]:hover {
+  background: rgba(109, 94, 252, 0.05) !important;
+  color: var(--kf-brand) !important;
+}
+
+/* 별점 필터 버튼 */
+.kf-playlist-review [class*="bg-white/20"],
+.kf-playlist-review [class*="bg-white/25"] {
+  background: rgba(109, 94, 252, 0.12) !important;
+  color: var(--kf-brand) !important;
+}
+
+/* 탭 버튼 active */
+.kf-playlist-review button[class*="bg-white"][class*="text-black"] {
+  background: linear-gradient(135deg, var(--kf-brand), var(--kf-brand-pink)) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 8px 20px rgba(109, 94, 252, 0.24) !important;
+}
+
+/* 탭 버튼 inactive */
+.kf-playlist-review button[class*="border-white/20"] {
+  border-color: rgba(109, 94, 252, 0.22) !important;
+  color: var(--kf-sub) !important;
+}
+
+.kf-playlist-review button[class*="border-white/20"]:hover {
+  background: rgba(109, 94, 252, 0.06) !important;
+  color: var(--kf-brand) !important;
+}
+
+/* 수록곡 이미지 placeholder */
+.kf-playlist-review [class*="bg-white/10"] {
+  background: rgba(109, 94, 252, 0.06) !important;
+}
+
+/* 수록곡 재생 버튼 */
+.kf-playlist-review button[class*="rounded-full"][class*="bg-white/10"] {
+  background: rgba(109, 94, 252, 0.08) !important;
+  color: var(--kf-brand) !important;
+}
+
+.kf-playlist-review button[class*="rounded-full"][class*="bg-white/10"]:hover {
+  background: rgba(109, 94, 252, 0.16) !important;
+}
+
+/* 수정/삭제 버튼 */
+.kf-playlist-review button[class*="bg-red-500"] {
+  background: var(--kf-danger) !important;
+}
