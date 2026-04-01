@@ -24,11 +24,11 @@ import {
   FaInfoCircle,
   FaHeart,
   FaSyncAlt,
+  FaUserAlt,
 } from "react-icons/fa";
 import { playlistApi } from "../../api/playlistApi";
 import { playlistSongApi } from "../../api/playlistSongApi";
 import type { Playlist, CollaboPlaylist } from "../../types/playlist";
-
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../../api/axios";
 import type { Song } from "../../components/ui/SongListItem";
@@ -37,7 +37,9 @@ import { usePlayer } from "../../contexts/PlayerContext";
 import RankSection from "../../components/layout/RankSection";
 import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
 import Header from "../../components/layout/Header";
-import RankingWidget from "../../components/ui/RankingWidget";
+import { rankingApi, type SongRankingDto, type ArtistRankingDto } from "../../api/rankingApi";
+import AddToPlaylistModal from "../../components/ui/AddToPlaylistModal";
+import { FaThumbsUp } from "react-icons/fa";
 
 function HomePage() {
   const [data, setData] = useState<Playlist[]>([]);
@@ -50,6 +52,11 @@ function HomePage() {
   const location = useLocation();
   const [searchValue, setSearchValue] = useState<string>("");
 
+  const [rankingSongs, setRankingSongs] = useState<SongRankingDto[]>([]);
+  const [rankingArtists, setRankingArtists] = useState<ArtistRankingDto[]>([]);
+  const [rankingLoading, setRankingLoading] = useState(false);
+  const [rankingTab, setRankingTab] = useState<"song" | "artist">("song");
+
   // 검색 드롭다운
   const [dropdownSongs, setDropdownSongs] = useState<Song[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -59,12 +66,11 @@ function HomePage() {
     song ? play(song, { onClose: stop, onSongEnd: stop }) : stop();
   const [detailSong, setDetailSong] = useState<Song | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
-  const [rightView, setRightView] = useState<"collabo" | "ranking">("collabo");
+  const [rankingModalSong, setRankingModalSong] = useState<Song | null>(null);
 
   const fetchData = async () => {
     setIsLoading(true);
     setIsError(false);
-
     try {
       const res = await playlistApi.getAllPlaylist();
       setData([...(res.data || [])].reverse());
@@ -77,7 +83,6 @@ function HomePage() {
     }
   };
 
-  // 오늘의 추천 음악
   const [dailySongs, setDailySongs] = useState<Song[]>([]);
   const [dailyLoading, setDailyLoading] = useState(false);
 
@@ -100,9 +105,20 @@ function HomePage() {
       .getAllCollaborativePlaylist()
       .then((res) => setCollaboPlaylists(res.data || []))
       .catch(() => setCollaboPlaylists([]));
+
+    setRankingLoading(true);
+    Promise.all([rankingApi.getTopSharedSongs(), rankingApi.getTopArtists()])
+      .then(([s, a]) => {
+        console.log("songs:", s); // 여기 확인
+        console.log("artists:", a); // 여기 확인
+        setRankingSongs(s);
+        setRankingArtists(a);
+      })
+      .catch(console.error)
+      .finally(() => setRankingLoading(false));
   }, []);
 
-  // 디바운스 검색(입력이 멈춘 후 400ms 기다렸다가 검색)
+  // 디바운스 검색
   useEffect(() => {
     if (!searchValue.trim()) {
       setDropdownSongs([]);
@@ -143,13 +159,17 @@ function HomePage() {
   const [timerKey, setTimerKey] = useState(0);
   const [isRankModalOpen, setIsRankModalOpen] = useState(false);
 
+  // 공동플리 최대 3개 + 랭킹 1개
+  const maxCollaboCount = Math.min(collaboPlaylists.length, 3);
+  const maxIndex = maxCollaboCount; // 랭킹 index = maxCollaboCount
+
   useEffect(() => {
-    if (collaboPlaylists.length <= 1 || selectSong || isRankModalOpen) return;
+    if (maxCollaboCount <= 0 || selectSong || isRankModalOpen) return;
     const timer = setInterval(() => {
-      setCurrentSharedIndex((prev) => (prev >= collaboPlaylists.length - 1 ? 0 : prev + 1));
+      setCurrentSharedIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
     }, 10000);
     return () => clearInterval(timer);
-  }, [collaboPlaylists.length, selectSong, isRankModalOpen, timerKey]);
+  }, [maxCollaboCount, maxIndex, selectSong, isRankModalOpen, timerKey]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -182,23 +202,8 @@ function HomePage() {
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
-  const scrollLeft = () => {
-    rowRef.current?.scrollBy({ left: -320, behavior: "smooth" });
-  };
-
-  const scrollRight = () => {
-    rowRef.current?.scrollBy({ left: 320, behavior: "smooth" });
-  };
-
-  const scrollSharedLeft = () => {
-    setCurrentSharedIndex((prev) => (prev <= 0 ? collaboPlaylists.length - 1 : prev - 1));
-    setTimerKey((k) => k + 1);
-  };
-
-  const scrollSharedRight = () => {
-    setCurrentSharedIndex((prev) => (prev >= collaboPlaylists.length - 1 ? 0 : prev + 1));
-    setTimerKey((k) => k + 1);
-  };
+  const scrollLeft = () => rowRef.current?.scrollBy({ left: -320, behavior: "smooth" });
+  const scrollRight = () => rowRef.current?.scrollBy({ left: 320, behavior: "smooth" });
 
   const handlePlayAll = async () => {
     const playlist = collaboPlaylists[currentSharedIndex];
@@ -209,7 +214,7 @@ function HomePage() {
       if (sorted.length === 0) return;
       play(sorted[0], { songs: sorted, songIndex: 0, onClose: stop, onSongEnd: stop });
     } catch {
-      // 곡 로딩 실패 시 무시
+      // 무시
     }
   };
 
@@ -217,7 +222,6 @@ function HomePage() {
     const playlist = collaboPlaylists[currentSharedIndex];
     if (!playlist) return;
     const liked = playlist.hasLiked;
-    // 낙관적 업데이트 (UI 즉시 반영)
     setCollaboPlaylists((prev) =>
       prev.map((p, i) =>
         i === currentSharedIndex
@@ -232,7 +236,6 @@ function HomePage() {
         await playlistApi.likeCollabo(playlist.id);
       }
     } catch {
-      // 실패 시 롤백
       setCollaboPlaylists((prev) =>
         prev.map((p, i) =>
           i === currentSharedIndex
@@ -243,20 +246,34 @@ function HomePage() {
     }
   };
 
+  const isRankingView = currentSharedIndex >= maxCollaboCount;
+
+  // 랭킹 곡 Song 객체 변환
+  const toSong = (s: SongRankingDto): Song => ({
+    id: s.songId,
+    trackName: s.trackName,
+    artistName: s.artistName,
+    imgUrl: s.imgUrl,
+    previewUrl: s.previewUrl,
+    genreName: "",
+    durationMs: 0,
+    releaseDate: "",
+  });
+
   return (
     <div className={`home${selectSong ? " player-open" : ""}`}>
       <Header showSearch={false} />
-      {/* ===== 중앙 영역 ===== */}
-      <div className="center-area">
-        <h1 className="main-title">메인 홈페이지에 띄워줄 문구</h1>
 
+      {/* ===== 중앙 영역: 메인 타이틀 & 검색바 ===== */}
+      <div className="center-area">
+        <h1 className="main-title">오늘 당신의 마음을 울릴 음악은 무엇인가요?</h1>
         <div
           className={`search-bar relative${isDropdownOpen ? " dropdown-open" : ""}`}
           ref={searchRef}
         >
           <input
             type="text"
-            placeholder="검색하고 싶은 곡 제목 또는 가수명를 입력해주세요."
+            placeholder="검색하고 싶은 곡 제목 또는 가수명을 입력해주세요."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             onFocus={() => dropdownSongs.length > 0 && setIsDropdownOpen(true)}
@@ -268,11 +285,7 @@ function HomePage() {
                 }
                 setIsDropdownOpen(false);
                 const url = `/search?q=${encodeURIComponent(searchValue)}`;
-                if (location.pathname + location.search === url) {
-                  navigate(url, { replace: true, state: { refresh: Date.now() } });
-                } else {
-                  navigate(url);
-                }
+                navigate(url);
               }
             }}
           />
@@ -294,7 +307,7 @@ function HomePage() {
             />
           )}
 
-          {/* 검색 드롭다운 */}
+          {/* 실시간 검색 드롭다운 */}
           {isDropdownOpen && (
             <div className="search-dropdown">
               {isDropdownLoading ? (
@@ -303,43 +316,26 @@ function HomePage() {
                 <div className="search-dropdown-empty">검색 결과가 없습니다.</div>
               ) : (
                 <>
-                  {dropdownSongs.slice(0, 1).map((song, idx) => (
-                    <div key={song.id}>
-                      {idx > 0 && <div className="search-dropdown-divider" />}
-                      <div className="search-dropdown-item">
-                        <img src={song.imgUrl} alt="" className="search-dropdown-img" />
-                        <div className="search-dropdown-info">
-                          <span className="search-dropdown-title">{song.trackName}</span>
-                          <span className="search-dropdown-artist">{song.artistName}</span>
-                        </div>
-                        <div className="search-dropdown-actions">
-                          <button
-                            onClick={() => {
-                              setSelectSong(song);
-                            }}
-                            title="미리듣기"
-                            className={selectSong?.id === song.id ? "active" : ""}
-                          >
-                            <FaHeadphones size={13} />
-                          </button>
-                          <button
-                            onClick={() =>
-                              navigate("/recommend/result", {
-                                state: {
-                                  trackName: song.trackName,
-                                  artistName: song.artistName,
-                                  coverImageUrl: song.imgUrl,
-                                },
-                              })
-                            }
-                            title="유사 곡 추천"
-                          >
-                            <FaMusic size={13} />
-                          </button>
-                          <button onClick={() => setDetailSong(song)} title="상세보기">
-                            <FaInfoCircle size={13} />
-                          </button>
-                        </div>
+                  {dropdownSongs.slice(0, 1).map((song) => (
+                    <div key={song.id} className="search-dropdown-item">
+                      <img src={song.imgUrl} alt="" className="search-dropdown-img" />
+                      <div className="search-dropdown-info">
+                        <span className="search-dropdown-title">{song.trackName}</span>
+                        <span className="search-dropdown-artist">{song.artistName}</span>
+                      </div>
+                      <div className="search-dropdown-actions">
+                        <button onClick={() => setSelectSong(song)} title="미리듣기">
+                          <FaHeadphones size={13} />
+                        </button>
+                        <button
+                          onClick={() => navigate("/recommend/result", { state: { ...song } })}
+                          title="유사 곡 추천"
+                        >
+                          <FaMusic size={13} />
+                        </button>
+                        <button onClick={() => setDetailSong(song)} title="상세보기">
+                          <FaInfoCircle size={13} />
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -359,60 +355,39 @@ function HomePage() {
         </div>
       </div>
 
-      {/* ===== 하단 중앙 - 오늘의 추천음악 ===== */}
-      {dailySongs.length > 0 &&
-        (() => {
-          const song = dailySongs[0];
-          return (
-            <div className="daily-recommend">
-              <div className="daily-recommend-header">
-                <span>오늘의 추천음악</span>
-                <button onClick={fetchDailySongs} disabled={dailyLoading} title="새로고침">
-                  <FaSyncAlt
-                    size={11}
-                    style={{ animation: dailyLoading ? "spin 0.8s linear infinite" : "none" }}
-                  />
+      {/* ===== 오늘의 추천음악 카드 ===== */}
+      {dailySongs.length > 0 && (
+        <div className="daily-recommend">
+          <div className="daily-recommend-header">
+            <span>오늘의 추천음악</span>
+            <button onClick={fetchDailySongs} disabled={dailyLoading}>
+              <FaSyncAlt
+                size={11}
+                style={{ animation: dailyLoading ? "spin 0.8s linear infinite" : "none" }}
+              />
+            </button>
+          </div>
+          <div className="daily-card">
+            <img src={dailySongs[0].imgUrl} alt="" className="daily-card-cover" />
+            <div className="daily-card-info">
+              <span className="daily-card-title">{dailySongs[0].trackName}</span>
+              <span className="daily-card-artist">{dailySongs[0].artistName}</span>
+              <div className="daily-card-actions">
+                <button onClick={() => setSelectSong(dailySongs[0])}>
+                  <FaHeadphones size={13} /> <span>미리듣기</span>
+                </button>
+                <button
+                  onClick={() => navigate("/recommend/result", { state: { ...dailySongs[0] } })}
+                >
+                  <FaMusic size={13} /> <span>유사 추천</span>
                 </button>
               </div>
-              <div className="daily-card">
-                <img src={song.imgUrl} alt={song.trackName} className="daily-card-cover" />
-                <div className="daily-card-info">
-                  <span className="daily-card-title">{song.trackName}</span>
-                  <span className="daily-card-artist">{song.artistName}</span>
-                  <div className="daily-card-actions">
-                    <button
-                      onClick={() => {
-                        setSelectSong(song);
-                      }}
-                      className={selectSong?.id === song.id ? "active" : ""}
-                      title="미리듣기"
-                    >
-                      <FaHeadphones size={13} />
-                      <span>미리듣기</span>
-                    </button>
-                    <button
-                      onClick={() =>
-                        navigate("/recommend/result", {
-                          state: {
-                            trackName: song.trackName,
-                            artistName: song.artistName,
-                            coverImageUrl: song.imgUrl,
-                          },
-                        })
-                      }
-                      title="유사 곡 추천"
-                    >
-                      <FaMusic size={13} />
-                      <span>유사 추천</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
-          );
-        })()}
+          </div>
+        </div>
+      )}
 
-      {/* ===== 하단 중앙 - 아이콘 ===== */}
+      {/* ===== 아이콘 메뉴 ===== */}
       <div className="center-icons-wrapper" ref={popupRef}>
         {openMenu && menuItems[openMenu] && (
           <div className="icon-popup">
@@ -424,42 +399,28 @@ function HomePage() {
                   setOpenMenu(null);
                 }}
               >
-                {item.icon}
-                <span>{item.label}</span>
+                {item.icon} <span>{item.label}</span>
               </button>
             ))}
           </div>
         )}
         <div className="center-icons">
-          <button
-            className={openMenu === "recommend" ? "active" : ""}
-            onClick={() => setOpenMenu(openMenu === "recommend" ? null : "recommend")}
-          >
-            <FaCompass size={28} />
-            <span>추천</span>
+          <button onClick={() => setOpenMenu(openMenu === "recommend" ? null : "recommend")}>
+            <FaCompass size={28} /> <span>추천</span>
           </button>
           <button onClick={() => navigate("/goods")}>
-            <FaShoppingBag size={28} />
-            <span>굿즈샵</span>
+            <FaShoppingBag size={28} /> <span>굿즈샵</span>
           </button>
-          <button
-            className={openMenu === "community" ? "active" : ""}
-            onClick={() => setOpenMenu(openMenu === "community" ? null : "community")}
-          >
-            <FaUsers size={28} />
-            <span>커뮤니티</span>
+          <button onClick={() => setOpenMenu(openMenu === "community" ? null : "community")}>
+            <FaUsers size={28} /> <span>커뮤니티</span>
           </button>
-          <button
-            className={openMenu === "game" ? "active" : ""}
-            onClick={() => setOpenMenu(openMenu === "game" ? null : "game")}
-          >
-            <FaGamepad size={28} />
-            <span>게임</span>
+          <button onClick={() => setOpenMenu(openMenu === "game" ? null : "game")}>
+            <FaGamepad size={28} /> <span>게임</span>
           </button>
         </div>
       </div>
 
-      {/* ===== 좌하단 - 내 플레이리스트 ===== */}
+      {/* ===== 좌하단: 내 플레이리스트 슬라이더 ===== */}
       <div className="bottom-left">
         <div className="section-header">
           <h2 onClick={() => navigate("/playlist/me")} style={{ cursor: "pointer" }}>
@@ -469,12 +430,10 @@ function HomePage() {
             <FaPlus />
           </button>
         </div>
-
         <div className="playlist-slider">
           <button className="slider-btn left" onClick={scrollLeft}>
             <FaChevronLeft />
           </button>
-
           <div className="playlist-row" ref={rowRef}>
             {data.length === 0 ? (
               <div className="playlist-empty">플레이리스트가 없습니다.</div>
@@ -485,7 +444,7 @@ function HomePage() {
                   key={item.id}
                   onClick={() => navigate(`/playlist/me/${item.id}`)}
                 >
-                  <img src={`${baseURL}${item.imageUrl}`} />
+                  <img src={`${baseURL}${item.imageUrl}`} alt="" />
                   <button className="play-button">
                     <FaPlay />
                   </button>
@@ -494,18 +453,16 @@ function HomePage() {
               ))
             )}
           </div>
-
           <button className="slider-btn right" onClick={scrollRight}>
             <FaChevronRight />
           </button>
         </div>
       </div>
 
-      {/* ===== 우측 - 공동 플레이리스트 / 랭킹 ===== */}
+      {/* ===== 우측 - 공동 플레이리스트 / 랭킹 (전환 뷰) ===== */}
       <div className="right-area">
-        {/* 상단 제목 + 뷰 전환 버튼 */}
         <div className="section-header">
-          {rightView === "collabo" ? (
+          {!isRankingView ? (
             <h2
               onClick={() =>
                 collaboPlaylists[currentSharedIndex] &&
@@ -518,54 +475,42 @@ function HomePage() {
           ) : (
             <h2>이번 주 랭킹</h2>
           )}
-
           <div className="shared-nav-row">
-            {/* 뷰 전환 토글 버튼 */}
             <button
-              className={`shared-nav-btn${rightView === "ranking" ? " active" : ""}`}
-              onClick={() => setRightView(rightView === "collabo" ? "ranking" : "collabo")}
-              title={rightView === "collabo" ? "랭킹 보기" : "공동 플레이리스트 보기"}
+              className="shared-nav-btn"
+              onClick={() => {
+                setCurrentSharedIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
+                setTimerKey((k) => k + 1);
+              }}
             >
-              {rightView === "collabo" ? <FaTrophy size={14} /> : <FaHandshake size={14} />}
+              <FaChevronLeft />
             </button>
-
-            {/* 공동 플레이리스트 탐색 버튼 - collabo 뷰일 때만 */}
-            {rightView === "collabo" && (
-              <>
-                <button className="shared-nav-btn" onClick={scrollSharedLeft}>
-                  <FaChevronLeft />
-                </button>
-                <button className="shared-nav-btn" onClick={scrollSharedRight}>
-                  <FaChevronRight />
-                </button>
-              </>
-            )}
+            <button
+              className="shared-nav-btn"
+              onClick={() => {
+                setCurrentSharedIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+                setTimerKey((k) => k + 1);
+              }}
+            >
+              <FaChevronRight />
+            </button>
           </div>
         </div>
 
-        {/* 본문 */}
-        {rightView === "collabo" ? (
-          <div className="shared-body">
-            {/* 기존 공동 플레이리스트 내용 그대로 */}
+        {!isRankingView ? (
+          /* 1. 공동 플레이리스트 뷰 */
+          <div className="shared-body" key={`collabo-${currentSharedIndex}`}>
             <div className="shared-cover-left">
               <div className="shared-cover-group">
-                <div
-                  key={currentSharedIndex}
-                  className="shared-cover-wrap shared-animate"
-                  onClick={handlePlayAll}
-                >
-                  {collaboPlaylists.length === 0 ? (
-                    <div className="shared-cover-empty" />
-                  ) : (
+                <div className="shared-cover-wrap shared-animate" onClick={handlePlayAll}>
+                  {collaboPlaylists[currentSharedIndex]?.imageUrl ? (
                     <img
                       className="shared-cover-large"
-                      src={
-                        collaboPlaylists[currentSharedIndex]?.imageUrl
-                          ? `${baseURL}${collaboPlaylists[currentSharedIndex].imageUrl}`
-                          : ""
-                      }
+                      src={`${baseURL}${collaboPlaylists[currentSharedIndex].imageUrl}`}
                       alt={collaboPlaylists[currentSharedIndex]?.title ?? ""}
                     />
+                  ) : (
+                    <div className="shared-cover-empty" />
                   )}
                   <button className="shared-cover-play" tabIndex={-1}>
                     <FaPlay />
@@ -574,7 +519,9 @@ function HomePage() {
                 <div className="shared-like-row">
                   <button className="shared-like-btn" onClick={handleLike}>
                     <FaHeart
-                      className={`shared-like-heart${collaboPlaylists[currentSharedIndex]?.hasLiked ? " liked" : ""}`}
+                      className={`shared-like-heart${
+                        collaboPlaylists[currentSharedIndex]?.hasLiked ? " liked" : ""
+                      }`}
                     />
                   </button>
                   <span className="shared-like-count">
@@ -586,32 +533,174 @@ function HomePage() {
             <div className="shared-right-panel">
               <div className="shared-wrapper">
                 <div key={currentSharedIndex} className="shared-container shared-animate">
-                  {collaboPlaylists.length === 0 ? (
-                    <div className="playlist-empty">공동 플레이리스트가 없습니다.</div>
-                  ) : (
-                    collaboPlaylists[currentSharedIndex] && (
-                      <RankSection
-                        playlist={collaboPlaylists[currentSharedIndex]}
-                        onSongClick={(song) => setSelectSong(song)}
-                        onModalOpenChange={setIsRankModalOpen}
-                      />
-                    )
+                  {collaboPlaylists[currentSharedIndex] && (
+                    <RankSection
+                      playlist={collaboPlaylists[currentSharedIndex]}
+                      onSongClick={(song) => setSelectSong(song)}
+                      onModalOpenChange={setIsRankModalOpen}
+                    />
                   )}
                 </div>
               </div>
             </div>
           </div>
         ) : (
-          <RankingWidget />
+          /* 2. 랭킹 뷰 (곡/가수 탭 전환 포함) */
+          <div className="shared-body shared-animate" key="ranking-section">
+            <div className="shared-cover-left">
+              <div className="shared-cover-group">
+                <div
+                  className="shared-cover-wrap"
+                  onClick={() => {
+                    if (rankingTab === "song" && rankingSongs.length > 0) {
+                      const songs = rankingSongs.map(toSong);
+                      play(songs[0], { songs, songIndex: 0, onClose: stop, onSongEnd: stop });
+                    }
+                  }}
+                  style={{
+                    cursor:
+                      rankingTab === "song" && rankingSongs.length > 0 ? "pointer" : "default",
+                  }}
+                >
+                  {rankingTab === "song" ? (
+                    rankingSongs[0] ? (
+                      <>
+                        <img
+                          className="shared-cover-large"
+                          src={rankingSongs[0].imgUrl}
+                          alt={rankingSongs[0].trackName}
+                        />
+                        <button className="shared-cover-play" tabIndex={-1}>
+                          <FaPlay />
+                        </button>
+                      </>
+                    ) : (
+                      <div className="shared-cover-empty" />
+                    )
+                  ) : (
+                    <div className="shared-cover-empty">
+                      <FaTrophy size={40} color="#ffd700" />
+                    </div>
+                  )}
+                </div>
+
+                {/* 곡/가수 탭 전환 버튼 */}
+                <div className="shared-like-row">
+                  <button
+                    className={`shared-nav-btn${rankingTab === "song" ? " active" : ""}`}
+                    onClick={() => setRankingTab("song")}
+                    title="인기 곡"
+                  >
+                    <FaMusic size={12} />
+                  </button>
+                  <button
+                    className={`shared-nav-btn${rankingTab === "artist" ? " active" : ""}`}
+                    onClick={() => setRankingTab("artist")}
+                    title="인기 가수"
+                  >
+                    <FaUserAlt size={12} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="shared-right-panel">
+              <div className="shared-wrapper">
+                {rankingLoading ? (
+                  <div className="ranking-loading">로딩 중...</div>
+                ) : rankingTab === "song" ? (
+                  /* 곡 랭킹 리스트 */
+                  rankingSongs.length === 0 ? (
+                    <div className="playlist-empty">데이터가 없습니다.</div>
+                  ) : (
+                    <div className="rank-section">
+                      <ul className="rank-list">
+                        {rankingSongs.map((item, index) => (
+                          <li key={item.songId} className="rank-item">
+                            <span
+                              className={
+                                index === 0
+                                  ? "rank-number gold"
+                                  : index === 1
+                                    ? "rank-number silver"
+                                    : index === 2
+                                      ? "rank-number bronze"
+                                      : "rank-number"
+                              }
+                            >
+                              {index + 1}
+                            </span>
+                            <img className="rank-album-img" src={item.imgUrl} alt="" />
+                            <div className="rank-text">
+                              <span className="rank-track">{item.trackName}</span>
+                              <span className="rank-artist">{item.artistName}</span>
+                            </div>
+                            <div className="rank-actions">
+                              <button
+                                onClick={() => item.previewUrl && setSelectSong(toSong(item))}
+                                title="미리듣기"
+                              >
+                                <FaHeadphones size={13} />
+                              </button>
+                              <button
+                                onClick={() => setRankingModalSong(toSong(item))}
+                                title="플리에 추가"
+                              >
+                                <FaPlus size={13} />
+                              </button>
+                            </div>
+                            <div className="rank-vote-btn">
+                              <FaThumbsUp size={11} />
+                              <span>{item.shareCount}</span>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )
+                ) : (
+                  /* 가수 랭킹 리스트 */
+                  <div className="ranking-list">
+                    {rankingArtists.length === 0 ? (
+                      <div className="playlist-empty">데이터가 없습니다.</div>
+                    ) : (
+                      rankingArtists.map((item, index) => (
+                        <div
+                          key={item.artistName}
+                          className="ranking-item"
+                          onClick={() =>
+                            navigate(`/search?q=${encodeURIComponent(item.artistName)}`)
+                          }
+                          style={{ cursor: "pointer" }}
+                        >
+                          <span className={`ranking-num rank-${index + 1}`}>{index + 1}</span>
+                          <div className="ranking-info">
+                            <span className="ranking-title">{item.artistName}</span>
+                            <span className="ranking-sub">{item.shareCount}회 공유</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         )}
       </div>
-      {/* ===== 모달 ===== */}
+
+      {/* ===== 모달들 ===== */}
       {isModalOpen && (
         <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
       )}
-
-      {/* ===== 상세보기 모달 ===== */}
       {detailSong && <SongDetailModal song={detailSong} onClose={() => setDetailSong(null)} />}
+      {rankingModalSong && (
+        <AddToPlaylistModal
+          song={rankingModalSong}
+          onClose={() => setRankingModalSong(null)}
+          onSuccess={() => setRankingModalSong(null)}
+        />
+      )}
     </div>
   );
 }

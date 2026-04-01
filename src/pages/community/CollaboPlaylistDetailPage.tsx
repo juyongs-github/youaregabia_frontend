@@ -53,7 +53,7 @@ function CollaboPlaylistDetailPage() {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const [playlist, setPlaylist] = useState<CollaboPlaylist | null>(null);
-  const [isPlaylistLoading] = useState(true);
+  const [isPlaylistLoading, setIsPlaylistLoading] = useState(false);
   const [songs, setSongs] = useState<CollaboSong[]>([]);
   const [isSongsLoading, setIsSongsLoading] = useState(false);
 
@@ -116,9 +116,14 @@ function CollaboPlaylistDetailPage() {
 
   const fetchPlaylist = async () => {
     if (!id) return;
-    try { const res = await playlistApi.getCollaborativePlaylist(Number(id)); setPlaylist(res.data); }
-    catch (e) { console.error(e); }
-    finally { setIsPlaylistLoading(false); }
+    try {
+      const res = await playlistApi.getCollaborativePlaylist(Number(id));
+      setPlaylist(res.data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsPlaylistLoading(false);
+    }
   };
 
   const fetchSongs = async () => {
@@ -136,10 +141,17 @@ function CollaboPlaylistDetailPage() {
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
-    setIsSearching(true); setHasSearched(true);
-    try { const res = await api.get("/api/search", { params: { q: searchQuery } }); setSearchResults(res.data || []); }
-    catch (e) { console.error(e); setSearchResults([]); }
-    finally { setIsSearching(false); }
+    setIsSearching(true);
+    setHasSearched(true);
+    try {
+      const res = await api.get("/api/search", { params: { q: searchQuery } });
+      setSearchResults(res.data || []);
+    } catch (e) {
+      console.error(e);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   // 곡 제안 (유저당 최대 5곡)
@@ -341,10 +353,17 @@ function CollaboPlaylistDetailPage() {
       {/* 플레이리스트 정보 */}
       <div className="flex gap-8">
         <div className="flex-shrink-0 w-52 h-52 bg-slate-700 rounded-2xl overflow-hidden">
-          {playlist?.imageUrl
-            ? <img src={(import.meta.env.VITE_API_BASE_URL ?? "") + playlist.imageUrl} alt="" className="w-full h-full object-cover" />
-            : <div className="flex items-center justify-center w-full h-full"><FaMusic size={48} className="text-white opacity-40" /></div>
-          }
+          {playlist?.imageUrl ? (
+            <img
+              src={(import.meta.env.VITE_API_BASE_URL ?? "") + playlist.imageUrl}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center w-full h-full">
+              <FaMusic size={48} className="text-white opacity-40" />
+            </div>
+          )}
         </div>
         <div className="flex flex-col justify-between flex-1 min-w-0 py-1">
           <div className="flex flex-col gap-2">

@@ -31,6 +31,7 @@ const BoardDetailPage = () => {
   const isFirstRender = useRef(true);
   const hasFetched = useRef(false);
   const navigate = useNavigate();
+  const [isShareMode, setIsShareMode] = useState(false);
 
   const loadBoard = async (page: number = 1, sort: "latest" | "likes" = sortBy) => {
     if (!boardId) return;
@@ -192,232 +193,230 @@ const BoardDetailPage = () => {
   // 본인 글 여부
   const isMyBoard = !!(userEmail && board.writerEmail === userEmail);
 
+  {
+    /* 헤더 섹션 동일 */
+  }
   return (
-    <div className="max-w-4xl mx-auto p-4 text-white">
-      {/* 헤더 */}
-      <div className="mb-6 border-b border-neutral-700 pb-6">
-        <h1 className="text-4xl font-extrabold tracking-tight text-white mb-3">{board.title}</h1>
-        <div className="flex flex-wrap gap-4 text-sm font-semibold text-neutral-500">
-          <span>작성자: {board.writer}</span>
-          <span>생성일시: {board.createdAt}</span>
-          {/* 장르가 CRITIC이 아닐 때만 렌더링 */}
-          {board.boardGenre !== "FREE" && (
-            <span className="text-indigo-400">장르: {board.boardGenre}</span>
-          )}
+    <div className="max-w-6xl mx-auto p-4 text-white">
+      {/* 헤더 섹션 (제목, 작성자 정보 등) */}
+      <header className="mb-8 border-b border-neutral-800 pb-6">
+        <h1 className="text-3xl font-bold text-indigo-400 mb-2">{board.title}</h1>
+        <div className="flex justify-between text-sm text-gray-400">
+          <span>
+            {board.writer} | {new Date(board.createdAt).toLocaleDateString()}
+          </span>
+          <span>조회 {board.viewCount}</span>
         </div>
-      </div>
+      </header>
 
-      {/* 수록곡 섹션 */}
-      {board.songs && board.songs.length > 0 && (
-        <div className="mb-8 rounded-xl border border-indigo-700 bg-neutral-900 overflow-hidden shadow-2xl">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-700 bg-neutral-800/50">
-            <span className="font-semibold text-indigo-400 flex items-center gap-2">
-              <span className="text-xl">🎵</span> 수록곡 리스트
-            </span>
-            {!isMyBoard && (
-              <span className="text-xs text-gray-400 bg-neutral-700 px-2 py-1 rounded-full">
-                {selectedSongIds.size} / {board.songs.length}곡 선택됨
-              </span>
-            )}
-          </div>
+      {/* 메인 레이아웃: 그리드 시스템 적용 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* [좌측 컬럼] 본문 및 댓글 (2/3 차지) */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* 본문 내용 */}
+          <div
+            className="min-h-[300px] break-words leading-relaxed text-lg text-neutral-200 bg-neutral-900/30 p-6 rounded-xl border border-neutral-800"
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(board.content) }}
+          />
 
-          {/* 플레이리스트 선택 및 추가 - 본인 글이면 숨김 */}
-          {userEmail && !isMyBoard && (
-            <div className="px-4 py-3 border-b border-neutral-700 bg-neutral-900 flex items-center gap-3">
-              <div className="flex-1 flex items-center gap-2">
-                <select
-                  className="flex-1 rounded border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  value={selectedPlaylistId ?? ""}
-                  onChange={(e) => setSelectedPlaylistId(Number(e.target.value) || null)}
-                  onFocus={fetchPlaylists}
-                >
-                  <option value="">추가할 플레이리스트 선택...</option>
-                  {playlists.map((pl) => (
-                    <option key={pl.id} value={pl.id}>
-                      {pl.title}
-                    </option>
-                  ))}
-                </select>
+          {/* 좋아요 + 수정 + 목록 버튼 하단 배치 */}
+          <div className="flex items-center justify-between border-t border-neutral-800 pt-6">
+            <button
+              onClick={() => navigate("/community/share")}
+              className="flex items-center gap-2 px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 rounded-lg text-sm transition-all"
+            >
+              <span className="font-bold text-indigo-300 font-bold">📋 목록</span>
+            </button>
+
+            <div className="flex items-center gap-4">
+              {isMyBoard && (
                 <button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="text-xs text-indigo-400 hover:text-indigo-300 hover:underline whitespace-nowrap px-1"
+                  onClick={() => navigate(`/community/share/${board.boardId}/update`)}
+                  className="text-sm font-medium text-neutral-400 hover:text-white"
                 >
-                  + 새 리스트
-                </button>
-              </div>
-
-              {selectedPlaylistId && selectedSongIds.size > 0 && (
-                <button
-                  onClick={handleAddSelectedSongs}
-                  disabled={checking}
-                  className={`rounded bg-indigo-600 px-4 py-2 text-xs font-bold text-white transition-all
-                    ${checking ? "opacity-50 cursor-not-allowed" : "hover:bg-indigo-500 active:scale-95"}`}
-                >
-                  {checking ? "확인 중..." : "선택곡 추가"}
+                  수정하기
                 </button>
               )}
+              <button
+                onClick={handleLike}
+                className={`flex items-center gap-3 rounded-full px-6 py-2.5 text-lg font-bold transition-all active:scale-95 ${
+                  likedByMe
+                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30"
+                    : "border-2 border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-white"
+                }`}
+              >
+                <span>❤️</span>
+                <span>{likeCount}</span>
+              </button>
             </div>
-          )}
+          </div>
 
-          {/* 곡 목록 */}
-          <ul className="divide-y divide-neutral-800 max-h-[500px] overflow-y-auto">
-            {board.songs
-              .slice()
-              .sort((a, b) => a.orderIndex - b.orderIndex)
-              .map((song) => {
-                const isAlreadyAdded = addedSongIds.has(song.songId);
-                const isInPlaylist = playlistSongIds.has(song.songId);
-                const isDisabled = isAlreadyAdded || isInPlaylist;
-                const isSelected = selectedSongIds.has(song.songId);
+          {/* 댓글 섹션 */}
+          <section className="mt-12">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold">댓글 {board.replies?.dtoList.length || 0}</h3>
+              <div className="flex gap-4 text-xs text-neutral-500">
+                <button
+                  onClick={() => setSortBy("latest")}
+                  className={sortBy === "latest" ? "text-indigo-400 font-bold" : ""}
+                >
+                  최신순
+                </button>
+                <button
+                  onClick={() => setSortBy("likes")}
+                  className={sortBy === "likes" ? "text-indigo-400 font-bold" : ""}
+                >
+                  추천순
+                </button>
+              </div>
+            </div>
 
-                return (
-                  <li
-                    key={song.songId}
-                    className={`flex items-center gap-4 px-4 py-3 transition-colors
-                      ${isDisabled ? "bg-neutral-900/50" : "hover:bg-neutral-800 cursor-pointer"}`}
-                    onClick={() => !isDisabled && !isMyBoard && toggleSongSelect(song.songId)}
-                  >
-                    {/* 체크박스 - 본인 글이면 숨김 */}
-                    {!isMyBoard && (
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        disabled={isDisabled}
-                        onChange={() => !isDisabled && toggleSongSelect(song.songId)}
-                        className={`w-5 h-5 rounded border-neutral-600 accent-indigo-500 flex-shrink-0
-                          ${isDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    )}
+            <div className="space-y-4 mb-6">
+              {board.replies?.dtoList.map((reply) => (
+                <ReplyItem
+                  key={reply.replyId}
+                  reply={reply}
+                  onRefresh={refresh}
+                  boardId={Number(boardId)}
+                  isAnonymous={false}
+                />
+              ))}
+            </div>
 
-                    <div className="relative flex-shrink-0">
-                      <img
-                        src={song.imgUrl}
-                        alt={song.trackName}
-                        className={`w-12 h-12 rounded shadow-md object-cover
-                          ${isDisabled ? "grayscale opacity-50" : ""}`}
-                      />
-                      {isAlreadyAdded && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded">
-                          <span className="text-[10px] font-bold text-green-400">IN</span>
-                        </div>
+            {/* 댓글 입력창 */}
+            <div className="bg-neutral-900 p-4 rounded-xl border border-neutral-800">
+              <textarea
+                className="w-full bg-transparent border-none focus:ring-0 text-sm resize-none mb-2"
+                placeholder="댓글을 입력하세요..."
+                value={replyContent}
+                onChange={(e) => setReplyContent(e.target.value)}
+                rows={3}
+              />
+              <div className="flex justify-end">
+                <button
+                  onClick={createReply}
+                  className="bg-indigo-600 px-5 py-2 rounded-lg text-sm font-bold hover:bg-indigo-500 transition-all"
+                >
+                  작성
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {/* [우측 컬럼] 수록곡 리스트 (1/3 차지, 스크롤 시 고정) */}
+        <aside className="lg:col-span-1">
+          <div className="sticky top-6 space-y-4">
+            {board.songs && board.songs.length > 0 && (
+              <div className="rounded-xl border border-indigo-700/50 bg-neutral-900 overflow-hidden shadow-2xl flex flex-col">
+                <div className="px-4 py-4 border-b border-neutral-700 bg-neutral-800/50 flex items-center justify-between">
+                  <h2 className="font-bold text-indigo-400 flex items-center gap-2">
+                    <span className="text-xl">🎵</span> 수록곡 ({board.songs.length})
+                  </h2>
+                  {!isMyBoard && !isShareMode && (
+                    <button
+                      onClick={() => setIsShareMode(true)}
+                      className="text-[10px] bg-indigo-600 hover:bg-indigo-500 px-2 py-1.5 rounded-md font-bold"
+                    >
+                      담기
+                    </button>
+                  )}
+                  {isShareMode && (
+                    <button
+                      onClick={() => setIsShareMode(false)}
+                      className="text-[10px] text-neutral-400"
+                    >
+                      취소
+                    </button>
+                  )}
+                </div>
+
+                {/* 공유 모드 플레이리스트 선택창 (수록곡 리스트 내부에 배치) */}
+                {isShareMode && (
+                  <div className="p-3 border-b border-neutral-700 bg-neutral-950/50 space-y-2">
+                    <select
+                      className="w-full rounded border border-neutral-700 bg-neutral-800 px-2 py-1.5 text-xs text-white focus:outline-none"
+                      value={selectedPlaylistId ?? ""}
+                      onChange={(e) => setSelectedPlaylistId(Number(e.target.value) || null)}
+                      onFocus={fetchPlaylists}
+                    >
+                      <option value="">추가할 리스트 선택...</option>
+                      {playlists.map((pl) => (
+                        <option key={pl.id} value={pl.id}>
+                          {pl.title}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="flex justify-between items-center">
+                      <button
+                        onClick={() => setIsCreateModalOpen(true)}
+                        className="text-[10px] text-indigo-400"
+                      >
+                        + 새 리스트
+                      </button>
+                      {selectedPlaylistId && selectedSongIds.size > 0 && (
+                        <button
+                          onClick={handleAddSelectedSongs}
+                          disabled={checking}
+                          className="bg-indigo-600 px-3 py-1 rounded text-[10px] font-bold"
+                        >
+                          추가하기
+                        </button>
                       )}
                     </div>
+                  </div>
+                )}
 
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className={`text-sm font-bold truncate ${isDisabled ? "text-neutral-500" : "text-white"}`}
-                      >
-                        {song.trackName}
-                      </p>
-                      <p className="text-xs text-neutral-400 truncate">{song.artistName}</p>
-                    </div>
+                {/* 곡 목록 리스트 */}
+                <ul className="divide-y divide-neutral-800 max-h-[60vh] overflow-y-auto">
+                  {board.songs
+                    .slice()
+                    .sort((a, b) => a.orderIndex - b.orderIndex)
+                    .map((song) => {
+                      const isAlreadyAdded = addedSongIds.has(song.songId);
+                      const isInPlaylist = playlistSongIds.has(song.songId);
+                      const isDisabled = isAlreadyAdded || isInPlaylist;
+                      const isSelected = selectedSongIds.has(song.songId);
 
-                    {isAlreadyAdded ? (
-                      <span className="text-[11px] font-semibold text-green-500 bg-green-500/10 px-2 py-1 rounded">
-                        보관됨 ✓
-                      </span>
-                    ) : isInPlaylist ? (
-                      <span className="text-[11px] font-semibold text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded">
-                        이미 있음
-                      </span>
-                    ) : isSelected && !isMyBoard ? (
-                      <span className="text-[11px] font-bold text-indigo-400 animate-pulse">
-                        선택됨
-                      </span>
-                    ) : null}
-                  </li>
-                );
-              })}
-          </ul>
-        </div>
-      )}
-
-      {/* 본문 */}
-      <div
-        className="mb-8 min-h-[100px] break-words leading-[1.3] text-white"
-        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(board.content) }}
-      />
-
-      {/* 좋아요 + 수정 버튼 */}
-      <div className="flex items-center justify-end gap-4 mb-8">
-        {isMyBoard && (
-          <button
-            onClick={() => navigate(`/community/share/${board.boardId}/update`)}
-            className="text-sm font-medium text-neutral-400 hover:text-white transition-colors"
-          >
-            수정하기
-          </button>
-        )}
-        <button
-          onClick={handleLike}
-          className={`flex items-center gap-3 rounded-full px-6 py-3 text-lg font-bold transition-all active:scale-95 ${
-            likedByMe
-              ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30"
-              : "border-2 border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-white"
-          }`}
-        >
-          <span className={likedByMe ? "animate-bounce" : ""}>❤️</span>
-          <span>{likeCount}</span>
-        </button>
+                      return (
+                        <li
+                          key={song.songId}
+                          className={`flex items-center gap-3 px-3 py-3 transition-colors ${isDisabled ? "opacity-50" : "hover:bg-neutral-800"} ${isShareMode && !isDisabled ? "cursor-pointer" : ""}`}
+                          onClick={() =>
+                            isShareMode && !isDisabled && toggleSongSelect(song.songId)
+                          }
+                        >
+                          {isShareMode && (
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              disabled={isDisabled}
+                              readOnly
+                              className="w-4 h-4 accent-indigo-500"
+                            />
+                          )}
+                          <img
+                            src={song.imgUrl}
+                            className="w-10 h-10 rounded object-cover"
+                            alt="cover"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold truncate">{song.trackName}</p>
+                            <p className="text-[10px] text-neutral-400 truncate">
+                              {song.artistName}
+                            </p>
+                          </div>
+                        </li>
+                      );
+                    })}
+                </ul>
+              </div>
+            )}
+          </div>
+        </aside>
       </div>
 
-      <hr />
-
-      {/* 댓글 */}
-      <h3>댓글</h3>
-      <div className="min-h-[50px]">
-        <button
-          onClick={() => setSortBy("latest")}
-          style={{ fontWeight: sortBy === "latest" ? "bold" : "normal" }}
-        >
-          최신순
-        </button>
-        <button
-          onClick={() => setSortBy("likes")}
-          style={{ fontWeight: sortBy === "likes" ? "bold" : "normal", marginLeft: "10px" }}
-        >
-          추천순
-        </button>
-      </div>
-
-      {!board.replies || board.replies?.dtoList.length === 0 ? (
-        <p>댓글이 없습니다.</p>
-      ) : (
-        <>
-          <ul>
-            {board.replies.dtoList.map((reply) => (
-              <ReplyItem
-                key={reply.replyId}
-                reply={reply}
-                onRefresh={refresh}
-                boardId={Number(boardId)}
-                isAnonymous={false}
-              />
-            ))}
-          </ul>
-          {board.replies.pageNumList.length > 0 && (
-            <Pagination
-              pageNumList={board.replies.pageNumList}
-              current={board.replies.current}
-              prev={board.replies.prev}
-              next={board.replies.next}
-              prevPage={board.replies.prevPage}
-              nextPage={board.replies.nextPage}
-              onPageChange={handleReplyPageChange}
-            />
-          )}
-        </>
-      )}
-
-      <textarea value={replyContent} onChange={(e) => setReplyContent(e.target.value)} rows={3} />
-      <button
-        onClick={createReply}
-        className="rounded bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-500"
-      >
-        댓글 작성
-      </button>
-
+      {/* 모달 동일 */}
       {isCreateModalOpen && (
         <PlaylistCreateModal
           onClose={() => setIsCreateModalOpen(false)}
