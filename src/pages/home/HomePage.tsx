@@ -296,6 +296,7 @@ function HomePage() {
 
           {/* 검색 드롭다운 */}
           {isDropdownOpen && (
+            <div className="search-dropdown-wrapper">
             <div className="search-dropdown">
               {isDropdownLoading ? (
                 <div className="search-dropdown-empty">검색 중...</div>
@@ -354,6 +355,7 @@ function HomePage() {
                   </button>
                 </>
               )}
+            </div>
             </div>
           )}
         </div>
