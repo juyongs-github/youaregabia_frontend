@@ -39,7 +39,7 @@
 
 /* 카드 */
 .top-playlist-card-small {
-  width: 160px;
+  width: 100%;
   aspect-ratio: 1 / 1;
 }
 

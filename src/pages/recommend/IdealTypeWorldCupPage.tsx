@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import "../../styles/IdealTypeWorldCupPage.css";
 import { playlistApi } from "../../api/playlistApi";
+import { usePlayer } from "../../contexts/PlayerContext";
 import type {
   SongDTO,
   Song,
@@ -462,6 +463,11 @@ export default function IdealTypeWorldCupPage() {
   const [addSuccess, setAddSuccess] = useState(false); // 추가 성공 메시지 표시 여부
 
   const audio = useAudio();
+  const { stop: stopGlobalPlayer } = usePlayer();
+
+  useEffect(() => {
+    stopGlobalPlayer();
+  }, []);
 
   // 파생 상태 — bracket 기반으로 매 렌더마다 계산
   const currentMatch = bracket[matchIdx] ?? null;

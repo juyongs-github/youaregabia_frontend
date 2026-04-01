@@ -194,54 +194,52 @@
   bottom: max(24px, 3.5vh);
   left: 50%;
   transform: translateX(-50%);
-  width: clamp(320px, 28vw, 420px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(8px, 1vh, 14px);
+  width: clamp(300px, 26vw, 380px);
   z-index: 10;
 }
 
 .icon-popup {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+
   display: flex;
   align-items: center;
-  gap: 8px;
-  width: 100%;
+  justify-content: space-around;
+  gap: 0;
   box-sizing: border-box;
 
-  padding: 12px 24px;
-  border-radius: 40px 40px 0 0;
+  padding: 4px 12px;
+  height: 52px;
+  border-radius: 28px 28px 0 0;
 
   background: rgba(45, 45, 45, 0.95);
-  white-space: nowrap;
-}
-
-.center-icons-wrapper:has(.icon-popup) {
-  gap: 0;
   backdrop-filter: blur(12px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-  border-radius: 40px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-.icon-popup + .center-icons {
-  border-radius: 0 0 40px 40px;
-  backdrop-filter: none;
-  box-shadow: none;
+.center-icons-wrapper:has(.icon-popup) .center-icons {
+  border-radius: 0 0 28px 28px;
 }
 
 .icon-popup button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 3px;
+  flex: 1;
+  height: 100%;
 
   background: none;
   border: none;
   color: #ccc;
-  font-size: clamp(12px, 1vw, 15px);
+  font-size: 10px;
   cursor: pointer;
-  padding: clamp(6px, 0.6vh, 10px) clamp(10px, 1vw, 16px);
-  border-radius: 14px;
+  padding: 4px 0;
+  border-radius: 10px;
 
   transition: all 0.15s ease;
 }
@@ -249,7 +247,6 @@
 .icon-popup button:hover {
   color: white;
   background: rgba(255, 255, 255, 0.08);
-  transform: translateY(-2px);
 }
 
 .center-icons {
@@ -260,8 +257,8 @@
   width: 100%;
   box-sizing: border-box;
 
-  padding: 14px 24px;
-  border-radius: 40px;
+  padding: 10px 20px;
+  border-radius: 28px;
 
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(12px);
@@ -273,16 +270,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   position: relative;
 
   background: none;
   border: none;
   color: #ccc;
-  font-size: clamp(12px, 1vw, 15px);
+  font-size: 12px;
   cursor: pointer;
-  padding: clamp(6px, 0.6vh, 10px) clamp(10px, 1.2vw, 18px);
-  border-radius: 16px;
+  padding: 6px 12px;
+  border-radius: 14px;
 
   transition: all 0.15s ease;
 }
@@ -833,6 +830,15 @@
   display: none;
 }
 
+.rank-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
 .rank-item {
   display: flex;
   align-items: center;
@@ -1224,13 +1230,13 @@
   }
 
   .icon-popup button {
-    font-size: 11px;
-    padding: 6px 10px;
+    font-size: 10px;
+    padding: 4px 8px;
   }
 
   .icon-popup button svg {
-    width: 18px;
-    height: 18px;
+    width: 15px;
+    height: 15px;
   }
 }
 

@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { boardApi } from "../../api/boardApi";
 import type { Board, PageResult, TabType } from "../../types/board";
 import { useNavigate } from "react-router-dom";
-import BoardTabBar from "../../Components/ui/BoardTabBar";
-import PopularTab from "../../Components/ui/PopularTab";
-import BoardListTemplate from "../../Components/ui/BoardListTemplate";
+import BoardTabBar from "../../components/ui/BoardTabBar";
+import PopularTab from "../../components/ui/PopularTab";
+import BoardListTemplate from "../../components/ui/BoardListTemplate";
 
 const FreeBoardListPage = () => {
   const [activeTab, setActiveTab] = useState<TabType>("ALL");

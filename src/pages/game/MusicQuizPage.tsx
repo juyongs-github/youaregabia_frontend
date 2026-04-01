@@ -35,6 +35,7 @@ const MusicQuizPage = () => {
 
   useEffect(() => {
     loadSongs();
+    return () => { stop(); };
   }, []);
 
   const currentSong = songs[currentIndex];
@@ -42,22 +43,63 @@ const MusicQuizPage = () => {
   const { play, stop } = usePlayer();
 
   useEffect(() => {
-    if (currentSong && !feedback && phase === "playing") {
+    if (started && currentSong && !feedback && phase === "playing") {
       play(currentSong, { blind: true, onClose: handleSkip });
     } else {
       stop();
     }
-  }, [currentIndex, feedback, phase]);
+  }, [currentIndex, feedback, phase, started]);
 
-  // 대소문자 구별x, 띄어쓰기x
-  const normalize = (str: string) => str.toLowerCase().replace(/\s/g, "");
+  // 대소문자, 띄어쓰기, 특수문자 제거 + 전각→반각, 가타카나→히라가나
+  const normalize = (str: string): string =>
+    str
+      .replace(/[\uFF01-\uFF5E]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0)) // 전각→반각
+      .replace(/\u3000/g, " ")                                                             // 전각 스페이스→반각
+      .replace(/[\u30A1-\u30F6]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60))   // 가타카나→히라가나
+      .toLowerCase()
+      .replace(/[\s\-_.,!?'"()&]/g, "");
+
+  // 레벤슈타인 거리 계산
+  const levenshtein = (a: string, b: string): number => {
+    const dp = Array.from({ length: a.length + 1 }, (_, i) =>
+      Array.from({ length: b.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
+    );
+    for (let i = 1; i <= a.length; i++)
+      for (let j = 1; j <= b.length; j++)
+        dp[i][j] =
+          a[i - 1] === b[j - 1]
+            ? dp[i - 1][j - 1]
+            : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    return dp[a.length][b.length];
+  };
+
+  // 괄호/대괄호 안 부제목 제거 (예: "(Attack on Titan)" → "")
+  const stripMeta = (str: string) =>
+    str.replace(/[\(\[\{][^\)\]\}]*[\)\]\}]/g, "").trim();
+
+  const checkAnswer = (answer: string, input: string): boolean => {
+    const a = normalize(answer);
+    const aCore = normalize(stripMeta(answer)); // 부제목 제거한 핵심 제목
+    const u = normalize(input);
+
+    // 1글자 제목 예외: 정확히 일치해야 인정
+    if (aCore.length === 1) return aCore === u;
+    // 2글자 미만 입력은 불인정
+    if (u.length < 2) return false;
+    // 정확히 일치 (전체 or 핵심 제목)
+    if (a === u || aCore === u) return true;
+    // 부분일치: 핵심 제목 기준으로 50% 이상이어야 인정
+    const base = aCore.length > 0 ? aCore : a;
+    if (base.includes(u) && u.length >= Math.ceil(base.length * 0.5)) return true;
+    // 오타 허용: 핵심 제목 길이 기준 1~2자
+    const threshold = base.length <= 4 ? 1 : 2;
+    return levenshtein(aCore, u) <= threshold || levenshtein(a, u) <= threshold;
+  };
 
   const handleSubmit = () => {
     if (!currentSong || !input.trim()) return;
 
-    const answer = normalize(currentSong.trackName);
-    const userInput = normalize(input);
-    const isCorrect = answer.includes(userInput) || userInput.includes(answer); // include여서 부분일치 허용
+    const isCorrect = checkAnswer(currentSong.trackName, input);
 
     if (isCorrect) {
       let gained = 0;

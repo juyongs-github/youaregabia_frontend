@@ -153,19 +153,19 @@ function HomePage() {
 
   const menuItems: Record<string, { icon: React.ReactNode; label: string; path: string }[]> = {
     recommend: [
-      { icon: <FaEyeSlash size={20} />, label: "블라인드 추천", path: "/recommend/blind" },
-      { icon: <FaTrophy size={20} />, label: "월드컵 추천", path: "/recommend/worldcup" },
-      { icon: <FaPen size={20} />, label: "음악 평론", path: "/recommend/critic" },
+      { icon: <FaEyeSlash size={15} />, label: "블라인드 추천", path: "/recommend/blind" },
+      { icon: <FaTrophy size={15} />, label: "월드컵 추천", path: "/recommend/worldcup" },
+      { icon: <FaPen size={15} />, label: "음악 평론", path: "/recommend/critic" },
     ],
     community: [
-      { icon: <FaShareAlt size={20} />, label: "플레이리스트 공유", path: "/community/share" },
-      { icon: <FaHandshake size={20} />, label: "공동 제작", path: "/community/collabo" },
-      { icon: <FaComments size={20} />, label: "자유게시판", path: "/community/free" },
+      { icon: <FaShareAlt size={15} />, label: "플레이리스트 공유", path: "/community/share" },
+      { icon: <FaHandshake size={15} />, label: "공동 제작", path: "/community/collabo" },
+      { icon: <FaComments size={15} />, label: "자유게시판", path: "/community/free" },
     ],
     game: [
-      { icon: <FaMusic size={20} />, label: "노래 맞추기", path: "/game/music-quiz" },
-      { icon: <FaCompactDisc size={20} />, label: "앨범 맞추기", path: "/game/album-quiz" },
-      { icon: <FaClone size={20} />, label: "카드 맞추기", path: "/game/card-match" },
+      { icon: <FaMusic size={15} />, label: "노래 맞추기", path: "/game/music-quiz" },
+      { icon: <FaCompactDisc size={15} />, label: "앨범 맞추기", path: "/game/album-quiz" },
+      { icon: <FaClone size={15} />, label: "카드 맞추기", path: "/game/card-match" },
     ],
   };
 
@@ -204,7 +204,7 @@ function HomePage() {
       const res = await playlistSongApi.getCollaborativeSongs(playlist.id);
       const sorted = [...(res.data || [])].sort((a, b) => (b.voteCount ?? 0) - (a.voteCount ?? 0));
       if (sorted.length === 0) return;
-      play(sorted[0], { songs: sorted, songIndex: 0, onClose: stop, onSongEnd: stop });
+      play(sorted[0], { songs: sorted, songIndex: 0, onClose: stop, onSongEnd: stop, onSongChange: () => {} });
     } catch {
       // 곡 로딩 실패 시 무시
     }
@@ -432,25 +432,25 @@ function HomePage() {
             className={openMenu === "recommend" ? "active" : ""}
             onClick={() => setOpenMenu(openMenu === "recommend" ? null : "recommend")}
           >
-            <FaCompass size={28} />
+            <FaCompass size={22} />
             <span>추천</span>
           </button>
           <button onClick={() => navigate("/goods")}>
-            <FaShoppingBag size={28} />
+            <FaShoppingBag size={22} />
             <span>굿즈샵</span>
           </button>
           <button
             className={openMenu === "community" ? "active" : ""}
             onClick={() => setOpenMenu(openMenu === "community" ? null : "community")}
           >
-            <FaUsers size={28} />
+            <FaUsers size={22} />
             <span>커뮤니티</span>
           </button>
           <button
             className={openMenu === "game" ? "active" : ""}
             onClick={() => setOpenMenu(openMenu === "game" ? null : "game")}
           >
-            <FaGamepad size={28} />
+            <FaGamepad size={22} />
             <span>게임</span>
           </button>
         </div>

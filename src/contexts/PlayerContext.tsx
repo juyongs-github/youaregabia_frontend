@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useRef } from "react";
 import type { Song } from "../components/ui/SongListItem";
 
 interface PlayerOptions {
@@ -33,7 +33,8 @@ const PlayerContext = createContext<PlayerContextValue | null>(null);
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [song, setSong] = useState<Song | null>(null);
   const [songs, setSongs] = useState<Song[]>([]);
-  const [songIndex, setSongIndex] = useState(0);
+  const songsRef = useRef<Song[]>([]);
+  const [songIndex, _setSongIndex] = useState(0);
   const [blind, setBlind] = useState(false);
   const [externalPaused, setExternalPaused] = useState(false);
   const [playKey, setPlayKey] = useState(0);
@@ -41,10 +42,18 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [onSongChange, setOnSongChange] = useState<((index: number) => void) | undefined>();
   const [onClose, setOnClose] = useState<(() => void) | undefined>();
 
+  const setSongIndex = useCallback((index: number) => {
+    _setSongIndex(index);
+    const nextSong = songsRef.current[index];
+    if (nextSong) setSong(nextSong);
+  }, []);
+
   const play = useCallback((newSong: Song, options?: PlayerOptions) => {
+    const newSongs = options?.songs ?? [];
     setSong(newSong);
-    setSongs(options?.songs ?? []);
-    setSongIndex(options?.songIndex ?? 0);
+    setSongs(newSongs);
+    songsRef.current = newSongs;
+    _setSongIndex(options?.songIndex ?? 0);
     setBlind(options?.blind ?? false);
     setExternalPaused(options?.externalPaused ?? false);
     if (options?.playKey !== undefined) setPlayKey(options.playKey);
@@ -56,7 +65,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const stop = useCallback(() => {
     setSong(null);
     setSongs([]);
-    setSongIndex(0);
+    songsRef.current = [];
+    _setSongIndex(0);
     setBlind(false);
     setExternalPaused(false);
     setOnSongEnd(undefined);

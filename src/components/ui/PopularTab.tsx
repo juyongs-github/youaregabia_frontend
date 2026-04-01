@@ -1,5 +1,5 @@
 import type { Board } from "../../types/board";
-import BoardItem from "../../Components/ui/BoardItem";
+import BoardItem from "../../components/ui/BoardItem";
 
 interface Props {
   boards: Board[];

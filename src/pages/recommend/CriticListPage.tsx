@@ -4,9 +4,9 @@ import type { Board, PageResult, TabType } from "../../types/board";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import BoardTabBar from "../../Components/ui/BoardTabBar";
-import PopularTab from "../../Components/ui/PopularTab";
-import BoardListTemplate from "../../Components/ui/BoardListTemplate";
+import BoardTabBar from "../../components/ui/BoardTabBar";
+import PopularTab from "../../components/ui/PopularTab";
+import BoardListTemplate from "../../components/ui/BoardListTemplate";
 
 const CriticListPage = () => {
   const [activeTab, setActiveTab] = useState<TabType>("ALL");

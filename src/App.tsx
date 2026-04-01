@@ -70,7 +70,7 @@ function GlobalMusicPlayer() {
   const { song, songs, songIndex, blind, externalPaused, playKey, onSongEnd, onSongChange, onClose, stop, setSongIndex } = usePlayer();
   if (!song) return null;
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40">
+    <div className="fixed bottom-0 left-0 right-0 z-40 music-player-bar">
       <MusicPlayer
         key={playKey}
         song={song}

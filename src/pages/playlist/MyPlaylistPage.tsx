@@ -104,7 +104,7 @@ function MyPlaylistPage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-7">
+      <div className="grid grid-cols-6 gap-5">
         {/* 정렬 */}
 
         {sortedData.map((item) => (
