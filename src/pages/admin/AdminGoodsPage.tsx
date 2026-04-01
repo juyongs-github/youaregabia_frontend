@@ -101,11 +101,11 @@ export default function AdminGoodsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">굿즈 관리</h1>
-          <p className="text-gray-400 text-sm mt-1">총 {goodsList.length}개 상품</p>
+          <p className="text-sm mt-1" style={{color:"#677086"}}>총 {goodsList.length}개 상품</p>
         </div>
         <button
           onClick={() => { setForm(EMPTY_FORM); setShowForm(true); }}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors"
+          className="kf-admin-btn-primary flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
         >
           <FaPlus size={12} /> 상품 등록
         </button>
@@ -113,38 +113,38 @@ export default function AdminGoodsPage() {
 
       {/* 등록/수정 폼 */}
       {showForm && (
-        <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 mb-6">
-          <h3 className="font-bold text-base mb-4">{form.goodsId ? "상품 수정" : "상품 등록"}</h3>
+        <div className="kf-admin-order-card mb-6">
+          <h3 className="font-bold text-base mb-4" style={{color:"#1f2430"}}>{form.goodsId ? "상품 수정" : "상품 등록"}</h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-gray-400 mb-1.5 block">상품명 *</label>
-              <input name="name" value={form.name} onChange={handleFormChange} placeholder="상품명" className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+              <label className="text-xs mb-1.5 block" style={{color:"#677086"}}>상품명 *</label>
+              <input name="name" value={form.name} onChange={handleFormChange} placeholder="상품명" className="w-full px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1.5 block">카테고리 *</label>
-              <select name="category" value={form.category} onChange={handleFormChange} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+              <label className="text-xs mb-1.5 block" style={{color:"#677086"}}>카테고리 *</label>
+              <select name="category" value={form.category} onChange={handleFormChange} className="w-full px-3 py-2 text-sm">
                 {CATEGORIES.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1.5 block">가격 (원) *</label>
-              <input name="price" type="number" value={form.price} onChange={handleFormChange} placeholder="0" className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+              <label className="text-xs mb-1.5 block" style={{color:"#677086"}}>가격 (원) *</label>
+              <input name="price" type="number" value={form.price} onChange={handleFormChange} placeholder="0" className="w-full px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1.5 block">재고 수량 *</label>
-              <input name="stock" type="number" value={form.stock} onChange={handleFormChange} placeholder="0" className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+              <label className="text-xs mb-1.5 block" style={{color:"#677086"}}>재고 수량 *</label>
+              <input name="stock" type="number" value={form.stock} onChange={handleFormChange} placeholder="0" className="w-full px-3 py-2 text-sm" />
             </div>
             <div className="md:col-span-2">
-              <label className="text-xs text-gray-400 mb-1.5 block">상품 설명</label>
-              <textarea name="description" value={form.description} onChange={handleFormChange} placeholder="상품 설명을 입력하세요" rows={3} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 resize-none" />
+              <label className="text-xs mb-1.5 block" style={{color:"#677086"}}>상품 설명</label>
+              <textarea name="description" value={form.description} onChange={handleFormChange} placeholder="상품 설명을 입력하세요" rows={3} className="w-full px-3 py-2 text-sm resize-none" />
             </div>
             <div className="md:col-span-2">
-              <label className="text-xs text-gray-400 mb-1.5 block">상품 이미지</label>
-              <input ref={fileRef} type="file" accept="image/*" onChange={(e) => setForm((f) => ({ ...f, imageFile: e.target.files?.[0] ?? null }))} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-gray-600 file:text-white file:text-xs file:cursor-pointer" />
+              <label className="text-xs mb-1.5 block" style={{color:"#677086"}}>상품 이미지</label>
+              <input ref={fileRef} type="file" accept="image/*" onChange={(e) => setForm((f) => ({ ...f, imageFile: e.target.files?.[0] ?? null }))} className="w-full px-3 py-2 text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:cursor-pointer" />
             </div>
             <div className="md:col-span-2 flex gap-3 justify-end">
-              <button type="button" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }} className="px-5 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-semibold transition-colors">취소</button>
-              <button type="submit" disabled={formLoading} className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded-lg text-sm font-semibold transition-colors">
+              <button type="button" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }} className="kf-admin-btn-secondary rounded-lg px-5 py-2 text-sm font-semibold transition-colors">취소</button>
+              <button type="submit" disabled={formLoading} className="kf-admin-btn-primary rounded-lg px-5 py-2 text-sm font-semibold transition-colors">
                 {formLoading ? "저장 중..." : form.goodsId ? "수정" : "등록"}
               </button>
             </div>
@@ -153,10 +153,10 @@ export default function AdminGoodsPage() {
       )}
 
       {/* 상품 목록 */}
-      <div className="w-full overflow-x-auto bg-gray-900/50 border border-gray-800 rounded-xl">
+      <div className="kf-admin-table-wrap w-full overflow-x-auto">
         <table className="min-w-[760px] w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-800 text-gray-500 whitespace-nowrap">
+            <tr className="whitespace-nowrap">
               <th className="text-left px-5 py-4 font-medium">이미지</th>
               <th className="text-left px-5 py-4 font-medium">상품명</th>
               <th className="text-left px-5 py-4 font-medium">카테고리</th>
@@ -167,22 +167,22 @@ export default function AdminGoodsPage() {
           </thead>
           <tbody>
             {goodsList.map((g) => (
-              <tr key={g.goodsId} className="border-b border-gray-800 hover:bg-white/[0.02] transition-colors whitespace-nowrap">
+              <tr key={g.goodsId} className="whitespace-nowrap">
                 <td className="px-5 py-4">
-                  <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden">
-                    {g.imageUrl ? <img src={`${import.meta.env.VITE_API_BASE_URL ?? ""}${g.imageUrl}`} alt={g.name} className="w-full h-full object-cover" /> : <FaBox size={14} className="text-gray-500" />}
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden" style={{background:"rgba(92,103,151,0.10)"}}>
+                    {g.imageUrl ? <img src={`${api.defaults.baseURL ?? ""}${g.imageUrl}`} alt={g.name} className="w-full h-full object-cover" /> : <FaBox size={14} style={{color:"#9199ad"}} />}
                   </div>
                 </td>
                 <td className="px-5 py-4 font-medium">{g.name}</td>
-                <td className="px-5 py-4 text-gray-400">{categoryLabel[g.category] ?? g.category}</td>
-                <td className="px-5 py-4 text-white">{g.price.toLocaleString()}원</td>
-                <td className={`px-5 py-4 font-semibold ${g.stock === 0 ? "text-red-400" : "text-white"}`}>{g.stock === 0 ? "품절" : `${g.stock}개`}</td>
+                <td className="px-5 py-4" style={{color:"#677086"}}>{categoryLabel[g.category] ?? g.category}</td>
+                <td className="px-5 py-4" style={{color:"#1f2430"}}>{g.price.toLocaleString()}원</td>
+                <td className={`px-5 py-4 font-semibold ${g.stock === 0 ? "text-red-500" : ""}`} style={g.stock !== 0 ? {color:"#1f2430"} : {}}>{g.stock === 0 ? "품절" : `${g.stock}개`}</td>
                 <td className="px-5 py-4">
                   <div className="flex gap-2">
-                    <button onClick={() => handleEdit(g)} className="flex items-center gap-1 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-semibold transition-colors">
+                    <button onClick={() => handleEdit(g)} className="kf-admin-btn-secondary flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
                       <FaEdit size={10} /> 수정
                     </button>
-                    <button onClick={() => handleDelete(g.goodsId)} className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/70 text-red-300 rounded-lg text-xs font-semibold transition-colors">
+                    <button onClick={() => handleDelete(g.goodsId)} className="kf-admin-btn-danger flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
                       <FaTrash size={10} /> 삭제
                     </button>
                   </div>
@@ -191,7 +191,7 @@ export default function AdminGoodsPage() {
             ))}
           </tbody>
         </table>
-        {goodsList.length === 0 && <p className="text-gray-500 text-center py-12">등록된 상품이 없습니다.</p>}
+        {goodsList.length === 0 && <p className="text-center py-12" style={{color:"#9199ad"}}>등록된 상품이 없습니다.</p>}
       </div>
     </div>
   );
