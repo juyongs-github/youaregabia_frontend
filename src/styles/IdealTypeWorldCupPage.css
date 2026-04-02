@@ -5,14 +5,14 @@
    ============================================================ */
 .wc-page {
   min-height: 100vh;
-  background: #000000;
+  background: transparent;
   font-family: "DM Sans", sans-serif;
-  color: #f0f0f8;
+  color: #1f2430;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 32px 20px;
+  justify-content: flex-start;
+  padding: 4px 20px;
 }
 
 .wc-page *,
@@ -28,10 +28,11 @@
    ============================================================ */
 .wc-inner {
   width: 100%;
-  max-width: 880px;
+  max-width: 1100px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 24px 32px;
 }
 
 /* ============================================================
@@ -56,7 +57,7 @@
   font-family: "Bebas Neue", sans-serif;
   font-size: clamp(58px, 14vw, 100px);
   line-height: 0.85;
-  color: #f0f0f8;
+  color: #1f2430;
   margin-bottom: 14px;
 }
 
@@ -97,9 +98,9 @@
 }
 
 .wc-size-btn {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  color: #f0f0f8;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #1f2430;
   border-radius: 20px;
   padding: 24px 10px 18px;
   cursor: pointer;
@@ -113,10 +114,10 @@
 }
 
 .wc-size-btn:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(0, 0, 0, 0.2);
   transform: translateY(-4px);
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4);
-  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.85);
 }
 
 .wc-size-btn:disabled {
@@ -152,8 +153,8 @@
 .wc-spinner {
   width: 15px;
   height: 15px;
-  border: 2px solid #222;
-  border-top-color: #fff;
+  border: 2px solid #ccc;
+  border-top-color: #1f2430;
   border-radius: 50%;
   animation: wc-spin 0.7s linear infinite;
   flex-shrink: 0;
@@ -169,21 +170,21 @@
 
 .wc-round-header {
   text-align: center;
-  margin-bottom: 26px;
+  margin-bottom: 12px;
 }
 
 .wc-round-title {
   font-family: "Bebas Neue", sans-serif;
-  font-size: 28px;
+  font-size: 22px;
   letter-spacing: 3px;
-  color: #f0f0f8;
-  margin-bottom: 6px;
+  color: #1f2430;
+  margin-bottom: 4px;
 }
 
 .wc-round-meta {
   font-size: 12px;
   color: #404050;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
 .wc-round-meta-divider {
@@ -193,14 +194,14 @@
 
 .wc-progress-track {
   height: 2px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.1);
   border-radius: 2px;
   overflow: hidden;
 }
 
 .wc-progress-fill {
   height: 100%;
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.3);
   border-radius: 2px;
   transition: width 0.55s ease;
 }
@@ -215,7 +216,7 @@
 .wc-vs-label {
   font-family: "Bebas Neue", sans-serif;
   font-size: 36px;
-  color: rgba(255, 255, 255, 0.06);
+  color: rgba(0, 0, 0, 0.12);
   letter-spacing: 1px;
   text-align: center;
   user-select: none;
@@ -236,7 +237,7 @@
 
 .wc-game-hint {
   text-align: center;
-  margin-top: 18px;
+  margin-top: 8px;
   font-size: 12px;
   color: #282830;
 }
@@ -248,9 +249,10 @@
   position: relative;
   border-radius: 24px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  background: #000000;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(10px);
   cursor: default;
   flex: 1;
   min-width: 0;
@@ -266,14 +268,14 @@
 
 /* 선택된 카드 */
 .wc-card--chosen {
-  border: 2px solid rgba(255, 255, 255, 0.45);
+  border: 2px solid rgba(0, 0, 0, 0.3);
   transform: scale(1.03) translateY(-6px);
   box-shadow: 0 28px 72px rgba(0, 0, 0, 0.7);
 }
 
 /* 탈락한 카드 */
 .wc-card--loser {
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   transform: scale(0.95);
   opacity: 0.18;
   filter: grayscale(1);
@@ -282,7 +284,7 @@
 /* 앨범 커버 wrapper — 1:1 비율 유지 */
 .wc-card-art {
   position: relative;
-  padding-bottom: 100%;
+  padding-bottom: 62%;
   overflow: hidden;
 }
 
@@ -368,7 +370,8 @@
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(8px);
-  transition: all 0.2s;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  transform: translate(-50%, -50%) !important;
 }
 
 /* 재생 중일 때 버튼 스타일 */
@@ -395,17 +398,17 @@
 
 /* 곡 정보 영역 — flex: 1로 남은 공간 채워 카드 높이 통일 */
 .wc-card-info {
-  padding: 16px 18px 18px;
+  padding: 10px 14px 10px;
   flex: 1;
 }
 
 .wc-card-title {
   font-family: "Bebas Neue", sans-serif;
-  font-size: 22px;
+  font-size: 18px;
   letter-spacing: 0.5px;
-  color: #f4f4f8;
+  color: #1f2430;
   line-height: 1.1;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -415,7 +418,7 @@
   font-size: 12px;
   color: #888;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -431,7 +434,7 @@
   font-size: 10px;
   padding: 2px 9px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.06);
   color: #555;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -445,21 +448,21 @@
 /* 이 곡 선택 버튼 — 호버 시 표시, 카드 하단 고정 */
 .wc-choose-cta {
   display: block;
-  width: calc(100% - 36px);
-  margin: 0 18px 18px;
-  padding: 12px 0;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  width: calc(100% - 28px);
+  margin: 0 14px 10px;
+  padding: 8px 0;
+  background: #1f2430;
+  border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 14px;
   cursor: pointer;
-  opacity: 0;
+  opacity: 1;
   transition:
     opacity 0.2s,
     background 0.2s;
 }
 
 .wc-choose-cta:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: #2e3547;
 }
 
 .wc-choose-cta-text {
@@ -539,7 +542,7 @@
   font-family: "Bebas Neue", sans-serif;
   font-size: clamp(32px, 8vw, 54px);
   line-height: 1;
-  color: #f8f8f8;
+  color: #1f2430;
   margin-bottom: 8px;
 }
 
@@ -555,7 +558,7 @@
   font-size: 10px;
   padding: 4px 14px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   color: #404050;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -568,9 +571,9 @@
 }
 
 .wc-result-preview-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #bbb;
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: #555;
   padding: 11px 26px;
   border-radius: 50px;
   cursor: pointer;
@@ -582,20 +585,20 @@
 }
 
 .wc-result-preview-btn--playing {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .wc-result-preview-progress {
   margin-top: 10px;
   height: 2px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.1);
   border-radius: 2px;
   overflow: hidden;
 }
 
 .wc-result-preview-progress-fill {
   height: 100%;
-  background: #fff;
+  background: #1f2430;
   transition: width 0.3s linear;
 }
 
@@ -607,9 +610,9 @@
 
 /* 다시하기 버튼 */
 .wc-btn-restart {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
+  background: rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  color: #1f2430;
   font-family: "Bebas Neue", sans-serif;
   font-size: 17px;
   letter-spacing: 2px;
@@ -688,7 +691,7 @@
 /* 전체 선택/해제 버튼 */
 .wc-win-select-all {
   background: none;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.12);
   color: #666;
   font-size: 11px;
   padding: 4px 10px;
@@ -698,15 +701,15 @@
 }
 
 .wc-win-select-all:hover {
-  border-color: rgba(255, 255, 255, 0.25);
-  color: #aaa;
+  border-color: rgba(0, 0, 0, 0.2);
+  color: #333;
 }
 
 /* 플레이리스트 추가 버튼 — 체크 시 표시 */
 .wc-win-add-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
+  background: rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  color: #1f2430;
   font-size: 11px;
   font-weight: 700;
   padding: 5px 12px;
@@ -739,8 +742,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 12px;
   padding: 10px 14px;
   cursor: pointer;
@@ -749,8 +752,8 @@
 
 /* 체크된 아이템 강조 */
 .wc-win-item--checked {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.2);
 }
 
 /* 순위 표시 */
@@ -778,7 +781,7 @@
 .wc-win-checkbox {
   width: 18px;
   height: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 5px;
   flex-shrink: 0;
   display: flex;
@@ -790,9 +793,9 @@
 }
 
 .wc-win-checkbox--checked {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.4);
-  color: #fff;
+  background: rgba(0, 0, 0, 0.12);
+  border-color: rgba(0, 0, 0, 0.3);
+  color: #1f2430;
 }
 
 .wc-win-thumb {
@@ -823,7 +826,7 @@
 .wc-win-title {
   font-size: 13px;
   font-weight: 700;
-  color: #e0e0f0;
+  color: #1f2430;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -859,7 +862,7 @@
 }
 
 .wc-modal {
-  background: #1c2333;
+  background: #f5f5fa;
   border-radius: 16px;
   width: 100%;
   max-width: 420px;
@@ -880,7 +883,7 @@
 .wc-modal-title {
   font-size: 17px;
   font-weight: 700;
-  color: #f0f0f8;
+  color: #1f2430;
 }
 
 .wc-modal-subtitle {
@@ -901,7 +904,7 @@
 }
 
 .wc-modal-close:hover {
-  color: #f0f0f8;
+  color: #1f2430;
 }
 
 .wc-modal-loading,
@@ -931,12 +934,12 @@
 }
 
 .wc-modal-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.05);
 }
 
 /* 선택된 플레이리스트 */
 .wc-modal-item--selected {
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(0, 0, 0, 0.07);
 }
 
 /* 중복 곡 아이템 (step 2) */
@@ -958,7 +961,7 @@
 }
 
 .wc-modal-thumb--fallback {
-  background: #2a3347;
+  background: #e0e0ea;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -969,7 +972,7 @@
 .wc-modal-playlist-title {
   font-size: 14px;
   font-weight: 600;
-  color: #e0e0f0;
+  color: #1f2430;
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -981,13 +984,13 @@
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: #2a3a4a;
+  background: #e0e0ea;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  color: #f0f0f8;
+  color: #1f2430;
   flex-shrink: 0;
 }
 
@@ -1024,7 +1027,7 @@
   font-size: 13px;
   color: #666;
   text-align: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .wc-modal-error {
@@ -1039,13 +1042,13 @@
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   padding: 16px 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .wc-modal-btn-cancel {
-  background: #2a3347;
+  background: #e0e0ea;
   border: none;
-  color: #aaa;
+  color: #555;
   font-size: 15px;
   font-weight: 600;
   padding: 14px;
@@ -1055,14 +1058,14 @@
 }
 
 .wc-modal-btn-cancel:hover {
-  background: #333f58;
+  background: #d0d0e0;
 }
 
 /* 추가하기 버튼 — 밝은 색으로 강조 */
 .wc-modal-btn-add {
-  background: #f0f0f8;
+  background: #1f2430;
   border: none;
-  color: #111;
+  color: #f0f0f8;
   font-size: 15px;
   font-weight: 700;
   padding: 14px;
