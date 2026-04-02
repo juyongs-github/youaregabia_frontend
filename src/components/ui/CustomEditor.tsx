@@ -6,9 +6,8 @@ interface Props {
   initialValue?: string;
 }
 
-const CustomEditor = ({ onChange, placeholder: _placeholder, initialValue }: Props) => {
+const CustomEditor = ({ onChange, placeholder, initialValue }: Props) => {
   const editorRef = useRef<HTMLDivElement>(null);
-  // 커서 위치를 저장할 Ref
   const selectionRef = useRef<Range | null>(null);
 
   useEffect(() => {
@@ -17,7 +16,7 @@ const CustomEditor = ({ onChange, placeholder: _placeholder, initialValue }: Pro
     }
   }, [initialValue]);
 
-  // 커서 위치 저장 함수
+  // 커서 위치 저장 및 복구 로직
   const saveSelection = () => {
     const sel = window.getSelection();
     if (sel && sel.rangeCount > 0) {
@@ -27,91 +26,118 @@ const CustomEditor = ({ onChange, placeholder: _placeholder, initialValue }: Pro
 
   const exec = (command: string, value?: string) => {
     editorRef.current?.focus();
-
-    // 저장된 커서 위치가 있다면 복구
     const sel = window.getSelection();
     if (selectionRef.current && sel) {
       sel.removeAllRanges();
       sel.addRange(selectionRef.current);
     }
-
     document.execCommand(command, false, value);
     handleChange();
   };
 
   const handleChange = () => {
     onChange(editorRef.current?.innerHTML ?? "");
-    saveSelection(); // 내용 변경 시마다 커서 위치 업데이트
+    saveSelection();
   };
 
-  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ✅ 서버 업로드(URL) 방식의 이미지 핸들러
+  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64Tag = reader.result as string;
-      // 직접 img 태그를 삽입하는 방식이 더 확실합니다.
-      const imgHtml = `<img src="${base64Tag}" style="max-width: 100%; height: auto;" /><br/>`;
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // 서버에 이미지 업로드 요청
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload/image`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      // 서버에서 반환한 상대 경로를 절대 경로 URL로 조합
+      const imageUrl = `${import.meta.env.VITE_API_BASE_URL}${data.url}`;
+
+      // URL을 사용하여 에디터에 이미지 삽입 (HTML 구조로 삽입하여 스타일 제어)
+      const imgHtml = `<img src="${imageUrl}" style="max-width: 100%; height: auto; border-radius: 12px; margin: 8px 0;" /><br/>`;
       exec("insertHTML", imgHtml);
-    };
-    reader.readAsDataURL(file);
-    e.target.value = ""; // 동일 파일 재선택 가능하도록 초기화
+    } catch (error) {
+      console.error("이미지 업로드 실패:", error);
+      alert("이미지 업로드에 실패했습니다.");
+    } finally {
+      e.target.value = ""; // 동일 파일 재선택 가능하도록 초기화
+    }
   };
 
   return (
-    <div className="rounded border border-neutral-700 overflow-hidden">
-      <div className="flex items-center gap-1 px-2 py-1 bg-neutral-800 border-b border-neutral-700">
+    <div className="rounded-[24px] border border-white/80 bg-white/50 backdrop-blur-xl overflow-hidden shadow-sm transition-all focus-within:shadow-md focus-within:border-[#6d5efc]/30">
+      {/* 툴바 영역 */}
+      <div className="flex items-center gap-2 px-4 py-3 bg-white/60 border-b border-white/80">
         <button
           type="button"
           onMouseDown={(e) => {
             e.preventDefault();
             exec("bold");
           }}
-          className="px-2 py-1 rounded font-bold text-white hover:bg-neutral-600"
+          className="w-10 h-10 flex items-center justify-center rounded-xl font-black text-[#2f3863] hover:bg-[#6d5efc] hover:text-black transition-all active:scale-95"
         >
           B
         </button>
 
-        <div className="w-px h-5 bg-neutral-600 mx-1" />
+        <div className="w-px h-6 bg-slate-200 mx-1" />
 
+        {/* 텍스트 컬러 선택 (밝은 테마에 맞는 컬러) */}
         <button
           type="button"
           onMouseDown={(e) => {
             e.preventDefault();
-            exec("foreColor", "#ffffff");
+            exec("foreColor", "#2f3863");
           }}
-          className="w-6 h-6 rounded-full border-2 border-neutral-500 bg-white"
+          className="w-7 h-7 rounded-full border-2 border-white shadow-sm bg-[#2f3863] hover:scale-110 transition-transform"
+          title="기본색"
         />
         <button
           type="button"
           onMouseDown={(e) => {
             e.preventDefault();
-            exec("foreColor", "#000000");
+            exec("foreColor", "#6d5efc");
           }}
-          className="w-6 h-6 rounded-full border-2 border-neutral-500 bg-black"
+          className="w-7 h-7 rounded-full border-2 border-white shadow-sm bg-[#6d5efc] hover:scale-110 transition-transform"
+          title="포인트색"
         />
 
-        <div className="w-px h-5 bg-neutral-600 mx-1" />
+        <div className="w-px h-6 bg-slate-200 mx-1" />
 
+        {/* 이미지 업로드 버튼 */}
         <label
-          className="px-2 py-1 rounded text-sm text-white hover:bg-neutral-600 cursor-pointer"
-          onMouseDown={saveSelection} // 클릭하는 순간 커서 위치 저장
+          className="w-10 h-10 flex items-center justify-center rounded-xl text-xl hover:bg-slate-100 cursor-pointer transition-all active:scale-95 shadow-sm bg-white border border-slate-100"
+          onMouseDown={saveSelection}
         >
-          🖼
+          🖼️
           <input type="file" accept="image/*" className="hidden" onChange={handleImage} />
         </label>
       </div>
 
+      {/* 에디터 입력 영역 */}
       <div
         ref={editorRef}
         contentEditable
         suppressContentEditableWarning
         onInput={handleChange}
-        onBlur={saveSelection} // 포커스가 나갈 때 커서 위치 저장
-        className="min-h-[200px] px-4 py-3 text-white bg-neutral-900 focus:outline-none"
+        onBlur={saveSelection}
+        className="min-h-[250px] px-6 py-5 text-[#2f3863] text-base leading-relaxed focus:outline-none bg-transparent"
         style={{ whiteSpace: "pre-wrap" }}
+        data-placeholder={placeholder}
       />
+
+      <style>{`
+        [contenteditable]:empty:before {
+          content: attr(data-placeholder);
+          color: #94a3b8;
+          cursor: text;
+        }
+      `}</style>
     </div>
   );
 };

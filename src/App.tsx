@@ -1,5 +1,5 @@
 import "./App.css";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { PlayerProvider, usePlayer } from "./contexts/PlayerContext";
 import MusicPlayer from "./components/layout/MusicPlayer";
 import { useSelector, useDispatch } from "react-redux";
@@ -33,6 +33,7 @@ import AdminActivityLogsPage from "./pages/admin/AdminActivityLogsPage";
 import AdminGoodsPage from "./pages/admin/AdminGoodsPage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import AdminPointsPage from "./pages/admin/AdminPointsPage";
+import AdminInquiriesPage from "./pages/admin/AdminInquiriesPage";
 import FreeBoardListPage from "./pages/community/FreeBoardListPage";
 import FreeBoardCreatePage from "./pages/community/FreeBoardCreatePage";
 import FreeBoardDetailPage from "./pages/community/FreeBoardDetailPage";
@@ -67,20 +68,39 @@ interface RateLimitInfo {
 }
 
 function GlobalMusicPlayer() {
-  const { song, songs, songIndex, blind, externalPaused, playKey, onSongEnd, onSongChange, onClose, stop, setSongIndex } = usePlayer();
+  const {
+    song,
+    songs,
+    songIndex,
+    blind,
+    externalPaused,
+    playKey,
+    onSongEnd,
+    onSongChange,
+    onClose,
+    stop,
+    setSongIndex,
+  } = usePlayer();
   if (!song) return null;
+  const currentSong = songs.length > 0 ? (songs[songIndex] ?? song) : song;
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40">
       <MusicPlayer
         key={playKey}
-        song={song}
+        song={currentSong}
         songs={songs.length > 0 ? songs : undefined}
         songIndex={songs.length > 0 ? songIndex : undefined}
         blind={blind}
         externalPaused={externalPaused}
         onSongEnd={onSongEnd}
-        onSongChange={(index) => { setSongIndex(index); onSongChange?.(index); }}
-        setIsPlayerVisible={() => { onClose?.(); stop(); }}
+        onSongChange={(index) => {
+          setSongIndex(index);
+          onSongChange?.(index);
+        }}
+        setIsPlayerVisible={() => {
+          onClose?.();
+          stop();
+        }}
       />
     </div>
   );
@@ -92,6 +112,8 @@ function App() {
   const isLogin = useSelector((state: RootState) => state.auth.isLoggedIn);
   const userRole = useSelector((state: RootState) => state.auth.user?.role);
   const loginRedirect = userRole === "ADMIN" ? "/admin" : "/home";
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith("/admin");
   // 매크로 방지 alert
   const [rateLimitInfo, setRateLimitInfo] = useState<RateLimitInfo | null>(null);
 
@@ -171,6 +193,7 @@ function App() {
           <Route path="goods" element={<AdminGoodsPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="points" element={<AdminPointsPage />} />
+          <Route path="inquiries" element={<AdminInquiriesPage />} />
         </Route>
         {/* 아닌 것들은 여기 밑으로 Route 추가 */}
         {/* 4. 로그인하지 않은 사용자만 접근 가능한 경로 (이미 로그인했다면 홈으로 이동) */}
@@ -198,7 +221,7 @@ function App() {
         <Route path="/" element={<Navigate to={isLogin ? loginRedirect : "/login"} replace />} />
       </Routes>
       {/* 전역 UI — 어느 페이지에서든 표시됨-> 매크로방지 alert */}
-      {isLogin && <ChatbotButton />}
+      {isLogin && !isAdminPage && <ChatbotButton />}
       {isLogin && <GlobalMusicPlayer />}
       {rateLimitInfo && (
         <RateLimitToast

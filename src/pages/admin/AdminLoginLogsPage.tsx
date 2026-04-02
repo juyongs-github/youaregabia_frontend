@@ -28,19 +28,19 @@ export default function AdminLoginLogsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="text-gray-400 text-center mt-20">로딩 중...</div>;
+  if (loading) return <div className="text-center mt-20" style={{color:"#64748b"}}>로딩 중...</div>;
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold">접속 로그</h1>
-        <p className="text-gray-400 text-sm mt-1">최근 {logs.length}건</p>
+        <p className="text-sm mt-1" style={{color:"#4b5563"}}>최근 {logs.length}건</p>
       </div>
 
-      <div className="w-full overflow-x-auto bg-gray-900/50 border border-gray-800 rounded-xl">
+      <div className="kf-admin-table-wrap w-full overflow-x-auto">
         <table className="min-w-[780px] w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-800 text-gray-500 whitespace-nowrap">
+            <tr className="whitespace-nowrap">
               <th className="text-left px-5 py-4 font-medium">이름</th>
               <th className="text-left px-5 py-4 font-medium">이메일</th>
               <th className="text-left px-5 py-4 font-medium">로그인 방식</th>
@@ -52,18 +52,18 @@ export default function AdminLoginLogsPage() {
             {logs.map((log) => {
               const lt = loginTypeLabel(log.loginType);
               return (
-                <tr key={log.id} className="border-b border-gray-800 hover:bg-white/[0.02] transition-colors whitespace-nowrap">
-                  <td className="px-5 py-4 font-medium">{log.name}</td>
-                  <td className="px-5 py-4 text-gray-300">{log.email}</td>
-                  <td className={`px-5 py-4 font-medium ${lt.color}`}>{lt.text}</td>
-                  <td className="px-5 py-4 text-gray-400">{log.ip}</td>
-                  <td className="px-5 py-4 text-gray-400">{log.loginAt?.replace("T", " ").slice(0, 19)}</td>
+                <tr key={log.id} className="whitespace-nowrap">
+                  <td className="px-5 py-4 font-semibold">{log.name}</td>
+                  <td className="px-5 py-4" style={{color:"#4b5563"}}>{log.email}</td>
+                  <td className={`px-5 py-4 font-semibold ${lt.color}`}>{lt.text}</td>
+                  <td className="px-5 py-4" style={{color:"#64748b"}}>{log.ip}</td>
+                  <td className="px-5 py-4" style={{color:"#64748b"}}>{log.loginAt?.replace("T", " ").slice(0, 19)}</td>
                 </tr>
               );
             })}
           </tbody>
         </table>
-        {logs.length === 0 && <p className="text-gray-500 text-center py-12">접속 기록이 없습니다.</p>}
+        {logs.length === 0 && <p className="text-center py-12" style={{color:"#64748b"}}>접속 기록이 없습니다.</p>}
       </div>
     </div>
   );

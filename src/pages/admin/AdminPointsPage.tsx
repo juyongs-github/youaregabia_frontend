@@ -76,34 +76,26 @@ export default function AdminPointsPage() {
     }
   };
 
-  if (loading) return <div className="text-gray-400 text-center mt-20">로딩 중...</div>;
+  if (loading) return <div className="text-center mt-20" style={{color:"#64748b"}}>로딩 중...</div>;
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold">포인트 관리</h1>
-        <p className="text-gray-400 text-sm mt-1">총 {rows.length}명</p>
+        <p className="text-sm mt-1" style={{color:"#4b5563"}}>총 {rows.length}명</p>
       </div>
 
       {/* 탭 */}
-      <div className="flex gap-1 mb-5 border-b border-gray-800">
+      <div className="kf-admin-tab-bar flex gap-1 mb-5">
         <button
           onClick={() => setTab("manage")}
-          className={`px-5 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
-            tab === "manage"
-              ? "border-yellow-500 text-yellow-400"
-              : "border-transparent text-gray-400 hover:text-white"
-          }`}
+          className={`kf-admin-tab${tab === "manage" ? " active" : ""}`}
         >
           포인트 관리
         </button>
         <button
           onClick={() => setTab("logs")}
-          className={`px-5 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
-            tab === "logs"
-              ? "border-yellow-500 text-yellow-400"
-              : "border-transparent text-gray-400 hover:text-white"
-          }`}
+          className={`kf-admin-tab${tab === "logs" ? " active" : ""}`}
         >
           지급 / 차감 로그
         </button>
@@ -111,10 +103,10 @@ export default function AdminPointsPage() {
 
       {/* 포인트 관리 탭 */}
       {tab === "manage" && (
-        <div className="w-full overflow-x-auto bg-gray-900/50 border border-gray-800 rounded-xl">
+        <div className="kf-admin-table-wrap w-full overflow-x-auto">
           <table className="min-w-[860px] w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800 text-gray-500 whitespace-nowrap">
+              <tr className="whitespace-nowrap">
                 <th className="text-left px-5 py-4 font-medium">ID</th>
                 <th className="text-left px-5 py-4 font-medium">이름</th>
                 <th className="text-left px-5 py-4 font-medium">이메일</th>
@@ -124,13 +116,18 @@ export default function AdminPointsPage() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => {
+              {rows.filter((row) => row.email !== "admin@naver.com").map((row) => {
                 const grade = GRADE_LABEL[row.grade] ?? { text: row.grade, color: "text-gray-400" };
+                const isWithdrawn = row.email?.includes("@delete.com");
+                const isDisabled = isWithdrawn || processing === row.userId;
                 return (
-                  <tr key={row.userId} className="border-b border-gray-800 hover:bg-white/[0.02] transition-colors whitespace-nowrap">
-                    <td className="px-5 py-4 text-gray-600">{row.userId}</td>
-                    <td className="px-5 py-4 font-medium">{row.name}</td>
-                    <td className="px-5 py-4 text-gray-300">{row.email || "-"}</td>
+                  <tr key={row.userId} className={`whitespace-nowrap ${isWithdrawn ? "opacity-50" : ""}`}>
+                    <td className="px-5 py-4" style={{color:"#64748b"}}>{row.userId}</td>
+                    <td className="px-5 py-4 font-medium">
+                      {row.name}
+                      {isWithdrawn && <span className="ml-2 text-xs text-red-400">(탈퇴)</span>}
+                    </td>
+                    <td className="px-5 py-4" style={{color:"#4b5563"}}>{row.email || "-"}</td>
                     <td className={`px-5 py-4 font-medium ${grade.color}`}>{grade.text}</td>
                     <td className="px-5 py-4 text-yellow-400 font-semibold">
                       {row.totalPoint.toLocaleString()}P
@@ -144,20 +141,21 @@ export default function AdminPointsPage() {
                           onChange={(e) =>
                             setAdjustInputs((prev) => ({ ...prev, [row.userId]: e.target.value }))
                           }
-                          placeholder="포인트 입력"
-                          className="w-32 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-yellow-500"
+                          placeholder={isWithdrawn ? "탈퇴한 회원" : "포인트 입력"}
+                          disabled={isDisabled}
+                          className="w-32 px-3 py-1.5 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                         />
                         <button
                           onClick={() => handleAdjust(row.userId, "grant")}
-                          disabled={processing === row.userId}
-                          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 rounded-lg text-sm font-semibold transition-colors"
+                          disabled={isDisabled}
+                          className="kf-admin-btn-primary rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
                         >
                           {processing === row.userId ? "..." : "지급"}
                         </button>
                         <button
                           onClick={() => handleAdjust(row.userId, "deduct")}
-                          disabled={processing === row.userId}
-                          className="px-3 py-1.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:text-gray-500 rounded-lg text-sm font-semibold transition-colors"
+                          disabled={isDisabled}
+                          className="kf-admin-btn-danger rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
                         >
                           {processing === row.userId ? "..." : "차감"}
                         </button>
@@ -169,17 +167,17 @@ export default function AdminPointsPage() {
             </tbody>
           </table>
           {rows.length === 0 && (
-            <p className="text-gray-500 text-center py-12">포인트 데이터가 없습니다.</p>
+            <p className="text-center py-12" style={{color:"#64748b"}}>포인트 데이터가 없습니다.</p>
           )}
         </div>
       )}
 
       {/* 지급/차감 로그 탭 */}
       {tab === "logs" && (
-        <div className="w-full overflow-x-auto bg-gray-900/50 border border-gray-800 rounded-xl">
+        <div className="kf-admin-table-wrap w-full overflow-x-auto">
           <table className="min-w-[860px] w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800 text-gray-500 whitespace-nowrap">
+              <tr className="whitespace-nowrap">
                 <th className="text-left px-5 py-4 font-medium">이름</th>
                 <th className="text-left px-5 py-4 font-medium">이메일</th>
                 <th className="text-left px-5 py-4 font-medium">유형</th>
@@ -189,22 +187,18 @@ export default function AdminPointsPage() {
             </thead>
             <tbody>
               {logs.map((log) => (
-                <tr key={log.id} className="border-b border-gray-800 hover:bg-white/[0.02] transition-colors whitespace-nowrap">
+                <tr key={log.id} className="whitespace-nowrap">
                   <td className="px-5 py-4 font-medium">{log.name}</td>
-                  <td className="px-5 py-4 text-gray-300">{log.email || "-"}</td>
+                  <td className="px-5 py-4" style={{color:"#4b5563"}}>{log.email || "-"}</td>
                   <td className="px-5 py-4">
-                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                      log.pointType === "ADMIN_GRANT"
-                        ? "bg-blue-500/20 text-blue-400"
-                        : "bg-red-500/20 text-red-400"
-                    }`}>
+                    <span className={log.pointType === "ADMIN_GRANT" ? "kf-badge-blue" : "kf-badge-red"}>
                       {log.description}
                     </span>
                   </td>
-                  <td className={`px-5 py-4 font-semibold ${log.amount > 0 ? "text-blue-400" : "text-red-400"}`}>
+                  <td className={`px-5 py-4 font-semibold ${log.amount > 0 ? "text-blue-500" : "text-red-500"}`}>
                     {log.amount > 0 ? `+${log.amount.toLocaleString()}` : log.amount.toLocaleString()}P
                   </td>
-                  <td className="px-5 py-4 text-gray-500">
+                  <td className="px-5 py-4" style={{color:"#64748b"}}>
                     {log.createdAt?.slice(0, 16).replace("T", " ")}
                   </td>
                 </tr>
@@ -212,7 +206,7 @@ export default function AdminPointsPage() {
             </tbody>
           </table>
           {logs.length === 0 && (
-            <p className="text-gray-500 text-center py-12">지급/차감 내역이 없습니다.</p>
+            <p className="text-center py-12" style={{color:"#64748b"}}>지급/차감 내역이 없습니다.</p>
           )}
         </div>
       )}

@@ -1,0 +1,267 @@
+/* ── Admin layout shell ─────────────────── */
+.kf-admin {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 8% 12%, rgba(132,195,255,0.16) 0%, transparent 28%),
+    radial-gradient(circle at 88% 10%, rgba(255,230,180,0.14) 0%, transparent 24%),
+    radial-gradient(circle at 82% 82%, rgba(255,153,198,0.14) 0%, transparent 26%),
+    radial-gradient(circle at 14% 80%, rgba(146,128,255,0.12) 0%, transparent 28%),
+    linear-gradient(180deg, #f7f8ff 0%, #fafbff 100%);
+  color: #212738;
+}
+
+/* ── Sidebar ────────────────────────────── */
+.kf-admin-sidebar {
+  background: rgba(255,255,255,0.82);
+  border-right: 1px solid rgba(92,103,151,0.12);
+  backdrop-filter: blur(20px);
+  box-shadow: 2px 0 24px rgba(80,90,140,0.06);
+}
+
+.kf-admin-sidebar .kf-admin-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: #9199ad;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* nav link */
+.kf-admin-nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 10px;
+  font-size: 13px; font-weight: 600;
+  color: #4b5563;
+  transition: background 0.15s, color 0.15s;
+}
+.kf-admin-nav-link:hover {
+  background: rgba(109,94,252,0.07);
+  color: #25272f;
+}
+.kf-admin-nav-link.active {
+  background: linear-gradient(135deg, rgba(109,94,252,0.12), rgba(255,92,168,0.08));
+  color: #6d5efc;
+  font-weight: 700;
+}
+
+.kf-admin-logout {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 9px 12px; border-radius: 10px;
+  font-size: 13px; font-weight: 600;
+  background: #ef4444;
+  color: #ffffff;
+  transition: background 0.15s;
+}
+.kf-admin-logout:hover {
+  background: #dc2626;
+}
+
+/* ── Content shell ──────────────────────── */
+.kf-admin-content {
+  background: transparent;
+}
+
+/* ── Page heading ───────────────────────── */
+.kf-admin h1 { color: #1f2430 !important; }
+.kf-admin h2 { color: #1f2430 !important; }
+
+/* ── Table card ─────────────────────────── */
+.kf-admin-table-wrap {
+  background: rgba(255,255,255,0.82);
+  border: 1px solid rgba(92,103,151,0.12);
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(80,90,140,0.08);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+}
+
+.kf-admin-table-wrap table thead tr {
+  border-bottom: 1px solid rgba(92,103,151,0.10) !important;
+}
+.kf-admin-table-wrap table thead th {
+  color: #64748b !important;
+}
+.kf-admin-table-wrap table tbody tr {
+  border-bottom: 1px solid rgba(92,103,151,0.08) !important;
+  transition: background 0.12s;
+}
+.kf-admin-table-wrap table tbody tr:hover {
+  background: rgba(109,94,252,0.04) !important;
+}
+.kf-admin-table-wrap table tbody td {
+  color: #212738;
+}
+
+/* ── Order card ─────────────────────────── */
+.kf-admin-order-card {
+  background: rgba(255,255,255,0.82);
+  border: 1px solid rgba(92,103,151,0.12);
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(80,90,140,0.07);
+  padding: 20px;
+}
+.kf-admin-order-card .kf-divider {
+  border-top: 1px solid rgba(92,103,151,0.10);
+}
+
+/* ── Dashboard chart card ────────────────── */
+.kf-admin-card {
+  background: rgba(255,255,255,0.82);
+  border: 1px solid rgba(92,103,151,0.12);
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(80,90,140,0.07);
+}
+
+/* ── Dashboard stat card ─────────────────── */
+.kf-admin-stat-card {
+  background: rgba(255,255,255,0.82);
+  border: 1px solid rgba(92,103,151,0.12);
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(80,90,140,0.07);
+  padding: 20px;
+  text-align: left;
+  transition: box-shadow 0.18s, border-color 0.18s, transform 0.18s;
+  cursor: pointer;
+}
+.kf-admin-stat-card:hover {
+  border-color: rgba(109,94,252,0.22);
+  box-shadow: 0 12px 28px rgba(80,90,140,0.12);
+  transform: translateY(-2px);
+}
+
+/* ── Inputs / selects / textareas ───────── */
+.kf-admin input,
+.kf-admin select,
+.kf-admin textarea {
+  background: rgba(255,255,255,0.88) !important;
+  border: 1px solid rgba(92,103,151,0.18) !important;
+  border-radius: 10px !important;
+  color: #212738 !important;
+  font-family: inherit;
+}
+.kf-admin input::placeholder,
+.kf-admin textarea::placeholder { color: #9199ad !important; }
+.kf-admin input:focus,
+.kf-admin select:focus,
+.kf-admin textarea:focus {
+  outline: none !important;
+  border-color: rgba(109,94,252,0.36) !important;
+  box-shadow: 0 0 0 3px rgba(109,94,252,0.09) !important;
+}
+
+/* ── Buttons ────────────────────────────── */
+.kf-admin-btn-primary {
+  background: linear-gradient(135deg, #6d5efc, #ff5ca8) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 8px 20px rgba(109,94,252,0.22);
+  transition: opacity 0.15s, transform 0.15s;
+}
+.kf-admin-btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+.kf-admin-btn-secondary {
+  background: rgba(255,255,255,0.88) !important;
+  border: 1px solid rgba(92,103,151,0.18) !important;
+  color: #4b5563 !important;
+  transition: background 0.15s, color 0.15s;
+}
+.kf-admin-btn-secondary:hover {
+  background: rgba(109,94,252,0.07) !important;
+  color: #25272f !important;
+}
+
+.kf-admin-btn-danger {
+  background: rgba(255,92,122,0.10) !important;
+  border: 1px solid rgba(255,92,122,0.22) !important;
+  color: #ff5c7a !important;
+  transition: background 0.15s;
+}
+.kf-admin-btn-danger:hover {
+  background: rgba(255,92,122,0.18) !important;
+}
+
+/* ── Tab bar ─────────────────────────────── */
+.kf-admin-tab-bar {
+  border-bottom: 1px solid rgba(92,103,151,0.12);
+}
+.kf-admin-tab {
+  padding: 10px 20px;
+  font-size: 13px; font-weight: 600;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color: #9199ad;
+  transition: color 0.15s, border-color 0.15s;
+}
+.kf-admin-tab:hover { color: #25272f; }
+.kf-admin-tab.active {
+  border-bottom-color: #6d5efc;
+  color: #6d5efc;
+}
+
+/* ── Badges ─────────────────────────────── */
+.kf-badge-blue   { background: rgba(99,152,255,0.12); color: #4a7fe0; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+.kf-badge-purple { background: rgba(146,128,255,0.12); color: #7b67f5; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+.kf-badge-green  { background: rgba(56,199,170,0.12); color: #29a98a; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+.kf-badge-yellow { background: rgba(255,182,72,0.14); color: #cc8800; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+.kf-badge-red    { background: rgba(255,92,122,0.12); color: #e0344a; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+.kf-badge-gray   { background: rgba(92,103,151,0.10); color: #677086; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+
+/* ── Mobile header bar ──────────────────── */
+.kf-admin-mobile-header {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(92,103,151,0.12);
+}
+
+.kf-admin-hamburger {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.88);
+  border: 1px solid rgba(92,103,151,0.18);
+  color: #1f2430;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.kf-admin-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 199;
+}
+
+/* ── Responsive admin layout ────────────── */
+@media (max-width: 1023px) {
+  .kf-admin-sidebar {
+    position: fixed;
+    left: -220px;
+    top: 0;
+    height: 100vh;
+    z-index: 200;
+    transition: left 0.3s ease;
+    width: 220px !important;
+  }
+
+  .kf-admin-sidebar.open {
+    left: 0;
+  }
+
+  .kf-admin-content {
+    padding: 16px !important;
+  }
+
+  .kf-admin-mobile-header {
+    display: flex !important;
+  }
+
+  .kf-admin-table-wrap {
+    overflow-x: auto;
+  }
+}

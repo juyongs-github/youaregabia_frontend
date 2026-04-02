@@ -1,5 +1,6 @@
 @import "./community-kfandom-core.css";
 .kf-free-board-list .kf-community-page__shell > div {
+  max-width: 980px;
   padding: 12px;
 }
 .kf-free-board-list [class*="mt-8 mb-6 flex items-end justify-between"] {
@@ -10,7 +11,7 @@
 }
 .kf-free-board-list [class*="divide-y"] {
   margin-top: 18px;
-  background: rgba(255,255,255,0.56);
+  background: rgba(255, 255, 255, 0.56);
   border-radius: 24px;
   overflow: hidden;
 }

@@ -1,12 +1,19 @@
 import { useState } from "react";
-import { FaChevronDown, FaCompass, FaGamepad, FaHome, FaUsers, FaShoppingBag } from "react-icons/fa";
+import {
+  FaChevronDown,
+  FaCompass,
+  FaGamepad,
+  FaHome,
+  FaUsers,
+  FaShoppingBag,
+} from "react-icons/fa";
 import { PiPlaylistBold } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import "../../styles/sidebar-kfandom.css";
 
-function Sidebar() {
+function Sidebar({ isOpen = false, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useSelector((state: RootState) => state.auth.user);
@@ -18,6 +25,7 @@ function Sidebar() {
   };
 
   const goPage = (path: string) => {
+    onClose?.();
     if (location.pathname === path) {
       window.location.reload();
     } else {
@@ -33,7 +41,7 @@ function Sidebar() {
     userRole === "ADMIN" ? "Admin Hub" : userRole === "CRITIC" ? "Critic Mode" : "Fan Mode";
 
   return (
-    <aside className="kf-side-shell">
+    <aside className={`kf-side-shell${isOpen ? " kf-sidebar-open" : ""}`}>
       <div className="kf-side-card">
         {/* Brand / user */}
         <div className="kf-side-brand">
@@ -47,7 +55,7 @@ function Sidebar() {
         {/* Status chip */}
         <div className="kf-side-status">
           <span className="kf-side-status__dot" />
-          K-Fandom Hub Edition
+          모두가 소통하는 음악커뮤니티
         </div>
 
         {/* Nav */}
@@ -57,7 +65,9 @@ function Sidebar() {
             className={`kf-side-item${isActive(userRole === "ADMIN" ? "/admin" : "/home") ? " is-active" : ""}`}
             onClick={() => goPage(userRole === "ADMIN" ? "/admin" : "/home")}
           >
-            <span className="kf-side-item__icon"><FaHome size={18} /></span>
+            <span className="kf-side-item__icon">
+              <FaHome size={18} />
+            </span>
             홈
           </button>
 
@@ -67,7 +77,9 @@ function Sidebar() {
               className={`kf-side-item${isActivePrefix("/recommend") ? " is-active" : ""}`}
               onClick={() => toggleMenu("recommend")}
             >
-              <span className="kf-side-item__icon"><FaCompass size={18} /></span>
+              <span className="kf-side-item__icon">
+                <FaCompass size={18} />
+              </span>
               추천
               <span className={`kf-side-chevron${openMenu === "recommend" ? " is-open" : ""}`}>
                 <FaChevronDown size={13} />
@@ -103,7 +115,9 @@ function Sidebar() {
               className={`kf-side-item${isActivePrefix("/playlist") ? " is-active" : ""}`}
               onClick={() => toggleMenu("playlist")}
             >
-              <span className="kf-side-item__icon"><PiPlaylistBold size={18} /></span>
+              <span className="kf-side-item__icon">
+                <PiPlaylistBold size={18} />
+              </span>
               플레이리스트
               <span className={`kf-side-chevron${openMenu === "playlist" ? " is-open" : ""}`}>
                 <FaChevronDown size={13} />
@@ -133,7 +147,9 @@ function Sidebar() {
               className={`kf-side-item${isActivePrefix("/community") ? " is-active" : ""}`}
               onClick={() => toggleMenu("community")}
             >
-              <span className="kf-side-item__icon"><FaUsers size={18} /></span>
+              <span className="kf-side-item__icon">
+                <FaUsers size={18} />
+              </span>
               커뮤니티
               <span className={`kf-side-chevron${openMenu === "community" ? " is-open" : ""}`}>
                 <FaChevronDown size={13} />
@@ -168,7 +184,9 @@ function Sidebar() {
             className={`kf-side-item${isActivePrefix("/goods") ? " is-active" : ""}`}
             onClick={() => goPage("/goods")}
           >
-            <span className="kf-side-item__icon"><FaShoppingBag size={18} /></span>
+            <span className="kf-side-item__icon">
+              <FaShoppingBag size={18} />
+            </span>
             굿즈샵
           </button>
 
@@ -178,7 +196,9 @@ function Sidebar() {
               className={`kf-side-item${isActivePrefix("/game") ? " is-active" : ""}`}
               onClick={() => toggleMenu("game")}
             >
-              <span className="kf-side-item__icon"><FaGamepad size={18} /></span>
+              <span className="kf-side-item__icon">
+                <FaGamepad size={18} />
+              </span>
               게임
               <span className={`kf-side-chevron${openMenu === "game" ? " is-open" : ""}`}>
                 <FaChevronDown size={13} />

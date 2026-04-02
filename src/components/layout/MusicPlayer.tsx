@@ -169,7 +169,10 @@ function MusicPlayer({
               <div className="kf-player__title">{song.trackName}</div>
               <div className="kf-player__sub">
                 {song.artistName}
-                <GoDotFill size={8} style={{ display: "inline", margin: "0 4px", verticalAlign: "middle" }} />
+                <GoDotFill
+                  size={8}
+                  style={{ display: "inline", margin: "0 4px", verticalAlign: "middle" }}
+                />
                 {song.genreName}
               </div>
             </div>
