@@ -185,7 +185,7 @@ export default function OrderPage() {
                   type="checkbox"
                   checked={useSameInfo}
                   onChange={(e) => handleSameInfo(e.target.checked)}
-                  className="w-4 h-4 accent-red-500 cursor-pointer"
+                  className="w-4 h-4 accent-violet-500 cursor-pointer"
                 />
                 회원정보와 동일
               </label>
@@ -217,10 +217,10 @@ export default function OrderPage() {
                   className={`w-full bg-gray-800 border rounded-lg px-4 py-2.5 text-white focus:outline-none transition-colors border-b-2 ${getPhoneBorderClass()}`}
                 />
                 {phoneTouched && form.receiverPhone && !phoneValid && (
-                  <p className="text-red-400 text-xs mt-1">올바른 휴대폰 번호를 입력해주세요. (예: 010-1234-5678)</p>
+                  <p className="text-red-600 text-xs mt-1">올바른 휴대폰 번호를 입력해주세요. (예: 010-1234-5678)</p>
                 )}
                 {phoneTouched && phoneValid && (
-                  <p className="text-green-400 text-xs mt-1">올바른 형식입니다.</p>
+                  <p className="text-green-600 text-xs mt-1">올바른 형식입니다.</p>
                 )}
               </div>
 
@@ -259,7 +259,7 @@ export default function OrderPage() {
             <h2 className="font-bold text-lg mb-4">포인트 사용</h2>
             <div className="flex items-center justify-between text-sm text-gray-400 mb-3">
               <span>보유 포인트</span>
-              <span className="text-yellow-400 font-semibold">{myPoint.toLocaleString()}P</span>
+              <span className="text-amber-600 font-semibold">{myPoint.toLocaleString()}P</span>
             </div>
             <div className="flex gap-2">
               <input
@@ -288,7 +288,7 @@ export default function OrderPage() {
               </button>
             </div>
             {pointsToUse > 0 && (
-              <p className="text-yellow-400 text-xs mt-2">
+              <p className="text-amber-600 text-xs mt-2">
                 {pointsToUse.toLocaleString()}P 사용 → {(myPoint - pointsToUse).toLocaleString()}P 남음
               </p>
             )}
@@ -340,7 +340,7 @@ export default function OrderPage() {
               </div>
               <div className="flex justify-between text-gray-400">
                 <span>배송비</span>
-                <span className={deliveryFee === 0 ? "text-green-400" : "text-white"}>
+                <span className={deliveryFee === 0 ? "text-green-600" : "text-white"}>
                   {deliveryFee === 0 ? "무료" : `${deliveryFee.toLocaleString()}원`}
                 </span>
               </div>
