@@ -7,6 +7,7 @@ import { BsQuestionCircleFill } from "react-icons/bs";
 import { IoWarning } from "react-icons/io5";
 import { RiResetLeftFill } from "react-icons/ri";
 import { usePlayer } from "../../contexts/PlayerContext";
+import "../../styles/SearchResult.kfandom.css";
 
 interface Song {
   id: number;
@@ -19,7 +20,6 @@ interface Song {
   releaseDate: string;
 }
 
-// 검색 결과 페이지
 function SearchResult() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -39,7 +39,6 @@ function SearchResult() {
       const response = await api.get("/api/search", {
         params: { q: query },
       });
-
       setData(response.data || []);
     } catch (error) {
       console.error(error);
@@ -50,59 +49,57 @@ function SearchResult() {
     }
   };
 
-  // 검색 값, 이전 검색어 재검색 상태 값에 따라 재렌더링
   useEffect(() => {
     fetchData();
   }, [query, location.state]);
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold">곡 검색 결과</h1>
+    <div className="kf-search-result">
+      <h1>곡 검색 결과</h1>
 
-      {/* 로딩 중인 상태 */}
+      {/* 로딩 */}
       {isLoading && (
-        <div className="flex items-center justify-center py-48">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
           <Spinner />
         </div>
       )}
 
-      {/* 에러인 상태 */}
+      {/* 에러 */}
       {isError && !isLoading && (
         <div className="flex flex-col items-center justify-center gap-5 py-32">
-          <div className="flex flex-col items-center justify-center gap-4">
-            <IoWarning size={60} />
-            <p className="text-lg font-bold text-white">검색 중 문제가 발생 했습니다.</p>
-          </div>
+          <IoWarning size={56} style={{ color: "var(--kf-danger, #ff687d)" }} />
+          <p className="kf-search-state__text--error">검색 중 문제가 발생했습니다.</p>
           <button
             onClick={() => fetchData()}
-            className="flex items-center gap-2 px-5 py-3 font-semibold text-white transition-colors bg-red-600 rounded-full hover:bg-red-700"
+            className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full"
+            style={{ background: "linear-gradient(135deg, #6d5efc, #ff5ca8)" }}
           >
-            <RiResetLeftFill size={25} />
+            <RiResetLeftFill size={20} />
             <span>다시 시도</span>
           </button>
         </div>
       )}
 
-      {/* 검색 결과 없는 상태 */}
+      {/* 검색 결과 없음 */}
       {!isLoading && !isError && data.length === 0 && query && (
-        <div className="flex flex-col items-center justify-center gap-5 py-48 text-gray-400">
-          <BsQuestionCircleFill size={60} />
-          <p className="mb-2 text-lg">
-            <span className="font-bold tracking-tight">"{query}"</span>
-            <span>에 대한 검색 결과가 없습니다.</span>
+        <div className="kf-search-state">
+          <div className="kf-search-state__icon--empty">
+            <BsQuestionCircleFill size={52} />
+          </div>
+          <p className="kf-search-state__text--empty">
+            <strong>"{query}"</strong>에 대한 검색 결과가 없습니다.
           </p>
         </div>
       )}
 
-      {/* 검색 결과 리스트 표시 */}
+      {/* 검색 결과 */}
       {!isLoading && !isError && data.length > 0 && (
-        <div className="mt-7">
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {data.map((item) => (
             <SongListItem key={item.id} song={item} setSelectSong={setSelectSong} />
           ))}
         </div>
       )}
-
     </div>
   );
 }

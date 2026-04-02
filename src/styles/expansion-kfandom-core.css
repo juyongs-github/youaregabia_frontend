@@ -180,7 +180,6 @@
   inset: 0;
   z-index: 70;
   background: rgba(232, 236, 255, 0.48) !important;
-  backdrop-filter: blur(18px);
 }
 
 .kf-expansion-modal .modal-container,

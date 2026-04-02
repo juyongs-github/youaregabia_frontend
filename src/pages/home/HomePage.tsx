@@ -340,6 +340,7 @@ function HomePage() {
                                     trackName: song.trackName,
                                     artistName: song.artistName,
                                     coverImageUrl: song.imgUrl,
+                                    previewUrl: song.previewUrl,
                                   },
                                 })
                               }
@@ -405,6 +406,7 @@ function HomePage() {
                             trackName: song.trackName,
                             artistName: song.artistName,
                             coverImageUrl: song.imgUrl,
+                            previewUrl: song.previewUrl,
                           },
                         })
                       }
