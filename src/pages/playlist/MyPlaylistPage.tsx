@@ -6,6 +6,7 @@ import { FaPlus, FaTrash } from "react-icons/fa";
 import "../../styles/playlist-kfandom.css";
 import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
 import "../../styles/MyplaylistPage.css";
+import api from "../../api/axios";
 
 
 function MyPlaylistPage() {
@@ -117,8 +118,10 @@ function MyPlaylistPage() {
             }}
           >
             <div className="playlist-image-wrapper">
-              <img src={`${import.meta.env.VITE_API_BASE_URL}${item.imageUrl}`} />
-
+              <img src={`${api.defaults.baseURL}${item.imageUrl}`} alt={item.title} />
+              <button className="play-button">
+                <FaPlay />
+              </button>
               <button
                 className="playlist-delete-btn"
                 title="삭제"

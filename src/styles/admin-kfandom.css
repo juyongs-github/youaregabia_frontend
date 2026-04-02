@@ -31,7 +31,7 @@
   display: flex; align-items: center; gap: 10px;
   padding: 9px 12px; border-radius: 10px;
   font-size: 13px; font-weight: 600;
-  color: #677086;
+  color: #4b5563;
   transition: background 0.15s, color 0.15s;
 }
 .kf-admin-nav-link:hover {
@@ -48,12 +48,12 @@
   display: flex; align-items: center; gap: 10px;
   width: 100%; padding: 9px 12px; border-radius: 10px;
   font-size: 13px; font-weight: 600;
-  color: #9199ad;
-  transition: background 0.15s, color 0.15s;
+  background: #ef4444;
+  color: #ffffff;
+  transition: background 0.15s;
 }
 .kf-admin-logout:hover {
-  background: rgba(255,103,122,0.08);
-  color: #ff5ca8;
+  background: #dc2626;
 }
 
 /* ── Content shell ──────────────────────── */
@@ -79,7 +79,7 @@
   border-bottom: 1px solid rgba(92,103,151,0.10) !important;
 }
 .kf-admin-table-wrap table thead th {
-  color: #9199ad !important;
+  color: #64748b !important;
 }
 .kf-admin-table-wrap table tbody tr {
   border-bottom: 1px solid rgba(92,103,151,0.08) !important;
@@ -102,6 +102,14 @@
 }
 .kf-admin-order-card .kf-divider {
   border-top: 1px solid rgba(92,103,151,0.10);
+}
+
+/* ── Dashboard chart card ────────────────── */
+.kf-admin-card {
+  background: rgba(255,255,255,0.82);
+  border: 1px solid rgba(92,103,151,0.12);
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(80,90,140,0.07);
 }
 
 /* ── Dashboard stat card ─────────────────── */
@@ -154,7 +162,7 @@
 .kf-admin-btn-secondary {
   background: rgba(255,255,255,0.88) !important;
   border: 1px solid rgba(92,103,151,0.18) !important;
-  color: #677086 !important;
+  color: #4b5563 !important;
   transition: background 0.15s, color 0.15s;
 }
 .kf-admin-btn-secondary:hover {
@@ -197,3 +205,63 @@
 .kf-badge-yellow { background: rgba(255,182,72,0.14); color: #cc8800; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
 .kf-badge-red    { background: rgba(255,92,122,0.12); color: #e0344a; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
 .kf-badge-gray   { background: rgba(92,103,151,0.10); color: #677086; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+
+/* ── Mobile header bar ──────────────────── */
+.kf-admin-mobile-header {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(92,103,151,0.12);
+}
+
+.kf-admin-hamburger {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.88);
+  border: 1px solid rgba(92,103,151,0.18);
+  color: #1f2430;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.kf-admin-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 199;
+}
+
+/* ── Responsive admin layout ────────────── */
+@media (max-width: 1023px) {
+  .kf-admin-sidebar {
+    position: fixed;
+    left: -220px;
+    top: 0;
+    height: 100vh;
+    z-index: 200;
+    transition: left 0.3s ease;
+    width: 220px !important;
+  }
+
+  .kf-admin-sidebar.open {
+    left: 0;
+  }
+
+  .kf-admin-content {
+    padding: 16px !important;
+  }
+
+  .kf-admin-mobile-header {
+    display: flex !important;
+  }
+
+  .kf-admin-table-wrap {
+    overflow-x: auto;
+  }
+}

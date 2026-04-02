@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import "../../styles/sidebar-kfandom.css";
 
-function Sidebar() {
+function Sidebar({ isOpen = false, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useSelector((state: RootState) => state.auth.user);
@@ -18,6 +18,7 @@ function Sidebar() {
   };
 
   const goPage = (path: string) => {
+    onClose?.();
     if (location.pathname === path) {
       window.location.reload();
     } else {
@@ -33,7 +34,7 @@ function Sidebar() {
     userRole === "ADMIN" ? "Admin Hub" : userRole === "CRITIC" ? "Critic Mode" : "Fan Mode";
 
   return (
-    <aside className="kf-side-shell">
+    <aside className={`kf-side-shell${isOpen ? " kf-sidebar-open" : ""}`}>
       <div className="kf-side-card">
         {/* Brand / user */}
         <div className="kf-side-brand">

@@ -76,13 +76,13 @@ export default function AdminPointsPage() {
     }
   };
 
-  if (loading) return <div className="text-center mt-20" style={{color:"#9199ad"}}>로딩 중...</div>;
+  if (loading) return <div className="text-center mt-20" style={{color:"#64748b"}}>로딩 중...</div>;
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold">포인트 관리</h1>
-        <p className="text-sm mt-1" style={{color:"#677086"}}>총 {rows.length}명</p>
+        <p className="text-sm mt-1" style={{color:"#4b5563"}}>총 {rows.length}명</p>
       </div>
 
       {/* 탭 */}
@@ -116,13 +116,18 @@ export default function AdminPointsPage() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => {
+              {rows.filter((row) => row.email !== "admin@naver.com").map((row) => {
                 const grade = GRADE_LABEL[row.grade] ?? { text: row.grade, color: "text-gray-400" };
+                const isWithdrawn = row.email?.includes("@delete.com");
+                const isDisabled = isWithdrawn || processing === row.userId;
                 return (
-                  <tr key={row.userId} className="whitespace-nowrap">
-                    <td className="px-5 py-4" style={{color:"#9199ad"}}>{row.userId}</td>
-                    <td className="px-5 py-4 font-medium">{row.name}</td>
-                    <td className="px-5 py-4" style={{color:"#677086"}}>{row.email || "-"}</td>
+                  <tr key={row.userId} className={`whitespace-nowrap ${isWithdrawn ? "opacity-50" : ""}`}>
+                    <td className="px-5 py-4" style={{color:"#64748b"}}>{row.userId}</td>
+                    <td className="px-5 py-4 font-medium">
+                      {row.name}
+                      {isWithdrawn && <span className="ml-2 text-xs text-red-400">(탈퇴)</span>}
+                    </td>
+                    <td className="px-5 py-4" style={{color:"#4b5563"}}>{row.email || "-"}</td>
                     <td className={`px-5 py-4 font-medium ${grade.color}`}>{grade.text}</td>
                     <td className="px-5 py-4 text-yellow-400 font-semibold">
                       {row.totalPoint.toLocaleString()}P
@@ -136,20 +141,21 @@ export default function AdminPointsPage() {
                           onChange={(e) =>
                             setAdjustInputs((prev) => ({ ...prev, [row.userId]: e.target.value }))
                           }
-                          placeholder="포인트 입력"
-                          className="w-32 px-3 py-1.5 text-sm"
+                          placeholder={isWithdrawn ? "탈퇴한 회원" : "포인트 입력"}
+                          disabled={isDisabled}
+                          className="w-32 px-3 py-1.5 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                         />
                         <button
                           onClick={() => handleAdjust(row.userId, "grant")}
-                          disabled={processing === row.userId}
-                          className="kf-admin-btn-primary rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors"
+                          disabled={isDisabled}
+                          className="kf-admin-btn-primary rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
                         >
                           {processing === row.userId ? "..." : "지급"}
                         </button>
                         <button
                           onClick={() => handleAdjust(row.userId, "deduct")}
-                          disabled={processing === row.userId}
-                          className="kf-admin-btn-danger rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors"
+                          disabled={isDisabled}
+                          className="kf-admin-btn-danger rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
                         >
                           {processing === row.userId ? "..." : "차감"}
                         </button>
@@ -161,7 +167,7 @@ export default function AdminPointsPage() {
             </tbody>
           </table>
           {rows.length === 0 && (
-            <p className="text-center py-12" style={{color:"#9199ad"}}>포인트 데이터가 없습니다.</p>
+            <p className="text-center py-12" style={{color:"#64748b"}}>포인트 데이터가 없습니다.</p>
           )}
         </div>
       )}
@@ -183,7 +189,7 @@ export default function AdminPointsPage() {
               {logs.map((log) => (
                 <tr key={log.id} className="whitespace-nowrap">
                   <td className="px-5 py-4 font-medium">{log.name}</td>
-                  <td className="px-5 py-4" style={{color:"#677086"}}>{log.email || "-"}</td>
+                  <td className="px-5 py-4" style={{color:"#4b5563"}}>{log.email || "-"}</td>
                   <td className="px-5 py-4">
                     <span className={log.pointType === "ADMIN_GRANT" ? "kf-badge-blue" : "kf-badge-red"}>
                       {log.description}
@@ -192,7 +198,7 @@ export default function AdminPointsPage() {
                   <td className={`px-5 py-4 font-semibold ${log.amount > 0 ? "text-blue-500" : "text-red-500"}`}>
                     {log.amount > 0 ? `+${log.amount.toLocaleString()}` : log.amount.toLocaleString()}P
                   </td>
-                  <td className="px-5 py-4" style={{color:"#9199ad"}}>
+                  <td className="px-5 py-4" style={{color:"#64748b"}}>
                     {log.createdAt?.slice(0, 16).replace("T", " ")}
                   </td>
                 </tr>
@@ -200,7 +206,7 @@ export default function AdminPointsPage() {
             </tbody>
           </table>
           {logs.length === 0 && (
-            <p className="text-center py-12" style={{color:"#9199ad"}}>지급/차감 내역이 없습니다.</p>
+            <p className="text-center py-12" style={{color:"#64748b"}}>지급/차감 내역이 없습니다.</p>
           )}
         </div>
       )}

@@ -22,7 +22,7 @@ interface NotificationItem {
   createdAt: string;
 }
 
-function Header({ showSearch = true }: { showSearch?: boolean }) {
+function Header({ showSearch = true, onMenuClick }: { showSearch?: boolean; onMenuClick?: () => void }) {
   const isLogin = useSelector((state: RootState) => state.auth.isLoggedIn);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -105,6 +105,11 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
   return (
     <div className="kf-header-wrap">
       <header className="kf-header">
+        {/* 햄버거 버튼 (모바일) */}
+        <button className="kf-header__hamburger" onClick={onMenuClick} aria-label="메뉴 열기">
+          ☰
+        </button>
+
         {/* 브랜드 */}
         <button
           className="kf-header__brand"
@@ -113,7 +118,7 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
           <span className="kf-header__brandMark">G</span>
           <span className="kf-header__brandCopy">
             <strong className="kf-header__brandTitle">GAP Music</strong>
-            <span className="kf-header__brandSub">K-Fandom Hub Edition</span>
+            <span className="kf-header__brandSub">모두가 소통하는 음악커뮤니티</span>
           </span>
         </button>
 
@@ -157,10 +162,7 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
         <div className="kf-header__actions">
           {/* 등급/포인트 칩 */}
           {isLogin && (
-            <button
-              className="kf-header__chip"
-              onClick={() => navigate("/profile/points")}
-            >
+            <button className="kf-header__chip" onClick={() => navigate("/profile/points")}>
               <span className="kf-header__chipDot" />
               {grade} · {totalPoint.toLocaleString()}P
             </button>
@@ -201,9 +203,7 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
                 <div className="kf-notif-dropdown">
                   <div className="kf-notif-header">
                     <span>알림</span>
-                    {unreadCount > 0 && (
-                      <button onClick={handleMarkAllRead}>모두 읽음</button>
-                    )}
+                    {unreadCount > 0 && <button onClick={handleMarkAllRead}>모두 읽음</button>}
                   </div>
                   <div className="kf-notif-list">
                     {notifications.length === 0 ? (
@@ -230,19 +230,17 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
           )}
 
           {/* 프로필 버튼 */}
-          <button
-            className="kf-header__profileBtn"
-            aria-label="프로필"
-            onClick={handleClick}
-          >
+          <button className="kf-header__profileBtn" aria-label="프로필" onClick={handleClick}>
             {user?.imgUrl ? (
               <img
                 src={`${import.meta.env.VITE_API_BASE_URL ?? ""}${user.imgUrl}`}
                 alt="프로필"
                 style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover" }}
               />
+            ) : user?.name ? (
+              user.name[0]
             ) : (
-              user?.name ? user.name[0] : "U"
+              "U"
             )}
           </button>
 
@@ -269,7 +267,12 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
           >
             <MenuItem
               onClick={() => goPage("/profile/me")}
-              sx={{ color: "#1f2430", fontWeight: 700, py: 1.5, "&:hover": { backgroundColor: "rgba(109,94,252,0.06)" } }}
+              sx={{
+                color: "#1f2430",
+                fontWeight: 700,
+                py: 1.5,
+                "&:hover": { backgroundColor: "rgba(109,94,252,0.06)" },
+              }}
             >
               <ListItemIcon sx={{ color: "#6d5efc" }}>
                 <BiSolidUser size={20} />
@@ -279,7 +282,12 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
             {user?.role !== "ADMIN" && (
               <MenuItem
                 onClick={() => goPage("/goods/cart")}
-                sx={{ color: "#1f2430", fontWeight: 700, py: 1.5, "&:hover": { backgroundColor: "rgba(109,94,252,0.06)" } }}
+                sx={{
+                  color: "#1f2430",
+                  fontWeight: 700,
+                  py: 1.5,
+                  "&:hover": { backgroundColor: "rgba(109,94,252,0.06)" },
+                }}
               >
                 <ListItemIcon sx={{ color: "#6d5efc" }}>
                   <FaShoppingCart size={18} />
@@ -290,7 +298,12 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
             {user?.role !== "ADMIN" && (
               <MenuItem
                 onClick={() => goPage("/goods/orders")}
-                sx={{ color: "#1f2430", fontWeight: 700, py: 1.5, "&:hover": { backgroundColor: "rgba(109,94,252,0.06)" } }}
+                sx={{
+                  color: "#1f2430",
+                  fontWeight: 700,
+                  py: 1.5,
+                  "&:hover": { backgroundColor: "rgba(109,94,252,0.06)" },
+                }}
               >
                 <ListItemIcon sx={{ color: "#6d5efc" }}>
                   <FaClipboardList size={18} />
@@ -300,7 +313,12 @@ function Header({ showSearch = true }: { showSearch?: boolean }) {
             )}
             <MenuItem
               onClick={handleLogout}
-              sx={{ color: "#ff5b6e", fontWeight: 700, py: 1.5, "&:hover": { backgroundColor: "rgba(255,91,110,0.06)" } }}
+              sx={{
+                color: "#ff5b6e",
+                fontWeight: 700,
+                py: 1.5,
+                "&:hover": { backgroundColor: "rgba(255,91,110,0.06)" },
+              }}
             >
               <ListItemIcon sx={{ color: "#ff5b6e" }}>
                 <RiLogoutBoxRLine size={20} />

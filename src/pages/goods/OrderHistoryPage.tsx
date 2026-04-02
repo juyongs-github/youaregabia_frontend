@@ -32,12 +32,12 @@ interface TrackingEvent {
   level: number;
 }
 
-const STATUS_LABEL: Record<string, { text: string; color: string }> = {
-  PENDING:   { text: "주문접수",  color: "text-yellow-400 bg-yellow-400/10" },
-  PAID:      { text: "결제완료",  color: "text-green-400 bg-green-400/10"  },
-  SHIPPED:   { text: "배송중",    color: "text-blue-400 bg-blue-400/10"    },
-  DELIVERED: { text: "배송완료",  color: "text-gray-300 bg-gray-700"       },
-  CANCELLED: { text: "취소",      color: "text-red-400 bg-red-400/10"      },
+const STATUS_LABEL: Record<string, { text: string; color: string; borderColor: string }> = {
+  PENDING:   { text: "주문접수",  color: "text-amber-700 bg-amber-100 border border-amber-300",  borderColor: "border-l-4 border-l-amber-400"  },
+  PAID:      { text: "결제완료",  color: "text-green-700 bg-green-100 border border-green-300",  borderColor: "border-l-4 border-l-green-400"  },
+  SHIPPED:   { text: "배송중",    color: "text-blue-700 bg-blue-100 border border-blue-300",     borderColor: "border-l-4 border-l-blue-400"   },
+  DELIVERED: { text: "배송완료",  color: "text-gray-600 bg-gray-100 border border-gray-300",     borderColor: "border-l-4 border-l-gray-400"   },
+  CANCELLED: { text: "취소",      color: "text-red-700 bg-red-100 border border-red-300",        borderColor: "border-l-4 border-l-red-400"    },
 };
 
 const CARRIER_LABEL: Record<string, string> = {
@@ -133,21 +133,24 @@ export default function OrderHistoryPage() {
             })();
 
             return (
-              <div key={order.orderId} className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+              <div key={order.orderId} className={`bg-gray-900 border border-gray-800 rounded-xl p-5 ${sl.borderColor}`}>
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">{order.createdAt?.replace("T", " ").slice(0, 16)}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs font-bold text-gray-400">#{order.orderId}</span>
+                      <span className="text-xs text-gray-500">{order.createdAt?.replace("T", " ").slice(0, 16)}</span>
+                    </div>
                     <p className="font-semibold text-base">{itemSummary}</p>
                   </div>
-                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${sl.color}`}>{sl.text}</span>
+                  <span className={`text-sm font-bold px-4 py-1.5 rounded-full ${sl.color}`}>{sl.text}</span>
                 </div>
 
-                <div className="text-sm text-gray-400 space-y-1 mb-4">
-                  <p>받는 분: <span className="text-gray-200">{order.receiverName}</span></p>
-                  <p>배송지: <span className="text-gray-200">{order.deliveryAddress}</span></p>
-                  <p>결제금액: <span className="text-white font-semibold">{order.totalAmount.toLocaleString()}원</span></p>
+                <div className="text-sm text-gray-500 space-y-1 mb-4">
+                  <p>받는 분: <span className="text-gray-900 font-medium">{order.receiverName}</span></p>
+                  <p>배송지: <span className="text-gray-900 font-medium">{order.deliveryAddress}</span></p>
+                  <p>결제금액: <span className="text-gray-900 font-semibold">{order.totalAmount.toLocaleString()}원</span></p>
                   {hasTracking && (
-                    <p>택배사: <span className="text-gray-200">{CARRIER_LABEL[order.carrierId!] ?? order.carrierId}</span> | 운송장: <span className="text-gray-200">{order.trackingNumber}</span></p>
+                    <p>택배사: <span className="text-gray-900 font-medium">{CARRIER_LABEL[order.carrierId!] ?? order.carrierId}</span> | 운송장: <span className="text-gray-900 font-medium">{order.trackingNumber}</span></p>
                   )}
                 </div>
 
@@ -163,7 +166,7 @@ export default function OrderHistoryPage() {
                     </button>
                     <button
                       onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL}/api/orders/track-popup?carrierId=${order.carrierId}&trackingNumber=${order.trackingNumber}`, "_blank", "width=500,height=700")}
-                      className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-semibold transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-100 border-2 border-gray-900 rounded-lg text-sm font-semibold transition-colors"
                     >
                       <FaTruck size={13} />
                       상세 조회

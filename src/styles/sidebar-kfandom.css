@@ -190,26 +190,76 @@
   border-color: rgba(109,94,252,0.12);
 }
 
-@media (max-width: 1024px) {
+/* ── Backdrop (mobile overlay) ──────────── */
+.kf-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 199;
+  backdrop-filter: blur(2px);
+}
+
+/* ── Main content area ──────────────────── */
+.kf-main-content {
+  flex: 1;
+  margin-left: 300px;
+  padding-top: 96px;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.kf-main-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px 80px;
+}
+
+/* ── Mobile: sidebar as drawer overlay ─── */
+@media (max-width: 1023px) {
   .kf-side-shell {
-    position: static;
-    width: 100%;
-    height: auto;
-    padding: 0;
+    position: fixed;
+    left: -340px;
+    top: 0;
+    height: 100vh;
+    width: 300px;
+    padding: 12px;
+    z-index: 200;
+    transition: left 0.3s ease;
+  }
+
+  .kf-side-shell.kf-sidebar-open {
+    left: 0;
   }
 
   .kf-side-card {
-    height: auto;
-    border-radius: 24px;
+    height: 100%;
+    border-radius: 0 24px 24px 0;
+    padding-top: 72px;
+  }
+
+  .kf-main-content {
+    margin-left: 0;
+    padding-top: 80px;
+    width: 100%;
   }
 }
 
-@media (max-width: 640px) {
-  .kf-side-card {
-    padding: 14px;
+/* ── Desktop: fixed sidebar ─────────────── */
+@media (min-width: 1024px) {
+  .kf-side-shell {
+    position: fixed;
+    left: 0;
+    top: 84px;
+    width: 300px;
+    height: calc(100vh - 96px);
+    padding: 12px 16px 16px;
+    z-index: 20;
   }
+}
 
-  .kf-side-brand {
-    padding: 12px;
+/* ── Small mobile inner padding ─────────── */
+@media (max-width: 768px) {
+  .kf-main-inner {
+    padding: 0 16px 80px;
   }
 }

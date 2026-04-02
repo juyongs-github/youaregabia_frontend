@@ -1,4 +1,6 @@
+import "../../styles/admin-kfandom.css";
 import { NavLink, Outlet, Navigate, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   FaUsers,
@@ -9,6 +11,8 @@ import {
   FaHome,
   FaSignOutAlt,
   FaCoins,
+  FaCommentDots,
+  FaBars,
 } from "react-icons/fa";
 import type { RootState } from "../../store";
 import { logout } from "../../store/authSlice";
@@ -21,6 +25,7 @@ const navItems = [
   { to: "/admin/goods", label: "굿즈 관리", icon: FaBox },
   { to: "/admin/orders", label: "결제 내역", icon: FaShoppingCart },
   { to: "/admin/points", label: "포인트 관리", icon: FaCoins },
+  { to: "/admin/inquiries", label: "문의 내역", icon: FaCommentDots },
 ];
 
 export default function AdminLayout() {
@@ -28,6 +33,8 @@ export default function AdminLayout() {
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   if (!isLogin) return <Navigate to="/login" replace />;
   if (user?.role !== "ADMIN") return <Navigate to="/home" replace />;
 
@@ -37,13 +44,19 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="flex min-h-screen text-white bg-gray-950">
+    <div className="kf-admin flex min-h-screen">
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div
+          className="kf-admin-sidebar-backdrop"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-52 shrink-0 border-r border-gray-800 bg-gray-950 flex flex-col py-6 sticky top-0 h-screen overflow-y-auto">
+      <aside className={`kf-admin-sidebar w-52 shrink-0 flex flex-col py-6 sticky top-0 h-screen overflow-y-auto${sidebarOpen ? " open" : ""}`}>
         <div className="px-5 mb-6">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
-            Admin Panel
-          </p>
+          <p className="kf-admin-label">Admin Panel</p>
         </div>
         <nav className="flex flex-col gap-0.5 px-3">
           {navItems.map(({ to, label, icon: Icon, end }) => (
@@ -52,12 +65,9 @@ export default function AdminLayout() {
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-white/10 text-white"
-                    : "text-gray-400 hover:text-white hover:bg-white/5"
-                }`
+                `kf-admin-nav-link${isActive ? " active" : ""}`
               }
+              onClick={() => setSidebarOpen(false)}
             >
               <Icon size={14} />
               {label}
@@ -65,10 +75,7 @@ export default function AdminLayout() {
           ))}
         </nav>
         <div className="mt-auto px-3">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition-colors"
-          >
+          <button onClick={handleLogout} className="kf-admin-logout">
             <FaSignOutAlt size={14} />
             관리자 접속 종료
           </button>
@@ -76,7 +83,18 @@ export default function AdminLayout() {
       </aside>
 
       {/* Content */}
-      <main className="flex-1 overflow-auto p-8">
+      <main className="kf-admin-content flex-1 overflow-auto p-8">
+        {/* Mobile header row */}
+        <div className="kf-admin-mobile-header">
+          <button
+            className="kf-admin-hamburger"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="메뉴 열기"
+          >
+            <FaBars size={16} />
+          </button>
+          <span style={{ fontSize: 15, fontWeight: 700, color: "#1f2430" }}>Admin Panel</span>
+        </div>
         <Outlet />
       </main>
     </div>

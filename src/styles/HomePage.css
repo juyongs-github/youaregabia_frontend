@@ -196,14 +196,14 @@
 
 .icon-popup button {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
-  background: none; border: none; color: #6a6f7d;
+  background: none; border: none; color: #ffffff;
   font-size: clamp(11px, 0.9vw, 13px); cursor: pointer;
   padding: clamp(6px, 0.6vh, 10px) 0; border-radius: 10px;
   transition: all 0.15s ease;
   flex: 1; min-width: 0;
   text-align: center;
 }
-.icon-popup button:hover { color: #25272f; background: rgba(109,94,252,0.06); transform: translateY(-2px); }
+.icon-popup button:hover { color: #1f2430; background: rgba(255,255,255,0.6); transform: translateY(-2px); }
 
 /* ── Center icons ───────────────────────── */
 .center-icons {
