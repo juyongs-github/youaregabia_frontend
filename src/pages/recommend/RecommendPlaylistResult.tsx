@@ -11,6 +11,8 @@ import { RiArrowLeftLine, RiPlayList2Fill } from "react-icons/ri";
 import { usePlayer } from "../../contexts/PlayerContext";
 import { RiResetLeftFill } from "react-icons/ri";
 import PlaylistReviewCreateModal from "../../components/ui/PlaylistReviewCreateModal";
+import Toast from "../../components/ui/Toast";
+import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import Checkbox from "@mui/material/Checkbox";
 import { playlistApi } from "../../api/playlistApi";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -59,6 +61,12 @@ function RecommendPlaylistResult() {
 
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+  const [confirmState, setConfirmState] = useState<{ message: string; onConfirm: () => void } | null>(null);
+
+  const showToast = (message: string, type: "success" | "error" | "info" = "info") => setToast({ message, type });
+  const showConfirm = (message: string, onConfirm: () => void) => setConfirmState({ message, onConfirm });
 
   const isAllChecked = data.length > 0 && checkedSongIds.length === data.length;
   const isIndeterminate = checkedSongIds.length > 0 && !isAllChecked;
@@ -159,15 +167,12 @@ function RecommendPlaylistResult() {
     (document.getElementById("playlist-cover-input") as HTMLInputElement)?.click();
   };
 
-  const handleSavePlaylist = async () => {
-    if (checkedSongIds.length === 0) { alert("저장할 곡을 선택해주세요."); return; }
-    if (!playlistTitle.trim()) { alert("플레이리스트 제목을 입력해주세요."); return; }
-    if (!confirm("플레이리스트를 저장 하시겠습니까?")) return;
-
+  const doSavePlaylist = async () => {
+    setConfirmState(null);
     setIsSaving(true);
     try {
       const formData = new FormData();
-      if (!user) { alert("로그인이 필요합니다."); return; }
+      if (!user) { showToast("로그인이 필요합니다.", "error"); return; }
 
       let fileToUpload: File | null = selectedImageFile;
       if (!fileToUpload && coverImageUrl) fileToUpload = await convertImageUrlToFile(coverImageUrl);
@@ -182,18 +187,24 @@ function RecommendPlaylistResult() {
       const res = await playlistApi.createPlaylist(formData);
       if (res.status === 200 || res.status === 201) {
         const playlistId = res.data?.id || res.data?.playlistId;
-        if (playlistId) { setSavedPlaylistId(playlistId); alert("플레이리스트가 저장되었습니다."); }
+        if (playlistId) { setSavedPlaylistId(playlistId); showToast("플레이리스트가 저장되었습니다.", "success"); }
       }
     } catch (error: any) {
-      if (error?.response?.status === 409) alert("같은 제목의 플레이리스트가 이미 존재합니다.");
-      else alert("플레이리스트 저장에 실패했습니다.");
+      if (error?.response?.status === 409) showToast("같은 제목의 플레이리스트가 이미 존재합니다.", "error");
+      else showToast("플레이리스트 저장에 실패했습니다.", "error");
     } finally {
       setIsSaving(false);
     }
   };
 
+  const handleSavePlaylist = () => {
+    if (checkedSongIds.length === 0) { showToast("저장할 곡을 선택해주세요.", "error"); return; }
+    if (!playlistTitle.trim()) { showToast("플레이리스트 제목을 입력해주세요.", "error"); return; }
+    showConfirm("플레이리스트를 저장 하시겠습니까?", doSavePlaylist);
+  };
+
   const handleOpenReviewModal = () => {
-    if (!savedPlaylistId) { alert("먼저 플레이리스트를 저장해주세요."); return; }
+    if (!savedPlaylistId) { showToast("먼저 플레이리스트를 저장해주세요.", "error"); return; }
     setIsModalOpen(true);
   };
 
@@ -203,6 +214,14 @@ function RecommendPlaylistResult() {
 
   return (
     <div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      {confirmState && (
+        <ConfirmDialog
+          message={confirmState.message}
+          onConfirm={confirmState.onConfirm}
+          onCancel={() => setConfirmState(null)}
+        />
+      )}
       {/* 로딩 */}
       {isLoading && (
         <div className="flex items-center justify-center py-48">
