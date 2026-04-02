@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaPlus, FaSearch } from "react-icons/fa";
-import Box from "@mui/material/Box";
-import Tab from "@mui/material/Tab";
-import TabContext from "@mui/lab/TabContext";
-import TabList from "@mui/lab/TabList";
-import TabPanel from "@mui/lab/TabPanel";
+import { MdOutlineLibraryMusic } from "react-icons/md";
 import CollaborationPlaylistTopicItem from "../../components/ui/CollaboPlaylistTopicItem";
 import CollaboPlaylistCreateModal from "../../components/ui/CollaboPlaylistCreateModal";
 import { playlistApi } from "../../api/playlistApi";
@@ -14,10 +10,9 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import "../../styles/collabo-playlist-page-kfandom.css";
 
-// 공동 플레이리스트 제작 페이지
 function CollaboPlaylistPage() {
   const user = useSelector((state: RootState) => state.auth.user);
-  const [tab, setTab] = useState("1");
+  const [tab, setTab] = useState<"all" | "popular" | "recent">("all");
   const [filter, setFilter] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [playlists, setPlaylists] = useState<CollaboPlaylist[]>([]);
@@ -56,11 +51,8 @@ function CollaboPlaylistPage() {
     }
   };
 
-  useEffect(() => {
-    fetchPlaylists();
-  }, []);
+  useEffect(() => { fetchPlaylists(); }, []);
 
-  // 필터 적용
   const filtered = playlists.filter(p =>
     !filter.trim() ||
     p.title?.toLowerCase().includes(filter.toLowerCase()) ||
@@ -68,94 +60,106 @@ function CollaboPlaylistPage() {
     p.creatorEmail?.toLowerCase().includes(filter.toLowerCase())
   );
 
-  // 탭별 정렬
-  const allPlaylists = filtered;
-  const popularPlaylists = [...filtered].sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0));
-  const recentPlaylists = [...filtered].sort((a, b) =>
-    new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
-  );
+  const tabs = [
+    { key: "all" as const, label: "전체" },
+    { key: "popular" as const, label: "인기순" },
+    { key: "recent" as const, label: "최신순" },
+  ];
+
+  const displayList =
+    tab === "popular"
+      ? [...filtered].sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0))
+      : tab === "recent"
+      ? [...filtered].sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())
+      : filtered;
 
   return (
     <div className="kf-community-page kf-collabo-page">
       <div className="kf-community-page__shell">
-      <div>
-      {/* 제목 부분 */}
-      <div className="flex items-center justify-between mb-8 tracking-tighter">
-        <div>
-          <h1 className="mb-2 text-3xl font-bold">공동 플레이리스트 제작</h1>
-          <p className="text-gray-400">다른 사람들과 함께 플레이리스트를 만들어보세요.</p>
-        </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 p-4 font-semibold transition-colors bg-red-600 rounded-full hover:bg-red-700"
-        >
-          <FaPlus size={20} />
-        </button>
-      </div>
+        <div style={{ padding: 24 }}>
+          {/* 헤더 */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl"
+                style={{ background: "linear-gradient(135deg, rgba(109,94,252,0.15), rgba(255,92,168,0.12))", border: "1px solid rgba(109,94,252,0.18)" }}>
+                <MdOutlineLibraryMusic size={20} style={{ color: "#6d5efc" }} />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold" style={{ color: "#1f2430" }}>공동 플레이리스트 제작</h1>
+                <p className="text-sm" style={{ color: "#677086" }}>다른 사람들과 함께 플레이리스트를 만들어보세요.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2.5 font-semibold text-sm text-white rounded-full transition-all hover:scale-105"
+              style={{ background: "linear-gradient(135deg, #6d5efc, #ff5ca8)", boxShadow: "0 6px 18px rgba(109,94,252,0.28)" }}
+            >
+              <FaPlus size={13} />
+              <span>새 플레이리스트</span>
+            </button>
+          </div>
 
-      {/* 검색바 */}
-      {!isLoading && playlists.length > 0 && (
-        <div className="relative mb-4">
-          <FaSearch size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          <input
-            value={filter}
-            onChange={e => setFilter(e.target.value)}
-            placeholder="제목, 설명 또는 작성자로 검색"
-            className="w-full pl-11 pr-4 py-3 text-base rounded-xl bg-white/5 border border-white/10 outline-none focus:border-white/30 transition-colors placeholder-white/30"
-          />
-        </div>
-      )}
-
-      {/* 로딩 */}
-      {isLoading && (
-        <div className="flex justify-center py-24">
-          <Spinner />
-        </div>
-      )}
-
-      {/* Filter Tabs */}
-      {!isLoading && (
-        <Box sx={{ width: "100%", typography: "body1" }}>
-          <TabContext value={tab}>
-            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-              <TabList
-                onChange={(_, v) => setTab(v)}
-                aria-label="공동 플레이리스트 제작 Filter Tab"
-                sx={{
-                  "& .MuiTab-root": { color: "#677086", fontWeight: 600, fontSize: 16 },
-                  "& .Mui-selected": { color: "#212738" },
-                  "& .MuiTabs-indicator": { backgroundColor: "#6d5efc" },
+          {/* 검색바 */}
+          {!isLoading && playlists.length > 0 && (
+            <div className="relative mb-5">
+              <FaSearch size={13} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "#8e97ab" }} />
+              <input
+                value={filter}
+                onChange={e => setFilter(e.target.value)}
+                placeholder="제목, 설명 또는 작성자로 검색"
+                className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl outline-none transition-colors"
+                style={{
+                  background: "rgba(255,255,255,0.7)",
+                  border: "1.5px solid rgba(88,95,138,0.15)",
+                  color: "#1f2430",
                 }}
-              >
-                <Tab label="전체" value="1" />
-                <Tab label="인기순" value="2" />
-                <Tab label="최신순" value="3" />
-              </TabList>
-            </Box>
-            <TabPanel value="1">
-              <CollaborationPlaylistTopicItem playlists={allPlaylists} onLike={handleLike} />
-            </TabPanel>
-            <TabPanel value="2">
-              <CollaborationPlaylistTopicItem playlists={popularPlaylists} onLike={handleLike} />
-            </TabPanel>
-            <TabPanel value="3">
-              <CollaborationPlaylistTopicItem playlists={recentPlaylists} onLike={handleLike} />
-            </TabPanel>
-          </TabContext>
-        </Box>
-      )}
+              />
+            </div>
+          )}
 
-      {/* 모달 */}
-      {isModalOpen && (
-        <CollaboPlaylistCreateModal
-          onClose={() => setIsModalOpen(false)}
-          onCreated={() => {
-            setIsModalOpen(false);
-            fetchPlaylists();
-          }}
-        />
-      )}
-      </div>
+          {/* 탭 */}
+          {!isLoading && (
+            <>
+              <div className="flex gap-1.5 mb-4">
+                {tabs.map(t => (
+                  <button
+                    key={t.key}
+                    onClick={() => setTab(t.key)}
+                    className="px-4 py-2 rounded-full text-sm font-semibold transition-all"
+                    style={tab === t.key
+                      ? { background: "linear-gradient(135deg, #6d5efc, #ff5ca8)", color: "#fff", boxShadow: "0 4px 12px rgba(109,94,252,0.25)" }
+                      : { background: "rgba(255,255,255,0.6)", color: "#677086", border: "1px solid rgba(88,95,138,0.15)" }}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+                {filtered.length > 0 && (
+                  <span
+                    className="ml-auto flex items-center gap-1.5 text-sm font-semibold self-center px-2.5 py-1 rounded-full"
+                    style={{ color: "#7d879d", background: "rgba(255,255,255,0.72)", border: "1px solid rgba(88,95,138,0.16)" }}
+                  >
+                    <span>총</span>
+                    <span>{filtered.length}개</span>
+                  </span>
+                )}
+              </div>
+              <CollaborationPlaylistTopicItem playlists={displayList} onLike={handleLike} />
+            </>
+          )}
+
+          {isLoading && (
+            <div className="flex justify-center py-24">
+              <Spinner />
+            </div>
+          )}
+
+          {isModalOpen && (
+            <CollaboPlaylistCreateModal
+              onClose={() => setIsModalOpen(false)}
+              onCreated={() => { setIsModalOpen(false); fetchPlaylists(); }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

@@ -27,6 +27,8 @@ interface SongProps {
   setSelectSong?: (song: Song) => void;
 }
 
+const formatGenreName = (genreName: string) => genreName.replace(/K\s*팝/g, "K-Pop");
+
 function SongListItem({ song, setSelectSong }: SongProps) {
   const navigate = useNavigate();
   const { stop } = usePlayer();
@@ -64,7 +66,7 @@ function SongListItem({ song, setSelectSong }: SongProps) {
           <div className="kf-song-item__meta">
             <span>{song.artistName}</span>
             <span className="kf-song-item__meta-dot" />
-            <span>{song.genreName}</span>
+            <span>{formatGenreName(song.genreName)}</span>
           </div>
         </div>
       </div>

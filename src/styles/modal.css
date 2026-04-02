@@ -8,7 +8,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 999;
+  padding: 16px;
+  z-index: 3000;
 }
 
 /* =========================
@@ -56,19 +57,26 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: color .2s ease, background .2s ease;
+  transition: color .15s ease, background .15s ease, border-color .15s ease;
   flex-shrink: 0;
 }
 
-.close-btn:hover {
-  color: #1f2430;
-  background: rgba(255, 255, 255, 0.96);
+.modal-container .close-btn:hover {
+  color: #4f46e5 !important;
+  background: rgba(109, 94, 252, 0.16) !important;
+  border-color: rgba(109, 94, 252, 0.45) !important;
+}
+
+.modal-container .close-btn:active {
+  background: rgba(109, 94, 252, 0.22) !important;
 }
 
 /* 썸네일 */
 .thumbnail-box {
   position: relative;
-  height: 120px;
+  width: 128px;
+  height: 128px;
+  align-self: center;
   border: 1.5px dashed rgba(109, 94, 252, 0.32);
   border-radius: 16px;
   background: rgba(109, 94, 252, 0.04);
@@ -83,6 +91,15 @@
   font-size: 13px;
   font-weight: 700;
   transition: background .2s ease, border-color .2s ease;
+}
+
+.thumbnail-box span {
+  display: block;
+  padding: 0 8px;
+  text-align: center;
+  line-height: 1.35;
+  word-break: keep-all;
+  font-size: 12px;
 }
 
 .thumbnail-box:hover {
@@ -102,26 +119,44 @@
 
 /* 입력 (modal 내부로 스코프 한정) */
 .modal-container input:not([type="file"]),
-.modal-container textarea,
 .modal-container select {
+  width: 100%;
+  padding: 9px 16px 11px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(88, 95, 138, 0.22);
+  background: rgba(247, 248, 255, 0.88);
+  color: #1f2430;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.25;
+  font-family: inherit;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(80, 90, 140, 0.06);
+  transition: border-color .2s ease, box-shadow .2s ease;
+  box-sizing: border-box;
+}
+
+.modal-container textarea {
   width: 100%;
   padding: 10px 16px;
   border-radius: 16px;
   border: 1.5px solid rgba(88, 95, 138, 0.22);
   background: rgba(247, 248, 255, 0.88);
   color: #1f2430;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
+  line-height: 1.25;
+  font-family: inherit;
   outline: none;
   box-shadow: 0 2px 8px rgba(80, 90, 140, 0.06);
   transition: border-color .2s ease, box-shadow .2s ease;
-  font: inherit;
   box-sizing: border-box;
 }
 
 .modal-container input:not([type="file"])::placeholder,
 .modal-container textarea::placeholder {
   color: #8e97ab;
+  font-size: 13px;
 }
 
 .modal-container input:not([type="file"]):focus,

@@ -12,7 +12,7 @@
 }
 .kf-collabo-detail [class*="fixed inset-0 z-50"],
 .kf-collabo-detail [class*="fixed inset-0 z-[60]"] {
-  backdrop-filter: blur(6px);
+  backdrop-filter: none;
 }
 .kf-collabo-detail [class*="max-w-sm"],
 .kf-collabo-detail [class*="max-w-lg"],
@@ -25,4 +25,19 @@
 }
 .kf-collabo-detail [class*="bg-black/60"] {
   background: rgba(30, 36, 60, 0.38) !important;
+}
+
+.kf-collabo-detail .collabo-hero-card {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.kf-collabo-detail .collabo-hero-card:hover {
+  box-shadow: 0 10px 26px rgba(80, 90, 140, 0.12) !important;
+}
+
+@media (max-width: 768px) {
+  .kf-collabo-detail .collabo-hero-card {
+    padding: 16px !important;
+    gap: 14px !important;
+  }
 }

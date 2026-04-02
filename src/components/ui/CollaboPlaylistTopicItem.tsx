@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import {
-  FaChevronRight,
   FaClock,
   FaHeart,
   FaMusic,
@@ -10,6 +9,7 @@ import {
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import type { CollaboPlaylist } from "../../types/playlist";
+import FallbackCoverArt from "./FallbackCoverArt";
 
 interface Props {
   playlists: CollaboPlaylist[];
@@ -27,27 +27,14 @@ function timeAgo(dateStr?: string): string {
   return `${Math.floor(diff / 31536000)}년 전`;
 }
 
-function statusCheck(deadlineStr?: string): string | null {
-  if (!deadlineStr) return null;
-  const deadline = new Date(deadlineStr).getTime();
-  const now = Date.now();
-  return now > deadline ? "마감" : "참여 진행중";
-}
-
 function useTimeLeft(deadlineStr?: string) {
   const [timeLeft, setTimeLeft] = useState("");
   useEffect(() => {
-    if (!deadlineStr) {
-      setTimeLeft("");
-      return;
-    }
+    if (!deadlineStr) return;
     let timer: ReturnType<typeof setTimeout>;
     const update = () => {
       const diff = new Date(deadlineStr).getTime() - Date.now();
-      if (diff <= 0) {
-        setTimeLeft("");
-        return;
-      }
+      if (diff <= 0) { setTimeLeft(""); return; }
       const days = Math.floor(diff / 86400000);
       const hours = Math.floor((diff % 86400000) / 3600000);
       const minutes = Math.floor((diff % 3600000) / 60000);
@@ -64,132 +51,176 @@ function useTimeLeft(deadlineStr?: string) {
   return timeLeft;
 }
 
-function PlaylistCard({
-  playlist,
-  onLike,
-}: {
-  playlist: CollaboPlaylist;
-  onLike: (p: CollaboPlaylist) => void;
-}) {
+function PlaylistCard({ playlist, onLike }: { playlist: CollaboPlaylist; onLike: (p: CollaboPlaylist) => void }) {
   const navigate = useNavigate();
   const timeLeft = useTimeLeft(playlist.deadline);
   const isClosed = playlist.deadline ? new Date() > new Date(playlist.deadline) : false;
 
+  const chipBaseStyle: CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "4px 10px",
+    borderRadius: 999,
+    fontSize: 12,
+    fontWeight: 600,
+    background: "rgba(255,255,255,0.82)",
+    border: "1px solid rgba(88,95,138,0.14)",
+    color: "#7d879d",
+  };
+  const participantChipStyle: CSSProperties = {
+    ...chipBaseStyle,
+    background: "rgba(77, 143, 255, 0.12)",
+    border: "1px solid rgba(77, 143, 255, 0.22)",
+    color: "#356fd1",
+  };
+  const songChipStyle: CSSProperties = {
+    ...chipBaseStyle,
+    background: "rgba(109, 94, 252, 0.12)",
+    border: "1px solid rgba(109, 94, 252, 0.22)",
+    color: "#5d4ff2",
+  };
+  const timeChipStyle: CSSProperties = {
+    ...chipBaseStyle,
+    background: "rgba(120, 130, 152, 0.12)",
+    border: "1px solid rgba(120, 130, 152, 0.22)",
+    color: "#657089",
+  };
+
   return (
     <div
-      className="transition-colors bg-gray-900 rounded-lg cursor-pointer group hover:bg-gray-800"
+      className="cursor-pointer transition-all group"
+      style={{
+        background: "rgba(255,255,255,0.72)",
+        border: "1px solid rgba(88,95,138,0.12)",
+        borderRadius: 18,
+        boxShadow: "0 4px 16px rgba(80,90,140,0.07)",
+        backdropFilter: "blur(12px)",
+      }}
       onClick={() => navigate(`/community/collabo/detail/${playlist.id}`)}
+      onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 8px 28px rgba(109,94,252,0.13)")}
+      onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 4px 16px rgba(80,90,140,0.07)")}
     >
-      <div className="flex gap-6 p-5">
+      <div className="flex items-center gap-5 p-4">
         {/* 썸네일 */}
-        <div className="relative flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg w-36 h-36 bg-slate-700">
-          {playlist.imageUrl ? (
-            <img
-              src={playlist.imageUrl}
-              alt=""
-              className="object-cover w-full h-full"
-            />
-          ) : (
-            <FaMusic size={36} className="text-white opacity-40" />
-          )}
+        <div
+          className="relative flex items-center justify-center flex-shrink-0 overflow-hidden rounded-xl"
+          style={{
+            width: 110, height: 110,
+            background: "linear-gradient(135deg, rgba(109,94,252,0.12), rgba(255,92,168,0.10))",
+            border: "1px solid rgba(88,95,138,0.10)",
+          }}
+        >
+          <FallbackCoverArt
+            src={playlist.imageUrl}
+            title={playlist.title}
+            size={110}
+            radius={12}
+            variant="collabo"
+          />
         </div>
 
         {/* 정보 */}
-        <div className="flex flex-col justify-center flex-1 min-w-0">
-          <div className="flex items-start justify-between mb-1">
-            <div className="flex items-center min-w-0 gap-3">
-              <h3 className="text-xl font-bold truncate">{playlist.title}</h3>
-              {(() => {
-                const d = statusCheck(playlist.deadline);
-                if (!d) return null;
-                const closed = d === "마감";
-                return (
-                  <span
-                    className={`shrink-0 px-3 py-1 rounded-full text-sm font-semibold border ${
-                      closed
-                        ? "bg-gray-500/20 text-gray-400 border-gray-500/30"
-                        : "bg-green-500/20 text-green-300 border-green-500/30"
-                    }`}
-                  >
-                    {d}
-                  </span>
-                );
-              })()}
-            </div>
-            <FaChevronRight size={14} className="flex-shrink-0 mt-0.5 ml-4 text-gray-400" />
+        <div className="flex flex-col justify-center flex-1 min-w-0 gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <h3 className="text-base font-bold truncate" style={{ color: "#1f2430" }}>{playlist.title}</h3>
+            {isClosed ? (
+              <span className="shrink-0 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                style={{ background: "rgba(88,95,138,0.10)", color: "#8e97ab", border: "1px solid rgba(88,95,138,0.15)" }}>
+                마감
+              </span>
+            ) : (
+              <span className="shrink-0 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                style={{ background: "rgba(57,201,167,0.12)", color: "#1aaa86", border: "1px solid rgba(57,201,167,0.25)" }}>
+                진행중
+              </span>
+            )}
           </div>
 
           {playlist.description && (
-            <p className="w-4/5 mb-2 text-base text-gray-400 line-clamp-1">
+            <p
+              className="text-sm line-clamp-1 px-4 py-1.5 rounded-xl w-fit"
+              style={{
+                color: "#5f6980",
+                background: "rgba(247,248,255,0.9)",
+                border: "1px solid rgba(88,95,138,0.12)",
+                maxWidth: "520px",
+              }}
+            >
               {playlist.description}
             </p>
           )}
 
-          <div className="flex flex-wrap items-center gap-4 text-base text-gray-400">
+          <div className="flex flex-wrap items-center gap-2.5">
             {playlist.participantCount !== undefined && (
-              <div className="flex items-center gap-1.5">
-                <FaUsers size={14} />
+              <div style={participantChipStyle}>
+                <FaUsers size={10} />
                 <span>{playlist.participantCount}명 참여</span>
               </div>
             )}
-            <div className="flex items-center gap-1.5">
-              <FaMusic size={14} />
+            <div style={songChipStyle}>
+              <FaMusic size={10} />
               <span>{playlist.songCount}곡</span>
             </div>
             {playlist.createdAt && (
-              <div className="flex items-center gap-1.5">
-                <FaClock size={14} />
+              <div style={timeChipStyle}>
+                <FaClock size={10} />
                 <span>{timeAgo(playlist.createdAt)}</span>
               </div>
             )}
             {playlist.creatorName && (
-              <div className="flex items-center gap-1.5">
-                <FaUser size={14} />
-                <span className="font-semibold text-white">{playlist.creatorName}</span>
+              <div
+                style={{
+                  ...chipBaseStyle,
+                  background: "linear-gradient(135deg, rgba(109,94,252,0.14), rgba(255,92,168,0.10))",
+                  border: "1px solid rgba(109,94,252,0.22)",
+                  color: "#4f466b",
+                }}
+              >
+                <FaUser size={10} />
+                <span className="font-semibold" style={{ color: "#1f2430" }}>{playlist.creatorName}</span>
               </div>
             )}
+          </div>
+
+          <div className="flex items-center justify-between mt-0.5">
+            {!isClosed && timeLeft ? (
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold"
+                style={{ background: "rgba(255,141,77,0.10)", color: "#e07020", border: "1px solid rgba(255,141,77,0.20)" }}>
+                <FaStopwatch size={10} />
+                {timeLeft}
+              </div>
+            ) : <div />}
             <button
-              className={`flex items-center gap-1.5 ml-auto px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-                playlist.hasLiked
-                  ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
-                  : "bg-white/10 text-gray-400 hover:bg-white/20"
-              }`}
-              onClick={(e) => {
-                e.stopPropagation();
-                onLike(playlist);
-              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+              style={playlist.hasLiked
+                ? { background: "rgba(255,91,110,0.10)", color: "#e03e52", border: "1px solid rgba(255,91,110,0.25)" }
+                : { background: "rgba(88,95,138,0.07)", color: "#8e97ab", border: "1px solid rgba(88,95,138,0.15)" }}
+              onClick={e => { e.stopPropagation(); onLike(playlist); }}
             >
-              <FaHeart size={13} />
+              <FaHeart size={11} />
               <span>{playlist.likeCount ?? 0}</span>
             </button>
           </div>
-          {/* 마감 남은 시간 */}
-          {!isClosed && timeLeft && (
-            <div className="flex items-center gap-1.5 mt-1">
-              <FaStopwatch size={13} />
-              <span className="text-base font-semibold text-orange-400">{timeLeft}</span>
-            </div>
-          )}
         </div>
       </div>
     </div>
   );
 }
 
-// 공동 플레이리스트 주제 리스트 UI
 function CollaborationPlaylistTopicItem({ playlists, onLike }: Props) {
   if (playlists.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 py-24 text-gray-400">
-        <FaMusic size={48} className="opacity-40" />
-        <p className="text-lg">아직 등록된 공동 플레이리스트가 없습니다.</p>
+      <div className="flex flex-col items-center justify-center gap-4 py-24" style={{ color: "#8e97ab" }}>
+        <FaMusic size={44} style={{ opacity: 0.3 }} />
+        <p className="text-base">아직 등록된 공동 플레이리스트가 없습니다.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {playlists.map((playlist) => (
+    <div className="flex flex-col gap-3">
+      {playlists.map(playlist => (
         <PlaylistCard key={playlist.id} playlist={playlist} onLike={onLike} />
       ))}
     </div>

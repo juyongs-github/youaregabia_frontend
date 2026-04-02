@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { FaPlus, FaTimes, FaCalendarAlt } from "react-icons/fa";
 import { playlistApi } from "../../api/playlistApi";
+import axios from "axios";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import DatePicker from "react-datepicker";
@@ -29,10 +31,11 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
     return `${deadlineDate.getFullYear()}-${String(deadlineDate.getMonth() + 1).padStart(2, "0")}-${String(deadlineDate.getDate()).padStart(2, "0")}T23:59:59`;
   };
 
-  return (
+  const modal = (
     <div className="modal-overlay">
       <form
         className="modal-container"
+        onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => {
           e.preventDefault();
 
@@ -57,9 +60,8 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
           }
 
           const formData = new FormData();
-          formData.append("title", title);
-          formData.append("description", description);
-          formData.append("email", user.email);
+          formData.append("title", title.trim());
+          formData.append("description", description.trim());
           formData.append("type", "COLLABORATIVE");
 
           const deadline = buildDeadline();
@@ -79,7 +81,13 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
               }
             })
             .catch((error) => {
-              alert("플레이리스트 생성에 실패했습니다.");
+              alert("플레이리스트 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
+              if (axios.isAxiosError(error)) {
+                console.error("[CollaboCreate] createPlaylist failed", {
+                  status: error.response?.status,
+                  data: error.response?.data,
+                });
+              }
               console.error(error);
             });
         }}
@@ -165,8 +173,8 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
                   background: "rgba(247, 248, 255, 0.88)",
                   border: "1.5px solid rgba(88, 95, 138, 0.22)",
                   color: deadlineDate ? "#1f2430" : "#8e97ab",
-                  fontSize: "14px",
-                  fontWeight: 500,
+                  fontSize: "13px",
+                  fontWeight: 400,
                   cursor: "pointer",
                   transition: "border-color 0.2s, box-shadow 0.2s",
                   userSelect: "none",
@@ -207,6 +215,9 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
       </form>
     </div>
   );
+
+  if (typeof document === "undefined") return modal;
+  return createPortal(modal, document.body);
 }
 
 export default CollaboPlaylistCreateModal;

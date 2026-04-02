@@ -24,6 +24,23 @@ body {
   overflow: hidden; /* 페이지 전체 스크롤 제거 */
 }
 
+/* 챗봇 버튼 — 홈 반응형 하단 네비게이션 바(z-index:100) 위에 항상 표시 */
+.chatbot-float {
+  z-index: 150;
+}
+.chatbot-window {
+  z-index: 150;
+}
+/* 홈 화면 ≤1400px: 하단 내비게이션 바(~80px) 위로 버튼 이동 + 채팅창 세로 크기 제한 */
+@media (max-width: 1400px) {
+  .chatbot-float:not(.chatbot-float--player) {
+    bottom: 88px !important;
+  }
+  .chatbot-window {
+    bottom: 152px !important;
+  }
+}
+
 /* 커스텀 스크롤바 */
 ::-webkit-scrollbar {
   width: 5px;

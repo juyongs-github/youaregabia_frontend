@@ -137,15 +137,14 @@ const SongDetailModal = ({ song, onClose }: Props) => {
             <button
               key={t}
               onClick={() => setTab(t)}
-              style={{
-                flex: 1, padding: "12px 0",
-                fontSize: 13, fontWeight: 700,
-                color: tab === t ? "#6d5efc" : "#9199ad",
-                borderBottom: tab === t ? "2px solid #6d5efc" : "2px solid transparent",
-                background: "none", border: "none",
-                borderBottom: tab === t ? "2px solid #6d5efc" : "2px solid transparent",
-                cursor: "pointer", transition: "color 0.15s",
-              }}
+	              style={{
+	                flex: 1, padding: "12px 0",
+	                fontSize: 13, fontWeight: 700,
+	                color: tab === t ? "#6d5efc" : "#9199ad",
+	                background: "none", border: "none",
+	                borderBottom: tab === t ? "2px solid #6d5efc" : "2px solid transparent",
+	                cursor: "pointer", transition: "color 0.15s",
+	              }}
             >
               {t === "info" ? "곡 정보" : "평론"}
             </button>

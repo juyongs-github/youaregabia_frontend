@@ -1,5 +1,6 @@
 import "../../styles/collabo-playlist-detail-kfandom.css";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   FaCalendarAlt,
   FaCheck,
@@ -37,6 +38,16 @@ import type { CollaboPlaylist } from "../../types/playlist";
 import MusicPlayer from "../../components/layout/MusicPlayer";
 import Spinner from "../../components/ui/Spinner";
 import api from "../../api/axios";
+import FallbackCoverArt from "../../components/ui/FallbackCoverArt";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+
+const resolveImageUrl = (url?: string | null) => {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("//")) return `https:${url}`;
+  return `${API_BASE_URL}${url.startsWith("/") ? url : `/${url}`}`;
+};
 
 function timeAgo(dateStr?: string): string {
   if (!dateStr) return "";
@@ -328,117 +339,137 @@ function CollaboPlaylistDetailPage() {
 
   const canDelete = (song: CollaboSong) =>
     !!user?.email && (isCreator || song.suggestedByEmail === user.email);
+  const modalRoot = typeof document !== "undefined" ? document.body : null;
 
   return (
     <div className="kf-community-page kf-collabo-detail">
       <div className="kf-community-page__shell">
-      <div className="flex flex-col w-full gap-12">
+      <div className="flex flex-col w-full gap-8" style={{ padding: 24 }}>
+
+      {/* 뒤로가기 */}
       <button
-        className="flex items-center self-start gap-3"
+        className="flex items-center self-start gap-2 px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
+        style={{ background: "rgba(255,255,255,0.7)", border: "1px solid rgba(88,95,138,0.15)", color: "#677086" }}
         onClick={() => navigate("/community/collabo")}
       >
-        <GrFormPrevious size={30} />
-        <span className="text-xl font-bold">목록</span>
+        <GrFormPrevious size={18} />
+        <span>목록</span>
       </button>
 
       {/* 플레이리스트 정보 */}
-      <div className="flex gap-8">
-        <div className="flex-shrink-0 w-52 h-52 bg-slate-700 rounded-2xl overflow-hidden">
-          {playlist?.imageUrl
-            ? <img src={(import.meta.env.VITE_API_BASE_URL ?? "") + playlist.imageUrl} alt="" className="w-full h-full object-cover" />
-            : <div className="flex items-center justify-center w-full h-full"><FaMusic size={48} className="text-white opacity-40" /></div>
-          }
+      <div
+        className="collabo-hero-card flex flex-col gap-5 p-6 rounded-2xl md:flex-row md:items-center"
+        style={{ background: "rgba(255,255,255,0.72)", border: "1px solid rgba(88,95,138,0.12)", boxShadow: "0 4px 16px rgba(80,90,140,0.07)", backdropFilter: "blur(12px)" }}
+      >
+        {/* 썸네일 */}
+        <div
+          className="flex-shrink-0 self-center rounded-xl overflow-hidden flex items-center justify-center md:self-auto"
+          style={{ width: 148, height: 148, background: "linear-gradient(135deg, rgba(109,94,252,0.12), rgba(255,92,168,0.10))", border: "1px solid rgba(88,95,138,0.10)" }}
+        >
+          <FallbackCoverArt
+            src={resolveImageUrl(playlist?.imageUrl)}
+            title={playlist?.title}
+            size={148}
+            radius={12}
+            variant="collabo"
+          />
         </div>
-        <div className="flex flex-col justify-between flex-1 min-w-0 py-1">
+
+        {/* 정보 */}
+        <div className="flex flex-col justify-between flex-1 min-w-0 gap-3 py-1">
           <div className="flex flex-col gap-2">
-            <p className="text-base text-gray-400">공동 플레이리스트 제작</p>
-            <div className="flex items-center gap-3">
-              <p className="text-3xl font-bold truncate">{playlist?.title || "-"}</p>
+            <p className="text-xs font-semibold" style={{ color: "#8e97ab" }}>공동 플레이리스트 제작</p>
+            <div className="flex flex-wrap items-center gap-2.5 min-w-0">
+              <p className="text-2xl font-bold truncate" style={{ color: "#1f2430" }}>{playlist?.title || "-"}</p>
               {isClosed ? (
-                <span className="px-3 py-1 text-sm font-semibold text-gray-400 border rounded-full bg-gray-500/20 border-gray-500/30">
+                <span className="shrink-0 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                  style={{ background: "rgba(88,95,138,0.10)", color: "#8e97ab", border: "1px solid rgba(88,95,138,0.15)" }}>
                   마감
                 </span>
               ) : (
-                <span className="px-3 py-1 text-sm font-semibold text-green-300 border rounded-full bg-green-500/20 border-green-500/30">
+                <span className="shrink-0 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                  style={{ background: "rgba(57,201,167,0.12)", color: "#1aaa86", border: "1px solid rgba(57,201,167,0.25)" }}>
                   참여 진행중
                 </span>
               )}
             </div>
             {playlist?.description && (
-              <p className="text-gray-300 line-clamp-3">{playlist.description}</p>
+              <p
+                className="text-sm line-clamp-2 rounded-xl px-4 py-2 w-fit"
+                style={{
+                  color: "#677086",
+                  background: "rgba(247,248,255,0.82)",
+                  border: "1px solid rgba(88,95,138,0.10)",
+                  maxWidth: "560px",
+                }}
+              >
+                {playlist.description}
+              </p>
             )}
           </div>
-          <div className="flex flex-wrap items-center gap-5 mt-4 text-base text-gray-400">
+
+          <div className="flex flex-wrap items-center gap-4 text-xs" style={{ color: "#8e97ab" }}>
             {playlist?.participantCount !== undefined && (
-              <div className="flex items-center gap-1.5">
-                <FaUsers size={16} />
-                <span>{playlist.participantCount}명 참여</span>
-              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(77,143,255,0.12)", border: "1px solid rgba(77,143,255,0.24)", color: "#356fd1" }}><FaUsers size={11} /><span>{playlist.participantCount}명 참여</span></div>
             )}
-            <div className="flex items-center gap-1.5">
-              <FaMusic size={16} />
-              <span>{songs.length}곡</span>
-            </div>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(109,94,252,0.12)", border: "1px solid rgba(109,94,252,0.24)", color: "#5d4ff2" }}><FaMusic size={11} /><span>{songs.length}곡</span></div>
             {playlist?.createdAt && (
-              <div className="flex items-center gap-1.5">
-                <FaClock size={16} />
-                <span>{timeAgo(playlist.createdAt)}</span>
-              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(120,130,152,0.12)", border: "1px solid rgba(120,130,152,0.24)", color: "#657089" }}><FaClock size={11} /><span>{timeAgo(playlist.createdAt)}</span></div>
             )}
             {playlist?.creatorEmail && (
-              <div className="flex items-center gap-1.5">
-                <FaCrown size={16} className="text-yellow-400" />
-                <span>등록자: </span>
-                <span className="text-white">{playlist.creatorName || playlist.creatorEmail}</span>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "linear-gradient(135deg, rgba(109,94,252,0.14), rgba(255,92,168,0.10))", border: "1px solid rgba(109,94,252,0.22)" }}>
+                <FaCrown size={11} style={{ color: "#f5a623" }} />
+                <span style={{ color: "#1f2430", fontWeight: 600 }}>{playlist.creatorName || playlist.creatorEmail}</span>
               </div>
             )}
           </div>
+
           {playlist?.deadline && (
-            <div className="flex items-center gap-3 mt-2">
-              <div className="flex items-center gap-1.5 text-base text-gray-400">
-                <FaClock size={16} />
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-xs" style={{ color: "#8e97ab" }}>
+                <FaClock size={11} />
                 <span>마감일: </span>
-                <span className={isClosed ? "text-gray-400" : "text-red-300"}>
+                <span style={{ color: isClosed ? "#8e97ab" : "#e07020", fontWeight: 600 }}>
                   {playlist.deadline.replace("T", " ")}
                 </span>
               </div>
               {!isClosed && timeLeft && (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-500/15 border border-orange-500/30 w-fit">
-                  <FaStopwatch size={16} className="text-orange-400" />
-                  <span className="text-sm font-bold text-orange-400">{timeLeft}</span>
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold"
+                  style={{ background: "rgba(255,141,77,0.10)", color: "#e07020", border: "1px solid rgba(255,141,77,0.20)" }}>
+                  <FaStopwatch size={10} />{timeLeft}
                 </div>
               )}
             </div>
           )}
-          <div className="flex items-center gap-3 mt-2">
+
+          {/* 액션 버튼 */}
+          <div className="flex flex-wrap items-center gap-2.5 pt-1">
             {songs.length > 0 && (
               <button
                 onClick={handlePlayAll}
-                className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 transition-colors rounded-full text-base font-semibold"
+                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white transition-all hover:scale-105"
+                style={{ background: "linear-gradient(135deg, #6d5efc, #ff5ca8)", boxShadow: "0 4px 14px rgba(109,94,252,0.28)" }}
               >
-                <FaPlay size={12} />
-                전체 듣기
+                <FaPlay size={11} />전체 듣기
               </button>
             )}
             <button
               onClick={handleLike}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-base font-semibold transition-colors ${
-                playlist?.hasLiked
-                  ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
-                  : "bg-white/10 text-gray-400 hover:bg-white/20"
-              }`}
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all"
+              style={playlist?.hasLiked
+                ? { background: "linear-gradient(135deg, rgba(255,91,110,0.22), rgba(255,125,166,0.18))", color: "#d92c47", border: "1px solid rgba(255,91,110,0.30)" }
+                : { background: "rgba(255,255,255,0.92)", color: "#70798f", border: "1px solid rgba(88,95,138,0.18)" }}
             >
-              <FaHeart size={13} />
-              {playlist?.likeCount ?? 0}
+              <FaHeart size={12} />{playlist?.likeCount ?? 0}
             </button>
             {isClosed && user && !playlist?.hasImported && (
               <button
                 onClick={handleImport}
                 disabled={isImporting}
-                className="flex items-center gap-2 px-4 py-2.5 bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 transition-colors rounded-full text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ background: "rgba(109,94,252,0.10)", color: "#6d5efc", border: "1px solid rgba(109,94,252,0.20)" }}
               >
-                <FaPlus size={13} />
-                {isImporting ? "추가하는 중..." : "내 플레이리스트 추가"}
+                <FaPlus size={11} />{isImporting ? "추가하는 중..." : "내 플레이리스트 추가"}
               </button>
             )}
             {isCreator && (
@@ -446,36 +477,36 @@ function CollaboPlaylistDetailPage() {
                 {!isClosed && (
                   <button
                     onClick={() => setShowEditModal(true)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 transition-colors rounded-full text-base font-semibold"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all"
+                    style={{ background: "rgba(109,94,252,0.12)", color: "#5d4ff2", border: "1px solid rgba(109,94,252,0.24)" }}
                   >
-                    <FaEdit size={13} />
-                    수정
+                    <FaEdit size={11} />수정
                   </button>
                 )}
                 {isClosed && (
                   <button
                     onClick={() => setShowReopenPanel((v) => !v)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-green-600/20 hover:bg-green-600/40 text-green-400 transition-colors rounded-full text-base font-semibold"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all"
+                    style={{ background: "rgba(57,201,167,0.16)", color: "#138e71", border: "1px solid rgba(57,201,167,0.32)" }}
                   >
-                    <FaRedo size={13} />
-                    참여 재개
+                    <FaRedo size={11} />참여 재개
                   </button>
                 )}
                 {!isClosed && playlist?.deadline && (
                   <button
                     onClick={handleEarlyClose}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-orange-600/20 hover:bg-orange-600/40 text-orange-400 transition-colors rounded-full text-base font-semibold"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all"
+                    style={{ background: "rgba(255,141,77,0.18)", color: "#cb5f14", border: "1px solid rgba(255,141,77,0.35)" }}
                   >
-                    <FaClock size={13} />
-                    마감하기
+                    <FaClock size={11} />마감하기
                   </button>
                 )}
                 <button
                   onClick={handleDeletePlaylist}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-red-600/20 hover:bg-red-600/40 text-red-400 transition-colors rounded-full text-base font-semibold"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all"
+                  style={{ background: "rgba(255,91,110,0.14)", color: "#d92c47", border: "1px solid rgba(255,91,110,0.30)" }}
                 >
-                  <FaTrash size={13} />
-                  삭제
+                  <FaTrash size={11} />삭제
                 </button>
               </>
             )}
@@ -483,35 +514,33 @@ function CollaboPlaylistDetailPage() {
         </div>
       </div>
 
-      {isCreator &&
-        isClosed &&
-        showReopenPanel &&
+      {/* 참여 재개 모달 */}
+      {isCreator && isClosed && showReopenPanel &&
         (() => {
           const tomorrow = new Date();
           tomorrow.setHours(0, 0, 0, 0);
-          return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-              <div className="bg-[#1a2535] rounded-2xl p-6 w-full max-w-sm mx-4 flex flex-col gap-5">
+          const reopenModal = (
+            <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(40,45,80,0.20)" }}>
+              <div className="w-full max-w-sm mx-4 flex flex-col gap-5 p-6 rounded-2xl"
+                style={{ background: "linear-gradient(180deg,#fff,rgba(247,248,255,0.98))", border: "1px solid rgba(200,205,230,0.6)", boxShadow: "0 32px 72px rgba(80,90,140,0.22)", color: "#1f2430" }}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <FaRedo size={15} className="text-green-400" />
-                    <h3 className="text-lg font-bold text-white">참여 재개</h3>
+                    <FaRedo size={14} style={{ color: "#1aaa86" }} />
+                    <h3 className="text-base font-bold" style={{ color: "#1f2430" }}>참여 재개</h3>
                   </div>
                   <button
-                    onClick={() => {
-                      setShowReopenPanel(false);
-                      setReopenDeadlineDate(null);
-                    }}
-                    className="flex items-center justify-center w-8 h-8 text-gray-400 transition-colors rounded-full bg-white/10 hover:bg-white/20 hover:text-white"
+                    onClick={() => { setShowReopenPanel(false); setReopenDeadlineDate(null); }}
+                    className="flex items-center justify-center w-8 h-8 rounded-full transition-colors"
+                    style={{ background: "rgba(255,255,255,0.72)", border: "1px solid rgba(88,95,138,0.12)", color: "#8e97ab" }}
                   >
                     ✕
                   </button>
                 </div>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm" style={{ color: "#677086" }}>
                   새 마감일을 설정하면 참여자들이 다시 곡을 추가하고 투표할 수 있습니다.
                 </p>
                 <div>
-                  <label className="block mb-2 text-sm text-gray-400">새 마감일</label>
+                  <label className="block mb-2 text-xs font-bold" style={{ color: "#1f2430" }}>새 마감일</label>
                   <DatePicker
                     selected={reopenDeadlineDate}
                     onChange={(date: Date | null) => setReopenDeadlineDate(date)}
@@ -524,48 +553,37 @@ function CollaboPlaylistDetailPage() {
                     wrapperClassName="w-full"
                     customInput={
                       <div
-                        className="flex items-center justify-between px-4 py-3 transition-colors border cursor-pointer rounded-xl bg-white/5 border-white/10 hover:border-white/20"
-                        style={{
-                          color: reopenDeadlineDate ? "white" : "#6b8099",
-                          userSelect: "none",
-                        }}
+                        className="flex items-center justify-between px-4 py-2.5 rounded-xl cursor-pointer transition-colors"
+                        style={{ background: "rgba(247,248,255,0.88)", border: "1.5px solid rgba(88,95,138,0.22)", color: reopenDeadlineDate ? "#1f2430" : "#8e97ab", fontSize: 14, userSelect: "none" }}
                       >
-                        <span className="text-sm">
+                        <span>
                           {reopenDeadlineDate
                             ? `${reopenDeadlineDate.getFullYear()}년 ${String(reopenDeadlineDate.getMonth() + 1).padStart(2, "0")}월 ${String(reopenDeadlineDate.getDate()).padStart(2, "0")}일`
                             : "날짜를 선택하세요"}
                         </span>
                         <div className="flex items-center gap-2">
                           {reopenDeadlineDate && (
-                            <span
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setReopenDeadlineDate(null);
-                              }}
-                              className="text-lg leading-none text-gray-500 transition-colors cursor-pointer hover:text-white"
-                            >
-                              ×
-                            </span>
+                            <span onClick={(e) => { e.stopPropagation(); setReopenDeadlineDate(null); }}
+                              className="text-lg leading-none cursor-pointer" style={{ color: "#8e97ab" }}>×</span>
                           )}
-                          <FaCalendarAlt size={14} className="opacity-50" />
+                          <FaCalendarAlt size={13} style={{ opacity: 0.5, color: "#677086" }} />
                         </div>
                       </div>
                     }
                   />
                 </div>
-                <div className="flex gap-2 mt-1">
+                <div className="flex gap-2">
                   <button
-                    onClick={() => {
-                      setShowReopenPanel(false);
-                      setReopenDeadlineDate(null);
-                    }}
-                    className="flex-1 py-3 text-sm font-semibold text-gray-300 transition-colors rounded-xl bg-white/10 hover:bg-white/15"
+                    onClick={() => { setShowReopenPanel(false); setReopenDeadlineDate(null); }}
+                    className="flex-1 py-3 text-sm font-bold rounded-2xl transition-colors"
+                    style={{ background: "rgba(255,255,255,0.72)", border: "1px solid rgba(88,95,138,0.16)", color: "#677086" }}
                   >
                     취소
                   </button>
                   <button
                     onClick={handleReopen}
-                    className="flex-1 py-3 text-sm font-semibold text-white transition-colors bg-green-600 rounded-xl hover:bg-green-500"
+                    className="flex-1 py-3 text-sm font-bold text-white rounded-2xl transition-all hover:scale-[1.02]"
+                    style={{ background: "linear-gradient(135deg, #39c9a7, #1aaa86)", boxShadow: "0 6px 18px rgba(57,201,167,0.28)" }}
                   >
                     재개하기
                   </button>
@@ -573,294 +591,253 @@ function CollaboPlaylistDetailPage() {
               </div>
             </div>
           );
+          return modalRoot ? createPortal(reopenModal, modalRoot) : reopenModal;
         })()}
 
       {/* 주의사항 */}
       {user && (
-        <div className="text-base text-gray-400 bg-yellow-500/30 border border-white/10 rounded-lg px-5 py-4 flex flex-col gap-1.5">
-          <p className="flex items-center gap-2 font-semibold text-yellow-300">
-            <FaExclamationTriangle size={13} />
-            주의사항
+        <div className="flex flex-col gap-1.5 px-5 py-4 rounded-xl text-sm"
+          style={{ background: "rgba(255,190,60,0.08)", border: "1px solid rgba(255,190,60,0.22)" }}>
+          <p className="flex items-center gap-2 font-bold text-xs" style={{ color: "#c98a00" }}>
+            <FaExclamationTriangle size={12} />주의사항
           </p>
-          <p className="text-sm">
-            • 1인당 최대 5곡까지 추가할 수 있으며 최대 3곡까지 투표할 수 있습니다.
-          </p>
-          <p className="text-sm">
-            • 등록자의 설정한 마감일까지 곡 추가와 투표를 진행할 수 있습니다.
-          </p>
-          <p className="text-sm">
-            • 등록자의 요청에 따라 조기 마감 될 수 있으며, 참여자가 추가한 수록곡이 삭제 될 수
-            있습니다.
-          </p>
-          <p className="text-sm">
-            • 마감일이 지나면 곡 추가와 투표가 불가능하며, 투표 순위가 가장 높은 상위 10곡이 최종
-            수록곡으로 확정됩니다.
-          </p>
-          <p className="text-sm">
-            • 마감일까지 추가된 곡이 3곡 미만일 경우 해당 플레이리스트는 자동 삭제됩니다.
-          </p>
+          {[
+            "1인당 최대 5곡까지 추가할 수 있으며 최대 3곡까지 투표할 수 있습니다.",
+            "등록자의 설정한 마감일까지 곡 추가와 투표를 진행할 수 있습니다.",
+            "등록자의 요청에 따라 조기 마감 될 수 있으며, 참여자가 추가한 수록곡이 삭제 될 수 있습니다.",
+            "마감일이 지나면 곡 추가와 투표가 불가능하며, 투표 순위가 가장 높은 상위 10곡이 최종 수록곡으로 확정됩니다.",
+            "마감일까지 추가된 곡이 3곡 미만일 경우 해당 플레이리스트는 자동 삭제됩니다.",
+          ].map((text, i) => (
+            <p key={i} style={{ color: "#8e6a00" }}>• {text}</p>
+          ))}
         </div>
       )}
 
-      {/* 수록곡 + 검색 패널 */}
+      {/* 수록곡 */}
       {isPlaylistLoading ? (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
+        <div className="flex justify-center py-12"><Spinner /></div>
       ) : (
         <div>
-          {/* 수록곡 */}
-          <div className="min-w-0">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-2xl font-bold">수록곡</h2>
-              {!isClosed && user && (
-                <button
-                  onClick={() => {
-                    setShowAddSongModal(true);
-                    setSearchQuery("");
-                    setSearchResults([]);
-                    setHasSearched(false);
-                    setAddedSongIds(new Set());
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition-colors bg-red-600 rounded-3xl hover:bg-red-700 shrink-0"
-                >
-                  <FaPlus size={13} />곡 추가
-                </button>
-              )}
-            </div>
-            {songs.length > 0 && (
-              <div className="relative mb-3">
-                <FaSearch
-                  size={13}
-                  className="absolute text-gray-400 -translate-y-1/2 pointer-events-none left-3 top-1/2"
-                />
-                <input
-                  value={songFilter}
-                  onChange={(e) => setSongFilter(e.target.value)}
-                  placeholder="곡명 또는 아티스트 검색"
-                  className="w-full pl-9 pr-4 py-2.5 text-base rounded-lg bg-white/5 border border-white/10 outline-none focus:border-white/30 transition-colors placeholder-white/30"
-                />
-              </div>
-            )}
-            {isSongsLoading ? (
-              <div className="flex justify-center py-12">
-                <Spinner />
-              </div>
-            ) : songs.length === 0 ? (
-              <div className="flex flex-col items-center gap-3 py-16 text-gray-400">
-                <FaMusic size={36} className="opacity-40" />
-                <p>아직 수록곡이 없습니다.</p>
-                {!isClosed && (
-                  <p className="text-sm">위의 곡 추가 버튼을 눌러 곡을 추가해보세요.</p>
-                )}
-              </div>
-            ) : (
-              (() => {
-                const filteredSongs = songs.filter(
-                  (s) =>
-                    !songFilter.trim() ||
-                    s.trackName?.toLowerCase().includes(songFilter.toLowerCase()) ||
-                    s.artistName?.toLowerCase().includes(songFilter.toLowerCase())
-                );
-                const displaySongs = isClosed ? filteredSongs.slice(0, 10) : filteredSongs;
-
-                return (
-                  <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
-                    {displaySongs.map((song, index) => {
-                      const rank = index + 1;
-                      return (
-                        <div
-                          key={song.playlistSongId}
-                          onClick={() => handlePlaySong(index)}
-                          className={
-                            "flex items-center gap-5 p-5 rounded-xl transition-colors group cursor-pointer bg-gray-900 hover:bg-gray-800"
-                          }
-                        >
-                          {/* 순위 번호 (마감 후) */}
-                          {isClosed && (
-                            <div className="w-8 text-center shrink-0">
-                              <span className="text-base font-bold text-gray-400">{rank}</span>
-                            </div>
-                          )}
-
-                          {/* 앨범 아트 */}
-                          <div className="relative w-24 h-24 overflow-hidden shrink-0 rounded-xl bg-slate-600">
-                            {song.imgUrl ? (
-                              <img
-                                src={song.imgUrl}
-                                alt=""
-                                className="object-cover w-full h-full"
-                              />
-                            ) : (
-                              <div className="flex items-center justify-center w-full h-full">
-                                <FaMusic size={18} className="text-white opacity-40" />
-                              </div>
-                            )}
-                            <div className="absolute inset-0 flex items-center justify-center transition-opacity rounded-lg opacity-0 bg-black/50 group-hover:opacity-100">
-                              <FaPlay size={14} />
-                            </div>
-                          </div>
-
-                          {/* 곡 정보 */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center min-w-0 gap-2">
-                              <p className="text-lg font-semibold truncate" title={song.trackName}>
-                                {song.trackName}
-                              </p>
-                              {song.suggestedByEmail === user?.email && (
-                                <span className="shrink-0 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                                  내가 추가한 곡
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-base text-gray-400 truncate flex items-center gap-1 mt-0.5">
-                              {song.artistName}
-                              {song.genreName && (
-                                <>
-                                  <GoDotFill size={8} className="shrink-0" />
-                                  {song.genreName}
-                                </>
-                              )}
-                            </p>
-                            {song.suggestedByEmail && (
-                              <p className="flex items-center gap-1 mt-1">
-                                <FaUser size={15} className="text-gray-500 shrink-0" />
-                                <span className="text-sm text-gray-400">참여자: </span>
-                                <span className="text-sm text-white truncate">
-                                  {song.suggestedByName || song.suggestedByEmail}
-                                </span>
-                              </p>
-                            )}
-                            {(song.reason || song.suggestedByEmail === user?.email) &&
-                              (editingReasonId === song.playlistSongId ? (
-                                <div
-                                  className="mt-2 overflow-hidden border rounded-xl bg-white/5 border-white/10"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <textarea
-                                    value={editingReasonText}
-                                    onChange={(e) => setEditingReasonText(e.target.value)}
-                                    rows={2}
-                                    autoFocus
-                                    className="w-full px-3 pt-3 pb-1 text-sm text-white bg-transparent outline-none resize-none placeholder-white/20"
-                                    placeholder="추가 이유를 입력하세요."
-                                  />
-                                  <div className="flex items-center justify-between px-3 pb-2">
-                                    <span
-                                      className="text-xs"
-                                      style={{
-                                        color:
-                                          editingReasonText.length > 50 ? "#f87171" : "#ffffff40",
-                                      }}
-                                    >
-                                      {editingReasonText.length} / 50
-                                    </span>
-                                    <div className="flex gap-1.5">
-                                      <button
-                                        onClick={() => setEditingReasonId(null)}
-                                        className="px-3 py-1 text-xs text-gray-400 transition-colors rounded-lg hover:text-white hover:bg-white/10"
-                                      >
-                                        취소
-                                      </button>
-                                      <button
-                                        onClick={() => handleUpdateReason(song.playlistSongId)}
-                                        className="px-3 py-1 text-xs font-semibold text-blue-300 transition-colors rounded-lg bg-blue-500/20 hover:bg-blue-500/30"
-                                      >
-                                        저장
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                              ) : (
-                                <p
-                                  className={`flex items-center gap-1 mt-1 group/reason ${
-                                    !isClosed && song.suggestedByEmail === user?.email
-                                      ? "cursor-pointer"
-                                      : ""
-                                  }`}
-                                  onClick={(e) => {
-                                    if (!isClosed && song.suggestedByEmail === user?.email) {
-                                      e.stopPropagation();
-                                      setEditingReasonId(song.playlistSongId);
-                                      setEditingReasonText(song.reason ?? "");
-                                    }
-                                  }}
-                                >
-                                  <FaComment size={15} className="text-gray-500 shrink-0" />
-                                  <span className="text-sm text-gray-400 shrink-0">
-                                    추가 이유:{" "}
-                                  </span>
-                                  <span className="text-sm text-white truncate">
-                                    {song.reason ||
-                                      (!isClosed && song.suggestedByEmail === user?.email ? (
-                                        <span className="text-gray-600 transition-colors group-hover/reason:text-gray-400">
-                                          작성하기...
-                                        </span>
-                                      ) : (
-                                        <span className="text-gray-600">없음</span>
-                                      ))}
-                                  </span>
-                                  {!isClosed && song.suggestedByEmail === user?.email && (
-                                    <FaEdit
-                                      size={12}
-                                      className="text-gray-600 transition-all opacity-0 shrink-0 group-hover/reason:opacity-100 group-hover/reason:text-blue-400"
-                                    />
-                                  )}
-                                </p>
-                              ))}
-                          </div>
-
-                          {/* 삭제 (마감 전 + 작성자 or 등록자) */}
-                          {!isClosed && canDelete(song) && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRemoveSong(song.playlistSongId);
-                              }}
-                              className="flex items-center justify-center w-8 h-8 text-red-400 transition-colors rounded-full opacity-0 bg-red-500/20 hover:bg-red-500/40 hover:text-red-300 group-hover:opacity-100 shrink-0"
-                            >
-                              <FaTrash size={13} />
-                            </button>
-                          )}
-
-                          {/* 투표 버튼 */}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleVote(song);
-                            }}
-                            disabled={!user || isClosed}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors shrink-0 disabled:cursor-not-allowed ${
-                              isClosed
-                                ? "bg-white/5 text-gray-400"
-                                : song.hasVoted
-                                  ? "bg-blue-600 hover:bg-blue-700 text-white"
-                                  : "bg-white/10 hover:bg-white/20 text-gray-300"
-                            }`}
-                          >
-                            <FaThumbsUp size={11} />
-                            {song.voteCount ?? 0}
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })()
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold" style={{ color: "#1f2430" }}>수록곡</h2>
+            {!isClosed && user && (
+              <button
+                onClick={() => { setShowAddSongModal(true); setSearchQuery(""); setSearchResults([]); setHasSearched(false); setAddedSongIds(new Set()); }}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-full transition-all hover:scale-105 shrink-0"
+                style={{ background: "linear-gradient(135deg, #6d5efc, #ff5ca8)", boxShadow: "0 4px 14px rgba(109,94,252,0.28)" }}
+              >
+                <FaPlus size={11} />곡 추가
+              </button>
             )}
           </div>
+
+          {songs.length > 0 && (
+            <div className="relative mb-3">
+              <FaSearch size={12} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "#8e97ab" }} />
+              <input
+                value={songFilter}
+                onChange={(e) => setSongFilter(e.target.value)}
+                placeholder="곡명 또는 아티스트 검색"
+                className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl outline-none transition-colors"
+                style={{ background: "rgba(255,255,255,0.7)", border: "1.5px solid rgba(88,95,138,0.15)", color: "#1f2430" }}
+              />
+            </div>
+          )}
+
+          {isSongsLoading ? (
+            <div className="flex justify-center py-12"><Spinner /></div>
+          ) : songs.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-16" style={{ color: "#8e97ab" }}>
+              <FaMusic size={36} style={{ opacity: 0.3 }} />
+              <p className="text-sm">아직 수록곡이 없습니다.</p>
+              {!isClosed && <p className="text-xs">위의 곡 추가 버튼을 눌러 곡을 추가해보세요.</p>}
+            </div>
+          ) : (
+            (() => {
+              const filteredSongs = songs.filter(
+                (s) =>
+                  !songFilter.trim() ||
+                  s.trackName?.toLowerCase().includes(songFilter.toLowerCase()) ||
+                  s.artistName?.toLowerCase().includes(songFilter.toLowerCase())
+              );
+              const displaySongs = isClosed ? filteredSongs.slice(0, 10) : filteredSongs;
+
+              return (
+                <div className="flex flex-col gap-2 max-h-[600px] overflow-y-auto pr-1">
+                  {displaySongs.map((song, index) => {
+                    const rank = index + 1;
+                    return (
+                      <div
+                        key={song.playlistSongId}
+                        onClick={() => handlePlaySong(index)}
+                        className="flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all group"
+                        style={{ background: "rgba(255,255,255,0.72)", border: "1px solid rgba(88,95,138,0.12)", boxShadow: "0 2px 8px rgba(80,90,140,0.05)" }}
+                        onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 16px rgba(109,94,252,0.10)")}
+                        onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 2px 8px rgba(80,90,140,0.05)")}
+                      >
+                        {/* 순위 번호 (마감 후) */}
+                        {isClosed && (
+                          <div className="w-7 text-center shrink-0">
+                            <span className="text-sm font-bold" style={{ color: rank <= 3 ? "#6d5efc" : "#8e97ab" }}>{rank}</span>
+                          </div>
+                        )}
+
+                        {/* 앨범 아트 */}
+                        <div
+                          className="relative shrink-0 rounded-xl overflow-hidden flex items-center justify-center"
+                          style={{ width: 80, height: 80, background: "linear-gradient(135deg, rgba(109,94,252,0.10), rgba(255,92,168,0.08))" }}
+                        >
+                          <FallbackCoverArt
+                            src={resolveImageUrl(song.imgUrl)}
+                            title={song.trackName}
+                            size={80}
+                            radius={12}
+                            variant="collabo"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center rounded-xl opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: "rgba(109,94,252,0.18)" }}>
+                            <FaPlay size={13} style={{ color: "#6d5efc" }} />
+                          </div>
+                        </div>
+
+                        {/* 곡 정보 */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <p className="text-sm font-bold truncate" style={{ color: "#1f2430" }} title={song.trackName}>
+                              {song.trackName}
+                            </p>
+                            {song.suggestedByEmail === user?.email && (
+                              <span className="shrink-0 px-2 py-0.5 rounded-full text-xs font-semibold"
+                                style={{ background: "rgba(109,94,252,0.10)", color: "#6d5efc", border: "1px solid rgba(109,94,252,0.20)" }}>
+                                내가 추가한 곡
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs truncate flex items-center gap-1 mt-0.5" style={{ color: "#677086" }}>
+                            {song.artistName}
+                            {song.genreName && (<><GoDotFill size={7} className="shrink-0" />{song.genreName}</>)}
+                          </p>
+                          {song.suggestedByEmail && (
+                            <p className="flex items-center gap-1 mt-1">
+                              <FaUser size={11} className="shrink-0" style={{ color: "#8e97ab" }} />
+                              <span className="text-xs" style={{ color: "#8e97ab" }}>참여자: </span>
+                              <span className="text-xs truncate font-semibold" style={{ color: "#1f2430" }}>
+                                {song.suggestedByName || song.suggestedByEmail}
+                              </span>
+                            </p>
+                          )}
+                          {(song.reason || song.suggestedByEmail === user?.email) &&
+                            (editingReasonId === song.playlistSongId ? (
+                              <div
+                                className="mt-2 overflow-hidden rounded-xl"
+                                style={{ background: "rgba(247,248,255,0.88)", border: "1.5px solid rgba(109,94,252,0.22)" }}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <textarea
+                                  value={editingReasonText}
+                                  onChange={(e) => setEditingReasonText(e.target.value)}
+                                  rows={2}
+                                  autoFocus
+                                  className="w-full px-3 pt-3 pb-1 text-xs bg-transparent outline-none resize-none"
+                                  style={{ color: "#1f2430" }}
+                                  placeholder="추가 이유를 입력하세요."
+                                />
+                                <div className="flex items-center justify-between px-3 pb-2">
+                                  <span className="text-xs" style={{ color: editingReasonText.length > 50 ? "#e03e52" : "#8e97ab" }}>
+                                    {editingReasonText.length} / 50
+                                  </span>
+                                  <div className="flex gap-1.5">
+                                    <button
+                                      onClick={() => setEditingReasonId(null)}
+                                      className="px-3 py-1 text-xs rounded-lg transition-colors"
+                                      style={{ color: "#677086" }}
+                                    >
+                                      취소
+                                    </button>
+                                    <button
+                                      onClick={() => handleUpdateReason(song.playlistSongId)}
+                                      className="px-3 py-1 text-xs font-semibold rounded-lg transition-colors"
+                                      style={{ background: "rgba(109,94,252,0.10)", color: "#6d5efc" }}
+                                    >
+                                      저장
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <p
+                                className={`flex items-center gap-1 mt-1 group/reason ${!isClosed && song.suggestedByEmail === user?.email ? "cursor-pointer" : ""}`}
+                                onClick={(e) => {
+                                  if (!isClosed && song.suggestedByEmail === user?.email) {
+                                    e.stopPropagation();
+                                    setEditingReasonId(song.playlistSongId);
+                                    setEditingReasonText(song.reason ?? "");
+                                  }
+                                }}
+                              >
+                                <FaComment size={11} className="shrink-0" style={{ color: "#8e97ab" }} />
+                                <span className="text-xs shrink-0" style={{ color: "#8e97ab" }}>추가 이유: </span>
+                                <span className="text-xs truncate" style={{ color: "#1f2430" }}>
+                                  {song.reason ||
+                                    (!isClosed && song.suggestedByEmail === user?.email ? (
+                                      <span className="transition-colors" style={{ color: "#c5cad5" }}>작성하기...</span>
+                                    ) : (
+                                      <span style={{ color: "#c5cad5" }}>없음</span>
+                                    ))}
+                                </span>
+                                {!isClosed && song.suggestedByEmail === user?.email && (
+                                  <FaEdit size={10} className="shrink-0 opacity-0 group-hover/reason:opacity-100 transition-all" style={{ color: "#6d5efc" }} />
+                                )}
+                              </p>
+                            ))}
+                        </div>
+
+                        {/* 삭제 버튼 */}
+                        {!isClosed && canDelete(song) && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleRemoveSong(song.playlistSongId); }}
+                            className="flex items-center justify-center w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                            style={{ background: "rgba(255,91,110,0.10)", color: "#e03e52", border: "1px solid rgba(255,91,110,0.18)" }}
+                          >
+                            <FaTrash size={11} />
+                          </button>
+                        )}
+
+                        {/* 투표 버튼 */}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleVote(song); }}
+                          disabled={!user || isClosed}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all shrink-0 disabled:cursor-not-allowed"
+                          style={isClosed
+                            ? { background: "rgba(88,95,138,0.07)", color: "#8e97ab", border: "1px solid rgba(88,95,138,0.12)" }
+                            : song.hasVoted
+                              ? { background: "rgba(109,94,252,0.12)", color: "#6d5efc", border: "1px solid rgba(109,94,252,0.25)" }
+                              : { background: "rgba(88,95,138,0.07)", color: "#8e97ab", border: "1px solid rgba(88,95,138,0.12)" }}
+                        >
+                          <FaThumbsUp size={10} />
+                          {song.voteCount ?? 0}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()
+          )}
         </div>
       )}
 
-      {/* 곡 추가 검색 모달 */}
-      {showAddSongModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-[#1a2535] rounded-2xl p-6 w-full max-w-lg mx-4 flex flex-col gap-4 max-h-[80vh]">
+      {/* 곡 검색 모달 */}
+      {showAddSongModal && (() => {
+        const addSongModal = (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(40,45,80,0.20)" }}>
+          <div className="w-full max-w-lg mx-4 flex flex-col gap-4 p-6 rounded-2xl max-h-[80vh]"
+            style={{ background: "linear-gradient(180deg,#fff,rgba(247,248,255,0.98))", border: "1px solid rgba(200,205,230,0.6)", boxShadow: "0 32px 72px rgba(80,90,140,0.22)" }}>
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white">곡 추가</h3>
+              <h3 className="text-base font-bold" style={{ color: "#1f2430" }}>곡 추가</h3>
               <button
                 onClick={() => setShowAddSongModal(false)}
-                className="flex items-center justify-center w-8 h-8 text-gray-400 transition-colors rounded-full bg-white/10 hover:bg-white/20 hover:text-white"
+                className="flex items-center justify-center w-8 h-8 rounded-full transition-colors"
+                style={{ background: "rgba(255,255,255,0.72)", border: "1px solid rgba(88,95,138,0.12)", color: "#8e97ab" }}
               >
                 ✕
               </button>
@@ -871,127 +848,91 @@ function CollaboPlaylistDetailPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="곡명 또는 아티스트 검색"
-                className="flex-1 px-4 py-2.5 text-base rounded-lg bg-white/5 border border-white/10 outline-none focus:border-white/30 transition-colors placeholder-white/30"
+                className="flex-1 px-4 py-2.5 text-sm rounded-xl outline-none transition-colors"
+                style={{ background: "rgba(247,248,255,0.88)", border: "1.5px solid rgba(88,95,138,0.22)", color: "#1f2430" }}
                 autoFocus
               />
               <button
                 onClick={handleSearch}
-                className="px-4 py-2 transition-colors bg-red-600 rounded-lg hover:bg-red-700"
+                className="px-4 py-2 rounded-xl text-white transition-all hover:scale-105"
+                style={{ background: "linear-gradient(135deg, #6d5efc, #ff5ca8)", boxShadow: "0 4px 12px rgba(109,94,252,0.25)" }}
               >
-                <FaSearch size={16} />
+                <FaSearch size={14} />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto">
               {isSearching ? (
-                <div className="flex justify-center py-10">
-                  <Spinner />
-                </div>
+                <div className="flex justify-center py-10"><Spinner /></div>
               ) : hasSearched && searchResults.length === 0 ? (
-                <p className="py-10 text-center text-gray-400">검색 결과가 없습니다.</p>
+                <p className="py-10 text-center text-sm" style={{ color: "#8e97ab" }}>검색 결과가 없습니다.</p>
               ) : (
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                   {searchResults.map((song) => (
                     <div
                       key={song.id}
-                      className="flex items-center gap-4 p-4 transition-colors rounded-xl bg-white/5 hover:bg-white/10"
+                      className="flex items-center gap-3 p-3 rounded-xl transition-colors"
+                      style={{ background: "rgba(247,248,255,0.7)", border: "1px solid rgba(88,95,138,0.10)" }}
                     >
-                      <div className="relative w-16 h-16 overflow-hidden shrink-0 rounded-xl bg-slate-600">
-                        {song.imgUrl ? (
-                          <img src={song.imgUrl} alt="" className="object-cover w-full h-full" />
-                        ) : (
-                          <div className="flex items-center justify-center w-full h-full">
-                            <FaMusic size={18} className="text-white opacity-40" />
-                          </div>
-                        )}
+                      <div
+                        className="shrink-0 rounded-xl overflow-hidden flex items-center justify-center"
+                        style={{ width: 52, height: 52, background: "linear-gradient(135deg, rgba(109,94,252,0.10), rgba(255,92,168,0.08))" }}
+                      >
+                        <FallbackCoverArt
+                          src={resolveImageUrl(song.imgUrl)}
+                          title={song.trackName}
+                          size={52}
+                          radius={10}
+                          variant="collabo"
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-base font-semibold truncate" title={song.trackName}>
-                          {song.trackName}
-                        </p>
-                        <p className="text-sm text-gray-400 truncate flex items-center gap-1 mt-0.5">
+                        <p className="text-sm font-semibold truncate" style={{ color: "#1f2430" }} title={song.trackName}>{song.trackName}</p>
+                        <p className="text-xs truncate flex items-center gap-1 mt-0.5" style={{ color: "#677086" }}>
                           {song.artistName}
-                          {song.genreName && (
-                            <>
-                              <GoDotFill size={8} className="shrink-0" />
-                              {song.genreName}
-                            </>
-                          )}
+                          {song.genreName && (<><GoDotFill size={7} className="shrink-0" />{song.genreName}</>)}
                         </p>
                       </div>
                       {song.previewUrl && (
                         <button
                           onClick={() => {
-                            if (
-                              isPlayerVisible &&
-                              playerSongs[0]?.id === song.id &&
-                              !isPreviewPaused
-                            ) {
+                            if (isPlayerVisible && playerSongs[0]?.id === song.id && !isPreviewPaused) {
                               setIsPreviewPaused(true);
                             } else {
-                              setPlayerSongs([song]);
-                              setPlayerIndex(0);
-                              setIsPlayerVisible(true);
-                              setIsPreviewPaused(false);
+                              setPlayerSongs([song]); setPlayerIndex(0); setIsPlayerVisible(true); setIsPreviewPaused(false);
                             }
                           }}
-                          className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors shrink-0 ${
-                            isPlayerVisible && playerSongs[0]?.id === song.id && !isPreviewPaused
-                              ? "bg-blue-600 hover:bg-blue-700 text-white"
-                              : "bg-white/10 hover:bg-white/20 text-gray-300"
-                          }`}
+                          className="flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0"
+                          style={isPlayerVisible && playerSongs[0]?.id === song.id && !isPreviewPaused
+                            ? { background: "rgba(109,94,252,0.12)", color: "#6d5efc", border: "1px solid rgba(109,94,252,0.22)" }
+                            : { background: "rgba(88,95,138,0.07)", color: "#8e97ab", border: "1px solid rgba(88,95,138,0.12)" }}
                         >
-                          {isPlayerVisible && playerSongs[0]?.id === song.id && !isPreviewPaused ? (
-                            <FaPause size={13} />
-                          ) : (
-                            <FaPlay size={13} />
-                          )}
+                          {isPlayerVisible && playerSongs[0]?.id === song.id && !isPreviewPaused ? <FaPause size={11} /> : <FaPlay size={11} />}
                         </button>
                       )}
                       <button
-                        onClick={() => {
-                          setSuggestTarget(song);
-                          setSuggestReason("");
-                        }}
-                        disabled={
-                          !user ||
-                          addedSongIds.has(song.id) ||
-                          songs.some(
-                            (s) =>
-                              s.trackName === song.trackName && s.artistName === song.artistName
-                          )
-                        }
-                        className={`flex items-center justify-center transition-colors rounded-full w-9 h-9 shrink-0 disabled:cursor-not-allowed ${
-                          addedSongIds.has(song.id) ||
-                          songs.some(
-                            (s) =>
-                              s.trackName === song.trackName && s.artistName === song.artistName
-                          )
-                            ? "bg-green-600 text-white"
-                            : "bg-red-600 hover:bg-red-700 disabled:opacity-40"
-                        }`}
+                        onClick={() => { setSuggestTarget(song); setSuggestReason(""); }}
+                        disabled={!user || addedSongIds.has(song.id) || songs.some((s) => s.trackName === song.trackName && s.artistName === song.artistName)}
+                        className="flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 disabled:cursor-not-allowed"
+                        style={addedSongIds.has(song.id) || songs.some((s) => s.trackName === song.trackName && s.artistName === song.artistName)
+                          ? { background: "rgba(57,201,167,0.12)", color: "#1aaa86", border: "1px solid rgba(57,201,167,0.25)" }
+                          : { background: "linear-gradient(135deg, #6d5efc, #ff5ca8)", color: "#fff" }}
                       >
-                        {addedSongIds.has(song.id) ||
-                        songs.some(
-                          (s) => s.trackName === song.trackName && s.artistName === song.artistName
-                        ) ? (
-                          <FaCheck size={16} />
-                        ) : (
-                          <FaPlus size={15} />
-                        )}
+                        {addedSongIds.has(song.id) || songs.some((s) => s.trackName === song.trackName && s.artistName === song.artistName)
+                          ? <FaCheck size={13} /> : <FaPlus size={13} />}
                       </button>
                     </div>
                   ))}
                 </div>
               )}
               {!user && hasSearched && (
-                <p className="mt-2 text-sm text-center text-gray-400">
-                  로그인 후 곡을 추가할 수 있습니다.
-                </p>
+                <p className="mt-2 text-xs text-center" style={{ color: "#8e97ab" }}>로그인 후 곡을 추가할 수 있습니다.</p>
               )}
             </div>
           </div>
         </div>
-      )}
+        );
+        return modalRoot ? createPortal(addSongModal, modalRoot) : addSongModal;
+      })()}
 
       {showEditModal && playlist && (
         <CollaboPlaylistEditModal
@@ -1005,91 +946,88 @@ function CollaboPlaylistDetailPage() {
         />
       )}
 
-      {/* 곡 추가 모달 */}
-      {suggestTarget && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60">
-          <div className="bg-[#1a2535] rounded-2xl p-6 w-full max-w-md mx-4 flex flex-col gap-7">
-            <h3 className="text-lg font-bold text-white">곡 추가</h3>
-            <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
-              {suggestTarget.imgUrl && (
-                <img
-                  src={suggestTarget.imgUrl}
-                  className="object-cover w-10 h-10 rounded-lg shrink-0"
-                />
-              )}
+      {/* 곡 추가 이유 모달 */}
+      {suggestTarget && (() => {
+        const suggestModal = (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center" style={{ background: "rgba(40,45,80,0.20)" }}>
+          <div className="w-full max-w-md mx-4 flex flex-col gap-5 p-6 rounded-2xl"
+            style={{ background: "linear-gradient(180deg,#fff,rgba(247,248,255,0.98))", border: "1px solid rgba(200,205,230,0.6)", boxShadow: "0 32px 72px rgba(80,90,140,0.22)" }}>
+            <h3 className="text-base font-bold" style={{ color: "#1f2430" }}>곡 추가</h3>
+            <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: "rgba(247,248,255,0.88)", border: "1px solid rgba(88,95,138,0.12)" }}>
+              <FallbackCoverArt
+                src={resolveImageUrl(suggestTarget.imgUrl)}
+                title={suggestTarget.trackName}
+                size={40}
+                radius={8}
+                variant="collabo"
+                className="shrink-0"
+              />
               <div className="flex flex-col min-w-0">
-                <span className="font-bold text-white truncate">{suggestTarget.trackName}</span>
-                <p className="text-sm text-gray-400 truncate flex items-center gap-1 mt-0.5">
+                <span className="text-sm font-bold truncate" style={{ color: "#1f2430" }}>{suggestTarget.trackName}</span>
+                <p className="text-xs truncate flex items-center gap-1 mt-0.5" style={{ color: "#677086" }}>
                   {suggestTarget.artistName}
-                  {suggestTarget.genreName && (
-                    <>
-                      <GoDotFill size={8} className="shrink-0" />
-                      {suggestTarget.genreName}
-                    </>
-                  )}
+                  {suggestTarget.genreName && (<><GoDotFill size={7} className="shrink-0" />{suggestTarget.genreName}</>)}
                 </p>
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between p-1">
-                <label className="text-sm text-gray-400">추가 이유 (선택)</label>
-                <span
-                  className="text-sm"
-                  style={{ color: suggestReason.length > 50 ? "#f87171" : "#6b8099" }}
-                >
-                  {suggestReason.length} / 50
-                </span>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold" style={{ color: "#1f2430" }}>추가 이유 (선택)</label>
+                <span className="text-xs" style={{ color: suggestReason.length > 50 ? "#e03e52" : "#8e97ab" }}>{suggestReason.length} / 50</span>
               </div>
               <textarea
                 value={suggestReason}
                 onChange={(e) => setSuggestReason(e.target.value)}
                 placeholder="이 곡을 추가하는 이유를 작성해주세요."
                 rows={3}
-                className="bg-[#111c2b] text-white text-sm rounded-xl p-3 resize-none outline-none border border-white/10 focus:border-blue-500 placeholder-gray-600"
+                className="text-sm rounded-xl p-3 resize-none outline-none transition-colors"
+                style={{ background: "rgba(247,248,255,0.88)", border: "1.5px solid rgba(88,95,138,0.22)", color: "#1f2430" }}
               />
             </div>
-            <div className="flex gap-[14px] mt-[6px]">
+            <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => setSuggestTarget(null)}
-                className="flex-1 py-[14px] rounded-[14px] bg-[#444] text-white text-[15px] cursor-pointer hover:bg-[#555] transition-colors"
+                className="flex-1 py-3 rounded-2xl text-sm font-bold transition-colors"
+                style={{ background: "rgba(255,255,255,0.72)", border: "1px solid rgba(88,95,138,0.16)", color: "#677086" }}
               >
                 취소
               </button>
-
               <button
                 onClick={() => {
-                  if (suggestReason.length > 50) {
-                    alert("추가 이유는 최대 50자까지 입력할 수 있습니다.");
-                    return;
-                  }
+                  if (suggestReason.length > 50) { alert("추가 이유는 최대 50자까지 입력할 수 있습니다."); return; }
                   handleSuggestSong(suggestTarget, suggestReason);
                   setSuggestTarget(null);
                 }}
-                className="flex-1 py-[14px] rounded-[14px] bg-white text-black font-bold text-[15px] cursor-pointer hover:bg-gray-200 transition-colors"
+                className="flex-1 py-3 rounded-2xl text-sm font-bold text-white transition-all hover:scale-[1.02]"
+                style={{ background: "linear-gradient(135deg, #6d5efc, #ff5ca8)", boxShadow: "0 6px 18px rgba(109,94,252,0.28)" }}
               >
                 추가
               </button>
             </div>
           </div>
         </div>
-      )}
+        );
+        return modalRoot ? createPortal(suggestModal, modalRoot) : suggestModal;
+      })()}
 
-      {isPlayerVisible && playerSongs.length > 0 && (
-        <div className="fixed bottom-0 left-0 z-50 w-full">
-          <MusicPlayer
-            song={playerSongs[playerIndex]}
-            setIsPlayerVisible={() => {
-              setIsPlayerVisible(false);
-              setIsPreviewPaused(false);
-            }}
-            songs={playerSongs}
-            songIndex={playerIndex}
-            onSongChange={(index) => setPlayerIndex(index)}
-            externalPaused={isPreviewPaused}
-          />
-        </div>
-      )}
+      {isPlayerVisible &&
+        playerSongs.length > 0 &&
+        (() => {
+          const playerModal = (
+            <div className="fixed bottom-0 left-0 z-[12000] w-full">
+              <MusicPlayer
+                song={playerSongs[playerIndex]}
+                setIsPlayerVisible={() => { setIsPlayerVisible(false); setIsPreviewPaused(false); }}
+                songs={playerSongs}
+                songIndex={playerIndex}
+                onSongChange={(index) => setPlayerIndex(index)}
+                externalPaused={isPreviewPaused}
+              />
+            </div>
+          );
+          return modalRoot ? createPortal(playerModal, modalRoot) : playerModal;
+        })()}
     </div>
       </div>
     </div>

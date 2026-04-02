@@ -1,7 +1,19 @@
 import { useState, useRef, useEffect } from "react";
+import type { AxiosError } from "axios";
 import {
-  FaCommentDots, FaTimes, FaPaperPlane, FaRobot, FaTrash,
-  FaChevronLeft, FaChevronRight, FaPlay, FaPause, FaPlus, FaCheck,
+  FaCommentDots,
+  FaTimes,
+  FaPaperPlane,
+  FaRobot,
+  FaTrash,
+  FaChevronLeft,
+  FaChevronRight,
+  FaPlay,
+  FaPause,
+  FaPlus,
+  FaCheck,
+  FaRegEnvelope,
+  FaMobileAlt,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -38,6 +50,7 @@ interface Message {
   link?: string;
   linkLabel?: string;
   links?: { label: string; path: string }[];
+  contactInput?: boolean;
 }
 
 interface ChatResponse {
@@ -46,45 +59,110 @@ interface ChatResponse {
   sessionId?: string;
 }
 
-// **"곡 제목" - 아티스트** 또는 **"곡 제목"** 패턴만 파싱 (따옴표 필수)
+interface ApiErrorResponse {
+  message?: string;
+  errors?: { field: string; message: string }[];
+}
+
+// AI 추천 응답에서 곡/아티스트/추천 이유를 최대한 유연하게 파싱
 function parseSongs(text: string): { title: string; artist: string; reason: string }[] {
   const lines = text.split("\n");
   const results: { title: string; artist: string; reason: string }[] = [];
-  // ASCII 따옴표 " 와 유니코드 곡선따옴표 " " 모두 처리
-  const songPattern = /\*{0,2}[\u201C"]([^"*\n\u201C\u201D]{2,})[\u201D"]\s*(?:[-–]\s*([^\n*]{2,}?))?\*{0,2}\s*$/;
-  const isSongLine = (l: string) => songPattern.test(l);
+  const songLinePattern =
+    /^(?:\d+\.\s*)?\*{0,2}[\u201C"]([^"*\n\u201C\u201D]{2,})[\u201D"]\s*(.*)\*{0,2}\s*$/;
+
+  const cleanText = (value: string) =>
+    value
+      .replace(/^\*+|\*+$/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const normalizeReason = (value: string) =>
+    cleanText(value).replace(/^(?:이유|추천\s*이유|설명|reason)\s*[:\-–—]\s*/i, "");
+
+  const isSongLine = (line: string) => songLinePattern.test(line.trim());
+  const commonReasonLines = lines
+    .map((line) => line.trim())
+    .filter(
+      (line) =>
+        !!line &&
+        !isSongLine(line) &&
+        !/^[-•→]\s*$/.test(line) &&
+        !/^(?:이유|추천\s*이유|설명|reason)\s*[:\-–—]\s*$/i.test(line)
+    );
 
   for (let i = 0; i < lines.length; i++) {
-    const match = songPattern.exec(lines[i]);
+    const line = lines[i].trim();
+    const match = songLinePattern.exec(line);
     if (!match) continue;
-    const title = match[1].trim();
-    const artist = match[2] ? match[2].trim().replace(/\*+$/, "").trim() : "";
-    if (!title) continue;
 
-    let reason = "";
-    for (let j = i + 1; j < lines.length && j <= i + 5; j++) {
-      const line = lines[j].trim();
-      if (!line) continue;
-      if (isSongLine(line) || /^\d+\.\s+\*/.test(line)) break;
-      const bulletMatch = line.match(/^[-•→]\s*(.+)/);
-      if (bulletMatch) { reason = bulletMatch[1].trim(); break; }
-      const colonMatch = line.match(/^(?:이유|추천\s*이유|설명|reason)\s*[:\-]\s*(.+)/i);
-      if (colonMatch) { reason = colonMatch[1].trim(); break; }
-      if (!/^\d+\./.test(line)) { reason = line; break; }
+    const title = cleanText(match[1]);
+    let remainder = cleanText(match[2] ?? "");
+    let artist = "";
+    let inlineReason = "";
+
+    if (remainder) {
+      remainder = remainder.replace(/^[-–—]\s*/, "");
+
+      const inlineReasonMatch = remainder.match(/^(.*?)(?:\s*[:\-–—]\s*)(.+)$/);
+      if (inlineReasonMatch) {
+        artist = cleanText(inlineReasonMatch[1]);
+        inlineReason = normalizeReason(inlineReasonMatch[2]);
+      } else {
+        artist = cleanText(remainder);
+      }
     }
 
-    results.push({ title, artist, reason });
+    if (!title) continue;
+
+    let reason = inlineReason;
+    for (let j = i + 1; j < lines.length && j <= i + 5; j++) {
+      if (reason) break;
+      const line = lines[j].trim();
+      if (!line) continue;
+      if (isSongLine(line)) break;
+      const bulletMatch = line.match(/^[-•→]\s*(.+)/);
+      if (bulletMatch) {
+        reason = normalizeReason(bulletMatch[1]);
+        break;
+      }
+      const colonMatch = line.match(/^(?:이유|추천\s*이유|설명|reason)\s*[:\-–—]\s*(.+)/i);
+      if (colonMatch) {
+        reason = normalizeReason(colonMatch[1]);
+        break;
+      }
+      const plainText = normalizeReason(line);
+      if (plainText) {
+        reason = plainText;
+        break;
+      }
+    }
+
+    results.push({ title, artist, reason: cleanText(reason) });
   }
+
+  const commonReason = cleanText(commonReasonLines.join(" "));
+  if (commonReason) {
+    return results.map((item) => ({
+      ...item,
+      reason: item.reason || commonReason,
+    }));
+  }
+
   return results;
 }
 
-async function fetchItunesTracks(songs: { title: string; artist: string; reason: string }[]): Promise<iTunesTrack[]> {
+async function fetchItunesTracks(
+  songs: { title: string; artist: string; reason: string }[]
+): Promise<iTunesTrack[]> {
   const results = await Promise.all(
     songs.map(async ({ title, artist, reason }) => {
       try {
         const query = encodeURIComponent(artist ? `${title} ${artist}` : title);
         // limit=5로 후보를 가져와 previewUrl 있는 트랙 우선 선택
-        const res = await fetch(`https://itunes.apple.com/search?term=${query}&media=music&limit=5&country=KR&lang=ko_kr`);
+        const res = await fetch(
+          `https://itunes.apple.com/search?term=${query}&media=music&limit=5&country=KR&lang=ko_kr`
+        );
         const data = await res.json();
         const tracks: iTunesTrack[] = data.results ?? [];
         let track = tracks.find((t) => t.previewUrl) ?? tracks[0];
@@ -93,12 +171,16 @@ async function fetchItunesTracks(songs: { title: string; artist: string; reason:
         // 여전히 previewUrl 없으면 US 스토어로 재시도
         if (!track.previewUrl) {
           try {
-            const res2 = await fetch(`https://itunes.apple.com/search?term=${query}&media=music&limit=5`);
+            const res2 = await fetch(
+              `https://itunes.apple.com/search?term=${query}&media=music&limit=5`
+            );
             const data2 = await res2.json();
             const tracks2: iTunesTrack[] = data2.results ?? [];
             const withPreview = tracks2.find((t) => t.previewUrl);
             if (withPreview) track = { ...track, previewUrl: withPreview.previewUrl };
-          } catch {}
+          } catch {
+            // Ignore fallback iTunes lookup failures and keep the original search result.
+          }
         }
 
         return { ...track, reason };
@@ -110,7 +192,15 @@ async function fetchItunesTracks(songs: { title: string; artist: string; reason:
   return results.filter(Boolean) as iTunesTrack[];
 }
 
-type Category = "main" | "feature" | "recommend" | "recommend_mood" | "recommend_vibe" | "faq" | "genre" | "inquiry";
+type Category =
+  | "main"
+  | "feature"
+  | "recommend"
+  | "recommend_mood"
+  | "recommend_vibe"
+  | "faq"
+  | "genre"
+  | "inquiry";
 
 const PARENT_CATEGORY: Partial<Record<Category, Category>> = {
   feature: "main",
@@ -136,7 +226,18 @@ const MOODS = [
   { emoji: "🌙", label: "몽환적", value: "몽환적이고 감성적인 기분일 때 들을 음악을 추천해줘" },
 ];
 
-const CATEGORIES: Record<Category, { label: string; options: { label: string; value: string; link?: string; links?: { label: string; path: string }[] }[] }> = {
+const CATEGORIES: Record<
+  Category,
+  {
+    label: string;
+    options: {
+      label: string;
+      value: string;
+      link?: string;
+      links?: { label: string; path: string }[];
+    }[];
+  }
+> = {
   main: {
     label: "메인",
     options: [
@@ -149,23 +250,55 @@ const CATEGORIES: Record<Category, { label: string; options: { label: string; va
   feature: {
     label: "기능 사용법",
     options: [
-      { label: "1. 플레이리스트 만들기", value: "플레이리스트 만드는 방법을 알려줘", link: "/playlist/me" },
+      {
+        label: "1. 플레이리스트 만들기",
+        value: "플레이리스트 만드는 방법을 알려줘",
+        link: "/playlist/me",
+      },
       { label: "2. 음악 검색하기", value: "음악 검색 방법을 알려줘" },
-      { label: "3. 추천 기능 사용법", value: "추천 기능 사용 방법을 알려줘", links: [
-        { label: "블라인드 곡 추천", path: "/recommend/blind" },
-        { label: "이상형 월드컵 곡 추천", path: "/recommend/worldcup" },
-      ]},
+      {
+        label: "3. 추천 기능 사용법",
+        value: "추천 기능 사용 방법을 알려줘",
+        links: [
+          { label: "블라인드 곡 추천", path: "/recommend/blind" },
+          { label: "이상형 월드컵 곡 추천", path: "/recommend/worldcup" },
+        ],
+      },
       { label: "4. 랭킹 보기", value: "랭킹 기능을 알려줘", link: "/home" },
-      { label: "5. 음악 공유 게시판", value: "공유 게시판 커뮤니티 이용 방법을 알려줘", link: "/community/share" },
-      { label: "6. 자유게시판 이용", value: "자유게시판 이용 방법을 알려줘", link: "/community/free" },
-      { label: "7. 음악 평론", value: "뮤직 크리틱 평론 이용 방법을 알려줘", link: "/recommend/critic" },
-      { label: "8. 공동 플레이리스트 제작", value: "콜라보 공동 플레이리스트 제작 기능을 알려줘", link: "/community/collabo" },
-      { label: "9. 게임 방법", value: "퀴즈 게임 이용 방법을 알려줘", links: [
-        { label: "노래 맞추기", path: "/game/music-quiz" },
-        { label: "앨범 맞추기", path: "/game/album-quiz" },
-        { label: "카드 맞추기", path: "/game/card-match" },
-      ]},
-      { label: "10. 포인트 & 등급", value: "포인트 등급 적립 시스템을 알려줘", link: "/profile/points" },
+      {
+        label: "5. 음악 공유 게시판",
+        value: "공유 게시판 커뮤니티 이용 방법을 알려줘",
+        link: "/community/share",
+      },
+      {
+        label: "6. 자유게시판 이용",
+        value: "자유게시판 이용 방법을 알려줘",
+        link: "/community/free",
+      },
+      {
+        label: "7. 음악 평론",
+        value: "뮤직 크리틱 평론 이용 방법을 알려줘",
+        link: "/recommend/critic",
+      },
+      {
+        label: "8. 공동 플레이리스트 제작",
+        value: "콜라보 공동 플레이리스트 제작 기능을 알려줘",
+        link: "/community/collabo",
+      },
+      {
+        label: "9. 게임 방법",
+        value: "퀴즈 게임 이용 방법을 알려줘",
+        links: [
+          { label: "노래 맞추기", path: "/game/music-quiz" },
+          { label: "앨범 맞추기", path: "/game/album-quiz" },
+          { label: "카드 맞추기", path: "/game/card-match" },
+        ],
+      },
+      {
+        label: "10. 포인트 & 등급",
+        value: "포인트 등급 적립 시스템을 알려줘",
+        link: "/profile/points",
+      },
       { label: "11. 굿즈 구매", value: "굿즈 상품 구매 방법을 알려줘", link: "/goods" },
       { label: "12. 주문 내역 확인", value: "주문 내역 조회 방법을 알려줘", link: "/goods/orders" },
       { label: "13. 마이페이지 이용", value: "마이페이지 이용 방법을 알려줘", link: "/profile/me" },
@@ -201,7 +334,11 @@ const CATEGORIES: Record<Category, { label: string; options: { label: string; va
     options: [
       { label: "1. 포인트는 어떻게 적립되나요?", value: "포인트 적립 방법을 알려줘" },
       { label: "2. 등급 기준이 어떻게 되나요?", value: "등급 기준을 알려줘" },
-      { label: "3. 비밀번호를 변경하고 싶어요", value: "비밀번호 변경 방법을 알려줘", link: "/profile/me" },
+      {
+        label: "3. 비밀번호를 변경하고 싶어요",
+        value: "비밀번호 변경 방법을 알려줘",
+        link: "/profile/me",
+      },
       { label: "4. 계정 문제가 생겼어요", value: "계정 문제 해결 방법을 알려줘" },
       { label: "5. 기능 오류가 발생했어요", value: "기능 오류 해결 방법을 알려줘" },
     ],
@@ -263,7 +400,10 @@ interface GuideCardData {
 
 // 규칙 응답 텍스트를 제목 + 항목 구조로 파싱
 function parseGuideCard(content: string): GuideCardData | null {
-  const lines = content.split("\n").map((l) => l.trim()).filter(Boolean);
+  const lines = content
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
   if (lines.length < 2) return null;
 
   // 첫 줄이 ':'으로 끝나야 제목으로 인식
@@ -294,7 +434,8 @@ function parseGuideCard(content: string): GuideCardData | null {
 
 // AI 답변 응답값 **bold**, "따옴표", URL 렌더링
 function renderContent(content: string) {
-  const tokenRegex = /(\*\*(.+?)\*\*|[\u201C"]([^\u201C\u201D"\n]{2,})[\u201D"]|https?:\/\/[^\s]+)/g;
+  const tokenRegex =
+    /(\*\*(.+?)\*\*|[\u201C"]([^\u201C\u201D"\n]{2,})[\u201D"]|https?:\/\/[^\s]+)/g;
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let match;
@@ -311,7 +452,13 @@ function renderContent(content: string) {
       parts.push(<strong key={key++}>{match[3]}</strong>);
     } else {
       parts.push(
-        <a key={key++} href={match[0]} target="_blank" rel="noopener noreferrer" className="underline text-red-300 hover:text-red-200">
+        <a
+          key={key++}
+          href={match[0]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-red-300 underline hover:text-red-200"
+        >
           {match[0]}
         </a>
       );
@@ -324,22 +471,121 @@ function renderContent(content: string) {
   return parts;
 }
 
+function getRecommendationIntro(content: string) {
+  const lines = content
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const introLines = lines.filter(
+    (line) =>
+      !/[\u201C"]/.test(line) &&
+      !/^[-•→]/.test(line) &&
+      !/^(?:이유|추천\s*이유|설명|reason)\s*[:-]/i.test(line)
+  );
+
+  return introLines[0] ?? "추천 곡을 준비했어요.";
+}
+
 const STORAGE_KEY = "chatbot_messages";
 const SESSION_KEY = "chatbot_session_id";
+const MAX_CHAT_MESSAGE_LENGTH = 300;
+
+function getScopeKey(prefix: string, scope: string) {
+  return `${prefix}:${scope}`;
+}
+
+function getDefaultMessages(): Message[] {
+  return [{ role: "assistant", content: WELCOME_MESSAGE }];
+}
+
+function hasConversation(messages: Message[]) {
+  return (
+    messages.length > 1 ||
+    messages[0]?.role !== "assistant" ||
+    messages[0]?.content !== WELCOME_MESSAGE
+  );
+}
+
+function loadMessagesFromStorage(storageKey: string, fallbackToLegacy = false): Message[] {
+  try {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      return JSON.parse(saved) as Message[];
+    }
+
+    if (fallbackToLegacy) {
+      const legacy = localStorage.getItem(STORAGE_KEY);
+      if (legacy) {
+        return JSON.parse(legacy) as Message[];
+      }
+    }
+  } catch {
+    // Ignore malformed local storage data and fall back to the default welcome state.
+  }
+
+  return getDefaultMessages();
+}
+
+function loadSessionFromStorage(storageKey: string, fallbackToLegacy = false): string | null {
+  const saved = localStorage.getItem(storageKey);
+  if (saved) {
+    return saved;
+  }
+
+  if (fallbackToLegacy) {
+    return localStorage.getItem(SESSION_KEY);
+  }
+
+  return null;
+}
+
+function getApiErrorMessage(error: unknown, fallback: string) {
+  const axiosError = error as AxiosError<ApiErrorResponse>;
+  const data = axiosError.response?.data;
+
+  if (data?.errors?.length) {
+    return data.errors[0].message;
+  }
+
+  return data?.message || fallback;
+}
+
+function shouldResetSession(error: unknown) {
+  const axiosError = error as AxiosError<ApiErrorResponse>;
+  const status = axiosError.response?.status;
+  const message = axiosError.response?.data?.message || "";
+
+  return (
+    status === 401 ||
+    message.includes("이 대화 세션에 접근할 수 없습니다") ||
+    message.includes("접근 권한이 없습니다") ||
+    message.includes("세션을 찾을 수 없습니다")
+  );
+}
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function normalizePhone(value: string) {
+  return value.replace(/[^\d-]/g, "").trim();
+}
+
+function isValidPhone(value: string) {
+  return /^01[016789]-?\d{3,4}-?\d{4}$/.test(normalizePhone(value));
+}
 
 function ChatbotButton() {
   const navigate = useNavigate();
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+  const userEmail = useSelector((state: RootState) => state.auth.user?.email ?? null);
+  const storageScope = userEmail ? `user:${userEmail}` : "guest";
+  const messagesStorageKey = getScopeKey(STORAGE_KEY, storageScope);
+  const sessionStorageKey = getScopeKey(SESSION_KEY, storageScope);
 
-  const [messages, setMessages] = useState<Message[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) return JSON.parse(saved) as Message[];
-    } catch {}
-    return [{ role: "assistant", content: WELCOME_MESSAGE }];
-  });
-
-  const [sessionId, setSessionId] = useState<string | null>(() => localStorage.getItem(SESSION_KEY));
+  const [messages, setMessages] = useState<Message[]>(getDefaultMessages);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   const [isOpen, setIsOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
@@ -347,32 +593,106 @@ function ChatbotButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [category, setCategory] = useState<Category>("main");
 
-  const [inquiryStep, setInquiryStep] = useState<null | "email" | "content">(null);
+  const [inquiryStep, setInquiryStep] = useState<null | "contact" | "content">(null);
   const [inquiryType, setInquiryType] = useState("");
   const [inquiryEmail, setInquiryEmail] = useState("");
+  const [inquiryPhone, setInquiryPhone] = useState("");
+  const [contactEmailValue, setContactEmailValue] = useState("");
+  const [contactPhoneValue, setContactPhoneValue] = useState("");
+  const [contactMethod, setContactMethod] = useState<null | "email" | "phone">(null);
   const { play: playGlobal, stop: stopGlobal, song: previewSong } = usePlayer();
+  const [isAnyPlayerVisible, setIsAnyPlayerVisible] = useState(false);
+  const [playerBarHeight, setPlayerBarHeight] = useState(0);
+  const hasPlayerBar = !!previewSong || isAnyPlayerVisible;
+  const playerOffsetBottom = Math.max(playerBarHeight + 14, 84);
+  const chatbotButtonBottom = hasPlayerBar ? playerOffsetBottom : 24;
+  const chatbotWindowBottom = hasPlayerBar ? playerOffsetBottom + 58 : 24;
+  const toastBottom = hasPlayerBar ? playerOffsetBottom - 2 : 8;
+
+  useEffect(() => {
+    const checkPlayerVisible = () => {
+      const playerWrap = document.querySelector(".kf-player-wrap") as HTMLElement | null;
+      setIsAnyPlayerVisible(!!playerWrap);
+      setPlayerBarHeight(playerWrap ? Math.ceil(playerWrap.getBoundingClientRect().height) : 0);
+    };
+
+    checkPlayerVisible();
+    const observer = new MutationObserver(checkPlayerVisible);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
+  }, []);
 
   // 플레이리스트 추가
   const [playlists, setPlaylists] = useState<{ id: number; title: string; imageUrl: string }[]>([]);
   const [addingTrack, setAddingTrack] = useState<iTunesTrack | null>(null);
-  const [addStatus, setAddStatus] = useState<Record<number, "idle" | "loading" | "done" | "error">>({});
+  const [addStatus, setAddStatus] = useState<Record<number, "idle" | "loading" | "done" | "error">>(
+    {}
+  );
   const [addingPlaylistId, setAddingPlaylistId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const previousScopeRef = useRef(storageScope);
+  const messagesRef = useRef(messages);
+  const sessionIdRef = useRef(sessionId);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  useEffect(() => {
+    sessionIdRef.current = sessionId;
+  }, [sessionId]);
+
+  useEffect(() => {
+    const previousScope = previousScopeRef.current;
+    const guestToUser = previousScope === "guest" && storageScope !== "guest";
+
+    if (guestToUser && (sessionIdRef.current || hasConversation(messagesRef.current))) {
+      localStorage.setItem(messagesStorageKey, JSON.stringify(messagesRef.current));
+      if (sessionIdRef.current) {
+        localStorage.setItem(sessionStorageKey, sessionIdRef.current);
+      } else {
+        localStorage.removeItem(sessionStorageKey);
+      }
+    } else {
+      const shouldFallbackToLegacy = storageScope === "guest";
+      const nextMessages = loadMessagesFromStorage(messagesStorageKey, shouldFallbackToLegacy);
+      const nextSessionId = loadSessionFromStorage(sessionStorageKey, shouldFallbackToLegacy);
+      setMessages(nextMessages);
+      setSessionId(nextSessionId);
+
+      if (shouldFallbackToLegacy) {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(SESSION_KEY);
+      }
+    }
+
+    previousScopeRef.current = storageScope;
+  }, [messagesStorageKey, sessionStorageKey, storageScope]);
 
   // messages 변경 시 localStorage 저장
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-  }, [messages]);
+    localStorage.setItem(messagesStorageKey, JSON.stringify(messages));
+  }, [messages, messagesStorageKey]);
+
+  useEffect(() => {
+    if (sessionId) {
+      localStorage.setItem(sessionStorageKey, sessionId);
+      return;
+    }
+
+    localStorage.removeItem(sessionStorageKey);
+  }, [sessionId, sessionStorageKey]);
 
   // 채팅창 닫혀있을 때 새 AI 응답 → 뱃지
   useEffect(() => {
     if (!isOpen && messages.length > 1 && messages[messages.length - 1].role === "assistant") {
       setHasUnread(true);
     }
-  }, [messages]);
+  }, [isOpen, messages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -385,6 +705,22 @@ function ChatbotButton() {
   const handleOpen = () => {
     setIsOpen(true);
     setHasUnread(false);
+  };
+
+  const resetChatState = (nextMessages: Message[] = getDefaultMessages()) => {
+    setMessages(nextMessages);
+    setSessionId(null);
+    setInput("");
+    setCategory("main");
+    setInquiryStep(null);
+    setInquiryType("");
+    setInquiryEmail("");
+    setInquiryPhone("");
+    setContactEmailValue("");
+    setContactPhoneValue("");
+    setContactMethod(null);
+    localStorage.removeItem(messagesStorageKey);
+    localStorage.removeItem(sessionStorageKey);
   };
 
   // 미리듣기
@@ -413,7 +749,9 @@ function ChatbotButton() {
     try {
       const res = await playlistApi.getAllPlaylist();
       setPlaylists(res.data);
-    } catch {}
+    } catch {
+      // Ignore playlist load failures here and keep the add flow lightweight.
+    }
   };
 
   // 플레이리스트에 곡 추가
@@ -439,8 +777,10 @@ function ChatbotButton() {
       await playlistApi.addSongToPlaylist(playlistId, match.id);
       setAddStatus((prev) => ({ ...prev, [trackId]: "done" }));
       succeeded = true;
-    } catch (err: any) {
-      const data = JSON.stringify(err?.response?.data ?? "").toLowerCase();
+    } catch (error) {
+      const data = JSON.stringify(
+        (error as AxiosError<ApiErrorResponse>)?.response?.data ?? ""
+      ).toLowerCase();
       isDuplicate = data.includes("duplicate entry");
       setAddStatus((prev) => ({ ...prev, [trackId]: "error" }));
     }
@@ -457,27 +797,21 @@ function ChatbotButton() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const sendMessage = async (text?: string, displayText?: string, link?: string, linkLabel?: string, links?: { label: string; path: string }[]) => {
+  const sendMessage = async (
+    text?: string,
+    displayText?: string,
+    link?: string,
+    linkLabel?: string,
+    links?: { label: string; path: string }[]
+  ) => {
     const msg = (text ?? input).trim();
     if (!msg || isLoading) return;
 
-    // 문의 이메일 입력 단계
-    if (inquiryStep === "email") {
-      const userMsg: Message = { role: "user", content: msg };
-      setInput("");
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(msg)) {
-        setMessages((prev) => [...prev, userMsg, { role: "assistant", content: "올바른 이메일 형식이 아닙니다. 다시 입력해주세요." }]);
-        return;
-      }
-      setInquiryEmail(msg);
-      setInquiryStep("content");
-      setMessages((prev) => [...prev, userMsg, { role: "assistant", content: `이메일이 확인되었습니다.\n${inquiryType}에 대한 문의 내용을 아래 입력창에 자세히 입력해주세요.\n\n접수된 문의는 담당자 이메일로 전달되며, 빠른 시일 내에 답변드리겠습니다.` }]);
-      return;
-    }
+    // 버튼 클릭(text 직접 전달)인 경우 문의 단계 체크 건너뜀
+    const isFromInput = text === undefined;
 
     // 문의 내용 입력 단계
-    if (inquiryStep === "content") {
+    if (isFromInput && inquiryStep === "content") {
       const userMsg: Message = { role: "user", content: msg };
       setMessages((prev) => [...prev, userMsg]);
       setInput("");
@@ -487,14 +821,31 @@ function ChatbotButton() {
           type: inquiryType,
           content: msg,
           email: inquiryEmail || undefined,
+          phone: inquiryPhone || undefined,
         });
-        setMessages((prev) => [...prev, { role: "assistant", content: "문의가 접수되었습니다! 빠른 시일 내에 답변 드리겠습니다 😊" }]);
-      } catch {
-        setMessages((prev) => [...prev, { role: "assistant", content: "문의 접수에 실패했습니다. 잠시 후 다시 시도해주세요." }]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: "문의가 접수되었습니다! 빠른 시일 내에 답변 드리겠습니다 😊",
+          },
+        ]);
+      } catch (error) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: getApiErrorMessage(
+              error,
+              "문의 접수에 실패했습니다. 잠시 후 다시 시도해주세요."
+            ),
+          },
+        ]);
       } finally {
         setInquiryStep(null);
         setInquiryType("");
         setInquiryEmail("");
+        setInquiryPhone("");
         setIsLoading(false);
         setTimeout(() => inputRef.current?.focus(), 50);
       }
@@ -509,15 +860,36 @@ function ChatbotButton() {
     setIsLoading(true);
 
     try {
-      const res = await api.post<ChatResponse>("/api/chatbot/message", {
-        message: msg,
-        sessionId,
-      });
+      const requestChat = async (currentSessionId: string | null) =>
+        api.post<ChatResponse>("/api/chatbot/message", {
+          message: msg,
+          sessionId: currentSessionId,
+        });
+
+      let res;
+      try {
+        res = await requestChat(sessionId);
+      } catch (error) {
+        if (!shouldResetSession(error)) {
+          throw error;
+        }
+
+        setSessionId(null);
+        localStorage.removeItem(sessionStorageKey);
+        res = await requestChat(null);
+      }
+
       if (res.data.sessionId && res.data.sessionId !== sessionId) {
         setSessionId(res.data.sessionId);
-        localStorage.setItem(SESSION_KEY, res.data.sessionId);
       }
-      const assistantMessage: Message = { role: "assistant", content: res.data.message, isRule: res.data.type === "rule", link, linkLabel, links };
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: res.data.message,
+        isRule: res.data.type === "rule",
+        link,
+        linkLabel,
+        links,
+      };
       if (res.data.type === "ai") {
         const songs = parseSongs(res.data.message);
         if (songs.length > 0) {
@@ -526,8 +898,17 @@ function ChatbotButton() {
         }
       }
       setMessages([...updatedMessages, assistantMessage]);
-    } catch {
-      setMessages([...updatedMessages, { role: "assistant", content: "죄송합니다. 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요." }]);
+    } catch (error) {
+      setMessages([
+        ...updatedMessages,
+        {
+          role: "assistant",
+          content: getApiErrorMessage(
+            error,
+            "죄송합니다. 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+          ),
+        },
+      ]);
     } finally {
       setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 50);
@@ -541,7 +922,12 @@ function ChatbotButton() {
     }
   };
 
-  const handleOption = async (label: string, value: string, link?: string, links?: { label: string; path: string }[]) => {
+  const handleOption = async (
+    label: string,
+    value: string,
+    link?: string,
+    links?: { label: string; path: string }[]
+  ) => {
     if (value === "__inquiry_history__") {
       setCategory("main");
       if (!isLoggedIn) {
@@ -558,12 +944,21 @@ function ChatbotButton() {
         const res = await api.get<InquiryItem[]>("/api/inquiry/my");
         const list = res.data;
         if (list.length === 0) {
-          setMessages((prev) => [...prev, { role: "assistant", content: "아직 접수된 문의가 없습니다." }]);
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: "아직 접수된 문의가 없습니다." },
+          ]);
         } else {
-          setMessages((prev) => [...prev, { role: "assistant", content: `내 문의 내역 (${list.length}건)`, inquiries: list }]);
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: `내 문의 내역 (${list.length}건)`, inquiries: list },
+          ]);
         }
       } catch {
-        setMessages((prev) => [...prev, { role: "assistant", content: "문의 내역을 불러오는 데 실패했습니다." }]);
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: "문의 내역을 불러오는 데 실패했습니다." },
+        ]);
       } finally {
         setIsLoading(false);
       }
@@ -574,15 +969,20 @@ function ChatbotButton() {
       const type = value.replace("__inquiry__", "");
       setInquiryType(type);
       setCategory("main");
-      const botMsg = isLoggedIn
-        ? `${type}에 대한 문의 내용을 아래 입력창에 자세히 입력해주세요.\n\n접수된 문의는 담당자 이메일로 전달되며, 빠른 시일 내에 답변드리겠습니다.`
-        : `문의 답변을 받으실 이메일 주소를 먼저 입력해주세요.`;
+      setContactEmailValue("");
+      setContactPhoneValue("");
+      setContactMethod(null);
       setMessages((prev) => [
         ...prev,
         { role: "user", content: `[문의] ${type}` },
-        { role: "assistant", content: botMsg },
+        {
+          role: "assistant",
+          content:
+            "문의를 진행하시려면 연락처를 남겨주세요. 오프라인 상태가 되면 이메일 또는 문자(알림톡)로 답변 알림을 보내드려요.\n\n(수집된 개인정보는 상담 답변 알림 목적으로만 이용되고, 삭제 요청을 주시기 전까지 보유됩니다. 제출하지 않으시면 상담 답변 알림을 받을 수 없어요.)",
+          contactInput: true,
+        },
       ]);
-      setInquiryStep(isLoggedIn ? "content" : "email");
+      setInquiryStep("contact");
       return;
     }
     const isSubCategory = value in PARENT_CATEGORY;
@@ -594,20 +994,14 @@ function ChatbotButton() {
   };
 
   const handleReset = async () => {
-    if (sessionId) {
+    if (isLoggedIn && sessionId) {
       try {
         await api.delete(`/api/chatbot/sessions/${sessionId}`);
-      } catch {}
-      setSessionId(null);
-      localStorage.removeItem(SESSION_KEY);
+      } catch {
+        // Local reset should still proceed even if the server-side delete fails.
+      }
     }
-    setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
-    setInput("");
-    setCategory("main");
-    setInquiryStep(null);
-    setInquiryType("");
-    setInquiryEmail("");
-    localStorage.removeItem(STORAGE_KEY);
+    resetChatState();
   };
 
   const currentOptions = CATEGORIES[category].options;
@@ -615,71 +1009,149 @@ function ChatbotButton() {
   return (
     <>
       {/* 채팅창 */}
-      <div
-        className={`fixed right-6 z-50 w-80 top-[5.5rem] bg-[#0f0f1a] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 ${
-          previewSong ? "bottom-40" : "bottom-24"
-        } ${isOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none"}`}
+        <div
+          className={`fixed right-6 w-80 top-[5.5rem] flex flex-col overflow-hidden transition-all duration-300 chatbot-window ${
+            isOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none"
+          }`}
+        style={{
+          background: "rgba(255,255,255,0.88)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          border: "1.5px solid rgba(88,95,138,0.15)",
+          borderRadius: 20,
+          boxShadow: "0 24px 60px rgba(80,90,140,0.16)",
+          bottom: `${chatbotWindowBottom}px`,
+        }}
       >
         {/* 헤더 */}
-        <div className="flex items-center justify-between px-4 py-3 bg-red-600 flex-shrink-0">
+        <div
+          className="flex items-center justify-between flex-shrink-0 px-4 py-3 text-white"
+          style={{
+            background: "linear-gradient(135deg, #6d5efc, #ff5ca8)",
+            borderRadius: "18px 18px 0 0",
+          }}
+        >
           <div className="flex items-center gap-2">
             <FaRobot size={16} />
             <div>
-              <p className="font-semibold text-sm leading-none">GAP Music 챗봇</p>
-              <p className="text-xs text-red-200 mt-0.5">무엇이든 물어보세요</p>
+              <p className="text-sm font-semibold leading-none">GAP Music 챗봇</p>
+              <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.75)" }}>
+                무엇이든 물어보세요
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={handleReset} title="대화 초기화" className="hover:opacity-70 transition-opacity p-1">
+            <button
+              onClick={handleReset}
+              title="대화 초기화"
+              className="p-1 transition-opacity hover:opacity-70"
+            >
               <FaTrash size={12} />
             </button>
-            <button onClick={() => setIsOpen(false)} className="hover:opacity-70 transition-opacity p-1">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="p-1 transition-opacity hover:opacity-70"
+            >
               <FaTimes size={14} />
             </button>
           </div>
         </div>
 
         {/* 메시지 영역 */}
-        <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 flex flex-col gap-3">
+        <div
+          className="flex flex-col flex-1 min-h-0 gap-3 px-4 py-3 overflow-y-auto"
+          style={{ background: "rgba(247,248,255,0.7)" }}
+        >
           {messages.map((msg, i) => (
-            <div key={i} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"} gap-1`}>
-              <div className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} items-end gap-2 w-full`}>
+            <div
+              key={i}
+              className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"} gap-1`}
+            >
+              <div
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} items-end gap-2 w-full`}
+              >
                 {msg.role === "assistant" && (
-                  <div className="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0 mb-0.5">
+                  <div
+                    className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mb-0.5 text-white"
+                    style={{ background: "linear-gradient(135deg, #6d5efc, #ff5ca8)" }}
+                  >
                     <FaRobot size={10} />
                   </div>
                 )}
                 {msg.isRule && msg.role === "assistant" ? (
                   (() => {
                     const guide = parseGuideCard(msg.content);
-                    if (!guide) return (
-                      <div className="max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap bg-white/10 text-gray-100 rounded-bl-sm">
-                        {renderContent(msg.content)}
-                      </div>
-                    );
+                    if (!guide)
+                      return (
+                        <div
+                          className="max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap rounded-bl-sm"
+                          style={{
+                            background: "rgba(255,255,255,0.85)",
+                            color: "#1f2430",
+                            border: "1px solid rgba(88,95,138,0.13)",
+                          }}
+                        >
+                          {renderContent(msg.content)}
+                        </div>
+                      );
                     return (
-                      <div className="max-w-[85%] rounded-2xl overflow-hidden border border-white/10 rounded-bl-sm">
+                      <div
+                        className="max-w-[85%] rounded-2xl overflow-hidden rounded-bl-sm"
+                        style={{ border: "1px solid rgba(88,95,138,0.13)" }}
+                      >
                         {/* 카드 헤더 */}
-                        <div className="bg-red-600/25 border-b border-red-500/20 px-3 py-2 flex items-center gap-2">
-                          <span className="text-base leading-none">{getGuideIcon(guide.title)}</span>
-                          <span className="text-sm font-semibold text-white">{guide.title}</span>
+                        <div
+                          className="flex items-center gap-2 px-3 py-2"
+                          style={{
+                            background: "rgba(109,94,252,0.10)",
+                            borderBottom: "1px solid rgba(109,94,252,0.15)",
+                          }}
+                        >
+                          <span className="text-base leading-none">
+                            {getGuideIcon(guide.title)}
+                          </span>
+                          <span className="text-sm font-semibold" style={{ color: "#6d5efc" }}>
+                            {guide.title}
+                          </span>
                         </div>
                         {/* 항목 목록 */}
-                        <div className="bg-white/5 px-3 py-2.5 flex flex-col gap-2">
+                        <div
+                          className="px-3 py-2.5 flex flex-col gap-2"
+                          style={{ background: "rgba(255,255,255,0.9)" }}
+                        >
                           {guide.items.map((item, idx) =>
                             item.type === "step" ? (
                               <div key={idx} className="flex items-start gap-2">
-                                <span className="flex-shrink-0 w-[18px] h-[18px] rounded-full bg-red-600/80 text-white text-[10px] font-bold flex items-center justify-center mt-0.5">
+                                <span
+                                  className="flex-shrink-0 w-[18px] h-[18px] rounded-full text-white text-[10px] font-bold flex items-center justify-center mt-0.5"
+                                  style={{ background: "#6d5efc" }}
+                                >
                                   {item.number}
                                 </span>
-                                <span className="text-xs text-gray-200 leading-relaxed">{renderContent(item.text)}</span>
+                                <span
+                                  className="text-xs leading-relaxed"
+                                  style={{ color: "#1f2430" }}
+                                >
+                                  {renderContent(item.text)}
+                                </span>
                               </div>
                             ) : item.type === "bullet" ? (
-                              <div key={idx} className="text-xs text-gray-200 leading-relaxed pl-1">
+                              <div
+                                key={idx}
+                                className="pl-1 text-xs leading-relaxed"
+                                style={{ color: "#1f2430" }}
+                              >
                                 {item.text}
                               </div>
                             ) : (
-                              <div key={idx} className="text-[11px] text-gray-400 pl-1 border-t border-white/5 pt-1.5">
+                              <div
+                                key={idx}
+                                className="text-[11px] pl-1 pt-1.5"
+                                style={{
+                                  color: "#677086",
+                                  borderTop: "1px solid rgba(88,95,138,0.10)",
+                                }}
+                              >
                                 {renderContent(item.text)}
                               </div>
                             )
@@ -689,16 +1161,30 @@ function ChatbotButton() {
                     );
                   })()
                 ) : msg.tracks && msg.tracks.length > 0 ? (
-                  <div className="max-w-[75%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap bg-white/10 text-gray-100 rounded-bl-sm">
-                    {renderContent(msg.content.split("\n").find(l => l.trim() && !/[\u201C"]/.test(l) && !/^\d+\./.test(l.trim())) ?? "")}
+                  <div
+                    className="max-w-[75%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap rounded-bl-sm"
+                    style={{
+                      background: "rgba(255,255,255,0.85)",
+                      color: "#1f2430",
+                      border: "1px solid rgba(88,95,138,0.13)",
+                    }}
+                  >
+                    {renderContent(getRecommendationIntro(msg.content))}
                   </div>
                 ) : (
                   <div
                     className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
-                      msg.role === "user"
-                        ? "bg-red-600 text-white rounded-br-sm"
-                        : "bg-white/10 text-gray-100 rounded-bl-sm"
+                      msg.role === "user" ? "rounded-br-sm" : "rounded-bl-sm"
                     }`}
+                    style={
+                      msg.role === "user"
+                        ? { background: "linear-gradient(135deg, #6d5efc, #a855f7)", color: "#fff" }
+                        : {
+                            background: "rgba(255,255,255,0.85)",
+                            color: "#1f2430",
+                            border: "1px solid rgba(88,95,138,0.13)",
+                          }
+                    }
                   >
                     {renderContent(msg.content)}
                   </div>
@@ -709,7 +1195,12 @@ function ChatbotButton() {
                 <div className="pl-8">
                   <button
                     onClick={() => navigate(msg.link!)}
-                    className="flex items-center gap-1.5 text-[11px] font-semibold text-indigo-300 hover:text-indigo-200 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 hover:border-indigo-500/50 rounded-full px-3 py-1 transition-all"
+                    className="flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-3 py-1 transition-all"
+                    style={{
+                      color: "#6d5efc",
+                      background: "rgba(109,94,252,0.08)",
+                      border: "1px solid rgba(109,94,252,0.25)",
+                    }}
                   >
                     <FaChevronRight size={8} />
                     {"페이지 바로가기"}
@@ -722,7 +1213,12 @@ function ChatbotButton() {
                     <button
                       key={l.path}
                       onClick={() => navigate(l.path)}
-                      className="flex items-center gap-1.5 text-[11px] font-semibold text-indigo-300 hover:text-indigo-200 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 hover:border-indigo-500/50 rounded-full px-3 py-1 transition-all"
+                      className="flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-3 py-1 transition-all"
+                      style={{
+                        color: "#6d5efc",
+                        background: "rgba(109,94,252,0.08)",
+                        border: "1px solid rgba(109,94,252,0.25)",
+                      }}
                     >
                       <FaChevronRight size={8} />
                       {l.label}
@@ -732,46 +1228,223 @@ function ChatbotButton() {
               )}
 
               {msg.inquiries && msg.inquiries.length > 0 && (
-                <div className="flex flex-col gap-2 w-full pl-8">
+                <div className="flex flex-col w-full gap-2 pl-8">
                   {msg.inquiries.map((item) => (
-                    <div key={item.id} className="flex flex-col gap-1.5 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5">
+                    <div
+                      key={item.id}
+                      className="flex flex-col gap-1.5 rounded-xl px-3 py-2.5"
+                      style={{
+                        background: "rgba(255,255,255,0.85)",
+                        border: "1px solid rgba(88,95,138,0.13)",
+                      }}
+                    >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-semibold text-white bg-white/10 rounded-full px-2 py-0.5 truncate">
+                        <span
+                          className="text-xs font-semibold rounded-full px-2 py-0.5 truncate"
+                          style={{ color: "#6d5efc", background: "rgba(109,94,252,0.10)" }}
+                        >
                           {item.type}
                         </span>
-                        <span className={`text-[10px] font-semibold rounded-full px-2 py-0.5 flex-shrink-0 ${
-                          item.status === "접수중"
-                            ? "bg-yellow-500/20 text-yellow-300"
-                            : "bg-green-500/20 text-green-300"
-                        }`}>
+                        <span
+                          className={`text-[10px] font-semibold rounded-full px-2 py-0.5 flex-shrink-0 ${
+                            item.status === "접수중"
+                              ? "bg-yellow-400/15 text-yellow-600"
+                              : "bg-green-400/15 text-green-600"
+                          }`}
+                        >
                           {item.status}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-300 leading-relaxed line-clamp-2">{item.content}</p>
-                      <p className="text-[10px] text-gray-500">
-                        {new Date(item.createdAt).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}
+                      <p
+                        className="text-xs leading-relaxed line-clamp-2"
+                        style={{ color: "#1f2430" }}
+                      >
+                        {item.content}
+                      </p>
+                      <p className="text-[10px]" style={{ color: "#8e97ab" }}>
+                        {new Date(item.createdAt).toLocaleDateString("ko-KR", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
                       </p>
                     </div>
                   ))}
                 </div>
               )}
 
+              {msg.contactInput && inquiryStep === "contact" && (
+                <div className="w-full pl-8 mt-1">
+                  <div
+                    className="rounded-xl px-3 py-3 flex flex-col gap-2.5"
+                    style={{
+                      background: "rgba(255,255,255,0.9)",
+                      border: "1px solid rgba(88,95,138,0.15)",
+                    }}
+                  >
+                    {/* 선택 단계 */}
+                    {!contactMethod ? (
+                      <div className="flex flex-col gap-2">
+                        <p className="text-[11px] font-semibold" style={{ color: "#677086" }}>
+                          연락 방법 선택
+                        </p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setContactMethod("email")}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg font-semibold transition-all"
+                            style={{
+                              background: "rgba(109,94,252,0.08)",
+                              border: "1.5px solid rgba(109,94,252,0.25)",
+                              color: "#6d5efc",
+                              fontSize: 11,
+                            }}
+                          >
+                            <FaRegEnvelope size={11} />
+                            이메일
+                          </button>
+                          <button
+                            onClick={() => setContactMethod("phone")}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg font-semibold transition-all"
+                            style={{
+                              background: "rgba(109,94,252,0.08)",
+                              border: "1.5px solid rgba(109,94,252,0.25)",
+                              color: "#6d5efc",
+                              fontSize: 11,
+                            }}
+                          >
+                            <FaMobileAlt size={11} />
+                            휴대폰 번호
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {/* 선택된 방법 표시 + 뒤로 */}
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setContactMethod(null)}
+                            className="flex items-center gap-1 text-[11px] font-semibold rounded-full px-2 py-0.5 transition-all"
+                            style={{
+                              color: "#677086",
+                              background: "rgba(88,95,138,0.07)",
+                              border: "1px solid rgba(88,95,138,0.15)",
+                            }}
+                          >
+                            <FaChevronLeft size={7} />
+                            선택
+                          </button>
+                          <span className="text-[11px] font-semibold" style={{ color: "#1f2430" }}>
+                            {contactMethod === "email" ? "이메일" : "휴대폰 번호"}
+                          </span>
+                        </div>
+
+                        {/* 이메일 입력 */}
+                        {contactMethod === "email" && (
+                          <input
+                            type="email"
+                            value={contactEmailValue}
+                            onChange={(e) => setContactEmailValue(e.target.value)}
+                            placeholder="example@email.com"
+                            className="px-3 py-2 text-sm transition-colors rounded-lg outline-none"
+                            style={{
+                              background: "rgba(247,248,255,0.9)",
+                              border: "1.5px solid rgba(88,95,138,0.16)",
+                              color: "#1f2430",
+                            }}
+                          />
+                        )}
+
+                        {/* 휴대폰 번호 입력 */}
+                        {contactMethod === "phone" && (
+                          <input
+                            type="tel"
+                            value={contactPhoneValue}
+                            onChange={(e) => setContactPhoneValue(e.target.value)}
+                            placeholder="휴대폰 번호를 입력하세요"
+                            className="w-full px-3 py-2 text-sm transition-colors rounded-lg outline-none"
+                            style={{
+                              background: "rgba(247,248,255,0.9)",
+                              border: "1.5px solid rgba(88,95,138,0.16)",
+                              color: "#1f2430",
+                            }}
+                          />
+                        )}
+
+                        {/* 완료 버튼 */}
+                        <button
+                          onClick={() => {
+                            const trimmedEmail = contactEmailValue.trim();
+                            const normalizedPhone = normalizePhone(contactPhoneValue);
+
+                            if (contactMethod === "email" && !isValidEmail(trimmedEmail)) {
+                              setToast({
+                                message: "올바른 이메일 주소를 입력해주세요.",
+                                type: "error",
+                              });
+                              setTimeout(() => setToast(null), 2500);
+                              return;
+                            }
+
+                            if (contactMethod === "phone" && !isValidPhone(normalizedPhone)) {
+                              setToast({
+                                message: "휴대폰 번호 형식을 확인해주세요.",
+                                type: "error",
+                              });
+                              setTimeout(() => setToast(null), 2500);
+                              return;
+                            }
+
+                            setInquiryEmail(contactMethod === "email" ? trimmedEmail : "");
+                            setInquiryPhone(contactMethod === "phone" ? normalizedPhone : "");
+                            setInquiryStep("content");
+                            setContactEmailValue("");
+                            setContactPhoneValue("");
+                            setContactMethod(null);
+                            setMessages((prev) => [
+                              ...prev,
+                              {
+                                role: "assistant",
+                                content: `${inquiryType}에 대한 문의 내용을 아래 입력창에 자세히 입력해주세요.\n\n접수된 문의는 빠른 시일 내에 답변드리겠습니다.`,
+                              },
+                            ]);
+                            setTimeout(() => inputRef.current?.focus(), 50);
+                          }}
+                          className="w-full py-2 text-sm font-semibold text-white transition-all rounded-lg"
+                          style={{ background: "linear-gradient(135deg, #6d5efc, #ff5ca8)" }}
+                        >
+                          완료
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {msg.tracks && msg.tracks.length > 0 && (
-                <div className="flex flex-col gap-2 w-full pl-8">
+                <div className="flex flex-col w-full gap-2 pl-8">
                   {msg.tracks.map((track) => (
                     <div
                       key={track.trackId}
-                      className="flex flex-col gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2"
+                      className="flex flex-col gap-2 px-3 py-2 rounded-xl"
+                      style={{
+                        background: "rgba(255,255,255,0.85)",
+                        border: "1px solid rgba(88,95,138,0.13)",
+                      }}
                     >
                       <div className="flex items-center gap-3">
                         <img
                           src={track.artworkUrl100}
                           alt={track.trackName}
-                          className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                          className="flex-shrink-0 object-cover w-10 h-10 rounded-lg"
                         />
-                        <div className="flex flex-col min-w-0 flex-1">
-                          <span className="text-sm font-medium text-white truncate">{track.trackName}</span>
-                          <span className="text-xs text-gray-400 truncate">
+                        <div className="flex flex-col flex-1 min-w-0">
+                          <span
+                            className="text-sm font-medium truncate"
+                            style={{ color: "#1f2430" }}
+                          >
+                            {track.trackName}
+                          </span>
+                          <span className="text-xs truncate" style={{ color: "#677086" }}>
                             {track.artistName}
                             {track.primaryGenreName && <> · {track.primaryGenreName}</>}
                           </span>
@@ -780,32 +1453,48 @@ function ChatbotButton() {
                           {/* 플레이리스트 추가 버튼 */}
                           {isLoggedIn && (
                             <button
-                              onClick={() => { loadPlaylists(); setAddingTrack(track); }}
+                              onClick={() => {
+                                loadPlaylists();
+                                setAddingTrack(track);
+                              }}
                               title="플레이리스트에 추가"
-                              className={`w-7 h-7 flex items-center justify-center rounded-full border transition-all ${
+                              className="flex items-center justify-center transition-all rounded-full w-7 h-7"
+                              style={
                                 addStatus[track.trackId] === "done"
-                                  ? "border-green-500/40 text-green-400"
+                                  ? { border: "1px solid rgba(34,197,94,0.4)", color: "#16a34a" }
                                   : addStatus[track.trackId] === "error"
-                                  ? "border-red-400/40 text-red-400"
-                                  : "border-white/20 text-gray-400 hover:border-red-500/40 hover:text-white"
-                              }`}
+                                    ? { border: "1px solid rgba(239,68,68,0.4)", color: "#dc2626" }
+                                    : { border: "1px solid rgba(88,95,138,0.2)", color: "#677086" }
+                              }
                             >
-                              {addStatus[track.trackId] === "done" ? <FaCheck size={9} /> : <FaPlus size={9} />}
+                              {addStatus[track.trackId] === "done" ? (
+                                <FaCheck size={9} />
+                              ) : (
+                                <FaPlus size={9} />
+                              )}
                             </button>
                           )}
                           {/* 미리듣기 버튼 */}
                           {track.previewUrl && (
                             <button
                               onClick={() => handlePreview(track)}
-                              className="w-8 h-8 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 transition-colors"
+                              className="flex items-center justify-center w-8 h-8 text-white transition-colors rounded-full"
+                              style={{ background: "linear-gradient(135deg, #6d5efc, #ff5ca8)" }}
                             >
-                              {previewSong?.id === track.trackId ? <FaPause size={10} /> : <FaPlay size={10} />}
+                              {previewSong?.id === track.trackId ? (
+                                <FaPause size={10} />
+                              ) : (
+                                <FaPlay size={10} />
+                              )}
                             </button>
                           )}
                         </div>
                       </div>
                       {track.reason && (
-                        <p className="text-xs text-gray-200 leading-relaxed border-t border-white/5 pt-2">
+                        <p
+                          className="pt-2 text-xs leading-relaxed"
+                          style={{ color: "#677086", borderTop: "1px solid rgba(88,95,138,0.10)" }}
+                        >
                           {track.reason}
                         </p>
                       )}
@@ -817,15 +1506,64 @@ function ChatbotButton() {
           ))}
 
           {isLoading && (
-            <div className="flex items-end gap-2 justify-start">
-              <div className="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0">
+            <div className="flex items-end justify-start gap-2">
+              <div
+                className="flex items-center justify-center flex-shrink-0 w-6 h-6 text-white rounded-full"
+                style={{ background: "linear-gradient(135deg, #6d5efc, #ff5ca8)" }}
+              >
                 <FaRobot size={10} />
               </div>
-              <div className="bg-white/10 px-4 py-3 rounded-2xl rounded-bl-sm flex gap-1 items-center">
-                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0ms]" />
-                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
-                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
+              <div
+                className="flex items-center gap-1 px-4 py-3 rounded-bl-sm rounded-2xl"
+                style={{
+                  background: "rgba(255,255,255,0.85)",
+                  border: "1px solid rgba(88,95,138,0.13)",
+                }}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full animate-bounce [animation-delay:0ms]"
+                  style={{ background: "#6d5efc" }}
+                />
+                <span
+                  className="w-1.5 h-1.5 rounded-full animate-bounce [animation-delay:150ms]"
+                  style={{ background: "#6d5efc" }}
+                />
+                <span
+                  className="w-1.5 h-1.5 rounded-full animate-bounce [animation-delay:300ms]"
+                  style={{ background: "#6d5efc" }}
+                />
               </div>
+            </div>
+          )}
+          {/* 문의 입력 중 - 취소 버튼 */}
+          {inquiryStep && !isLoading && (
+            <div className="flex justify-start pl-8">
+              <button
+                onClick={() => {
+                  setInquiryStep(null);
+                  setInquiryType("");
+                  setInquiryEmail("");
+                  setInquiryPhone("");
+                  setContactEmailValue("");
+                  setContactPhoneValue("");
+                  setContactMethod(null);
+                  setCategory("main");
+                  setMessages((prev) => [
+                    ...prev,
+                    { role: "user", content: "취소" },
+                    { role: "assistant", content: WELCOME_MESSAGE },
+                  ]);
+                }}
+                className="flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-3 py-1 transition-all"
+                style={{
+                  color: "#e03e52",
+                  background: "rgba(239,68,68,0.08)",
+                  border: "1px solid rgba(239,68,68,0.3)",
+                }}
+              >
+                <FaTimes size={8} />
+                취소
+              </button>
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -836,46 +1574,70 @@ function ChatbotButton() {
           <div className="absolute inset-0 z-20 flex flex-col justify-end">
             {/* 배경 오버레이 */}
             <div
-              className="absolute inset-0 bg-black/50"
+              className="absolute inset-0"
+              style={{ background: "rgba(80,90,140,0.25)", backdropFilter: "blur(2px)" }}
               onClick={() => setAddingTrack(null)}
             />
             {/* 바텀 시트 */}
-            <div className="relative bg-[#13131f] rounded-t-2xl shadow-2xl overflow-hidden">
+            <div
+              className="relative overflow-hidden shadow-2xl rounded-t-2xl"
+              style={{ background: "rgba(255,255,255,0.97)" }}
+            >
               {/* 핸들 바 */}
               <div className="flex justify-center pt-2.5 pb-1">
-                <div className="w-8 h-1 rounded-full bg-white/20" />
+                <div
+                  className="w-8 h-1 rounded-full"
+                  style={{ background: "rgba(88,95,138,0.2)" }}
+                />
               </div>
               {/* 트랙 미리보기 헤더 */}
-              <div className="px-4 py-4 flex items-center gap-3 border-b border-white/10">
+              <div
+                className="flex items-center gap-3 px-4 py-4"
+                style={{ borderBottom: "1px solid rgba(88,95,138,0.12)" }}
+              >
                 <img
                   src={addingTrack.artworkUrl100}
                   alt={addingTrack.trackName}
-                  className="w-12 h-12 rounded-xl object-cover shadow-lg"
+                  className="object-cover w-12 h-12 shadow-lg rounded-xl"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{addingTrack.trackName}</p>
-                  <p className="text-xs text-gray-400 truncate">{addingTrack.artistName}</p>
+                  <p className="text-sm font-semibold truncate" style={{ color: "#1f2430" }}>
+                    {addingTrack.trackName}
+                  </p>
+                  <p className="text-xs truncate" style={{ color: "#677086" }}>
+                    {addingTrack.artistName}
+                  </p>
                 </div>
                 <button
                   onClick={() => setAddingTrack(null)}
-                  className="w-7 h-7 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-gray-400 hover:text-white transition-all flex-shrink-0"
+                  className="flex items-center justify-center flex-shrink-0 transition-all rounded-full w-7 h-7"
+                  style={{ background: "rgba(88,95,138,0.08)", color: "#677086" }}
                 >
                   <FaTimes size={10} />
                 </button>
               </div>
               {/* 섹션 레이블 */}
               <div className="px-4 pt-4 pb-2">
-                <p className="text-sm font-semibold text-gray-200">플레이리스트 선택</p>
+                <p className="text-sm font-semibold" style={{ color: "#1f2430" }}>
+                  플레이리스트 선택
+                </p>
               </div>
               {/* 플레이리스트 목록 */}
-              <div className="max-h-52 overflow-y-auto py-2">
+              <div className="py-2 overflow-y-auto max-h-52">
                 {playlists.length === 0 ? (
                   <div className="flex flex-col items-center gap-2 py-8">
-                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
-                      <FaPlus size={13} className="text-gray-600" />
+                    <div
+                      className="flex items-center justify-center w-10 h-10 rounded-full"
+                      style={{ background: "rgba(109,94,252,0.08)" }}
+                    >
+                      <FaPlus size={13} style={{ color: "#6d5efc" }} />
                     </div>
-                    <p className="text-sm text-gray-400">플레이리스트가 없습니다</p>
-                    <p className="text-[11px] text-gray-600">먼저 플레이리스트를 만들어보세요</p>
+                    <p className="text-sm" style={{ color: "#677086" }}>
+                      플레이리스트가 없습니다
+                    </p>
+                    <p className="text-[11px]" style={{ color: "#8e97ab" }}>
+                      먼저 플레이리스트를 만들어보세요
+                    </p>
                   </div>
                 ) : (
                   playlists.map((pl) => {
@@ -885,22 +1647,48 @@ function ChatbotButton() {
                         key={pl.id}
                         onClick={() => handleAddToPlaylist(pl.id)}
                         disabled={addingPlaylistId !== null}
-                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors disabled:opacity-50"
+                        className="flex items-center w-full gap-3 px-4 py-3 transition-colors disabled:opacity-50"
+                        style={{ color: "#1f2430" }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background = "rgba(109,94,252,0.06)")
+                        }
+                        onMouseLeave={(e) => (e.currentTarget.style.background = "")}
                       >
-                        <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 bg-white/5">
+                        <div
+                          className="flex-shrink-0 overflow-hidden rounded-lg w-9 h-9"
+                          style={{ background: "rgba(109,94,252,0.08)" }}
+                        >
                           {pl.imageUrl ? (
-                            <img src={pl.imageUrl} alt={pl.title} className="w-full h-full object-cover" />
+                            <img
+                              src={pl.imageUrl}
+                              alt={pl.title}
+                              className="object-cover w-full h-full"
+                            />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-700/30 to-purple-800/30">
-                              <span className="text-sm text-red-400">♪</span>
+                            <div className="flex items-center justify-center w-full h-full">
+                              <span className="text-sm" style={{ color: "#6d5efc" }}>
+                                ♪
+                              </span>
                             </div>
                           )}
                         </div>
-                        <span className="flex-1 text-left text-sm text-gray-200 truncate">{pl.title}</span>
+                        <span
+                          className="flex-1 text-sm text-left truncate"
+                          style={{ color: "#1f2430" }}
+                        >
+                          {pl.title}
+                        </span>
                         {isThisLoading ? (
-                          <span className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                          <span
+                            className="flex-shrink-0 w-4 h-4 border-2 rounded-full border-t-transparent animate-spin"
+                            style={{ borderColor: "#6d5efc", borderTopColor: "transparent" }}
+                          />
                         ) : (
-                          <FaChevronRight size={10} className="text-gray-600 flex-shrink-0" />
+                          <FaChevronRight
+                            size={10}
+                            style={{ color: "#8e97ab" }}
+                            className="flex-shrink-0"
+                          />
                         )}
                       </button>
                     );
@@ -913,7 +1701,13 @@ function ChatbotButton() {
 
         {/* 빠른 선택 옵션 */}
         {!isLoading && (
-          <div className="border-t border-white/5 flex-shrink-0">
+          <div
+            className="flex-shrink-0"
+            style={{
+              borderTop: "1px solid rgba(88,95,138,0.12)",
+              background: "rgba(255,255,255,0.9)",
+            }}
+          >
             {/* 현재 미리듣기 중인 곡 기반 추천 */}
             {previewSong && (
               <div className="px-3 pt-2">
@@ -924,7 +1718,12 @@ function ChatbotButton() {
                       `🎵 "${previewSong.trackName}"과 비슷한 음악 추천`
                     )
                   }
-                  className="w-full text-left px-3 py-1.5 rounded-xl bg-teal-500/10 border border-teal-500/30 text-xs text-teal-300 hover:bg-teal-500/20 transition-colors flex items-center gap-2"
+                  className="w-full text-left px-3 py-1.5 rounded-xl text-xs flex items-center gap-2 transition-colors"
+                  style={{
+                    background: "rgba(57,201,167,0.08)",
+                    border: "1px solid rgba(57,201,167,0.25)",
+                    color: "#1aaa86",
+                  }}
                 >
                   <FaPlay size={8} />
                   <span className="truncate">"{previewSong.trackName}"과 비슷한 음악 추천</span>
@@ -933,82 +1732,146 @@ function ChatbotButton() {
             )}
 
             <>
-                {category !== "main" && (
-                  <div className="flex items-center gap-2 px-3 pt-2">
-                    <button
-                      onClick={() => setCategory(PARENT_CATEGORY[category] ?? "main")}
-                      className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400 hover:text-gray-200 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-full px-2.5 py-0.5 transition-all"
-                    >
-                      <FaChevronLeft size={8} />
-                      이전
-                    </button>
-                    <span className="text-xs font-medium text-gray-300">{CATEGORIES[category].label}</span>
-                  </div>
-                )}
-
-                {/* 기분 선택 UI (음악 추천 카테고리일 때만) */}
-                {category === "recommend_mood" && (
-                  <div className="px-3 pt-2">
-                    <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
-                      {MOODS.map((mood) => (
-                        <button
-                          key={mood.label}
-                          onClick={() => sendMessage(mood.value, `${mood.emoji} ${mood.label} 음악 추천`)}
-                          className="flex-shrink-0 flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-red-500/30 transition-all"
-                        >
-                          <span className="text-base leading-none">{mood.emoji}</span>
-                          <span className="text-xs text-gray-400">{mood.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="px-3 py-2 flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
-                  {currentOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => handleOption(opt.label, opt.value, opt.link, opt.links)}
-                      className="px-2.5 py-1 rounded-full bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 hover:border-indigo-500/50 text-xs text-indigo-300 hover:text-indigo-200 transition-all whitespace-nowrap"
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
+              {category !== "main" && (
+                <div className="flex items-center gap-2 px-3 pt-2">
+                  <button
+                    onClick={() => setCategory(PARENT_CATEGORY[category] ?? "main")}
+                    className="flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-0.5 transition-all"
+                    style={{
+                      color: "#677086",
+                      background: "rgba(88,95,138,0.07)",
+                      border: "1px solid rgba(88,95,138,0.15)",
+                    }}
+                  >
+                    <FaChevronLeft size={8} />
+                    이전
+                  </button>
+                  <span className="text-xs font-medium" style={{ color: "#1f2430" }}>
+                    {CATEGORIES[category].label}
+                  </span>
                 </div>
-              </>
+              )}
+
+              {/* 기분 선택 UI (음악 추천 카테고리일 때만) */}
+              {category === "recommend_mood" && (
+                <div className="px-3 pt-2">
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+                    {MOODS.map((mood) => (
+                      <button
+                        key={mood.label}
+                        onClick={() =>
+                          sendMessage(mood.value, `${mood.emoji} ${mood.label} 음악 추천`)
+                        }
+                        className="flex-shrink-0 flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-xl transition-all"
+                        style={{
+                          background: "rgba(109,94,252,0.06)",
+                          border: "1px solid rgba(109,94,252,0.15)",
+                        }}
+                      >
+                        <span className="text-base leading-none">{mood.emoji}</span>
+                        <span className="text-xs" style={{ color: "#677086" }}>
+                          {mood.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="px-3 py-2 flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                {currentOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleOption(opt.label, opt.value, opt.link, opt.links)}
+                    className="px-2.5 py-1 rounded-full text-xs transition-all whitespace-nowrap"
+                    style={{
+                      color: "#6d5efc",
+                      background: "rgba(109,94,252,0.08)",
+                      border: "1px solid rgba(109,94,252,0.2)",
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </>
           </div>
         )}
 
         {/* 입력창 */}
-        <div className="px-3 py-3 border-t border-white/10 flex gap-2 flex-shrink-0">
+        <div
+          className="flex flex-shrink-0 gap-2 px-3 py-3"
+          style={{
+            borderTop: "1px solid rgba(88,95,138,0.12)",
+            background: "rgba(255,255,255,0.95)",
+          }}
+        >
           <input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={isLoading ? "답변 중..." : "메시지를 입력하세요 (Enter)"}
-            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-red-500/50 placeholder-white/20 transition-colors"
+            placeholder={
+              isLoading
+                ? "답변 중..."
+                : inquiryStep === "content"
+                  ? "문의 내용을 자세히 입력해주세요"
+                  : "메시지를 입력하세요 (Enter)"
+            }
+            className="flex-1 px-3 py-2 text-sm transition-colors outline-none rounded-xl"
+            style={{
+              background: "rgba(247,248,255,0.9)",
+              border: "1.5px solid rgba(88,95,138,0.16)",
+              color: "#1f2430",
+            }}
             disabled={isLoading}
           />
           <button
             onClick={() => sendMessage()}
-            disabled={!input.trim() || isLoading}
-            className="w-9 h-9 flex items-center justify-center bg-red-600 hover:bg-red-700 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl transition-colors flex-shrink-0"
+            disabled={
+              !input.trim() ||
+              isLoading ||
+              (!inquiryStep && input.trim().length > MAX_CHAT_MESSAGE_LENGTH)
+            }
+            className="flex items-center justify-center flex-shrink-0 text-white transition-all w-9 h-9 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl"
+            style={{ background: "linear-gradient(135deg, #6d5efc, #ff5ca8)" }}
           >
             <FaPaperPlane size={13} />
           </button>
         </div>
+        {!inquiryStep && input.trim().length > 0 && (
+          <div
+            className="px-3 pb-3 flex justify-between text-[11px]"
+            style={{ color: input.trim().length > MAX_CHAT_MESSAGE_LENGTH ? "#dc2626" : "#8e97ab" }}
+          >
+            <span>
+              {input.trim().length > MAX_CHAT_MESSAGE_LENGTH
+                ? `질문은 ${MAX_CHAT_MESSAGE_LENGTH}자 이내로 입력해주세요.`
+                : "질문을 구체적으로 입력하면 더 정확하게 답변해드릴 수 있어요."}
+            </span>
+            <span>
+              {input.trim().length}/{MAX_CHAT_MESSAGE_LENGTH}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* 플로팅 버튼 (뱃지 포함) */}
-      <div className={`fixed right-6 z-50 ${previewSong ? "bottom-28" : "bottom-6"}`}>
+      <div
+        className={`fixed right-6 ${hasPlayerBar ? "chatbot-float chatbot-float--player" : "chatbot-float"}`}
+        style={{ bottom: `${chatbotButtonBottom}px` }}
+      >
         <button
           onClick={isOpen ? () => setIsOpen(false) : handleOpen}
-          className="relative w-14 h-14 bg-red-600 hover:bg-red-700 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105"
+          className="relative flex items-center justify-center text-white transition-all rounded-full shadow-lg w-14 h-14 hover:scale-105"
+          style={{
+            background: "linear-gradient(135deg, #6d5efc, #ff5ca8)",
+            boxShadow: "0 8px 24px rgba(109,94,252,0.35)",
+          }}
         >
           {isOpen ? <FaTimes size={20} /> : <FaCommentDots size={22} />}
           {!isOpen && hasUnread && (
-            <span className="absolute top-1 right-1 w-3 h-3 bg-yellow-400 rounded-full border-2 border-[#0f0f1a] animate-pulse" />
+            <span className="absolute w-3 h-3 bg-yellow-400 border-2 border-white rounded-full top-1 right-1 animate-pulse" />
           )}
         </button>
       </div>
@@ -1016,18 +1879,26 @@ function ChatbotButton() {
       {/* 저장 결과 토스트 */}
       {toast && (
         <div
-          className={`fixed left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl text-sm font-medium text-white transition-all duration-300 ${
-            previewSong ? "bottom-24" : "bottom-8"
-          } ${toast.type === "success" ? "bg-green-600" : "bg-red-600"}`}
+          className="fixed left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl text-sm font-medium text-white transition-all duration-300"
+          style={{
+            background:
+              toast.type === "success"
+                ? "linear-gradient(135deg, #39c9a7, #22a37a)"
+                : "linear-gradient(135deg, #ff5b6e, #e04458)",
+            boxShadow: "0 8px 24px rgba(80,90,140,0.2)",
+            bottom: `${toastBottom}px`,
+          }}
         >
           <span>{toast.type === "success" ? "✓" : "✕"}</span>
           <span>{toast.message}</span>
-          <button onClick={() => setToast(null)} className="ml-1 opacity-70 hover:opacity-100 transition-opacity">
+          <button
+            onClick={() => setToast(null)}
+            className="ml-1 transition-opacity opacity-70 hover:opacity-100"
+          >
             <FaTimes size={11} />
           </button>
         </div>
       )}
-
     </>
   );
 }

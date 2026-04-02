@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
@@ -10,18 +11,24 @@ import {
   FaStar,
   FaRegStar,
   FaTrash,
-  FaMusic,
   FaChevronDown,
   FaChevronUp,
   FaPlay,
 } from "react-icons/fa";
 import { HiPencil } from "react-icons/hi2";
 import { TbMessageStar } from "react-icons/tb";
-import { RiPlayList2Fill } from "react-icons/ri";
 import { FiCheck, FiSearch, FiX } from "react-icons/fi";
 import MusicPlayer from "../../components/layout/MusicPlayer";
+import FallbackCoverArt from "../../components/ui/FallbackCoverArt";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+
+const resolveImageUrl = (url?: string) => {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("//")) return `https:${url}`;
+  return `${API_BASE_URL}${url.startsWith("/") ? url : `/${url}`}`;
+};
 
 interface Review {
   id: number;
@@ -214,7 +221,7 @@ function PlaylistReviewPage() {
         {/* 헤더 */}
         <div className="flex items-center gap-3 mb-6">
           <TbMessageStar size={32} className="text-white/80" />
-          <h1 className="text-3xl font-bold">추천 플레이리스트 리뷰</h1>
+          <h1 className="text-2xl font-bold leading-tight">추천 플레이리스트 리뷰</h1>
         </div>
 
         {/* 검색 */}
@@ -276,22 +283,22 @@ function PlaylistReviewPage() {
               전체
             </button>
             {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                onClick={() => setRatingFilter(ratingFilter === star ? null : star)}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                  ratingFilter === star
-                    ? "bg-yellow-400/20 text-yellow-300"
-                    : "text-white/40 hover:text-white/70"
-                }`}
-              >
-                <FaStar
-                  size={15}
-                  className={ratingFilter === star ? "text-yellow-300" : "text-white/40"}
-                />
-                {star}
-              </button>
-            ))}
+                <button
+                  key={star}
+                  onClick={() => setRatingFilter(ratingFilter === star ? null : star)}
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    ratingFilter === star
+                      ? "bg-amber-300/20 text-amber-200"
+                      : "text-white/40 hover:text-white/70"
+                  }`}
+                >
+                  <FaStar
+                    size={15}
+                    className={ratingFilter === star ? "text-amber-200" : "text-white/30"}
+                  />
+                  {star}
+                </button>
+              ))}
           </div>
         </div>
 
@@ -307,7 +314,7 @@ function PlaylistReviewPage() {
           <div className="flex flex-col gap-4">
             {currentReviews.map((review) => {
               const title = review.playlistTitle;
-              const imageUrl = review.imageUrl ? `${BASE_URL}${review.imageUrl}` : null;
+              const imageUrl = resolveImageUrl(review.imageUrl);
 
               const rid = review.id;
               const isExpanded = expandedIds.has(rid);
@@ -322,19 +329,14 @@ function PlaylistReviewPage() {
                   {/* 카드 상단: 앨범 커버 이미지 + 리뷰 */}
                   <div className="flex items-center gap-5 px-5 py-5">
                     {/* 앨범 커버 */}
-                    <div className="flex-shrink-0 w-24 h-24 overflow-hidden rounded-xl bg-white/10">
-                      {imageUrl ? (
-                        <img
-                          src={imageUrl}
-                          alt={title ?? "플레이리스트"}
-                          className="object-cover w-full h-full"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center w-full h-full">
-                          <RiPlayList2Fill size={36} className="text-white/30" />
-                        </div>
-                      )}
-                    </div>
+                    <FallbackCoverArt
+                      src={imageUrl}
+                      title={title}
+                      size={96}
+                      radius={12}
+                      variant="review"
+                      className="flex-shrink-0"
+                    />
 
                     {/* 리뷰 내용 */}
                     <div className="flex flex-col gap-2.5 flex-1 min-w-0 overflow-hidden">
@@ -352,9 +354,18 @@ function PlaylistReviewPage() {
                             value={editingReviewId === review.id ? editRating : review.rating}
                             readOnly={editingReviewId !== review.id}
                             size="medium"
-                            icon={<FaStar color="yellow" />}
-                            emptyIcon={<FaRegStar color="white" />}
+                            icon={<FaStar />}
+                            emptyIcon={<FaRegStar />}
                             onChange={(_e, val) => val != null && setEditRating(val)}
+                            sx={{
+                              "& .MuiRating-iconFilled": {
+                                color: "#f4b740",
+                                filter: "drop-shadow(0 0 0.5px rgba(77, 54, 18, 0.25))",
+                              },
+                              "& .MuiRating-iconEmpty": {
+                                color: "rgba(188, 198, 219, 0.85)",
+                              },
+                            }}
                           />
                         </div>
 
@@ -483,19 +494,14 @@ function PlaylistReviewPage() {
                                   idx + 1
                                 )}
                               </span>
-                              <div className="flex-shrink-0 overflow-hidden rounded-lg w-9 h-9 bg-white/10">
-                                {song.imgUrl ? (
-                                  <img
-                                    src={song.imgUrl}
-                                    alt={song.trackName}
-                                    className="object-cover w-full h-full"
-                                  />
-                                ) : (
-                                  <div className="flex items-center justify-center w-full h-full">
-                                    <FaMusic size={14} className="text-white/30" />
-                                  </div>
-                                )}
-                              </div>
+                              <FallbackCoverArt
+                                src={resolveImageUrl(song.imgUrl)}
+                                title={song.trackName}
+                                size={36}
+                                radius={8}
+                                variant="review"
+                                className="flex-shrink-0"
+                              />
                               <div className="flex flex-col flex-1 min-w-0">
                                 <span className="text-sm font-medium truncate text-white/80">
                                   {song.trackName}
@@ -530,21 +536,24 @@ function PlaylistReviewPage() {
       </div>
 
       {/* 하단 음악 재생 플레이어 */}
-      {isPlayerVisible && currentSong && (
-        <div className="fixed bottom-0 left-0 z-50 w-full">
-          <MusicPlayer
-            key={playKey}
-            song={currentSong}
-            songs={playerSongs}
-            songIndex={playerIndex}
-            onSongChange={setPlayerIndex}
-            setIsPlayerVisible={() => {
-              setIsPlayerVisible(false);
-              setPlayerSongs([]);
-            }}
-          />
-        </div>
-      )}
+      {isPlayerVisible &&
+        currentSong &&
+        createPortal(
+          <div className="fixed bottom-0 left-0 z-[12000] w-full">
+            <MusicPlayer
+              key={playKey}
+              song={currentSong}
+              songs={playerSongs}
+              songIndex={playerIndex}
+              onSongChange={setPlayerIndex}
+              setIsPlayerVisible={() => {
+                setIsPlayerVisible(false);
+                setPlayerSongs([]);
+              }}
+            />
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

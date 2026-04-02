@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { FaPlus, FaTimes, FaCalendarAlt } from "react-icons/fa";
 import { playlistApi } from "../../api/playlistApi";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from "date-fns/locale";
+import "../../styles/modal.css";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 
@@ -45,10 +47,11 @@ function CollaboPlaylistEditModal({
     return `${deadlineDate.getFullYear()}-${String(deadlineDate.getMonth() + 1).padStart(2, "0")}-${String(deadlineDate.getDate()).padStart(2, "0")}T23:59:59`;
   };
 
-  return (
+  const modal = (
     <div className="modal-overlay">
       <form
         className="modal-container"
+        onClick={(e) => e.stopPropagation()}
         onSubmit={async (e) => {
           e.preventDefault();
           if (!title.trim()) {
@@ -91,7 +94,7 @@ function CollaboPlaylistEditModal({
             alert("플레이리스트가 수정되었습니다.");
             onUpdated();
             onClose();
-          } catch (e) {
+          } catch {
             alert("수정에 실패했습니다.");
           } finally {
             setIsSubmitting(false);
@@ -172,16 +175,19 @@ function CollaboPlaylistEditModal({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  padding: "14px",
-                  borderRadius: "12px",
-                  background: "#1b2b3b",
-                  border: "1.5px solid transparent",
-                  color: deadlineDate ? "white" : "#6b8099",
-                  fontSize: "15px",
+                  padding: "10px 16px",
+                  borderRadius: "16px",
+                  background: "rgba(247,248,255,0.88)",
+                  border: "1.5px solid rgba(88,95,138,0.22)",
+                  color: deadlineDate ? "#1f2430" : "#8e97ab",
+                  fontSize: "13px",
+                  fontWeight: 400,
                   cursor: "pointer",
-                  transition: "border-color 0.2s",
+                  transition: "border-color 0.2s, box-shadow 0.2s",
                   userSelect: "none",
                   width: "100%",
+                  boxShadow: "0 2px 8px rgba(80,90,140,0.06)",
+                  boxSizing: "border-box",
                 }}
               >
                 <span>{deadlineDate
@@ -214,6 +220,9 @@ function CollaboPlaylistEditModal({
       </form>
     </div>
   );
+
+  if (typeof document === "undefined") return modal;
+  return createPortal(modal, document.body);
 }
 
 export default CollaboPlaylistEditModal;
