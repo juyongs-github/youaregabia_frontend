@@ -20,8 +20,10 @@ const MusicQuizPage = () => {
   const [correctSongIds, setCorrectSongIds] = useState<Set<number>>(new Set());
   const [wrongSongIds, setWrongSongIds] = useState<Set<number>>(new Set());
   const [started, setStarted] = useState(false);
+  const [timer, setTimer] = useState(0);
 
-  // 게임 시작 시 10곡 미리 로드
+  const { play, stop } = usePlayer();
+
   const loadSongs = async () => {
     setIsLoading(true);
     const results: Song[] = [];
@@ -37,19 +39,29 @@ const MusicQuizPage = () => {
     loadSongs();
   }, []);
 
+  // ✅ 페이지 이탈 시 플레이어 종료
+  useEffect(() => {
+    return () => {
+      stop();
+    };
+  }, []);
+
   const currentSong = songs[currentIndex];
 
-  const { play, stop } = usePlayer();
-
+  // ✅ 첫 곡 버그 수정: songs 배열이 실제로 채워진 뒤에만 play 호출
   useEffect(() => {
-    if (currentSong && !feedback && phase === "playing") {
-      play(currentSong, { blind: true, onClose: handleSkip });
+    if (!started || isLoading || songs.length === 0 || phase !== "playing") return;
+
+    const song = songs[currentIndex];
+    if (!song) return;
+
+    if (!feedback) {
+      play(song, { blind: true, onClose: handleSkip });
     } else {
       stop();
     }
-  }, [currentIndex, feedback, phase]);
+  }, [currentIndex, feedback, phase, started, songs]);
 
-  // 대소문자 구별x, 띄어쓰기x
   const normalize = (str: string) => str.toLowerCase().replace(/\s/g, "");
 
   const handleSubmit = () => {
@@ -57,15 +69,13 @@ const MusicQuizPage = () => {
 
     const answer = normalize(currentSong.trackName);
     const userInput = normalize(input);
-    const isCorrect = answer.includes(userInput) || userInput.includes(answer); // include여서 부분일치 허용
+    const isCorrect = answer.includes(userInput) || userInput.includes(answer);
 
     if (isCorrect) {
       let gained = 0;
-      if (timer < 10)
-        gained = 10; // 10초 이내: 10점
-      else if (timer < 20)
-        gained = 6; // 20초 이내: 6점
-      else gained = 3; // 30초 이내: 3점
+      if (timer < 10) gained = 10;
+      else if (timer < 20) gained = 6;
+      else gained = 3;
       setScore((prev) => prev + gained);
       setCorrectSongIds((prev) => new Set(prev).add(currentSong.id));
       setFeedback("correct");
@@ -84,11 +94,8 @@ const MusicQuizPage = () => {
       }
     }, 1000);
   };
-  const [timer, setTimer] = useState(0);
 
-  // 곡 바뀔 때마다 타이머 리셋 및 30초 제한 감시
   useEffect(() => {
-    // 1. 아직 시작 버튼을 누르지 않았거나 곡이 로딩 중이면 타이머를 돌리지 않음
     if (!started || isLoading || phase !== "playing") return;
 
     let isTransitioning = false;
@@ -119,8 +126,7 @@ const MusicQuizPage = () => {
   };
 
   const handleSkip = () => {
-    if (!currentSong || feedback) return; // 추가 - currentSong 없으면 무시
-    // 스킵 시에도 현재 곡 ID를 오답 목록에 추가
+    if (!currentSong || feedback) return;
     setWrongSongIds((prev) => new Set(prev).add(currentSong.id));
     setFeedback("wrong");
     setTimeout(() => {
@@ -146,23 +152,37 @@ const MusicQuizPage = () => {
     setWrongSongIds(new Set());
   };
 
+  // ── 로딩 ──────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64 text-white">🎵 곡 불러오는 중...</div>
+      <div
+        className="flex items-center justify-center h-64 text-lg font-semibold"
+        style={{ color: "var(--kf-text-sub)" }}
+      >
+        🎵 곡 불러오는 중...
+      </div>
     );
   }
-  // 카운트다운
+
+  // ── 카운트다운 ─────────────────────────────────────────
   if (!started) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] text-white px-4 animate-in fade-in duration-700">
-        {/* 상단 문구 영역 */}
+      <div
+        className="flex flex-col items-center justify-center min-h-[80vh] px-4"
+        style={{ color: "var(--kf-text-main)" }}
+      >
         <div className="text-center mb-16 space-y-4">
           <div className="text-6xl mb-6 animate-bounce">🎧</div>
-          <h1 className="text-4xl font-black mb-3 tracking-tight">노래 맞추기</h1>
-          <p className="text-gray-400 text-sm">음악을 듣고 제목을 맞혀보세요!</p>
+          <h1
+            className="text-4xl font-black mb-3 tracking-tight"
+            style={{ color: "var(--kf-text-main)" }}
+          >
+            노래 맞추기
+          </h1>
+          <p style={{ color: "var(--kf-text-muted)", fontSize: "14px" }}>
+            음악을 듣고 제목을 맞혀보세요!
+          </p>
         </div>
-
-        {/* 카운트다운 컴포넌트 (내부의 START 버튼이 이 자리에 위치함) */}
         <div className="w-full flex justify-center scale-110">
           <GameCountdown onStart={() => setStarted(true)} />
         </div>
@@ -170,6 +190,7 @@ const MusicQuizPage = () => {
     );
   }
 
+  // ── 결과 ──────────────────────────────────────────────
   if (phase === "result") {
     return (
       <GameResult
@@ -184,39 +205,60 @@ const MusicQuizPage = () => {
     );
   }
 
+  // ── 게임 화면 ──────────────────────────────────────────
   return (
-    <div className="mx-auto max-w-xl p-8 text-white">
+    <div className="mx-auto max-w-xl p-8" style={{ color: "var(--kf-text-main)" }}>
       {/* 진행 상황 */}
-      <div className="mb-6 flex items-center justify-between">
-        <span className="text-gray-400">
+      <div className="mb-2 flex items-center justify-between">
+        <span style={{ color: "var(--kf-text-muted)" }}>
           {currentIndex + 1} / {TOTAL}
         </span>
-        <span className="text-indigo-400 font-semibold">점수: {score}</span>
+        <span className="font-semibold" style={{ color: "var(--kf-brand)" }}>
+          점수: {score}
+        </span>
       </div>
 
-      {/* 진행 상황 영역 아래에 추가 */}
+      {/* 타이머 */}
       <div className="mb-2 text-right">
         <span
-          className={`font-mono text-xl ${timer >= 25 ? "text-red-500 animate-pulse" : "text-gray-300"}`}
+          className="font-mono text-xl"
+          style={{
+            color: timer >= 25 ? "var(--kf-danger)" : "var(--kf-text-sub)",
+            animation: timer >= 25 ? "pulse 1s infinite" : "none",
+          }}
         >
           ⏱️ {30 - timer}s
         </span>
       </div>
 
       {/* 진행 바 */}
-      <div className="mb-8 h-2 w-full rounded-full bg-neutral-700">
+      <div className="mb-8 h-2 w-full rounded-full" style={{ background: "var(--kf-border)" }}>
         <div
-          className="h-2 rounded-full bg-indigo-600 transition-all"
-          style={{ width: `${((currentIndex + 1) / TOTAL) * 100}%` }}
+          className="h-2 rounded-full transition-all"
+          style={{
+            width: `${((currentIndex + 1) / TOTAL) * 100}%`,
+            background: "linear-gradient(90deg, var(--kf-brand), var(--kf-brand-pink))",
+          }}
         />
       </div>
 
       {/* 피드백 */}
       {feedback && (
         <div
-          className={`mb-4 rounded-lg px-4 py-3 text-center font-semibold text-lg ${
-            feedback === "correct" ? "bg-green-800 text-green-300" : "bg-red-900 text-red-300"
-          }`}
+          className="mb-4 rounded-xl px-4 py-3 text-center font-semibold text-base"
+          style={
+            feedback === "correct"
+              ? {
+                  background: "rgba(56,199,170,0.12)",
+                  color: "#178f74",
+                  border: "1px solid rgba(56,199,170,0.28)",
+                }
+              : {
+                  background: "rgba(255,102,122,0.10)",
+                  color: "var(--kf-danger)",
+                  border: "1px solid rgba(255,102,122,0.24)",
+                }
+          }
         >
           {feedback === "correct"
             ? `정답! 🎉 "${currentSong?.trackName}"`
@@ -234,42 +276,63 @@ const MusicQuizPage = () => {
           onKeyDown={handleEnter}
           placeholder="곡 제목을 입력하세요..."
           disabled={!!feedback}
-          className="flex-1 rounded border border-neutral-700 bg-neutral-900 px-4 py-3 text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+          className="flex-1 px-4 py-3 rounded-xl"
+          style={{
+            background: "rgba(255,255,255,0.84)",
+            border: "1px solid var(--kf-border)",
+            color: "var(--kf-text-main)",
+            outline: "none",
+            opacity: feedback ? 0.5 : 1,
+          }}
         />
         <button
           onClick={handleSubmit}
           disabled={!!feedback}
-          className="rounded bg-indigo-600 px-5 py-3 font-semibold hover:bg-indigo-500 disabled:opacity-50"
+          className="px-5 py-3 rounded-xl font-semibold text-white transition-all"
+          style={{
+            background: "linear-gradient(135deg, var(--kf-brand), var(--kf-brand-pink))",
+            boxShadow: "0 8px 20px rgba(109,94,252,0.24)",
+            opacity: feedback ? 0.5 : 1,
+          }}
         >
           정답
         </button>
       </div>
 
-      <div className="mb-4 flex flex-col gap-1 text-sm text-gray-400">
+      {/* 힌트 */}
+      <div className="mb-4 flex flex-col gap-1 text-sm" style={{ color: "var(--kf-text-muted)" }}>
         {timer >= 10 && currentSong && (
           <p>
             🎤 힌트 1: 가수는{" "}
-            <span className="text-indigo-400 font-semibold">{currentSong.artistName}</span> 입니다.
+            <span className="font-semibold" style={{ color: "var(--kf-brand)" }}>
+              {currentSong.artistName}
+            </span>{" "}
+            입니다.
           </p>
         )}
         {timer >= 20 && currentSong && (
           <p>
             🔤 힌트 2: 제목은{" "}
-            <span className="text-indigo-400 font-semibold">
+            <span className="font-semibold" style={{ color: "var(--kf-brand)" }}>
               {currentSong.trackName.length}글자
             </span>{" "}
             입니다.
           </p>
         )}
       </div>
+
+      {/* 스킵 */}
       <button
         onClick={handleSkip}
         disabled={!!feedback}
-        className="text-sm text-gray-500 hover:text-gray-300 disabled:opacity-50"
+        className="text-sm transition-colors"
+        style={{
+          color: "var(--kf-text-muted)",
+          opacity: feedback ? 0.5 : 1,
+        }}
       >
         모르겠어요 → 넘기기
       </button>
-
     </div>
   );
 };

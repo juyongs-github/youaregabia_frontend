@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { FaHeadphones, FaPlus, FaThumbsUp } from "react-icons/fa";
+import { FaMusic, FaPlus, FaThumbsUp } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { playlistSongApi, type CollaboSong } from "../../api/playlistSongApi";
 import type { CollaboPlaylist } from "../../types/playlist";
 import type { Song } from "../ui/SongListItem";
@@ -12,6 +13,7 @@ type Props = {
 };
 
 function RankSection({ playlist, onSongClick, onModalOpenChange }: Props) {
+  const navigate = useNavigate();
   const [songs, setSongs] = useState<CollaboSong[]>([]);
   const [modalSong, setModalSong] = useState<Song | null>(null);
 
@@ -62,7 +64,7 @@ function RankSection({ playlist, onSongClick, onModalOpenChange }: Props) {
             songs.map((song, index) => {
               const rank = getRank(index);
               return (
-              <li className="rank-item" key={song.playlistSongId}>
+              <li className="rank-item" key={song.playlistSongId} onClick={() => onSongClick(song)} style={{ cursor: "pointer" }}>
                 <span className={rankClass(rank)}>{rank}</span>
                 <img className="rank-album-img" src={song.imgUrl} alt={song.trackName} />
                 <span className="rank-text">
@@ -70,10 +72,13 @@ function RankSection({ playlist, onSongClick, onModalOpenChange }: Props) {
                   <span className="rank-artist">{song.artistName}</span>
                 </span>
                 <div className="rank-actions">
-                  <button onClick={() => onSongClick(song)} title="미리듣기">
-                    <FaHeadphones size={13} />
+                  <button
+                    onClick={(e) => { e.stopPropagation(); navigate("/recommend/result", { state: { trackName: song.trackName, artistName: song.artistName, coverImageUrl: song.imgUrl } }); }}
+                    title="유사곡 추천"
+                  >
+                    <FaMusic size={13} />
                   </button>
-                  <button onClick={() => openModal(song)} title="플레이리스트에 추가">
+                  <button onClick={(e) => { e.stopPropagation(); openModal(song); }} title="플레이리스트에 추가">
                     <FaPlus size={13} />
                   </button>
                 </div>

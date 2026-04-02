@@ -80,99 +80,113 @@ const GameResult = ({
   }, [score, quizType, userEmail]);
 
   return (
-    <div className="flex flex-col items-center gap-6 py-12 text-white mx-auto max-w-xl px-8">
-      <h2 className="text-3xl font-bold">최종 결과</h2>
-      <p className="text-6xl font-extrabold text-indigo-400">
-        {score} / {maxScore}
-      </p>
-      <p className="text-gray-400">
-        {score === maxScore
-          ? "완벽해요! 🎉"
-          : score >= maxScore * 0.7
-            ? "훌륭해요! 👏"
-            : score >= maxScore * 0.4
-              ? "잘 했어요! 😊"
-              : "다음엔 더 잘할 수 있어요! 💪"}
-      </p>
-      <button
-        onClick={onRestart}
-        className="rounded-full bg-indigo-600 px-8 py-3 font-semibold hover:bg-indigo-500 transition-colors"
-      >
-        다시 도전
-      </button>
+    <div className="flex flex-col items-center gap-8 py-10 px-6 mx-auto max-w-2xl animate-in fade-in zoom-in duration-500">
+      {/* 결과 헤더 카드 */}
+      <div className="w-full bg-white/70 backdrop-blur-2xl border border-white/80 rounded-[40px] p-10 text-center shadow-[0_20px_50px_rgba(109,94,252,0.1)]">
+        <h2 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-2">
+          Final Result
+        </h2>
 
-      <div className="w-full mt-4">
-        <h3 className="text-lg font-bold mb-3">이번 게임 수록곡</h3>
+        {/* 점수 크기 조절 (기존 8xl -> 6xl) */}
+        <div className="relative inline-block mb-2">
+          <p className="text-6xl font-black bg-gradient-to-br from-[#6d5efc] to-[#ff5ca8] bg-clip-text text-transparent">
+            {score} <span className="text-xl font-bold text-slate-300 ml-1">/ {maxScore}</span>
+          </p>
+        </div>
 
-        {userEmail && (
-          <div className="mb-4">
-            <select
-              className="w-full rounded border border-neutral-700 bg-neutral-900 px-4 py-2 text-white outline-none focus:ring-1 focus:ring-indigo-500"
-              value={selectedPlaylistId ?? ""}
-              onChange={(e) => setSelectedPlaylistId(Number(e.target.value) || null)}
-              onClick={fetchPlaylists}
-            >
-              <option value="">플레이리스트 선택...</option>
-              {playlists.map((pl) => (
-                <option key={pl.id} value={pl.id}>
-                  {pl.title}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="mt-2 text-sm text-indigo-400 hover:text-indigo-300"
-            >
-              + 새 플레이리스트 만들기
-            </button>
-          </div>
-        )}
+        <p className="text-lg font-bold text-[#2f3863] mb-8">
+          {score === maxScore ? "완벽해요! 🎉" : "수고하셨습니다! 😊"}
+        </p>
 
-        <ul className="flex flex-col gap-3">
+        {/* 버튼 색상 변경: 보라색 계열 강조 */}
+        <button
+          onClick={onRestart}
+          className="group relative px-14 py-4 rounded-2xl bg-[#ff5ca8] text-white font-black text-lg shadow-lg shadow-[#ff5ca8]/25 hover:shadow-xl hover:bg-[#ef4d97] active:scale-95 transition-all"
+        >
+          다시 도전하기
+        </button>
+      </div>
+
+      {/* 수록곡 영역 */}
+      <div className="w-full bg-white/40 backdrop-blur-xl border border-white/60 rounded-[32px] p-8 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <h3 className="text-lg font-black text-[#2f3863]">🎵 수록곡 리스트</h3>
+
+          {userEmail && (
+            <div className="flex flex-col items-end gap-2">
+              <select
+                className="w-full md:w-56 appearance-none rounded-xl border border-slate-200 bg-white/90 px-4 py-2.5 text-[#2f3863] font-bold text-xs outline-none focus:ring-2 focus:ring-[#6d5efc]/20 shadow-sm transition-all"
+                value={selectedPlaylistId ?? ""}
+                onChange={(e) => setSelectedPlaylistId(Number(e.target.value) || null)}
+                onClick={fetchPlaylists}
+              >
+                <option value="">플레이리스트 선택</option>
+                {playlists.map((pl) => (
+                  <option key={pl.id} value={pl.id}>
+                    {pl.title}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="text-xs font-black text-[#6d5efc] hover:underline"
+              >
+                + 새 플레이리스트
+              </button>
+            </div>
+          )}
+        </div>
+
+        <ul className="grid grid-cols-1 gap-4">
           {songs.map((song) => {
             const isAdded = addedSongIds.has(song.id);
             const isInPlaylist = playlistSongIds.has(song.id);
             const isDisabled = isAdded || isInPlaylist;
+            const isCorrect = correctSongIds?.has(song.id);
+            const isWrong = wrongSongIds?.has(song.id);
 
             return (
               <li
                 key={song.id}
-                className={`flex items-center justify-between rounded border px-4 py-3 transition-all ${
-                  correctSongIds?.has(song.id)
-                    ? "border-green-700 bg-green-900/20"
-                    : wrongSongIds?.has(song.id)
-                      ? "border-red-700 bg-red-900/20"
-                      : "border-neutral-700"
-                } ${isDisabled ? "opacity-60" : ""}`}
+                className={`flex items-center justify-between rounded-[26px] p-4 border transition-all duration-300 ${
+                  isCorrect
+                    ? "border-green-100 bg-green-50/60"
+                    : isWrong
+                      ? "border-rose-100 bg-rose-50/60"
+                      : "bg-white/80 border-white shadow-sm"
+                }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                   <img
                     src={song.imgUrl}
-                    className="w-10 h-10 rounded object-cover shadow-sm"
+                    className="w-12 h-12 rounded-[16px] object-cover shadow-sm ring-2 ring-white"
                     alt={song.trackName}
                   />
-                  <div>
-                    <p className="font-semibold text-sm">{song.trackName}</p>
-                    <p className="text-xs text-gray-400">{song.artistName}</p>
+                  <div className="flex flex-col max-w-[150px] md:max-w-xs">
+                    <p className="font-black text-[#2f3863] text-sm leading-tight truncate">
+                      {song.trackName}
+                    </p>
+                    <p className="text-xs font-bold text-slate-400 truncate">{song.artistName}</p>
                   </div>
                 </div>
 
                 {userEmail && selectedPlaylistId && (
-                  <div className="flex-shrink-0">
+                  <div className="flex-shrink-0 ml-4">
                     {isAdded ? (
-                      <span className="text-xs text-green-400 font-semibold px-2 py-1">
+                      <span className="flex items-center gap-1 text-[13px] text-green-600 font-black bg-green-100 px-4 py-2 rounded-xl">
                         추가됨 ✓
                       </span>
                     ) : isInPlaylist ? (
-                      <span className="text-[11px] font-semibold text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded">
+                      <span className="text-[13px] font-black text-slate-400 bg-slate-100 px-4 py-2 rounded-xl">
                         이미 있음
                       </span>
                     ) : (
+                      /* 추가 버튼 크기 확대 및 색상 변경 (포인트 핑크 계열) */
                       <button
                         onClick={() => handleAddSong(song.id)}
-                        className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium hover:bg-indigo-500 active:scale-95 transition-all"
+                        className="rounded-xl bg-[#ff5ca8] px-5 py-2.5 text-[13px] font-black text-white hover:bg-[#ef4d97] hover:shadow-lg hover:shadow-[#ff5ca8]/20 active:scale-90 transition-all shadow-md"
                       >
-                        + 추가
+                        곡 추가
                       </button>
                     )}
                   </div>

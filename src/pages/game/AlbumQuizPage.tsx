@@ -22,19 +22,15 @@ const AlbumQuizPage = () => {
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [started, setStarted] = useState(false); // 게임 시작 상태 추가
+  const [started, setStarted] = useState(false);
 
-  // 1. 곡 로드 로직
   const loadSongs = useCallback(async () => {
     setIsLoading(true);
     try {
-      const promises = Array.from(
-        { length: TOTAL },
-        () => api.get("/api/random").then((res) => res.data) // 직접 data를 반환
+      const promises = Array.from({ length: TOTAL }, () =>
+        api.get("/api/random").then((res) => res.data)
       );
-
-      const results = await Promise.all(promises); // 모든 데이터가 올 때까지 기다림
-
+      const results = await Promise.all(promises);
       if (results.length > 0) {
         setSongs(results);
         setStarted(true);
@@ -90,7 +86,6 @@ const AlbumQuizPage = () => {
       const newTries = tries + 1;
       setTries(newTries);
       setFeedback("wrong");
-
       if (newTries >= MAX_TRIES) {
         setRevealed(true);
         goNext();
@@ -120,11 +115,6 @@ const AlbumQuizPage = () => {
     setStarted(false);
   };
 
-  // ========================================================
-  // 조건부 렌더링
-  // ========================================================
-
-  // 1. 결과 화면
   if (phase === "result") {
     return (
       <GameResult
@@ -137,108 +127,162 @@ const AlbumQuizPage = () => {
     );
   }
 
-  // 2. 로딩 화면
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-white gap-4">
-        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-        <p className="animate-pulse font-bold text-indigo-300">앨범 데이터 구성 중...</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
+        <div
+          className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin"
+          style={{ borderColor: "var(--kf-brand)", borderTopColor: "transparent" }}
+        />
+        <p className="font-bold animate-pulse text-lg" style={{ color: "var(--kf-brand)" }}>
+          앨범 데이터 구성 중...
+        </p>
       </div>
     );
   }
 
-  // 3. 인트로 및 카운트다운 화면
   if (!started) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] text-white px-4 animate-in fade-in duration-700">
-        <div className="text-center mb-16 space-y-4">
-          <div className="text-6xl mb-6 animate-bounce">🎨</div>
-          <h1 className="text-4xl font-black mb-3 tracking-tight">앨범보고 맞추기</h1>
-          <p className="text-gray-400 text-sm">흐릿한 앨범 이미지를 보고 가수를 맞춰보세요!</p>
+      <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 animate-in fade-in duration-700">
+        <div className="text-center mb-12 space-y-4">
+          <div className="text-7xl mb-6 animate-bounce drop-shadow-lg">🎨</div>
+          <h1
+            className="text-4xl font-black mb-3 tracking-tight"
+            style={{ color: "var(--kf-text-main)" }}
+          >
+            앨범 보고 맞추기
+          </h1>
+          <p style={{ color: "var(--kf-text-muted)", fontSize: "14px" }}>
+            흐릿한 이미지를 보고 가수를 맞춰보세요!
+          </p>
         </div>
-        <div className="w-full flex justify-center scale-110">
+        <div className="scale-110 flex justify-center w-full">
           <GameCountdown onStart={loadSongs} />
         </div>
       </div>
     );
   }
 
-  // 4. 게임 화면
   return (
-    <div className="mx-auto max-w-xl p-8 text-white animate-in fade-in duration-500">
+    <div
+      className="mx-auto max-w-xl p-8 animate-in fade-in duration-500"
+      style={{ color: "var(--kf-text-main)" }}
+    >
+      {/* 상단 정보 */}
       <div className="mb-4 flex items-center justify-between">
-        <span className="text-gray-400 font-bold">
+        <span style={{ color: "var(--kf-text-muted)" }}>
           {currentIndex + 1} / {TOTAL}
         </span>
-        <span className="text-indigo-400 font-bold text-xl">Score: {score}</span>
+        <span className="font-semibold" style={{ color: "var(--kf-brand)" }}>
+          점수: {score}
+        </span>
       </div>
 
-      <div className="mb-6 h-2 w-full rounded-full bg-neutral-800 overflow-hidden">
+      {/* 진행 바 */}
+      <div className="mb-8 h-2 w-full rounded-full" style={{ background: "var(--kf-border)" }}>
         <div
-          className="h-full bg-indigo-600 transition-all duration-500"
-          style={{ width: `${((currentIndex + 1) / TOTAL) * 100}%` }}
+          className="h-2 rounded-full transition-all duration-500"
+          style={{
+            width: `${((currentIndex + 1) / TOTAL) * 100}%`,
+            background: "linear-gradient(90deg, var(--kf-brand), var(--kf-brand-pink))",
+          }}
         />
       </div>
 
+      {/* 메인 퀴즈 카드 영역 */}
       <div className="mb-8 flex flex-col items-center">
         <div className="relative group">
           {currentSong?.imgUrl ? (
             <img
               src={currentSong.imgUrl}
               alt="album"
-              className="w-66 h-66 md:w-66 md:h-66 rounded-2xl object-cover shadow-2xl transition-all duration-1000 ease-in-out border-4 border-neutral-800"
-              style={{ filter: revealed ? "blur(0) " : `blur(${blurAmount}px)` }}
+              className="w-64 h-64 md:w-72 md:h-72 rounded-[32px] object-cover shadow-2xl transition-all duration-1000 ease-in-out border-4"
+              style={{
+                filter: revealed ? "blur(0)" : `blur(${blurAmount}px)`,
+                borderColor: "var(--kf-border)",
+              }}
             />
           ) : (
-            <div className="w-56 h-56 bg-neutral-800 animate-pulse rounded-2xl flex items-center justify-center">
-              <span>이미지 없음</span>
+            <div
+              className="w-64 h-64 animate-pulse rounded-[32px] flex items-center justify-center border"
+              style={{ background: "var(--kf-border)", color: "var(--kf-text-muted)" }}
+            >
+              이미지 없음
             </div>
           )}
           {!revealed && (
-            <div className="absolute top-2 right-2 bg-black/60 px-3 py-1 rounded-full text-[10px] font-bold tracking-tighter border border-white/10">
+            <div
+              className="absolute top-2 right-2 px-3 py-1 rounded-full text-[10px] font-bold border backdrop-blur-md"
+              style={{
+                background: "rgba(0,0,0,0.4)",
+                color: "#fff",
+                borderColor: "rgba(255,255,255,0.1)",
+              }}
+            >
               BLUR: {blurAmount}px
             </div>
           )}
         </div>
       </div>
 
-      <div className="mb-6 flex justify-center gap-3">
+      {/* 기회 표시 (기존 유지하되 색상만 변수화) */}
+      <div className="mb-6 flex justify-center gap-4">
         {Array.from({ length: MAX_TRIES }).map((_, i) => (
           <div
             key={i}
-            className={`w-4 h-4 rounded-md rotate-45 transition-colors duration-300 ${
-              i < tries ? "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" : "bg-neutral-700"
-            }`}
+            className="w-4 h-4 rounded-full transition-all duration-300"
+            style={{
+              background: i < tries ? "var(--kf-border)" : "var(--kf-brand-pink)",
+              boxShadow: i < tries ? "none" : "0 0 10px rgba(255,92,168,0.3)",
+              transform: i < tries ? "scale(0.8)" : "scale(1)",
+            }}
           />
         ))}
       </div>
 
-      {feedback && (
-        <div
-          className={`mb-6 rounded-xl px-4 py-4 text-center font-bold animate-in zoom-in duration-300 ${
-            feedback === "correct"
-              ? "bg-green-500/20 text-green-400 border border-green-500/50"
-              : feedback === "empty"
-                ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/50"
-                : "bg-red-500/20 text-red-400 border border-red-500/50"
-          }`}
-        >
-          {feedback === "correct" && `정답! 🎉 +${gainedScore}점`}
-          {feedback === "empty" && "가수 이름을 입력해주세요!"}
-          {feedback === "wrong" &&
-            (tries >= MAX_TRIES
-              ? `기회 소진! 정답: ${currentSong?.artistName}`
-              : "틀렸어요! 이미지가 선명해집니다 🔎")}
-        </div>
-      )}
+      {/* 피드백 및 정답 노출 */}
+      <div className="min-h-[80px] mb-6">
+        {feedback && (
+          <div
+            className="rounded-xl px-4 py-4 text-center font-bold animate-in zoom-in duration-300 border"
+            style={
+              feedback === "correct"
+                ? {
+                    background: "rgba(56,199,170,0.1)",
+                    color: "#178f74",
+                    borderColor: "rgba(56,199,170,0.2)",
+                  }
+                : {
+                    background: "rgba(255,102,122,0.1)",
+                    color: "var(--kf-danger)",
+                    borderColor: "rgba(255,102,122,0.2)",
+                  }
+            }
+          >
+            {feedback === "correct" && `정답! 🎉 +${gainedScore}점`}
+            {feedback === "empty" && "가수 이름을 입력해주세요!"}
+            {feedback === "wrong" &&
+              (tries >= MAX_TRIES
+                ? `정답: ${currentSong?.artistName}`
+                : "틀렸어요! 이미지가 선명해집니다 🔎")}
+          </div>
+        )}
+        {revealed && !feedback && (
+          <div className="text-center animate-in slide-in-from-bottom-4">
+            <p
+              className="text-2xl font-black leading-tight"
+              style={{ color: "var(--kf-text-main)" }}
+            >
+              {currentSong?.trackName}
+            </p>
+            <p className="font-bold" style={{ color: "var(--kf-brand)" }}>
+              {currentSong?.artistName}
+            </p>
+          </div>
+        )}
+      </div>
 
-      {revealed && !feedback && (
-        <div className="mb-6 text-center animate-in slide-in-from-bottom-4">
-          <p className="text-2xl font-black text-white leading-tight">{currentSong?.trackName}</p>
-          <p className="text-indigo-400 font-bold">{currentSong?.artistName}</p>
-        </div>
-      )}
-
+      {/* 입력 섹션 */}
       {!revealed && (
         <div className="flex flex-col gap-3">
           <input
@@ -249,21 +293,31 @@ const AlbumQuizPage = () => {
             onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             placeholder="가수 이름을 입력하세요..."
             disabled={!!feedback}
-            className="rounded-xl border border-neutral-700 bg-neutral-900 px-5 py-4 text-white focus:border-indigo-500 focus:outline-none disabled:opacity-50 transition-all shadow-inner"
+            className="w-full rounded-xl px-5 py-4 outline-none transition-all border shadow-inner"
+            style={{
+              background: "rgba(255,255,255,0.8)",
+              borderColor: "var(--kf-border)",
+              color: "var(--kf-text-main)",
+            }}
           />
           <button
             onClick={handleSubmit}
             disabled={!!feedback}
-            className="rounded-xl bg-indigo-600 px-5 py-4 font-bold hover:bg-indigo-500 active:scale-95 disabled:opacity-50 transition-all shadow-lg shadow-indigo-600/20"
+            className="w-full rounded-xl py-4 font-bold text-white transition-all shadow-lg"
+            style={{
+              background: "linear-gradient(135deg, var(--kf-brand), var(--kf-brand-pink))",
+              opacity: !!feedback ? 0.6 : 1,
+            }}
           >
             정답 확인
           </button>
           <button
             onClick={handleSkip}
             disabled={!!feedback}
-            className="mt-2 text-sm text-gray-500 hover:text-gray-300 transition-colors"
+            className="mt-2 text-sm transition-colors"
+            style={{ color: "var(--kf-text-muted)" }}
           >
-            전혀 모르겠어요 (패스) →
+            모르겠어요 (패스) →
           </button>
         </div>
       )}

@@ -1,6 +1,6 @@
 @import "./community-kfandom-core.css";
 .kf-free-board-create .kf-community-page__shell > div {
-  max-width: 860px;
+  max-width: 980px;
   margin: 0 auto;
   padding: 26px;
 }

@@ -5,21 +5,12 @@
   display: flex;
   flex-direction: row;
 
-  /*
-    Layout의 main이 이미 h-[calc(100vh-5rem)] + overflow-y-auto 를 가짐.
-    main 안의 래퍼(p-20, max-w-7xl)의 padding을 상쇄하고 main 높이를 꽉 채운다.
-  */
+  margin: 0 -2rem -5rem;
+  width: calc(100% + 4rem);
 
-  /* 부모 래퍼(p-20 = 5rem)의 상하좌우 padding 상쇄.
-     위쪽 -5rem은 main의 overflow:hidden으로 가려져 시각적 문제 없음 */
-  margin: -5rem;
-  width: calc(100% + 10rem);
+  height: calc(100vh - 6rem);
 
-  /* main의 전체 높이를 채움 */
-  height: calc(100vh - 5rem);
-
-  background: black;
-  color: white;
+  color: #1f2430;
 
   overflow: hidden;
 }
@@ -28,21 +19,18 @@
    왼쪽 패널
 ========================= */
 .playlist-left {
-  /* sticky 제거 → 그냥 flex item으로, 높이는 부모에 맞춤 */
   flex-shrink: 0;
 
-  /* 화면 너비에 따라 유연하게 조절: 최소 260px ~ 최대 360px */
   width: clamp(260px, 28vw, 360px);
 
-  height: 100%; /* 부모(.playlist-detail-page)의 고정 높이를 채움 */
+  height: 100%;
   padding: 24px;
   box-sizing: border-box;
 
   display: flex;
   justify-content: center;
-  overflow-y: auto; /* 왼쪽 패널 내용이 넘칠 때만 내부 스크롤 */
+  overflow-y: auto;
 
-  background: black;
 }
 
 .playlist-center {
@@ -53,16 +41,16 @@
   gap: 14px;
 
   padding: 20px;
-  border: 1px solid transparent;
+  border: 2px solid transparent;
   border-radius: 16px;
   box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.5);
 
   width: 100%;
 }
 
 .playlist-center.editing {
-  border-color: rgba(255, 77, 79, 0.35);
-  max-height: 650px;
+  border-color: rgba(16, 185, 129, 0.6);
 }
 
 /* =========================
@@ -71,7 +59,6 @@
 
 .playlist-cover-large {
   position: relative;
-  /* 패널 너비에 비례해서 커버 크기도 자동 조절 */
   width: clamp(160px, 18vw, 240px);
   aspect-ratio: 1 / 1;
   border-radius: 18px;
@@ -91,7 +78,7 @@
   align-items: center;
   justify-content: center;
 
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.45);
   color: white;
   font-size: 14px;
   font-weight: 600;
@@ -146,7 +133,7 @@
   border: none;
 
   background: white;
-  color: black;
+  color: #1f2430;
   font-size: 20px;
 
   display: flex;
@@ -158,7 +145,7 @@
 
   opacity: 0;
   transition: all 0.18s ease;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
 }
 
 .playlist-cover-large:hover .primary-play.large {
@@ -172,7 +159,7 @@
   left: 50%;
   transform: translateX(-50%);
   pointer-events: auto;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.45);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 20px;
@@ -184,7 +171,7 @@
 }
 
 .toggle-play-mode:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.6);
 }
 
 /* =========================
@@ -199,9 +186,9 @@
 }
 
 .more-button {
-  background: rgba(0, 0, 0, 0.45);
-  border: none;
-  color: white;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #374151;
   font-size: 20px;
 
   width: 34px;
@@ -216,7 +203,7 @@
 }
 
 .more-button:hover {
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .playlist-menu {
@@ -224,9 +211,10 @@
   top: 110%;
   right: 0;
 
-  background: #111;
-  border: 1px solid #222;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 
   min-width: 90px;
   padding: 4px 0;
@@ -239,7 +227,7 @@
 
   background: none;
   border: none;
-  color: white;
+  color: #374151;
   font-size: 13px;
   text-align: left;
 
@@ -247,11 +235,15 @@
 }
 
 .playlist-menu button:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.playlist-menu .edit {
+  color: #10b981;
 }
 
 .playlist-menu .danger {
-  color: #ff5c5c;
+  color: #f43f5e;
 }
 
 /* =========================
@@ -266,9 +258,9 @@
 
 .playlist-title-large {
   margin: 0;
-  /* 화면이 좁아질수록 폰트도 살짝 줄어듦 */
   font-size: clamp(16px, 2vw, 22px);
   font-weight: 700;
+  color: #1f2430;
 
   max-width: 100%;
 
@@ -281,8 +273,8 @@
   font-size: clamp(16px, 2vw, 22px);
   background: transparent;
   border: none;
-  border-bottom: 2px solid #ff4d4f;
-  color: white;
+  border-bottom: 2px solid #10b981;
+  color: #1f2430;
   outline: none;
   text-align: center;
   width: 100%;
@@ -299,13 +291,13 @@
   margin-top: 4px;
   margin-bottom: 12px;
   font-size: 13px;
-  color: #aaa;
+  color: #6b7280;
 }
 
 .meta-user,
 .meta-count {
   font-weight: 600;
-  color: #ddd;
+  color: #374151;
 }
 
 .meta-dot {
@@ -323,13 +315,13 @@
 }
 
 .playlist-description-text {
-  background: #111;
-  border: 1px solid #222;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 12px;
   padding: 14px 16px;
 
   font-size: 14px;
-  color: #ccc;
+  color: #4b5563;
   line-height: 1.5;
 
   white-space: pre-wrap;
@@ -337,16 +329,16 @@
 }
 
 .playlist-description-edit-wrap {
-  border: 1px solid #333;
+  border: 1px solid #d1d5db;
   border-radius: 12px;
   overflow: hidden;
-  background: #0f0f0f;
+  background: rgba(255, 255, 255, 0.8);
   max-height: 120px;
   transition: border-color 0.15s;
 }
 
 .playlist-description-edit-wrap:focus-within {
-  border-color: #ff4d4f;
+  border-color: #10b981;
 }
 
 .playlist-description-edit {
@@ -355,7 +347,7 @@
   border: none;
   padding: 14px 16px;
 
-  color: white;
+  color: #1f2430;
   font-size: 14px;
   resize: none;
   box-sizing: border-box;
@@ -388,14 +380,14 @@
 .btn-save,
 .btn-cancel {
   box-sizing: border-box;
-  width: 64px; /* 고정 너비 통일 — padding 포함 */
+  width: 64px;
   height: 36px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  padding: 0; /* 가로 padding 제거 → width가 크기 결정 */
+  padding: 0;
   font-size: 13px;
   font-weight: 600;
   border-radius: 8px;
@@ -406,14 +398,14 @@
 }
 
 .btn-save {
-  background: #ff4d4f;
-  border: 1px solid #ff4d4f;
+  background: #10b981;
+  border: 1px solid #10b981;
   color: white;
 }
 
 .btn-save:hover {
-  background: #ff2f31;
-  border-color: #ff2f31;
+  background: #059669;
+  border-color: #059669;
 }
 
 .btn-save:active {
@@ -422,13 +414,13 @@
 
 .btn-cancel {
   background: transparent;
-  border: 1px solid #666;
-  color: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
 }
 
 .btn-cancel:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: #fff;
+  background: rgba(0, 0, 0, 0.04);
+  border-color: #9ca3af;
 }
 
 .btn-cancel:active {
@@ -443,7 +435,6 @@
   flex: 1;
   min-width: 0;
 
-  /* flex column으로 헤더 + 리스트 구조 잡기 */
   display: flex;
   flex-direction: column;
 
@@ -451,7 +442,7 @@
   padding: 24px clamp(16px, 3vw, 40px);
   padding-bottom: 24px;
   box-sizing: border-box;
-  overflow: hidden; /* 바깥은 hidden, 스크롤은 track-list가 담당 */
+  overflow: hidden;
 
   transition: padding-bottom 0.3s ease;
 }
@@ -463,7 +454,7 @@
 
 /* ===== 곡 리스트 상단 헤더 ===== */
 .track-header {
-  flex-shrink: 0; /* 헤더는 고정 크기 유지 */
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -475,7 +466,7 @@
 .track-header h2 {
   font-size: 18px;
   font-weight: 600;
-  color: #ffffff;
+  color: #1f2430;
   margin: 0;
 }
 
@@ -491,10 +482,10 @@
   appearance: none;
   -webkit-appearance: none;
 
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid #d1d5db;
   border-radius: 8px;
-  color: #ccc;
+  color: #374151;
   font-size: 12px;
   padding: 6px 28px 6px 10px;
   cursor: pointer;
@@ -509,13 +500,13 @@
 }
 
 .sort-select:hover {
-  border-color: #555;
-  color: #fff;
+  border-color: #9ca3af;
+  color: #1f2430;
 }
 
 .sort-select:focus {
   outline: none;
-  border-color: #666;
+  border-color: #9ca3af;
 }
 
 .btn-add-song {
@@ -528,14 +519,14 @@
   align-items: center;
   justify-content: center;
 
-  background: #2a2a2a;
-  color: white;
+  background: #f3f4f6;
+  color: #374151;
   cursor: pointer;
 }
 
 .btn-add-song:hover {
-  background: white;
-  color: black;
+  background: #1f2430;
+  color: white;
 }
 
 /* ===== 곡 리스트 스크롤 ===== */
@@ -545,8 +536,8 @@
   padding: 0;
   margin: 0;
 
-  flex: 1; /* 헤더를 제외한 나머지 높이를 모두 채움 */
-  min-height: 0; /* flex 자식의 overflow 허용을 위해 필수 */
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -555,18 +546,18 @@
 }
 
 .track-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.12);
   border-radius: 10px;
 }
 
 .track-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.22);
 }
 
 .track-empty {
   padding: 40px 0;
   text-align: center;
-  color: #555;
+  color: #9ca3af;
   font-size: 14px;
 }
 
@@ -581,15 +572,15 @@
 }
 
 .track-item:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .track-item.playing {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(109, 94, 252, 0.08);
 }
 
 .track-item.playing .track-title {
-  color: #ffffff;
+  color: #6d5efc;
   font-weight: 600;
 }
 
@@ -610,6 +601,7 @@
 
 .track-title {
   font-size: 14px;
+  color: #1f2430;
 
   white-space: nowrap;
   overflow: hidden;
@@ -618,12 +610,12 @@
 
 .track-artist {
   font-size: 12px;
-  color: #aaa;
+  color: #6b7280;
 }
 
 .track-duration {
   font-size: 12px;
-  color: #aaa;
+  color: #9ca3af;
 
   margin-right: 12px;
   flex-shrink: 0;
@@ -632,7 +624,7 @@
 .track-delete {
   background: transparent;
   border: none;
-  color: #888;
+  color: #9ca3af;
   font-size: 12px;
   cursor: pointer;
 
@@ -646,12 +638,12 @@
 }
 
 .track-delete:hover {
-  color: #ff4d4f;
+  color: #f43f5e;
 }
 
 /* 선택 모드 */
 .track-item.selected {
-  background: rgba(255, 77, 79, 0.1);
+  background: rgba(244, 63, 94, 0.07);
 }
 
 .track-checkbox {
@@ -659,7 +651,7 @@
   height: 18px;
   flex-shrink: 0;
   cursor: pointer;
-  accent-color: #ff4d4f;
+  accent-color: #f43f5e;
 }
 
 /* 선택/취소 토글 버튼 */
@@ -667,9 +659,9 @@
   height: 32px;
   padding: 0 14px;
   border-radius: 8px;
-  border: 1px solid #444;
+  border: 1px solid #d1d5db;
   background: transparent;
-  color: #ccc;
+  color: #6b7280;
   font-size: 12px;
   cursor: pointer;
   transition:
@@ -680,13 +672,13 @@
 }
 
 .btn-select-toggle:hover {
-  border-color: #888;
-  color: #fff;
+  border-color: #9ca3af;
+  color: #1f2430;
 }
 
 .btn-select-toggle.active {
-  border-color: #ff4d4f;
-  color: #ff4d4f;
+  border-color: #f43f5e;
+  color: #f43f5e;
 }
 
 /* 다중 삭제 버튼 */
@@ -695,7 +687,7 @@
   padding: 0 14px;
   border-radius: 8px;
   border: none;
-  background: #ff4d4f;
+  background: #f43f5e;
   color: white;
   font-size: 12px;
   font-weight: 600;
@@ -705,28 +697,46 @@
 }
 
 .btn-bulk-delete:hover {
-  background: #ff2f31;
+  background: #e11d48;
+}
+
+/* add playlist button */
+.add-playlist-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f3f4f6;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.add-playlist-btn:hover {
+  background: #1f2430;
+  color: white;
 }
 
 /* =========================
    반응형 - 좁은 화면
 ========================= */
 
-/* 태블릿 수준 (< 900px): 세로 스택 레이아웃 */
 @media (max-width: 900px) {
   .playlist-detail-page {
     flex-direction: column;
 
-    /* main의 높이를 그대로 채우고, 내부에서 스크롤 */
     height: calc(100vh - 5rem);
     overflow-y: auto;
 
-    /* 커스텀 스크롤바 (Firefox) */
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
   }
 
-  /* 커스텀 스크롤바 (Chrome / Safari) */
   .playlist-detail-page::-webkit-scrollbar {
     width: 6px;
   }
@@ -736,12 +746,12 @@
   }
 
   .playlist-detail-page::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.12);
     border-radius: 10px;
   }
 
   .playlist-detail-page::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.22);
   }
 
   .playlist-left {
