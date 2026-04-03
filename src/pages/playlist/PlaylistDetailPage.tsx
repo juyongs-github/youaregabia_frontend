@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import type { Song } from "../../components/ui/SongListItem";
 import { usePlayer } from "../../contexts/PlayerContext";
 import AddSongsModal from "../../components/ui/AddSongsModal";
+import FallbackCoverArt from "../../components/ui/FallbackCoverArt";
 
 function PlaylistDetailPage() {
   const navigate = useNavigate();
@@ -52,6 +53,7 @@ function PlaylistDetailPage() {
   const [editDescription, setEditDescription] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const coverImageSrc = preview ?? (data?.imageUrl ? `${import.meta.env.VITE_API_BASE_URL}${data.imageUrl}` : null);
 
   // 수정 모드 저장
   const handleSave = async () => {
@@ -237,11 +239,13 @@ function PlaylistDetailPage() {
           </button>
 
           <div className="playlist-cover-large">
-            {preview ? (
-              <img src={preview} alt="playlist cover" />
-            ) : (
-              <img src={`${import.meta.env.VITE_API_BASE_URL}${data?.imageUrl}`} alt="playlist cover" />
-            )}
+            <FallbackCoverArt
+              src={coverImageSrc}
+              title={data?.title}
+              size="100%"
+              radius={18}
+              className="playlist-cover-art"
+            />
             {isEditMode && (
               <input
                 type="file"

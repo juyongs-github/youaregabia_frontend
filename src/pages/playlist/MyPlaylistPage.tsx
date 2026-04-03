@@ -7,6 +7,7 @@ import "../../styles/playlist-kfandom.css";
 import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
 import "../../styles/MyplaylistPage.css";
 import api from "../../api/axios";
+import FallbackCoverArt from "../../components/ui/FallbackCoverArt";
 
 
 function MyPlaylistPage() {
@@ -118,7 +119,13 @@ function MyPlaylistPage() {
             }}
           >
             <div className="playlist-image-wrapper">
-              <img src={`${api.defaults.baseURL}${item.imageUrl}`} alt={item.title} />
+              <FallbackCoverArt
+                src={item.imageUrl ? `${api.defaults.baseURL}${item.imageUrl}` : null}
+                title={item.title}
+                size="100%"
+                radius={14}
+                className="playlist-image-art"
+              />
               <button
                 className="playlist-delete-btn"
                 title="삭제"

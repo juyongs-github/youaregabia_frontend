@@ -93,14 +93,16 @@
   opacity: 1;
 }
 
-.playlist-cover-large img {
+.playlist-cover-large img,
+.playlist-cover-art {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.25s ease;
 }
 
-.playlist-center.editing .playlist-cover-large:hover img {
+.playlist-center.editing .playlist-cover-large:hover img,
+.playlist-center.editing .playlist-cover-large:hover .playlist-cover-art {
   transform: scale(1.05);
 }
 

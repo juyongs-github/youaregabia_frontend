@@ -316,11 +316,13 @@
   background: linear-gradient(135deg, rgba(215,151,136,0.22), rgba(153,166,207,0.22));
 }
 
-.playlist-card img {
+.playlist-card img,
+.playlist-card-cover {
   width: 100%; height: 100%; object-fit: cover;
   display: block; transition: filter 0.2s ease;
 }
-.playlist-card:hover img { filter: brightness(0.88); }
+.playlist-card:hover img,
+.playlist-card:hover .playlist-card-cover { filter: brightness(0.88); }
 
 /* 이미지 위 제목 오버레이 */
 .playlist-card-title {

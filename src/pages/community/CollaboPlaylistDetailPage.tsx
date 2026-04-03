@@ -14,6 +14,7 @@ import {
   FaPause,
   FaPlay,
   FaPlus,
+  FaRegCommentDots,
   FaRedo,
   FaSearch,
   FaStopwatch,
@@ -394,17 +395,44 @@ function CollaboPlaylistDetailPage() {
               )}
             </div>
             {playlist?.description && (
-              <p
-                className="text-sm line-clamp-2 rounded-xl px-4 py-2 w-fit"
+              <div
+                className="w-full max-w-[560px]"
                 style={{
-                  color: "#677086",
-                  background: "rgba(247,248,255,0.82)",
-                  border: "1px solid rgba(88,95,138,0.10)",
-                  maxWidth: "560px",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 10,
+                  padding: "10px 12px",
+                  borderRadius: 14,
+                  background: "rgba(246, 248, 252, 0.92)",
+                  border: "1px solid rgba(88,95,138,0.08)",
                 }}
               >
-                {playlist.description}
-              </p>
+                <div
+                  className="shrink-0"
+                  style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: 999,
+                    display: "grid",
+                    placeItems: "center",
+                    background: "rgba(109,94,252,0.10)",
+                    color: "#6d5efc",
+                  }}
+                >
+                  <FaRegCommentDots size={11} />
+                </div>
+                <div className="min-w-0">
+                  <div
+                    className="text-[11px] font-semibold tracking-[0.08em]"
+                    style={{ color: "#8a92a8", marginBottom: 2 }}
+                  >
+                    요청 사항
+                  </div>
+                  <p className="text-sm line-clamp-2" style={{ color: "#4f5b72", margin: 0 }}>
+                    {playlist.description}
+                  </p>
+                </div>
+              </div>
             )}
           </div>
 

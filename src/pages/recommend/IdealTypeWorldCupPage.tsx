@@ -12,6 +12,7 @@ import type {
   AudioState,
   SongCardProps,
 } from "../../types/idealtypeworldcup";
+import FallbackCoverArt from "../../components/ui/FallbackCoverArt";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -366,15 +367,13 @@ function PlaylistModal({ selectedSongs, onClose, onSuccess }: PlaylistModalProps
                   className={`wc-modal-item${selectedPlaylistId === pl.id ? " wc-modal-item--selected" : ""}`}
                   onClick={() => setSelectedPlaylistId(pl.id)}
                 >
-                  {pl.imageUrl ? (
-                    <img
-                      className="wc-modal-thumb"
-                      src={`${BASE_URL}${pl.imageUrl}`}
-                      alt={pl.title}
-                    />
-                  ) : (
-                    <div className="wc-modal-thumb wc-modal-thumb--fallback">♪</div>
-                  )}
+                  <FallbackCoverArt
+                    src={pl.imageUrl ? `${BASE_URL}${pl.imageUrl}` : null}
+                    title={pl.title}
+                    size={44}
+                    radius={8}
+                    className="wc-modal-thumb"
+                  />
                   <span className="wc-modal-playlist-title">{pl.title}</span>
                   {/* 선택된 플레이리스트에 체크 표시 */}
                   {selectedPlaylistId === pl.id && <span className="wc-modal-check"><FaCheck size={11} /></span>}

@@ -5,6 +5,7 @@ import { playlistApi } from "../../api/playlistApi";
 import type { Playlist } from "../../types/playlist";
 import type { Song } from "./SongListItem";
 import "../../styles/IdealTypeWorldCupPage.css";
+import FallbackCoverArt from "./FallbackCoverArt";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -94,11 +95,13 @@ function AddToPlaylistModal({ song, onClose, onSuccess }: Props) {
                   className={`wc-modal-item${selectedPlaylistId === pl.id ? " wc-modal-item--selected" : ""}`}
                   onClick={() => setSelectedPlaylistId(pl.id)}
                 >
-                  {pl.imageUrl ? (
-                    <img className="wc-modal-thumb" src={`${BASE_URL}${pl.imageUrl}`} alt={pl.title} />
-                  ) : (
-                    <div className="wc-modal-thumb wc-modal-thumb--fallback">♪</div>
-                  )}
+                  <FallbackCoverArt
+                    src={pl.imageUrl ? `${BASE_URL}${pl.imageUrl}` : null}
+                    title={pl.title}
+                    size={44}
+                    radius={8}
+                    className="wc-modal-thumb"
+                  />
                   <span className="wc-modal-playlist-title">{pl.title}</span>
                   {selectedPlaylistId === pl.id && <span className="wc-modal-check"><FaCheck size={11} /></span>}
                 </li>

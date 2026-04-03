@@ -288,13 +288,13 @@ function PlaylistReviewPage() {
                   onClick={() => setRatingFilter(ratingFilter === star ? null : star)}
                   className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                     ratingFilter === star
-                      ? "bg-amber-300/20 text-amber-200"
+                      ? "bg-violet-400/15 text-black ring-1 ring-violet-300/25"
                       : "text-white/40 hover:text-white/70"
                   }`}
                 >
                   <FaStar
                     size={15}
-                    className={ratingFilter === star ? "text-amber-200" : "text-white/30"}
+                    className={ratingFilter === star ? "text-black" : "text-white/30"}
                   />
                   {star}
                 </button>

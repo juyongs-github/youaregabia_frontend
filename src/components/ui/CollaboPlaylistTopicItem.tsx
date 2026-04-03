@@ -3,6 +3,7 @@ import {
   FaClock,
   FaHeart,
   FaMusic,
+  FaRegCommentDots,
   FaStopwatch,
   FaUser,
   FaUsers,
@@ -86,6 +87,16 @@ function PlaylistCard({ playlist, onLike }: { playlist: CollaboPlaylist; onLike:
     border: "1px solid rgba(120, 130, 152, 0.22)",
     color: "#657089",
   };
+  const requestBoxStyle: CSSProperties = {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: 10,
+    padding: "10px 12px",
+    borderRadius: 14,
+    background: "rgba(246, 248, 252, 0.92)",
+    border: "1px solid rgba(88,95,138,0.08)",
+    maxWidth: "520px",
+  };
 
   return (
     <div
@@ -138,17 +149,33 @@ function PlaylistCard({ playlist, onLike }: { playlist: CollaboPlaylist; onLike:
           </div>
 
           {playlist.description && (
-            <p
-              className="text-sm line-clamp-1 px-4 py-1.5 rounded-xl w-fit"
-              style={{
-                color: "#5f6980",
-                background: "rgba(247,248,255,0.9)",
-                border: "1px solid rgba(88,95,138,0.12)",
-                maxWidth: "520px",
-              }}
-            >
-              {playlist.description}
-            </p>
+            <div style={requestBoxStyle}>
+              <div
+                className="shrink-0"
+                style={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: 999,
+                  display: "grid",
+                  placeItems: "center",
+                  background: "rgba(109,94,252,0.10)",
+                  color: "#6d5efc",
+                }}
+              >
+                <FaRegCommentDots size={11} />
+              </div>
+              <div className="min-w-0">
+                <div
+                  className="text-[11px] font-semibold uppercase tracking-[0.08em]"
+                  style={{ color: "#8a92a8", marginBottom: 2 }}
+                >
+                  요청 사항
+                </div>
+                <p className="text-sm line-clamp-2" style={{ color: "#4f5b72", margin: 0 }}>
+                  {playlist.description}
+                </p>
+              </div>
+            </div>
           )}
 
           <div className="flex flex-wrap items-center gap-2.5">

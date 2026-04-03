@@ -22,6 +22,7 @@ import type { Song } from "./SongListItem";
 import { usePlayer } from "../../contexts/PlayerContext";
 import { playlistApi } from "../../api/playlistApi";
 import type { RootState } from "../../store";
+import FallbackCoverArt from "./FallbackCoverArt";
 
 interface iTunesTrack {
   trackId: number;
@@ -626,7 +627,7 @@ function ChatbotButton() {
   }, []);
 
   // 플레이리스트 추가
-  const [playlists, setPlaylists] = useState<{ id: number; title: string; imageUrl: string }[]>([]);
+  const [playlists, setPlaylists] = useState<{ id: number; title: string; imageUrl?: string | null }[]>([]);
   const [addingTrack, setAddingTrack] = useState<iTunesTrack | null>(null);
   const [addStatus, setAddStatus] = useState<Record<number, "idle" | "loading" | "done" | "error">>(
     {}
@@ -1681,24 +1682,12 @@ function ChatbotButton() {
                         }
                         onMouseLeave={(e) => (e.currentTarget.style.background = "")}
                       >
-                        <div
-                          className="flex-shrink-0 overflow-hidden rounded-lg w-9 h-9"
-                          style={{ background: "rgba(109,94,252,0.08)" }}
-                        >
-                          {pl.imageUrl ? (
-                            <img
-                              src={pl.imageUrl}
-                              alt={pl.title}
-                              className="object-cover w-full h-full"
-                            />
-                          ) : (
-                            <div className="flex items-center justify-center w-full h-full">
-                              <span className="text-sm" style={{ color: "#6d5efc" }}>
-                                ♪
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                        <FallbackCoverArt
+                          src={pl.imageUrl || null}
+                          title={pl.title}
+                          size={36}
+                          radius={8}
+                        />
                         <span
                           className="flex-1 text-sm text-left truncate"
                           style={{ color: "#1f2430" }}

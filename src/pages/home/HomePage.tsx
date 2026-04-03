@@ -40,6 +40,7 @@ import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
 import Header from "../../components/layout/Header";
 import { rankingApi, type SongRankingDto, type ArtistRankingDto } from "../../api/rankingApi";
 import AddToPlaylistModal from "../../components/ui/AddToPlaylistModal";
+import FallbackCoverArt from "../../components/ui/FallbackCoverArt";
 
 function HomePage() {
   const [data, setData] = useState<Playlist[]>([]);
@@ -488,7 +489,13 @@ function HomePage() {
                   onClick={() => navigate(`/playlist/me/${item.id}`)}
                 >
                   <div className="playlist-card-img-wrap">
-                    <img src={`${baseURL}${item.imageUrl}`} alt={item.title} />
+                    <FallbackCoverArt
+                      src={item.imageUrl ? `${baseURL}${item.imageUrl}` : null}
+                      title={item.title}
+                      size="100%"
+                      radius={12}
+                      className="playlist-card-cover"
+                    />
 
                     <span className="playlist-card-title">{item.title}</span>
                   </div>
@@ -550,14 +557,17 @@ function HomePage() {
                   className="shared-cover-wrap shared-animate"
                   onClick={handlePlayAll}
                 >
-                  <img
+                  <FallbackCoverArt
                     className="shared-cover-large"
                     src={
                       collaboPlaylists[currentSharedIndex]?.imageUrl
                         ? `${baseURL}${collaboPlaylists[currentSharedIndex].imageUrl}`
-                        : ""
+                        : null
                     }
-                    alt={collaboPlaylists[currentSharedIndex]?.title ?? ""}
+                    title={collaboPlaylists[currentSharedIndex]?.title ?? ""}
+                    size="100%"
+                    radius={10}
+                    variant="collabo"
                   />
                   <button className="shared-cover-play" tabIndex={-1}>
                     <FaPlay />

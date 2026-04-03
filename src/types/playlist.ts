@@ -2,7 +2,7 @@ export interface Playlist {
   id: number;
   title: string;
   description?: string;
-  imageUrl: string;
+  imageUrl?: string | null;
   songCount: number;
   userName: string;
 }
@@ -22,7 +22,7 @@ export interface CollaboPlaylist extends Playlist {
 export interface PlaylistCreate {
   title: string;
   description?: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
 }
 
 // 수정
