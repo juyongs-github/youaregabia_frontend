@@ -59,6 +59,8 @@
 /* ── Content shell ──────────────────────── */
 .kf-admin-content {
   background: transparent;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 /* ── Page heading ───────────────────────── */

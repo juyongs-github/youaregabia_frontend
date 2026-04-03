@@ -321,7 +321,7 @@ export default function OrderPage() {
             <div className="flex flex-col gap-3">
               {cart.map((item) => (
                 <div key={item.goodsId} className="flex justify-between items-center text-sm">
-                  <span className="text-gray-300">{item.name} × {item.quantity}</span>
+                  <span className="text-gray-700 font-medium">{item.name} × {item.quantity}</span>
                   <span className="font-semibold">{(item.price * item.quantity).toLocaleString()}원</span>
                 </div>
               ))}

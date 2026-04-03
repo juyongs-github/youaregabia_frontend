@@ -32,6 +32,7 @@ interface MyReply {
   replyId: number;
   boardId: number;
   boardTitle: string;
+  boardType: string;
   content: string;
   likeCount: number;
   createdAt: string;
@@ -235,11 +236,13 @@ function MyPage() {
               <div
                 key={b.boardId}
                 className="kf-my-list-item"
-                onClick={() => navigate(`/community/board/${b.boardId}`)}
+                onClick={() => navigate(b.boardType === "FREE" ? `/community/free/${b.boardId}` : `/community/share/${b.boardId}`)}
               >
                 <div className="kf-my-item-top">
                   <div className="kf-my-item-left">
-                    <span className="kf-my-item-tag">{b.boardType}</span>
+                    <span className="kf-my-item-tag">
+                      {b.boardType === "PLAYLIST_SHARE" ? "플레이리스트 공유" : b.boardType === "FREE" ? "자유게시판" : b.boardType}
+                    </span>
                     <span className="kf-my-item-title">{b.title}</span>
                   </div>
                   <span className="kf-my-item-date">{b.createdAt?.slice(0, 10)}</span>
@@ -264,9 +267,14 @@ function MyPage() {
               <div
                 key={r.replyId}
                 className="kf-my-list-item"
-                onClick={() => navigate(`/community/board/${r.boardId}`)}
+                onClick={() => navigate(r.boardType === "FREE" ? `/community/free/${r.boardId}` : `/community/share/${r.boardId}`)}
               >
-                <p className="kf-my-reply-board">{r.boardTitle}</p>
+                <div className="kf-my-item-left" style={{ marginBottom: 4 }}>
+                  <span className="kf-my-item-tag">
+                    {r.boardType === "PLAYLIST_SHARE" ? "플레이리스트 공유" : r.boardType === "FREE" ? "자유게시판" : r.boardType}
+                  </span>
+                  <span className="kf-my-reply-board">{r.boardTitle}</span>
+                </div>
                 <p className="kf-my-reply-content">{r.content}</p>
                 <div className="kf-my-reply-bottom">
                   <span>좋아요 {r.likeCount}</span>

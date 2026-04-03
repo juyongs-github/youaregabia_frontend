@@ -45,7 +45,15 @@ function Sidebar({ isOpen = false, onClose }: { isOpen?: boolean; onClose?: () =
       <div className="kf-side-card">
         {/* Brand / user */}
         <div className="kf-side-brand">
-          <div className="kf-side-brand__mark">{profileInitial}</div>
+          <div className={`kf-side-brand__mark${user?.imgUrl ? " kf-side-brand__mark--has-img" : ""}`}>
+            {user?.imgUrl ? (
+              <img
+                src={`${import.meta.env.VITE_API_BASE_URL ?? ""}${user.imgUrl}`}
+                alt="프로필"
+                style={{ width: "100%", height: "100%", borderRadius: "inherit", objectFit: "cover" }}
+              />
+            ) : profileInitial}
+          </div>
           <div className="kf-side-brand__copy">
             <strong>{user?.name || "GAP Music"}</strong>
             <span>{roleLabel}</span>

@@ -204,7 +204,7 @@
 .kf-header__profileBtn {
   min-width: 42px;
   height: 42px;
-  padding: 0 10px;
+  padding: 0 5px;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
@@ -213,11 +213,19 @@
   color: #fff;
   font-size: 14px;
   font-weight: 900;
+  overflow: hidden;
   letter-spacing: -0.02em;
   box-shadow: 0 12px 24px rgba(109, 94, 252, 0.24);
   border: 0;
   cursor: pointer;
   font: inherit;
+}
+
+.kf-header__profileBtn--has-img {
+  background: rgba(109, 94, 252, 0.10);
+  border: 2px solid rgba(109, 94, 252, 0.20);
+  box-shadow: 0 4px 12px rgba(109, 94, 252, 0.12);
+  padding: 3px;
 }
 
 /* 알림 드롭다운 */

@@ -44,7 +44,7 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="kf-admin flex min-h-screen">
+    <div className="kf-admin flex h-screen overflow-hidden">
       {/* Mobile backdrop */}
       {sidebarOpen && (
         <div
