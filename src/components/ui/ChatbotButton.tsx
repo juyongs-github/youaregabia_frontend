@@ -39,6 +39,8 @@ interface InquiryItem {
   content: string;
   status: string;
   createdAt: string;
+  answer: string | null;
+  answeredAt: string | null;
 }
 
 interface Message {
@@ -1268,6 +1270,31 @@ function ChatbotButton() {
                           day: "numeric",
                         })}
                       </p>
+                      {item.answer && (
+                        <div
+                          className="rounded-lg px-2.5 py-2 mt-0.5"
+                          style={{
+                            background: "rgba(34,197,94,0.07)",
+                            border: "1px solid rgba(34,197,94,0.18)",
+                          }}
+                        >
+                          <p className="text-[10px] font-semibold mb-1" style={{ color: "#16a34a" }}>
+                            관리자 답변
+                          </p>
+                          <p className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: "#1f2430" }}>
+                            {item.answer}
+                          </p>
+                          {item.answeredAt && (
+                            <p className="text-[10px] mt-1" style={{ color: "#8e97ab" }}>
+                              {new Date(item.answeredAt).toLocaleDateString("ko-KR", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })}
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

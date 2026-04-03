@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FiTrash2 } from "react-icons/fi";
 import api from "../../api/axios";
 
 interface Inquiry {
@@ -8,7 +9,11 @@ interface Inquiry {
   status: string;
   createdAt: string;
   email: string | null;
+  phone: string | null;
   userName: string | null;
+  userEmail: string | null;
+  answer: string | null;
+  answeredAt: string | null;
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -24,24 +29,67 @@ export default function AdminInquiriesPage() {
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [filterStatus, setFilterStatus] = useState<"전체" | "접수중" | "답변완료">("전체");
+  const [answerDraft, setAnswerDraft] = useState<Record<number, string>>({});
+  const [answerEditing, setAnswerEditing] = useState<number | null>(null);
+  const [saving, setSaving] = useState<number | null>(null);
 
   useEffect(() => {
-    api.get("/api/inquiry")
+    api.get("/api/admin/inquiries")
       .then((res) => setInquiries(res.data))
       .finally(() => setLoading(false));
   }, []);
 
-  const handleStatusChange = async (id: number, status: "PENDING" | "ANSWERED") => {
+const handleSaveAnswer = async (id: number) => {
+    const answer = answerDraft[id]?.trim();
+    if (!answer) { alert("답변 내용을 입력해주세요."); return; }
+    setSaving(id);
     try {
-      await api.patch(`/api/inquiry/${id}/status`, { status });
+      const res = await api.put(`/api/admin/inquiries/${id}/answer`, { answer });
       setInquiries((prev) =>
-        prev.map((q) => q.id === id
-          ? { ...q, status: status === "PENDING" ? "접수중" : "답변완료" }
-          : q)
+        prev.map((q) => q.id === id ? { ...q, ...res.data } : q)
       );
+      setAnswerEditing(null);
+      setAnswerDraft((prev) => { const next = { ...prev }; delete next[id]; return next; });
     } catch {
-      alert("상태 변경에 실패했습니다.");
+      alert("답변 저장에 실패했습니다.");
+    } finally {
+      setSaving(null);
     }
+  };
+
+  const handleDeleteAnswer = async (id: number) => {
+    if (!confirm("답변을 삭제하시겠습니까?")) return;
+    try {
+      const res = await api.delete(`/api/admin/inquiries/${id}/answer`);
+      setInquiries((prev) =>
+        prev.map((q) => q.id === id ? { ...q, ...res.data } : q)
+      );
+      setAnswerEditing(null);
+      setAnswerDraft((prev) => { const next = { ...prev }; delete next[id]; return next; });
+    } catch {
+      alert("답변 삭제에 실패했습니다.");
+    }
+  };
+
+  const handleDeleteInquiry = async (id: number) => {
+    if (!confirm("이 문의를 삭제하시겠습니까? 복구할 수 없습니다.")) return;
+    try {
+      await api.delete(`/api/admin/inquiries/${id}`);
+      setInquiries((prev) => prev.filter((q) => q.id !== id));
+      if (expanded === id) setExpanded(null);
+    } catch {
+      alert("문의 삭제에 실패했습니다.");
+    }
+  };
+
+  const startEdit = (q: Inquiry) => {
+    setAnswerEditing(q.id);
+    setAnswerDraft((prev) => ({ ...prev, [q.id]: q.answer ?? "" }));
+  };
+
+  const cancelEdit = (id: number) => {
+    setAnswerEditing(null);
+    setAnswerDraft((prev) => { const next = { ...prev }; delete next[id]; return next; });
   };
 
   const filtered = filterStatus === "전체"
@@ -90,21 +138,25 @@ export default function AdminInquiriesPage() {
           {filtered.map((q) => {
             const isOpen = expanded === q.id;
             const isAnswered = q.status === "답변완료";
+            const isEditingAnswer = answerEditing === q.id;
+            const draft = answerDraft[q.id] ?? "";
             return (
               <div key={q.id} className="kf-admin-order-card">
                 {/* 헤더 행 */}
-                <button
-                  className="w-full flex items-start justify-between gap-3 text-left"
-                  onClick={() => setExpanded(isOpen ? null : q.id)}
-                >
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 min-w-0">
-                    <span className="text-xs" style={{ color: "#64748b" }}>#{q.id}</span>
-                    <span className={TYPE_COLORS[q.type] ?? "kf-badge-gray"}>{q.type}</span>
-                    <span className="text-sm font-semibold truncate max-w-xs" style={{ color: "#1f2430" }}>
-                      {q.content.length > 60 ? q.content.slice(0, 60) + "…" : q.content}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
+                <div className="w-full flex items-start justify-between gap-3">
+                  <button
+                    className="flex-1 flex items-start gap-3 text-left min-w-0"
+                    onClick={() => setExpanded(isOpen ? null : q.id)}
+                  >
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 min-w-0 flex-1">
+                      <span className="text-xs" style={{ color: "#64748b" }}>#{q.id}</span>
+                      <span className={TYPE_COLORS[q.type] ?? "kf-badge-gray"}>{q.type}</span>
+                      <span className="text-sm font-semibold truncate max-w-xs" style={{ color: "#1f2430" }}>
+                        {q.content.length > 60 ? q.content.slice(0, 60) + "…" : q.content}
+                      </span>
+                    </div>
+                  </button>
+                  <div className="flex items-center gap-2 shrink-0">
                     <span
                       className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                         isAnswered
@@ -114,43 +166,140 @@ export default function AdminInquiriesPage() {
                     >
                       {q.status}
                     </span>
-                    <span className="text-xs" style={{ color: "#64748b" }}>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDeleteInquiry(q.id); }}
+                      title="문의 삭제"
+                      className="rounded-lg p-1.5 transition-colors"
+                      style={{ color: "#ef4444", background: "rgba(239,68,68,0.07)" }}
+                    >
+                      <FiTrash2 size={14} />
+                    </button>
+                    <button
+                      className="text-xs px-1"
+                      style={{ color: "#64748b" }}
+                      onClick={() => setExpanded(isOpen ? null : q.id)}
+                    >
                       {isOpen ? "▲" : "▼"}
-                    </span>
+                    </button>
                   </div>
-                </button>
+                </div>
 
                 {/* 펼침 상세 */}
                 {isOpen && (
                   <div className="mt-4 pt-4 kf-divider">
+                    {/* 메타 정보 */}
                     <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs mb-3" style={{ color: "#4b5563" }}>
-                      <span>작성자: <strong style={{ color: "#1f2430" }}>{q.userName ?? "비회원"}</strong></span>
-                      <span>이메일: <strong style={{ color: "#1f2430" }}>{q.email ?? "—"}</strong></span>
+                      <span>
+                        작성자: <strong style={{ color: "#1f2430" }}>{q.userName ?? "비회원"}</strong>
+                        {q.userEmail && (
+                          <span style={{ color: "#64748b" }}> ({q.userEmail})</span>
+                        )}
+                      </span>
+                      {q.email
+                        ? <span>이메일: <strong style={{ color: "#1f2430" }}>{q.email}</strong></span>
+                        : q.phone
+                          ? <span>전화번호: <strong style={{ color: "#1f2430" }}>{q.phone}</strong></span>
+                          : <span>연락처: <strong style={{ color: "#1f2430" }}>—</strong></span>
+                      }
                       <span>접수일: <strong style={{ color: "#1f2430" }}>{q.createdAt?.replace("T", " ").slice(0, 16)}</strong></span>
                     </div>
+
+                    {/* 문의 내용 */}
                     <p className="text-sm leading-relaxed p-3 rounded-lg mb-4"
                       style={{ background: "rgba(109,94,252,0.04)", color: "#1f2430", border: "1px solid rgba(109,94,252,0.08)" }}>
                       {q.content}
                     </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleStatusChange(q.id, "ANSWERED")}
-                        disabled={isAnswered}
-                        className={`kf-admin-btn-primary rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
-                          isAnswered ? "opacity-40 cursor-not-allowed pointer-events-none" : ""
-                        }`}
-                      >
-                        답변완료 처리
-                      </button>
-                      <button
-                        onClick={() => handleStatusChange(q.id, "PENDING")}
-                        disabled={!isAnswered}
-                        className={`kf-admin-btn-secondary rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
-                          !isAnswered ? "opacity-40 cursor-not-allowed pointer-events-none" : ""
-                        }`}
-                      >
-                        접수중으로 되돌리기
-                      </button>
+
+                    {/* 답변 영역 */}
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-semibold" style={{ color: "#6d5efc" }}>관리자 답변</span>
+                        {q.answer && !isEditingAnswer && (
+                          <span className="text-xs" style={{ color: "#94a3b8" }}>
+                            {q.answeredAt?.replace("T", " ").slice(0, 16)}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* 기존 답변 표시 (편집 모드 아닐 때) */}
+                      {q.answer && !isEditingAnswer && (
+                        <div className="p-3 rounded-lg mb-2"
+                          style={{ background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.15)", color: "#1f2430" }}>
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap">{q.answer}</p>
+                        </div>
+                      )}
+
+                      {/* 답변 textarea (신규 작성 또는 편집 모드) */}
+                      {(!q.answer || isEditingAnswer) && (
+                        <textarea
+                          rows={4}
+                          placeholder="답변 내용을 입력하세요..."
+                          value={draft}
+                          onChange={(e) =>
+                            setAnswerDraft((prev) => ({ ...prev, [q.id]: e.target.value }))
+                          }
+                          className="w-full rounded-lg text-sm p-3 resize-none"
+                          style={{
+                            background: "rgba(255,255,255,0.9)",
+                            border: "1.5px solid rgba(109,94,252,0.25)",
+                            color: "#1f2430",
+                            outline: "none",
+                          }}
+                        />
+                      )}
+
+                      {/* 답변 액션 버튼 */}
+                      <div className="flex justify-end gap-2 mt-2">
+                        {/* 신규 작성: 오른쪽 끝 저장 버튼 */}
+                        {!q.answer && (
+                          <button
+                            onClick={() => handleSaveAnswer(q.id)}
+                            disabled={saving === q.id}
+                            className="rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors"
+                            style={{ background: "rgba(20,184,166,0.10)", color: "#0d9488", border: "1px solid rgba(20,184,166,0.3)" }}
+                          >
+                            {saving === q.id ? "저장 중..." : "저장"}
+                          </button>
+                        )}
+                        {/* 기존 답변 있을 때: 수정/삭제 버튼 */}
+                        {q.answer && !isEditingAnswer && (
+                          <>
+                            <button
+                              onClick={() => handleDeleteAnswer(q.id)}
+                              className="rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors"
+                              style={{ background: "rgba(239,68,68,0.08)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
+                            >
+                              삭제
+                            </button>
+                            <button
+                              onClick={() => startEdit(q)}
+                              className="rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors"
+                              style={{ background: "rgba(20,184,166,0.10)", color: "#0d9488", border: "1px solid rgba(20,184,166,0.3)" }}
+                            >
+                              수정
+                            </button>
+                          </>
+                        )}
+                        {/* 수정 모드: 취소/저장 버튼 */}
+                        {q.answer && isEditingAnswer && (
+                          <>
+                            <button
+                              onClick={() => cancelEdit(q.id)}
+                              className="kf-admin-btn-secondary rounded-lg px-4 py-2 text-xs font-semibold"
+                            >
+                              취소
+                            </button>
+                            <button
+                              onClick={() => handleSaveAnswer(q.id)}
+                              disabled={saving === q.id}
+                              className="rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors"
+                              style={{ background: "rgba(20,184,166,0.10)", color: "#0d9488", border: "1px solid rgba(20,184,166,0.3)" }}
+                            >
+                              {saving === q.id ? "저장 중..." : "저장"}
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
