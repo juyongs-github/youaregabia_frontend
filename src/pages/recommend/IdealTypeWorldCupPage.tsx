@@ -1,7 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { FaCheck } from "react-icons/fa";
 import "../../styles/IdealTypeWorldCupPage.css";
 import "../../styles/IdealTypeWorldCupPage.kfandom.css";
 import { playlistApi } from "../../api/playlistApi";
+import { usePlayer } from "../../contexts/PlayerContext";
 import type {
   SongDTO,
   Song,
@@ -32,12 +35,20 @@ function normalizeSongDTO(dto: SongDTO): Song {
 // DB에서 랜덤으로 N곡을 가져와 Song[] 반환
 // ============================================================
 async function fetchRandomSongs(count: number): Promise<Song[]> {
-  const res = await fetch(`${BASE_URL}/api/randoms?limit=${count}`);
+  const res = await fetch(`${BASE_URL}/api/randoms?limit=${count * 3}`);
   if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
   const data: SongDTO[] = await res.json();
-  if (data.length < count)
-    throw new Error(`곡이 부족합니다. (DB 보유: ${data.length} / 필요: ${count})`);
-  return data.map(normalizeSongDTO);
+  const filtered = data.filter((dto) => {
+    const t = dto.trackName.toLowerCase();
+    if (/노래방|반주|mr버전|m\/r/.test(t)) return false;
+    if (/\bmr\b/.test(t)) return false;
+    if (/instrumental/.test(t)) return false;
+    if (/cover/.test(t)) return false;
+    return true;
+  });
+  if (filtered.length < count)
+    throw new Error(`곡이 부족합니다. (DB 보유: ${filtered.length} / 필요: ${count})`);
+  return filtered.slice(0, count).map(normalizeSongDTO);
 }
 
 // 배열 무작위 섞기 — 다음 라운드 대진 랜덤 배치용
@@ -75,6 +86,13 @@ function useAudio(): AudioState {
   const [progress, setProgress] = useState<Record<number, number>>({});
   // 곡별 재생 위치(초) — 이어듣기 시 audio.currentTime 복원용 (리렌더 불필요 → useRef)
   const currentTimeRef = useRef<Record<number, number>>({});
+  // 볼륨 0~1
+  const [volume, setVolumeState] = useState<number>(0.5);
+
+  const setVolume = useCallback((v: number) => {
+    setVolumeState(v);
+    if (audioRef.current) audioRef.current.volume = v;
+  }, []);
 
   const play = useCallback(
     (song: Song) => {
@@ -92,7 +110,7 @@ function useAudio(): AudioState {
       if (audioRef.current) audioRef.current.pause();
 
       const audio = new Audio(song.previewUrl);
-      audio.volume = 0.7;
+      audio.volume = volume;
 
       // 이전에 재생한 적 있으면 저장된 위치부터 이어서 재생
       if (currentTimeRef.current[song.id]) {
@@ -117,7 +135,7 @@ function useAudio(): AudioState {
         delete currentTimeRef.current[song.id];
       };
     },
-    [playing]
+    [playing, volume]
   );
 
   // 곡 선택 또는 라운드 전환 시 호출 — 오디오 즉시 정지 + 전체 초기화
@@ -137,7 +155,7 @@ function useAudio(): AudioState {
     []
   );
 
-  return { playing, progress, play, stop };
+  return { playing, progress, volume, setVolume, play, stop };
 }
 
 // ============================================================
@@ -156,7 +174,11 @@ function SongCard({ song, onChoose, isChosen, isLoser, audio }: SongCardProps) {
   return (
     <div className={cardClass}>
       {/* 앨범 커버 영역 */}
-      <div className="wc-card-art">
+      <div
+        className="wc-card-art"
+        onClick={!disabled && song.previewUrl ? (e) => { e.stopPropagation(); audio.play(song); } : undefined}
+        style={!disabled && song.previewUrl ? { cursor: "pointer" } : undefined}
+      >
         {/* 커버 이미지 — 로드 실패 시 fallback */}
         {!imgError && song.coverUrl ? (
           <img
@@ -176,7 +198,7 @@ function SongCard({ song, onChoose, isChosen, isLoser, audio }: SongCardProps) {
         <div className="wc-card-overlay" />
 
         {/* 선택된 카드에만 표시 */}
-        {isChosen && <div className="wc-card-chosen-badge">✓ 선택</div>}
+        {isChosen && <div className="wc-card-chosen-badge"><FaCheck size={11} /> 선택</div>}
 
         {/* 미리듣기 버튼 — 탈락/선택 카드에는 미표시 */}
         {!isLoser && song.previewUrl && !isChosen && (
@@ -316,7 +338,7 @@ function PlaylistModal({ selectedSongs, onClose, onSuccess }: PlaylistModalProps
     }
   };
 
-  return (
+  return createPortal(
     <div className="wc-modal-backdrop" onClick={onClose}>
       <div className="wc-modal" onClick={(e) => e.stopPropagation()}>
         {/* ── STEP 1: 플레이리스트 선택 ── */}
@@ -355,7 +377,7 @@ function PlaylistModal({ selectedSongs, onClose, onSuccess }: PlaylistModalProps
                   )}
                   <span className="wc-modal-playlist-title">{pl.title}</span>
                   {/* 선택된 플레이리스트에 체크 표시 */}
-                  {selectedPlaylistId === pl.id && <span className="wc-modal-check">✓</span>}
+                  {selectedPlaylistId === pl.id && <span className="wc-modal-check"><FaCheck size={11} /></span>}
                 </li>
               ))}
             </ul>
@@ -435,7 +457,8 @@ function PlaylistModal({ selectedSongs, onClose, onSuccess }: PlaylistModalProps
           </>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -461,6 +484,11 @@ export default function IdealTypeWorldCupPage() {
   const [checkedSongIds, setCheckedSongIds] = useState<Set<number>>(new Set()); // 체크된 곡 id Set
   const [showModal, setShowModal] = useState(false); // 플레이리스트 모달 표시 여부
   const [addSuccess, setAddSuccess] = useState(false); // 추가 성공 메시지 표시 여부
+
+  const { stop: stopPlayer } = usePlayer();
+  useEffect(() => {
+    stopPlayer();
+  }, []);
 
   const audio = useAudio();
 
@@ -660,7 +688,21 @@ export default function IdealTypeWorldCupPage() {
               </div>
             </div>
 
-            <p className="wc-game-hint">▶ : 30초 미리듣기</p>
+            <div className="wc-game-bottom">
+              <p className="wc-game-hint">▶ : 30초 미리듣기</p>
+              <div className="wc-volume">
+                <span className="wc-volume-icon">{audio.volume === 0 ? "🔇" : "🔊"}</span>
+                <input
+                  type="range"
+                  className="wc-volume-slider"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={audio.volume}
+                  onChange={(e) => audio.setVolume(Number(e.target.value))}
+                />
+              </div>
+            </div>
           </div>
         )}
 
@@ -745,7 +787,7 @@ export default function IdealTypeWorldCupPage() {
 
                 {/* 추가 성공 메시지 */}
                 {addSuccess && (
-                  <p className="wc-win-add-success">✓ 플레이리스트에 추가되었습니다</p>
+                  <p className="wc-win-add-success"><FaCheck size={11} /> 플레이리스트에 추가되었습니다</p>
                 )}
 
                 <ul className="wc-win-list-items">
@@ -775,7 +817,7 @@ export default function IdealTypeWorldCupPage() {
                           <div
                             className={`wc-win-checkbox${isChecked ? " wc-win-checkbox--checked" : ""}`}
                           >
-                            {isChecked && "✓"}
+                            {isChecked && <FaCheck size={10} />}
                           </div>
                           <span className="wc-win-rank">{rank}</span>
                           {item.song.coverUrl ? (

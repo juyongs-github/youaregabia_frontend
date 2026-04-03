@@ -173,7 +173,7 @@ const GameResult = ({
                 {userEmail && selectedPlaylistId && (
                   <div className="flex-shrink-0 ml-4">
                     {isAdded ? (
-                      <span className="flex items-center gap-1 text-[13px] text-green-600 font-black bg-green-100 px-4 py-2 rounded-xl">
+                      <span className="flex items-center gap-1 text-[13px] text-[#6d5efc] font-black bg-[rgba(109,94,252,0.1)] px-4 py-2 rounded-xl">
                         추가됨 ✓
                       </span>
                     ) : isInPlaylist ? (

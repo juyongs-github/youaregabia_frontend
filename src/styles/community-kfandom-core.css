@@ -29,7 +29,7 @@
 }
 
 .kf-community-page {
-  min-height: 100vh;
+  min-height: 100%;
   padding: 36px 18px 60px;
   color: var(--kf-text-main);
   position: relative;
