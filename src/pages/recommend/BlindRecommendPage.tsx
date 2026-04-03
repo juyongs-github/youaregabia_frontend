@@ -282,7 +282,7 @@ const BlindRecommendPage = () => {
             >
               <div className="text-left">
                 <p className="font-black text-xl text-[#2f3863] group-hover:text-[#6d5efc] transition-colors">
-                  {mode === "infinite" ? "계속 모드" : `${mode}곡 모드`}
+                  {mode === "infinite" ? "무한 모드" : `${mode}곡 모드`}
                 </p>
                 <p className="text-sm font-bold text-slate-400 mt-1">
                   {mode === "infinite" ? "끝없이 새로운 취향 발견" : `${mode}곡의 큐레이션`}
@@ -307,7 +307,7 @@ const BlindRecommendPage = () => {
             {totalMode === "infinite" ? "♾️" : totalMode === 5 ? "🎯" : "🔥"}
           </div>
           <h2 className="text-3xl font-black text-[#6d5efc]">
-            {totalMode === "infinite" ? "계속 모드" : `${totalMode}곡 모드`}
+            {totalMode === "infinite" ? "무한 모드" : `${totalMode}곡 모드`}
           </h2>
           <p className="text-slate-500 font-bold mt-2">당신의 귀를 믿어보세요!</p>
         </div>

@@ -43,7 +43,7 @@ const BoardDetailPage = () => {
     setReplyPage(page);
   };
 
-  const { play } = usePlayer(); // 2. play 함수 가져오기
+  const { play, song: currentSong } = usePlayer(); // 2. play 함수 가져오기
 
   useEffect(() => {
     if (boardId && !hasFetched.current) {
@@ -242,6 +242,8 @@ const BoardDetailPage = () => {
             <div className="flex justify-between text-sm" style={{ color: "var(--kf-text-sub)" }}>
               <span>
                 {board.writer} | {new Date(board.createdAt).toLocaleDateString()}
+                {/* 장르가 Free가 아닐 때만 세로바와 함께 표시 */}
+                {board.boardGenre !== "FREE" && ` | ${board.boardGenre}`}
               </span>
               <span>조회 {board.viewCount}</span>
             </div>
@@ -263,7 +265,11 @@ const BoardDetailPage = () => {
                 style={{ borderTop: "1px solid var(--kf-border)" }}
               >
                 <button
-                  onClick={() => navigate("/community/share")}
+                  onClick={() =>
+                    board.boardGenre === "FREE"
+                      ? navigate("/recommend/critic")
+                      : navigate("/community/share")
+                  }
                   className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all"
                   style={{
                     background: "rgba(109,94,252,0.08)",
@@ -271,7 +277,7 @@ const BoardDetailPage = () => {
                     border: "1px solid rgba(109,94,252,0.18)",
                   }}
                 >
-                  📋 목록
+                  목록
                 </button>
                 <div className="flex items-center gap-4">
                   {isMyBoard && (
@@ -503,6 +509,8 @@ const BoardDetailPage = () => {
                           const isInPlaylist = playlistSongIds.has(song.songId);
                           const isDisabled = isAlreadyAdded || isInPlaylist;
                           const isSelected = selectedSongIds.has(song.songId);
+                          // 추가: 현재 재생 중인지 확인
+                          const isPlaying = currentSong?.id === song.songId;
 
                           return (
                             <li
@@ -510,11 +518,17 @@ const BoardDetailPage = () => {
                               className={`flex items-center gap-3 px-3 py-2 transition-colors hover:bg-black/5 cursor-pointer`}
                               style={{
                                 opacity: isShareMode && isDisabled ? 0.45 : 1,
-                                background:
-                                  isSelected && isShareMode && !isDisabled
+                                // 재생 중일 때 배경색 변경 (예: 브랜드 색상의 아주 연한 버전)
+                                background: isPlaying
+                                  ? "rgba(109,94,252,0.12)"
+                                  : isSelected && isShareMode && !isDisabled
                                     ? "rgba(109,94,252,0.06)"
                                     : "transparent",
                                 borderBottom: "1px solid var(--kf-border)",
+                                // 재생 중일 때 왼쪽 보더 포인트 강조 (선택 사항)
+                                borderLeft: isPlaying
+                                  ? "4px solid var(--kf-brand)"
+                                  : "4px solid transparent",
                               }}
                               onClick={() => handleSongClick(song)} // 4. 클릭 시 핸들러 실행
                             >
@@ -553,7 +567,8 @@ const BoardDetailPage = () => {
                                   style={{
                                     fontSize: "13px",
                                     fontWeight: 700,
-                                    color: "var(--kf-text-main)",
+                                    // 재생 중일 때 텍스트 색상 변경
+                                    color: isPlaying ? "var(--kf-brand)" : "var(--kf-text-main)",
                                     overflow: "hidden",
                                     textOverflow: "ellipsis",
                                     whiteSpace: "nowrap",

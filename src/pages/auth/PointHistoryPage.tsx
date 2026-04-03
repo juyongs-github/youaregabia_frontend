@@ -108,6 +108,7 @@ const PointHistoryPage = () => {
   const [likeRanking, setLikeRanking] = useState<UserRankingDto[]>([]);
   const [pointRanking, setPointRanking] = useState<UserRankingDto[]>([]);
   const [rankingLoaded, setRankingLoaded] = useState(false); // 중복 호출 방지
+  const [showGradeInfo, setShowGradeInfo] = useState(false);
 
   const user = useSelector((state: RootState) => state.auth.user);
 
@@ -168,24 +169,91 @@ const PointHistoryPage = () => {
   return (
     <div className="kf-expansion-page kf-point-history">
       {/* 등급 요약 카드 */}
-      <div className="mb-6 rounded-xl border border-neutral-700 bg-neutral-900 px-6 py-5 shadow-lg">
+      <div className="mb-6 rounded-xl border border-neutral-700 bg-neutral-900/50 px-6 py-5 shadow-lg backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Current Grade</p>
-            <p
-              className={`text-2xl font-black mt-1 ${GRADE_CONFIG[user?.grade ?? "ENSEMBLE"].color}`}
-            >
-              {user?.grade ?? "ENSEMBLE"}
+            <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-bold">
+              Current Grade
             </p>
+            <div className="flex items-center gap-3 mt-1">
+              <p
+                className={`text-3xl font-black tracking-tighter ${GRADE_CONFIG[user?.grade ?? "ENSEMBLE"].color}`}
+              >
+                {user?.grade ?? "ENSEMBLE"}
+              </p>
+              {/* 텍스트 대신 아이콘 버튼으로 변경 */}
+              <button
+                onClick={() => setShowGradeInfo((prev) => !prev)}
+                className={`p-1 rounded-full hover:bg-neutral-800 transition-all duration-300 ${
+                  showGradeInfo ? "rotate-180 text-indigo-400" : "text-gray-500"
+                }`}
+                aria-label="등급 상세 보기"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+            </div>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">My Points</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-bold">
+              My Points
+            </p>
             <p className="text-2xl font-black text-indigo-400 mt-1">
               {(user?.totalPoint ?? 0).toLocaleString()}{" "}
-              <span className="text-sm font-normal text-gray-400">P</span>
+              <span className="text-sm font-normal text-gray-500">P</span>
             </p>
           </div>
         </div>
+
+        {/* 등급 안내 펼침 영역 */}
+        {showGradeInfo && (
+          <div className="mt-5 pt-5 border-t border-neutral-800 space-y-2 text-[11px] text-gray-400 animate-fadeIn">
+            <p className="font-bold text-gray-400 mb-3 px-1">등급 구간 안내 (누적 포인트)</p>
+            {[
+              { grade: "ENSEMBLE", range: "0 ~ 999 P" },
+              { grade: "SESSION", range: "1,000 ~ 4,999 P" },
+              { grade: "SOLOIST", range: "5,000 ~ 9,999 P" },
+              { grade: "MAESTRO", range: "10,000 ~ 19,999 P" },
+              { grade: "LEGEND", range: "20,000 P 이상" },
+            ].map(({ grade, range }) => {
+              const isCurrentGrade = user?.grade === grade;
+              return (
+                <div
+                  key={grade}
+                  className={`flex justify-between items-center px-3 py-2 rounded-lg border transition-all ${
+                    isCurrentGrade
+                      ? "border-indigo-500/40 bg-indigo-500/5 text-indigo-200 shadow-[0_0_15px_rgba(99,102,241,0.1)]"
+                      : "border-transparent text-gray-500"
+                  }`}
+                >
+                  <span
+                    className={`font-bold tracking-tight ${GRADE_CONFIG[grade as keyof typeof GRADE_CONFIG].color}`}
+                  >
+                    {grade}
+                  </span>
+                  <span className={isCurrentGrade ? "font-semibold text-indigo-300/80" : ""}>
+                    {range}
+                  </span>
+                </div>
+              );
+            })}
+            <p className="mt-4 px-1 text-[10px] text-neutral-600 leading-relaxed italic">
+              * 등급은 누적 획득 포인트를 기준으로 산정되며, 포인트를 사용해도 하락하지 않습니다.
+            </p>
+          </div>
+        )}
+
         <div className="mt-6">
           <div className="flex justify-between text-xs mb-2">
             <span className="text-gray-400">Next Level Progress</span>
