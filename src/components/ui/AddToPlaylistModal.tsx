@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { FaCheck } from "react-icons/fa";
 import { playlistApi } from "../../api/playlistApi";
 import type { Playlist } from "../../types/playlist";
 import type { Song } from "./SongListItem";
@@ -99,7 +100,7 @@ function AddToPlaylistModal({ song, onClose, onSuccess }: Props) {
                     <div className="wc-modal-thumb wc-modal-thumb--fallback">♪</div>
                   )}
                   <span className="wc-modal-playlist-title">{pl.title}</span>
-                  {selectedPlaylistId === pl.id && <span className="wc-modal-check">✓</span>}
+                  {selectedPlaylistId === pl.id && <span className="wc-modal-check"><FaCheck size={11} /></span>}
                 </li>
               ))}
             </ul>

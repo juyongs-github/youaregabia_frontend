@@ -176,19 +176,19 @@ function HomePage() {
 
   const menuItems: Record<string, { icon: React.ReactNode; label: string; path: string }[]> = {
     recommend: [
-      { icon: <FaEyeSlash size={20} />, label: "블라인드 추천", path: "/recommend/blind" },
-      { icon: <FaTrophy size={20} />, label: "월드컵 추천", path: "/recommend/worldcup" },
-      { icon: <FaPen size={20} />, label: "음악 평론", path: "/recommend/critic" },
+      { icon: <FaEyeSlash size={28} />, label: "블라인드 추천", path: "/recommend/blind" },
+      { icon: <FaTrophy size={28} />, label: "월드컵 추천", path: "/recommend/worldcup" },
+      { icon: <FaPen size={28} />, label: "음악 평론", path: "/recommend/critic" },
     ],
     community: [
-      { icon: <FaShareAlt size={20} />, label: "플레이리스트 공유", path: "/community/share" },
-      { icon: <FaHandshake size={20} />, label: "공동 제작", path: "/community/collabo" },
-      { icon: <FaComments size={20} />, label: "자유게시판", path: "/community/free" },
+      { icon: <FaShareAlt size={28} />, label: "플레이리스트 공유", path: "/community/share" },
+      { icon: <FaHandshake size={28} />, label: "공동 제작", path: "/community/collabo" },
+      { icon: <FaComments size={28} />, label: "자유게시판", path: "/community/free" },
     ],
     game: [
-      { icon: <FaMusic size={20} />, label: "노래 맞추기", path: "/game/music-quiz" },
-      { icon: <FaCompactDisc size={20} />, label: "앨범 맞추기", path: "/game/album-quiz" },
-      { icon: <FaClone size={20} />, label: "카드 맞추기", path: "/game/card-match" },
+      { icon: <FaMusic size={28} />, label: "노래 맞추기", path: "/game/music-quiz" },
+      { icon: <FaCompactDisc size={28} />, label: "앨범 맞추기", path: "/game/album-quiz" },
+      { icon: <FaClone size={28} />, label: "카드 맞추기", path: "/game/card-match" },
     ],
   };
 
@@ -297,12 +297,12 @@ function HomePage() {
                 }}
                 className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
               >
-                <FaTimes size={20} />
+                <FaTimes size={28} />
               </button>
             ) : (
               <FaSearch
                 className="absolute text-gray-400 right-6 top-1/2 -translate-y-1/2"
-                size={20}
+                size={28}
               />
             )}
           </div>

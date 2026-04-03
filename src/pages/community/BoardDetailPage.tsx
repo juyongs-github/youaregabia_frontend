@@ -524,14 +524,7 @@ const BoardDetailPage = () => {
                                   checked={isSelected}
                                   disabled={isDisabled}
                                   readOnly
-                                  style={{
-                                    width: "16px",
-                                    height: "16px",
-                                    flexShrink: 0,
-                                    accentColor: "var(--kf-brand)",
-                                    minWidth: "16px",
-                                    maxWidth: "16px",
-                                  }}
+                                  className="kf-share-checkbox"
                                   onClick={(e) => e.stopPropagation()}
                                 />
                               )}
@@ -583,8 +576,8 @@ const BoardDetailPage = () => {
                                     padding: "2px 8px",
                                     borderRadius: "999px",
                                     flexShrink: 0,
-                                    color: "#178f74",
-                                    background: "rgba(56,199,170,0.12)",
+                                    color: "#6d5efc",
+                                    background: "rgba(109,94,252,0.1)",
                                     whiteSpace: "nowrap",
                                   }}
                                 >

@@ -7,6 +7,19 @@
   padding: 0 20px 12px;
 }
 
+@media (max-width: 1400px) {
+  body:has(.home) .kf-player-wrap {
+    bottom: 81px;
+    padding: 0 20px 0;
+  }
+
+  body:has(.home .icon-popup) .kf-player-wrap {
+    bottom: calc(81px + 80px);
+    padding: 0 20px 0;
+  }
+}
+
+
 .kf-player {
   display: flex;
   align-items: center;

@@ -33,6 +33,8 @@ export type Screen = "start" | "game" | "result";
 export interface AudioState {
   playing: number | null; // 현재 재생 중인 곡의 id (null이면 미재생)
   progress: Record<number, number>; // 곡별 재생 진행률 { [songId]: 0~100 } — 이어듣기용
+  volume: number; // 0~1
+  setVolume: (v: number) => void;
   play: (song: Song) => void; // 재생 / 일시정지 토글
   stop: () => void; // 즉시 정지 + 전체 초기화
 }

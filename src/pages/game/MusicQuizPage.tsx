@@ -27,11 +27,24 @@ const MusicQuizPage = () => {
   const loadSongs = async () => {
     setIsLoading(true);
     const results: Song[] = [];
-    const promises = Array.from({ length: TOTAL }, () =>
+    const promises = Array.from({ length: TOTAL * 3 }, () =>
       api.get("/api/random").then((res) => results.push(res.data))
     );
     await Promise.all(promises);
-    setSongs(results);
+    const filtered = results.filter((s) => {
+      const title = s.trackName.replace(/\(.*?\)|\[.*?\]/g, "").trim();
+      const titleLower = s.trackName.toLowerCase();
+      // 초성만으로 이루어진 곡 제외
+      if (/^[ㄱ-ㅎ\s]+$/.test(title)) return false;
+      // 일본어(히라가나·카타카나·한자) 포함 곡 제외
+      if (/[\u3040-\u30ff\u4e00-\u9faf]/.test(title)) return false;
+      // 노래방 반주/MR/Instrumental 제외
+      if (/노래방|반주|mr버전|m\/r/.test(titleLower)) return false;
+      if (/\bmr\b/.test(titleLower)) return false;
+      if (/instrumental/.test(titleLower)) return false;
+      return true;
+    });
+    setSongs(filtered.slice(0, TOTAL));
     setIsLoading(false);
   };
 
@@ -62,14 +75,53 @@ const MusicQuizPage = () => {
     }
   }, [currentIndex, feedback, phase, started, songs]);
 
-  const normalize = (str: string) => str.toLowerCase().replace(/\s/g, "");
+  // 괄호 안 내용 제거 후 특수문자·공백 제거 + 소문자
+  const normalize = (str: string) =>
+    str
+      .replace(/\(.*?\)/g, "")
+      .replace(/\[.*?\]/g, "")
+      .replace(/「.*?」/g, "")
+      .replace(/【.*?】/g, "")
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .replace(/[^\w가-힣\u3040-\u30ff\u4e00-\u9faf]/g, "");
+
+  // 레벤슈타인 거리
+  const levenshtein = (a: string, b: string): number => {
+    const dp = Array.from({ length: a.length + 1 }, (_, i) =>
+      Array.from({ length: b.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
+    );
+    for (let i = 1; i <= a.length; i++)
+      for (let j = 1; j <= b.length; j++)
+        dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    return dp[a.length][b.length];
+  };
+
+  const checkAnswer = (answer: string, userInput: string): boolean => {
+    return checkAnswerBase(answer, userInput);
+  };
+
+  const checkAnswerBase = (answer: string, userInput: string): boolean => {
+    // 한 글자 예외: 완전 일치만 허용
+    if (answer.length === 1) return answer === userInput;
+
+    // 최소 길이 조건: 입력이 정답의 50% 이상이어야 함
+    if (userInput.length < Math.ceil(answer.length * 0.5)) return false;
+
+    // 포함 관계
+    if (answer.includes(userInput) || userInput.includes(answer)) return true;
+
+    // 레벤슈타인: 정답 길이의 20% 이하 오차 허용 (최대 2자)
+    const maxDist = Math.min(2, Math.floor(answer.length * 0.2));
+    return levenshtein(answer, userInput) <= maxDist;
+  };
 
   const handleSubmit = () => {
     if (!currentSong || !input.trim()) return;
 
     const answer = normalize(currentSong.trackName);
     const userInput = normalize(input);
-    const isCorrect = answer.includes(userInput) || userInput.includes(answer);
+    const isCorrect = checkAnswer(answer, userInput);
 
     if (isCorrect) {
       let gained = 0;
@@ -314,7 +366,7 @@ const MusicQuizPage = () => {
           <p>
             🔤 힌트 2: 제목은{" "}
             <span className="font-semibold" style={{ color: "var(--kf-brand)" }}>
-              {currentSong.trackName.length}글자
+              {normalize(currentSong.trackName).length}글자
             </span>{" "}
             입니다.
           </p>

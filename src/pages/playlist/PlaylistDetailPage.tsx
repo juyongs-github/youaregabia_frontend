@@ -5,6 +5,7 @@ import { playlistApi } from "../../api/playlistApi";
 import "../../styles/MyplaylistPage.css";
 import "../../styles/PlaylistDetailPage.css";
 import { FaPlay, FaPlus, FaTrash } from "react-icons/fa";
+import { GrFormPrevious } from "react-icons/gr";
 import { BsThreeDots } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import type { Song } from "../../components/ui/SongListItem";
@@ -226,6 +227,15 @@ function PlaylistDetailPage() {
       {/* ================= 왼쪽 패널 ================= */}
       <aside className="playlist-left">
         <div className={`playlist-center ${isEditMode ? "editing" : ""}`}>
+          <button
+            className="flex items-center self-start gap-2 px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
+            style={{ background: "rgba(255,255,255,0.7)", border: "1px solid rgba(88,95,138,0.15)", color: "#677086" }}
+            onClick={() => navigate("/playlist/me")}
+          >
+            <GrFormPrevious size={18} />
+            <span>목록</span>
+          </button>
+
           <div className="playlist-cover-large">
             {preview ? (
               <img src={preview} alt="playlist cover" />
