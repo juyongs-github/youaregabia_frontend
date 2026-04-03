@@ -230,12 +230,12 @@ function Header({ showSearch = true, onMenuClick }: { showSearch?: boolean; onMe
           )}
 
           {/* 프로필 버튼 */}
-          <button className="kf-header__profileBtn" aria-label="프로필" onClick={handleClick}>
+          <button className={`kf-header__profileBtn${user?.imgUrl ? " kf-header__profileBtn--has-img" : ""}`} aria-label="프로필" onClick={handleClick}>
             {user?.imgUrl ? (
               <img
                 src={`${import.meta.env.VITE_API_BASE_URL ?? ""}${user.imgUrl}`}
                 alt="프로필"
-                style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover" }}
+                style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", background: "rgba(109,94,252,0.08)" }}
               />
             ) : user?.name ? (
               user.name[0]

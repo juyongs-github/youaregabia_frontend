@@ -43,7 +43,9 @@ function RegisterForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 이메일 상태: idle(입력 중) | checking(검사 중) | valid(사용 가능) | duplicate(중복됨)
-  const [emailStatus, setEmailStatus] = useState<"idle" | "checking" | "valid" | "duplicate">("idle");
+  const [emailStatus, setEmailStatus] = useState<"idle" | "checking" | "valid" | "duplicate">(
+    "idle"
+  );
   const emailTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestEmailRef = useRef("");
 
@@ -76,7 +78,7 @@ function RegisterForm() {
   };
 
   // 비밀번호 조건
-  const pwConditionResults = PW_CONDITIONS.map(c => c.test(form.password));
+  const pwConditionResults = PW_CONDITIONS.map((c) => c.test(form.password));
   const isPasswordValid = pwConditionResults.every(Boolean);
   const isPasswordMatch = form.password && form.password === form.passwordcheck;
   const isEmailValid = emailStatus === "valid";
@@ -97,9 +99,12 @@ function RegisterForm() {
   };
 
   const getFieldClass = (name: keyof RegisterFormValues) => {
-    if (name === "passwordcheck" && form.passwordcheck) return isPasswordMatch ? "input-success" : "input-error";
-    if (name === "password" && form.password) return isPasswordValid ? "input-success" : "input-error";
-    if ((name === "name" || name === "birthDate" || name === "phone") && form[name]) return "input-success";
+    if (name === "passwordcheck" && form.passwordcheck)
+      return isPasswordMatch ? "input-success" : "input-error";
+    if (name === "password" && form.password)
+      return isPasswordValid ? "input-success" : "input-error";
+    if ((name === "name" || name === "birthDate" || name === "phone") && form[name])
+      return "input-success";
     return form[name] && !clientErrors[name] ? "input-success" : "";
   };
 
@@ -120,12 +125,12 @@ function RegisterForm() {
 
     if (name === "birthDate") finalValue = formatBirthDate(value);
 
-    setForm(prev => ({ ...prev, [name]: finalValue }));
+    setForm((prev) => ({ ...prev, [name]: finalValue }));
 
     if (name === "email") {
       latestEmailRef.current = finalValue;
       setEmailStatus("idle");
-      setClientErrors(prev => ({ ...prev, email: validateEmailFormat(finalValue) }));
+      setClientErrors((prev) => ({ ...prev, email: validateEmailFormat(finalValue) }));
 
       if (emailTimerRef.current) clearTimeout(emailTimerRef.current);
 
@@ -146,7 +151,7 @@ function RegisterForm() {
   const openAddressSearch = () => {
     new (window as any).daum.Postcode({
       oncomplete: (data: any) => {
-        setForm(prev => ({ ...prev, address: data.address }));
+        setForm((prev) => ({ ...prev, address: data.address }));
         setTimeout(() => detailAddressRef.current?.focus(), 0);
       },
     }).open();
@@ -180,7 +185,7 @@ function RegisterForm() {
 
         {/* 이메일 — 자동 debounce 중복 체크 */}
         <div className="auth-field">
-          <label>Email</label>
+          <label>이메일</label>
           <input
             name="email"
             value={form.email}
@@ -191,9 +196,7 @@ function RegisterForm() {
           {clientErrors.email && emailStatus === "idle" && (
             <p className="auth-message error">{clientErrors.email}</p>
           )}
-          {emailStatus === "checking" && (
-            <p className="auth-message">확인 중...</p>
-          )}
+          {emailStatus === "checking" && <p className="auth-message">확인 중...</p>}
           {emailStatus === "valid" && (
             <p className="auth-message success">사용 가능한 이메일입니다.</p>
           )}
@@ -203,18 +206,32 @@ function RegisterForm() {
         </div>
 
         <div className="auth-field">
-          <label>Name</label>
-          <input name="name" value={form.name} onChange={handleChange} className={getFieldClass("name")} readOnly={!!name} />
+          <label>이름</label>
+          <input
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            className={getFieldClass("name")}
+            readOnly={!!name}
+          />
         </div>
 
         <div className="auth-field">
           <label>생년월일</label>
-          <input name="birthDate" value={form.birthDate} onChange={handleChange} className={getFieldClass("birthDate")} placeholder="YYYY-MM-DD" maxLength={10} readOnly={!!birth} />
+          <input
+            name="birthDate"
+            value={form.birthDate}
+            onChange={handleChange}
+            className={getFieldClass("birthDate")}
+            placeholder="YYYY-MM-DD"
+            maxLength={10}
+            readOnly={!!birth}
+          />
         </div>
 
         {/* 비밀번호 + 실시간 조건 체크 */}
         <div className="auth-field">
-          <label>Password</label>
+          <label>비밀번호</label>
           <input
             name="password"
             type="password"
@@ -234,13 +251,15 @@ function RegisterForm() {
         </div>
 
         <div className="auth-field">
-          <label>Password Check</label>
+          <label>비밀번호 확인</label>
           <input
             name="passwordcheck"
             type="password"
             value={form.passwordcheck}
             onChange={handleChange}
-            className={form.passwordcheck ? (isPasswordMatch ? "input-success" : "input-error") : ""}
+            className={
+              form.passwordcheck ? (isPasswordMatch ? "input-success" : "input-error") : ""
+            }
           />
           {form.passwordcheck && !isPasswordMatch && (
             <p className="auth-message error">비밀번호가 일치하지 않습니다.</p>
@@ -251,20 +270,36 @@ function RegisterForm() {
         </div>
 
         <div className="auth-field">
-          <label>Phone</label>
+          <label>휴대폰</label>
           <div className="phone-row">
             <input name="phone" value={form.phone} readOnly className="input-success" />
-            <button type="button" className="sub-button success" disabled>인증완료</button>
+            <button type="button" className="sub-button success" disabled>
+              인증완료
+            </button>
           </div>
         </div>
 
         <div className="auth-field">
-          <label>Address</label>
+          <label>주소</label>
           <div className="address-row">
-            <input value={form.address} readOnly placeholder="주소" className={form.address ? "input-success" : ""} />
-            <button type="button" className="sub-button" onClick={openAddressSearch}>주소검색</button>
+            <input
+              value={form.address}
+              readOnly
+              placeholder="주소"
+              className={form.address ? "input-success" : ""}
+            />
+            <button type="button" className="sub-button" onClick={openAddressSearch}>
+              주소검색
+            </button>
           </div>
-          <input ref={detailAddressRef} name="detailAddress" value={form.detailAddress} onChange={handleChange} placeholder="상세주소" className={form.detailAddress ? "input-success" : ""} />
+          <input
+            ref={detailAddressRef}
+            name="detailAddress"
+            value={form.detailAddress}
+            onChange={handleChange}
+            placeholder="상세주소"
+            className={form.detailAddress ? "input-success" : ""}
+          />
         </div>
 
         <button type="submit" className="auth-button" disabled={!isFormValid}>

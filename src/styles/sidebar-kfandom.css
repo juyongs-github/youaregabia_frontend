@@ -56,6 +56,13 @@
   font-weight: 900;
   box-shadow: 0 12px 24px rgba(109,94,252,0.22);
   flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.kf-side-brand__mark--has-img {
+  background: rgba(109, 94, 252, 0.10);
+  border: 2px solid rgba(109, 94, 252, 0.20);
+  box-shadow: 0 4px 12px rgba(109, 94, 252, 0.12);
 }
 
 .kf-side-brand__copy strong {
