@@ -14,65 +14,46 @@ const FreeBoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const [board, setBoard] = useState<Board | null>(null);
   const [replyContent, setReplyContent] = useState("");
-  const [replyPage, setReplyPage] = useState(1); // 댓글 페이지
+  const [replyPage, setReplyPage] = useState(1);
   const userEmail = useSelector((state: RootState) => state.auth.user?.email);
-
-  // 정렬
   const [sortBy, setSortBy] = useState<"latest" | "likes">("latest");
 
   const navigate = useNavigate();
+  const isFirstRender = useRef(true);
+  const hasFetched = useRef(false);
 
-  // 게시글 가져오기
+  // 게시글 가져오기 (BoardDetailPage와 동일한 로직)
   const loadBoard = async (page: number = 1, sort: "latest" | "likes" = sortBy) => {
     if (!boardId) return;
-    console.log("loadBoard 호출:", { boardId, page, sort });
-
-    const data = await boardApi.getBoardDetail(
-      Number(boardId),
-      { page, size: 10, sort: sort } // 댓글 페이징
-    );
+    const data = await boardApi.getBoardDetail(Number(boardId), { page, size: 10, sort });
     setBoard(data);
     setReplyPage(page);
-    console.log("board 응답 전체:", data);
-    console.log("replies:", data.replies);
   };
-  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    console.log("boardId:", boardId);
-    if (boardId) {
+    if (boardId && !hasFetched.current) {
+      hasFetched.current = true;
       loadBoard(1);
     }
   }, [boardId]);
 
-  // sortBy가 변경될 때마다 1페이지로 이동하며 새로고침
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
-      return; // 초기 마운트는 건너뜀
+      return;
     }
-    if (boardId) {
-      loadBoard(1, sortBy);
-    }
+    if (boardId) loadBoard(1, sortBy);
   }, [sortBy]);
 
-  // 댓글 작성
   const createReply = async () => {
     if (!boardId || !replyContent.trim()) return;
-
-    await replyApi.createReply(Number(boardId), {
-      content: replyContent,
-    });
-
+    await replyApi.createReply(Number(boardId), { content: replyContent });
     setReplyContent("");
-    // 댓글 작성 후에는 1페이지로 이동
     loadBoard(1);
   };
 
-  // 댓글 기능 이후 자동 새로고침
   const refresh = async () => {
     if (!boardId) return;
-    // 현재 페이지 정렬 유지하면서 새로고침
     const updated = await boardApi.getBoardDetail(Number(boardId), {
       page: replyPage,
       size: 10,
@@ -86,86 +67,154 @@ const FreeBoardDetailPage = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // 오류 시 로딩중 이라고 보여주기
-  if (!board) return <div className="kf-community-page kf-free-board-detail"><div className="kf-community-page__shell"><div className="kf-community-loading">로딩 중...</div></div></div>;
+  if (!board) return <div className="kf-community-loading">로딩 중...</div>;
+
+  const isMyBoard = !!(userEmail && board.writerEmail === userEmail);
 
   return (
-    <div className="kf-community-page kf-free-board-detail">
+    <div className="kf-community-page kf-board-detail">
+      {" "}
+      {/* 클래스명 유지하여 공통 스타일 적용 */}
       <div className="kf-community-page__shell">
-      <div>
-      <div className="mb-6 border-b border-neutral-700 pb-6">
-        <h1 className="text-4xl font-extrabold tracking-tight text-white mb-3">{board.title}</h1>
-        <span className="text-sm font-semibold text-neutral-500">작성자: {board.writer}</span>
-        <div className="text-sm font-semibold text-neutral-500">생성일시: {board.createdAt}</div>
-        <div className="text-sm font-semibold text-neutral-500">장르: {board.boardGenre}</div>
-      </div>
-      <div
-        className="mb-8 min-h-[100px] break-words leading-[1.3] text-white"
-        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(board.content) }}
-      />
-      <div className="flex items-center justify-end">
-        {userEmail && board.writerEmail === userEmail && (
-          <button onClick={() => navigate(`/community/free/${board.boardId}/update`)}>수정</button>
-        )}
-      </div>
+        <div className="max-w-6xl mx-auto p-6">
+          {/* 헤더 섹션: 날짜 형식 변경 (toLocaleDateString) */}
+          <header className="mb-8 pb-6" style={{ borderBottom: "1px solid var(--kf-border)" }}>
+            <h1
+              className="text-4xl font-extrabold tracking-tight mb-3"
+              style={{ color: "var(--kf-brand)" }}
+            >
+              {board.title}
+            </h1>
+            <div className="flex justify-between text-sm" style={{ color: "var(--kf-text-sub)" }}>
+              <span>
+                {board.writer} | {new Date(board.createdAt).toLocaleDateString()} |{" "}
+                {board.boardGenre}
+              </span>
+              <span>조회 {board.viewCount}</span>
+            </div>
+          </header>
 
-      <hr />
-
-      <h3>댓글</h3>
-      <div className="min-h-[50px]">
-        <button
-          onClick={() => setSortBy("latest")}
-          style={{ fontWeight: sortBy === "latest" ? "bold" : "normal" }}
-        >
-          최신순
-        </button>
-        <button
-          onClick={() => setSortBy("likes")}
-          style={{ fontWeight: sortBy === "likes" ? "bold" : "normal", marginLeft: "10px" }}
-        >
-          추천순
-        </button>
-      </div>
-
-      {!board.replies || board.replies?.dtoList.length === 0 ? (
-        <p>댓글이 없습니다.</p>
-      ) : (
-        <>
-          <ul>
-            {board.replies.dtoList.map((reply) => (
-              <ReplyItem
-                key={reply.replyId}
-                reply={reply}
-                onRefresh={refresh}
-                boardId={Number(boardId)}
-                isAnonymous={true}
-              />
-            ))}
-          </ul>
-          {/* 댓글 페이지네이션 추가 */}
-          {board.replies.pageNumList.length > 0 && (
-            <Pagination
-              pageNumList={board.replies.pageNumList}
-              current={board.replies.current}
-              prev={board.replies.prev}
-              next={board.replies.next}
-              prevPage={board.replies.prevPage}
-              nextPage={board.replies.nextPage}
-              onPageChange={handleReplyPageChange}
+          <div className="space-y-8">
+            {/* 본문 섹션: 기존 스타일 유지하되 레이아웃 정리 */}
+            <div
+              className="min-h-[300px] break-words leading-relaxed text-lg p-6 rounded-xl"
+              style={{
+                color: "var(--kf-text-main)",
+                background: "rgba(255,255,255,0.56)",
+                border: "1px solid var(--kf-border)",
+              }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(board.content) }}
             />
-          )}
-        </>
-      )}
 
-      <textarea value={replyContent} onChange={(e) => setReplyContent(e.target.value)} rows={3} />
+            {/* 버튼 섹션 */}
+            <div
+              className="flex items-center justify-between pt-6"
+              style={{ borderTop: "1px solid var(--kf-border)" }}
+            >
+              <button
+                onClick={() => navigate("/community/free")}
+                className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all"
+                style={{
+                  background: "rgba(109,94,252,0.08)",
+                  color: "var(--kf-brand)",
+                  border: "1px solid rgba(109,94,252,0.18)",
+                }}
+              >
+                목록
+              </button>
+              {isMyBoard && (
+                <button
+                  onClick={() => navigate(`/community/free/${board.boardId}/update`)}
+                  className="text-sm font-medium transition-colors"
+                  style={{ color: "var(--kf-text-sub)" }}
+                >
+                  수정하기
+                </button>
+              )}
+            </div>
 
-      <button
-        onClick={createReply}
-        className="rounded bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-500"
-      >
-        댓글 작성
-      </button>
-    </div>
+            {/* 댓글 섹션: BoardDetailPage와 100% 동일한 구조 */}
+            <section className="mt-12">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold" style={{ color: "var(--kf-text-main)" }}>
+                  댓글 {board.replies?.dtoList.length || 0}
+                </h3>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setSortBy("latest")}
+                    className={`kf-sort-btn ${sortBy === "latest" ? "kf-sort-btn--active" : ""}`}
+                  >
+                    최신순
+                  </button>
+                  <button
+                    onClick={() => setSortBy("likes")}
+                    className={`kf-sort-btn ${sortBy === "likes" ? "kf-sort-btn--active" : ""}`}
+                  >
+                    추가순
+                  </button>
+                </div>
+              </div>
+
+              {!board.replies || board.replies.dtoList.length === 0 ? (
+                <p style={{ color: "var(--kf-text-muted)" }}>댓글이 없습니다.</p>
+              ) : (
+                <>
+                  <ul className="kf-reply-list mb-6">
+                    {board.replies.dtoList.map((reply) => (
+                      <ReplyItem
+                        key={reply.replyId}
+                        reply={reply}
+                        onRefresh={refresh}
+                        boardId={Number(boardId)}
+                        isAnonymous={true} // 자유게시판 특성 유지
+                      />
+                    ))}
+                  </ul>
+                  {board.replies.pageNumList.length > 0 && (
+                    <Pagination
+                      pageNumList={board.replies.pageNumList}
+                      current={board.replies.current}
+                      prev={board.replies.prev}
+                      next={board.replies.next}
+                      prevPage={board.replies.prevPage}
+                      nextPage={board.replies.nextPage}
+                      onPageChange={handleReplyPageChange}
+                    />
+                  )}
+                </>
+              )}
+
+              {/* 댓글 입력창 */}
+              <div
+                className="p-4 rounded-xl mt-6"
+                style={{
+                  background: "rgba(255,255,255,0.72)",
+                  border: "1px solid var(--kf-border)",
+                }}
+              >
+                <textarea
+                  className="w-full bg-transparent border-none outline-none resize-none"
+                  placeholder="댓글을 입력하세요..."
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                  rows={3}
+                />
+                <div className="flex justify-end mt-2">
+                  <button
+                    onClick={createReply}
+                    className="px-5 py-2 rounded-full text-sm font-bold text-white transition-all"
+                    style={{
+                      background: "linear-gradient(135deg, var(--kf-brand), var(--kf-brand-pink))",
+                      boxShadow: "0 8px 20px rgba(109,94,252,0.24)",
+                    }}
+                  >
+                    작성
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
       </div>
     </div>
   );

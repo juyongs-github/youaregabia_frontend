@@ -4,12 +4,15 @@ import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
 import { attendanceApi } from "../../api/attendanceApi";
 import { checkAttendance } from "../../components/ui/AttendanceSlice";
+import { GrFormPrevious } from "react-icons/gr";
+import { useNavigate } from "react-router-dom";
 
 const AttendancePage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { checked, streak } = useSelector((state: RootState) => state.attendance);
   const [calendarDates, setCalendarDates] = useState<string[]>([]);
   const [resultMsg, setResultMsg] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const today = new Date();
   const year = today.getFullYear();
@@ -42,6 +45,18 @@ const AttendancePage = () => {
         <div className="mx-auto max-w-4xl p-4">
           {/* 헤더 부분: 리스트 페이지와 유사한 여백 구성 */}
           <div className="mt-8 mb-8 pb-6" style={{ borderBottom: "1px solid var(--kf-border)" }}>
+            <button
+              className="flex items-center self-start gap-2 px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
+              style={{
+                background: "rgba(255,255,255,0.7)",
+                border: "1px solid rgba(88,95,138,0.15)",
+                color: "#677086",
+              }}
+              onClick={() => navigate("/profile/me")}
+            >
+              <GrFormPrevious size={18} />
+              <span>목록</span>
+            </button>
             <h2 className="text-3xl font-bold text-gray-900">출석 체크</h2>
             <p className="mt-2 text-sm text-gray-500">매일 출석하고 포인트 혜택을 받아보세요!</p>
           </div>

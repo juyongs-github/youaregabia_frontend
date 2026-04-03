@@ -16,6 +16,14 @@ const FreeBoardCreatePage = () => {
 
   const submit = async () => {
     if (!userEmail) return;
+    if (!title.trim()) {
+      alert("제목을 입력해주세요.");
+      return;
+    }
+    if (!content.trim() || content === "<br>" || content === "<p><br></p>") {
+      alert("내용을 입력해주세요.");
+      return;
+    }
     const boardId = await boardApi.createBoard({
       title,
       content,
@@ -29,26 +37,26 @@ const FreeBoardCreatePage = () => {
   return (
     <div className="kf-community-page kf-free-board-create">
       <div className="kf-community-page__shell">
-      <div>
-      <h2 className="mb-4 text-2xl font-bold">자유게시판</h2>
+        <div>
+          <h2 className="mb-4 text-2xl font-bold">자유게시판</h2>
 
-      <input
-        className="mb-3 w-full rounded border px-3 py-2"
-        placeholder="제목"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      <div className="mb-4">
-        <CustomEditor
-          onChange={(html) => setContent(html)}
-          placeholder="추가로 하고 싶은 말을 입력하세요... (선택)"
-        />
-      </div>
+          <input
+            className="mb-3 w-full rounded border px-3 py-2"
+            placeholder="제목"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <div className="mb-4">
+            <CustomEditor
+              onChange={(html) => setContent(html)}
+              placeholder="추가로 하고 싶은 말을 입력하세요... (선택)"
+            />
+          </div>
 
-      <button className="rounded bg-indigo-600 px-4 py-2 text-white" onClick={submit}>
-        등록
-      </button>
-    </div>
+          <button className="rounded bg-indigo-600 px-4 py-2 text-white" onClick={submit}>
+            등록
+          </button>
+        </div>
       </div>
     </div>
   );

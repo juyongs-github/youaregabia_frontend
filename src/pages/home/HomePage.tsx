@@ -694,7 +694,12 @@ function HomePage() {
                     <div className="rank-section">
                       <ul className="rank-list">
                         {rankingSongs.map((item, index) => (
-                          <li key={item.songId} className="rank-item">
+                          <li
+                            key={item.songId}
+                            className="rank-item"
+                            onClick={() => item.previewUrl && setSelectSong(toSong(item))}
+                            style={{ cursor: item.previewUrl ? "pointer" : "default" }}
+                          >
                             <span
                               className={
                                 index === 0
@@ -715,14 +720,26 @@ function HomePage() {
                             </div>
                             <div className="rank-actions">
                               <button
-                                onClick={() => item.previewUrl && setSelectSong(toSong(item))}
-                                title="미리듣기"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate("/recommend/result", {
+                                    state: {
+                                      trackName: item.trackName,
+                                      artistName: item.artistName,
+                                      coverImageUrl: item.imgUrl,
+                                    },
+                                  });
+                                }}
+                                title="유사곡 추천"
                               >
-                                <FaHeadphones size={13} />
+                                <FaMusic size={13} />
                               </button>
                               <button
-                                onClick={() => setRankingModalSong(toSong(item))}
-                                title="플리에 추가"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setRankingModalSong(toSong(item));
+                                }}
+                                title="플레이리스트에 추가"
                               >
                                 <FaPlus size={13} />
                               </button>
