@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { replyApi } from "../../api/replyApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
@@ -47,12 +47,10 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
       alert("로그인이 필요합니다.");
       return;
     }
-
     if (!content.trim()) {
       alert("댓글 내용을 입력해주세요.");
       return;
     }
-
     await replyApi.updateReply(reply.replyId, { content });
     setIsEdit(false);
     onRefresh();
@@ -63,9 +61,7 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
       alert("로그인이 필요합니다.");
       return;
     }
-
     if (!confirm("댓글을 삭제할까요?")) return;
-
     await replyApi.deleteReply(reply.replyId);
     onRefresh();
   };
@@ -75,7 +71,6 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
       alert("로그인이 필요합니다.");
       return;
     }
-
     try {
       await replyApi.toggleLike(reply.replyId);
       onRefresh();
@@ -89,14 +84,11 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
       alert("로그인이 필요합니다.");
       return;
     }
-
     if (!childContent.trim()) return;
-
     await replyApi.createReply(boardId, {
       content: childContent,
       parentReplyId: reply.replyId,
     });
-
     setChildContent("");
     setShowReplyForm(false);
     onRefresh();
@@ -105,8 +97,8 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
   if (reply.deleted) {
     return (
       <li className={`kf-reply-deleted ${isChild ? "kf-reply-child" : ""}`}>
-        {isChild ? "ㄴ삭제된 댓글입니다." : "삭제된 댓글입니다."}
-
+        {isChild && <span className="kf-reply-indent">ㄴ</span>}
+        삭제된 댓글입니다.
         {!isChild && reply.children?.length > 0 && (
           <ul className="kf-reply-children">
             {reply.children.map((child) => (
@@ -145,6 +137,8 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
         </div>
       ) : (
         <div className="kf-reply-card__inner">
+          {isChild && <span className="kf-reply-indent">ㄴ</span>}
+
           <div className="kf-reply-avatar">
             {reply.imgUrl ? (
               <img
@@ -165,9 +159,7 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
           <div className="kf-reply-card__body">
             <div className="kf-reply-card__header">
               <div className="kf-reply-card__meta">
-                <span className="kf-reply-card__name">
-                  {isChild ? `ㄴ ${displayName}` : displayName}
-                </span>
+                <span className="kf-reply-card__name">{displayName}</span>
                 <span className="kf-reply-card__time">{timeAgo(reply.createdAt)}</span>
               </div>
 
@@ -190,7 +182,6 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
                   답글
                 </button>
               )}
-
               {userEmail && reply.writerEmail === userEmail && (
                 <>
                   <button onClick={() => setIsEdit(true)} className="kf-reply-action-btn">
@@ -209,6 +200,7 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
             {showReplyForm && (
               <div className="kf-reply-child-form">
                 <textarea
+                  autoFocus
                   value={childContent}
                   onChange={(e) => setChildContent(e.target.value)}
                   rows={2}

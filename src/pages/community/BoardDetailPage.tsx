@@ -34,11 +34,7 @@ const BoardDetailPage = () => {
 
   const refreshReplies = async (page: number = replyPage) => {
     if (!boardId) return;
-    const updated = await boardApi.getBoardDetail(Number(boardId), {
-      page,
-      size: 10,
-      sort: sortBy,
-    });
+    const updated = await boardApi.getBoardDetail(Number(boardId), { page, size: 10, sort: sortBy });
     setBoard((prev) => (prev ? { ...prev, replies: updated.replies } : prev));
   };
 
@@ -77,10 +73,7 @@ const BoardDetailPage = () => {
   };
 
   const handleLike = async () => {
-    if (!userEmail) {
-      alert("로그인이 필요합니다.");
-      return;
-    }
+    if (!userEmail) { alert("로그인이 필요합니다."); return; }
     const res = await boardApi.toggleBoardLike(Number(boardId));
     setLikeCount(res.likeCount);
     setLikedByMe(res.likedByMe);
@@ -90,6 +83,11 @@ const BoardDetailPage = () => {
   if (!board) return <div className="kf-community-loading">로딩 중...</div>;
 
   const isMyBoard = !!(userEmail && board.writerEmail === userEmail);
+  const isCritic = board.boardType === "CRITIC";
+  const hasSidePanel =
+    board.boardType === "FREE" ||
+    (board.boardType === "PLAYLIST_SHARE" && board.songs && board.songs.length > 0) ||
+    board.boardType === "CRITIC";
 
   return (
     <div className="kf-community-page kf-board-detail">
@@ -108,8 +106,9 @@ const BoardDetailPage = () => {
             </div>
           </header>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-8">
+          <div className={`grid grid-cols-1 gap-8 ${isCritic ? "lg:grid-cols-5" : "lg:grid-cols-3"}`}>
+            {/* 본문 영역 */}
+            <div className={`${isCritic ? "lg:col-span-3" : "lg:col-span-2"} space-y-8`}>
               <div
                 className="min-h-[300px] break-words leading-relaxed text-lg p-6 rounded-xl"
                 style={{
@@ -118,10 +117,9 @@ const BoardDetailPage = () => {
                   border: "1px solid var(--kf-border)",
                 }}
                 dangerouslySetInnerHTML={{
-                  __html:
-                    board.boardType === "CRITIC"
-                      ? DOMPurify.sanitize(board.content, { FORBID_TAGS: ["img"] })
-                      : DOMPurify.sanitize(board.content),
+                  __html: isCritic
+                    ? DOMPurify.sanitize(board.content, { FORBID_TAGS: ["img"] })
+                    : DOMPurify.sanitize(board.content),
                 }}
               />
               <div
@@ -146,9 +144,8 @@ const BoardDetailPage = () => {
                 <div className="flex items-center gap-4">
                   {isMyBoard && (
                     <button
-                      // BoardDetailPage.tsx
                       onClick={() =>
-                        board.boardType === "CRITIC"
+                        isCritic
                           ? navigate(`/recommend/critic/${board.boardId}/update`)
                           : navigate(`/community/share/${board.boardId}/update`)
                       }
@@ -164,8 +161,7 @@ const BoardDetailPage = () => {
                     style={
                       likedByMe
                         ? {
-                            background:
-                              "linear-gradient(135deg, var(--kf-brand), var(--kf-brand-pink))",
+                            background: "linear-gradient(135deg, var(--kf-brand), var(--kf-brand-pink))",
                             color: "#fff",
                             border: "none",
                             boxShadow: "0 8px 20px rgba(109,94,252,0.28)",
@@ -234,10 +230,10 @@ const BoardDetailPage = () => {
                 <ReplyForm onSubmit={createReply} />
               </section>
             </div>
-            {(board.boardType === "FREE" ||
-              (board.boardType === "PLAYLIST_SHARE" && board.songs && board.songs.length > 0) ||
-              board.boardType === "CRITIC") && (
-              <aside className="lg:col-span-1">
+
+            {/* 사이드바 */}
+            {hasSidePanel && (
+              <aside className={isCritic ? "lg:col-span-2" : "lg:col-span-1"}>
                 <div className="sticky top-6">
                   <BoardSidePanel board={board} isMyBoard={isMyBoard} />
                 </div>

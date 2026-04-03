@@ -11,7 +11,7 @@ const FreeBoardCreatePage = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const navigate = useNavigate();
-  // 이메일 가져오
+  // 이메일 가져오기
   const userEmail = useSelector((state: RootState) => state.auth.user?.email);
 
   const submit = async () => {
@@ -31,7 +31,7 @@ const FreeBoardCreatePage = () => {
       boardGenre: "FREE",
     });
     refreshPoint();
-    navigate(`/community/share/${boardId}`);
+    navigate(`/community/free/${boardId}`);
   };
 
   return (
