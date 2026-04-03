@@ -5,6 +5,7 @@ import "../../styles/IdealTypeWorldCupPage.css";
 import "../../styles/IdealTypeWorldCupPage.kfandom.css";
 import { playlistApi } from "../../api/playlistApi";
 import { usePlayer } from "../../contexts/PlayerContext";
+import Toast from "../../components/ui/Toast";
 import type {
   SongDTO,
   Song,
@@ -483,7 +484,7 @@ export default function IdealTypeWorldCupPage() {
   // 플레이리스트 추가 관련 상태
   const [checkedSongIds, setCheckedSongIds] = useState<Set<number>>(new Set()); // 체크된 곡 id Set
   const [showModal, setShowModal] = useState(false); // 플레이리스트 모달 표시 여부
-  const [addSuccess, setAddSuccess] = useState(false); // 추가 성공 메시지 표시 여부
+  const [toast, setToast] = useState(false); // 추가 성공 토스트 표시 여부
 
   const { stop: stopPlayer } = usePlayer();
   useEffect(() => {
@@ -522,7 +523,7 @@ export default function IdealTypeWorldCupPage() {
         setWins({});
         setWinList([]);
         setCheckedSongIds(new Set());
-        setAddSuccess(false);
+        setToast(false);
         setScreen("game");
       } catch (e: unknown) {
         setError(e instanceof Error ? e.message : "알 수 없는 오류가 발생했습니다.");
@@ -775,7 +776,7 @@ export default function IdealTypeWorldCupPage() {
                       <button
                         className="wc-win-add-btn"
                         onClick={() => {
-                          setAddSuccess(false);
+                          setToast(false);
                           setShowModal(true);
                         }}
                       >
@@ -785,10 +786,6 @@ export default function IdealTypeWorldCupPage() {
                   </div>
                 </div>
 
-                {/* 추가 성공 메시지 */}
-                {addSuccess && (
-                  <p className="wc-win-add-success"><FaCheck size={11} /> 플레이리스트에 추가되었습니다</p>
-                )}
 
                 <ul className="wc-win-list-items">
                   {(() => {
@@ -853,8 +850,17 @@ export default function IdealTypeWorldCupPage() {
           onSuccess={() => {
             setShowModal(false);
             setCheckedSongIds(new Set());
-            setAddSuccess(true);
+            setToast(true);
           }}
+        />
+      )}
+
+      {/* 추가 성공 토스트 */}
+      {toast && (
+        <Toast
+          message="플레이리스트에 추가되었습니다."
+          type="success"
+          onClose={() => setToast(false)}
         />
       )}
     </div>

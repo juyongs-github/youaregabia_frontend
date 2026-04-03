@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { FaCheckCircle, FaExclamationCircle, FaTimes } from "react-icons/fa";
+import { FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
 
 interface Props {
   message: string;
@@ -26,42 +26,35 @@ export default function Toast({ message, type = "info", onClose, duration = 2500
     <div
       style={{
         position: "fixed",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
+        inset: 0,
         zIndex: 9999,
+        background: "rgba(109, 94, 252, 0.08)",
+        backdropFilter: "blur(8px)",
         display: "flex",
         alignItems: "center",
-        gap: 16,
-        padding: "22px 28px",
-        borderRadius: 20,
-        background: "rgba(255,255,255,0.95)",
-        border: `1px solid ${c.border}`,
-        boxShadow: "0 24px 60px rgba(80,90,140,0.20)",
-        backdropFilter: "blur(24px)",
-        minWidth: 300,
-        maxWidth: 440,
+        justifyContent: "center",
       }}
     >
-      <span style={{ color: c.icon, flexShrink: 0, display: "flex" }}>
-        {type === "success" ? <FaCheckCircle size={28} /> : <FaExclamationCircle size={28} />}
-      </span>
-      <span style={{ flex: 1, fontSize: 16, fontWeight: 700, color: "#1f2430" }}>{message}</span>
-      <button
-        onClick={onClose}
+      <div
         style={{
-          background: "none",
-          border: "none",
-          color: "#9199ad",
-          cursor: "pointer",
           display: "flex",
           alignItems: "center",
-          padding: 2,
-          flexShrink: 0,
+          gap: 16,
+          padding: "22px 28px",
+          borderRadius: 20,
+          background: "rgba(255,255,255,0.95)",
+          border: `1px solid ${c.border}`,
+          boxShadow: "0 24px 60px rgba(80,90,140,0.20)",
+          backdropFilter: "blur(24px)",
+          minWidth: 300,
+          maxWidth: 440,
         }}
       >
-        <FaTimes size={15} />
-      </button>
+        <span style={{ color: c.icon, flexShrink: 0, display: "flex" }}>
+          {type === "success" ? <FaCheckCircle size={28} /> : <FaExclamationCircle size={28} />}
+        </span>
+        <span style={{ flex: 1, fontSize: 16, fontWeight: 700, color: "#1f2430" }}>{message}</span>
+      </div>
     </div>
   );
 }

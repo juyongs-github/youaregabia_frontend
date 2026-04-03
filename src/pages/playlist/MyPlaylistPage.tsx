@@ -21,7 +21,7 @@ function MyPlaylistPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 정렬 State
-  const [sortType, setSortType] = useState("oldest");
+  const [sortType, setSortType] = useState("latest");
 
   // 검색 State
   const [searchQuery, setSearchQuery] = useState("");
@@ -107,7 +107,15 @@ function MyPlaylistPage() {
       </div>
 
       <div className="flex flex-wrap gap-7">
-        {/* 정렬 */}
+        <div
+          className="playlist-card top-playlist-card top-playlist-card-small add-playlist-card"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <div className="add-playlist-inner">
+            <FaPlus />
+            <span>플레이리스트 추가</span>
+          </div>
+        </div>
 
         {sortedData.map((item) => (
           <div
@@ -130,15 +138,6 @@ function MyPlaylistPage() {
             </div>
           </div>
         ))}
-        <div
-          className="playlist-card top-playlist-card top-playlist-card-small add-playlist-card"
-          onClick={() => setIsModalOpen(true)}
-        >
-          <div className="add-playlist-inner">
-            <FaPlus />
-            <span>플레이리스트 추가</span>
-          </div>
-        </div>
         {/* ===== 플레이리스트 생성 모달 ===== */}
         {isModalOpen && (
           <PlaylistCreateModal onClose={() => setIsModalOpen(false)} onCreated={fetchData} />
