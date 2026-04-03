@@ -8,6 +8,7 @@ export interface Reply {
   deleted: boolean;
   writerEmail: string;
   children: Reply[];
+  imgUrl?: string | null;
 }
 
 export interface Board {
@@ -24,6 +25,7 @@ export interface Board {
   songs?: BoardSong[];
   likeCount: number;
   likedByMe: boolean;
+  imgUrl?: string | null;
 }
 export type TabType = "ALL" | "POPULAR";
 

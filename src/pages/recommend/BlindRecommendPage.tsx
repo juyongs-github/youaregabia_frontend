@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import api from "../../api/axios";
@@ -30,6 +30,9 @@ const BlindRecommendPage = () => {
   const [addedSongIds, setAddedSongIds] = useState<Set<number>>(new Set());
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [playlistSongIds, setPlaylistSongIds] = useState<Set<number>>(new Set());
+  // 기존 state에 드롭다운 open 상태 추가
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // 곡 가져오기 함수
   const fetchRandomSongs = useCallback(async (count: number) => {
@@ -154,6 +157,17 @@ const BlindRecommendPage = () => {
     };
   }, [stop]);
 
+  // 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   useEffect(() => {
     if (currentSong && !isRevealed && phase === "playing" && started) {
       play(currentSong, { blind: true, onClose: handleDislike });
@@ -192,25 +206,75 @@ const BlindRecommendPage = () => {
               </h3>
               {userEmail && (
                 <div className="mb-6 space-y-3">
-                  <select
-                    className="w-full rounded-2xl border border-slate-200 bg-white/50 px-4 py-3.5 text-[#2f3863] font-bold focus:ring-2 focus:ring-[#6d5efc]/20 outline-none transition-all"
-                    value={selectedPlaylistId ?? ""}
-                    onChange={(e) => setSelectedPlaylistId(Number(e.target.value) || null)}
-                    onClick={fetchPlaylists}
-                  >
-                    <option value="">저장할 플레이리스트 선택...</option>
-                    {playlists.map((pl) => (
-                      <option key={pl.id} value={pl.id}>
-                        {pl.title}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={() => setIsCreateModalOpen(true)}
-                    className="text-sm font-extrabold text-[#6d5efc] hover:opacity-70 px-1"
-                  >
-                    + 새 플레이리스트 만들기
-                  </button>
+                  {userEmail && (
+                    <div className="flex flex-col items-end gap-2">
+                      {/* 커스텀 드롭다운 */}
+                      <div ref={dropdownRef} className="relative w-full md:w-56">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            fetchPlaylists();
+                            setIsDropdownOpen((prev) => !prev);
+                          }}
+                          className="w-full flex items-center justify-between rounded-xl border border-slate-200 bg-white/90 px-4 py-2.5 text-[#2f3863] font-bold text-xs outline-none focus:ring-2 focus:ring-[#6d5efc]/20 shadow-sm transition-all"
+                        >
+                          <span className="truncate max-w-[160px]">
+                            {selectedPlaylistId
+                              ? (playlists.find((pl) => pl.id === selectedPlaylistId)?.title ??
+                                "플레이리스트 선택")
+                              : "플레이리스트 선택"}
+                          </span>
+                          <svg
+                            className={`ml-2 flex-shrink-0 w-3.5 h-3.5 text-slate-400 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+
+                        {isDropdownOpen && (
+                          <ul className="absolute right-0 z-50 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg overflow-y-auto max-h-44 py-1">
+                            <li
+                              onClick={() => {
+                                setSelectedPlaylistId(null);
+                                setIsDropdownOpen(false);
+                              }}
+                              className="px-4 py-2 text-xs font-bold text-slate-400 hover:bg-slate-50 cursor-pointer"
+                            >
+                              선택 안함
+                            </li>
+                            {playlists.map((pl) => (
+                              <li
+                                key={pl.id}
+                                onClick={() => {
+                                  setSelectedPlaylistId(pl.id);
+                                  setIsDropdownOpen(false);
+                                }}
+                                className={`px-4 py-2 text-xs font-bold cursor-pointer truncate transition-colors ${
+                                  selectedPlaylistId === pl.id
+                                    ? "bg-[#6d5efc]/10 text-[#6d5efc]"
+                                    : "text-[#2f3863] hover:bg-slate-50"
+                                }`}
+                                title={pl.title}
+                              >
+                                {pl.title}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={() => setIsCreateModalOpen(true)}
+                        className="text-xs font-black text-[#6d5efc] hover:underline"
+                      >
+                        + 새 플레이리스트
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
               <ul className="flex flex-col gap-3">
@@ -413,15 +477,26 @@ const BlindRecommendPage = () => {
           )}
         </div>
       </div>
-      {likedSongs.length > 0 && (
-        <aside className="w-full md:w-80 bg-white/60 backdrop-blur-2xl rounded-[40px] p-8 border border-white/80 sticky top-12 shadow-2xl">
-          <div className="flex items-center justify-between mb-8">
-            <p className="text-base font-black text-[#2f3863]">👍 발견한 취향</p>
-            <span className="bg-[#ff5ca8] text-white text-xs px-3 py-1.5 rounded-full font-black">
-              {likedSongs.length}
-            </span>
-          </div>
-          <div className="max-h-[50vh] overflow-y-auto pr-2">
+      <aside className="w-full md:w-80 bg-white/60 backdrop-blur-2xl rounded-[40px] p-8 border border-white/80 sticky top-12 shadow-2xl">
+        <div className="flex items-center justify-between mb-8">
+          <p className="text-base font-black text-[#2f3863]">👍 발견한 취향</p>
+          <span className="bg-[#ff5ca8] text-white text-xs px-3 py-1.5 rounded-full font-black">
+            {likedSongs.length}
+          </span>
+        </div>
+
+        <div className="max-h-[50vh] overflow-y-auto pr-2">
+          {likedSongs.length === 0 ? (
+            // ✅ 빈 상태 안내
+            <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
+              <span className="text-4xl">🎵</span>
+              <p className="text-sm font-bold text-slate-400 leading-relaxed">
+                마음에 드는 곡의
+                <br />
+                좋아요를 눌러보세요
+              </p>
+            </div>
+          ) : (
             <ul className="flex flex-col gap-4">
               {[...likedSongs].reverse().map((s, i) => (
                 <li
@@ -440,17 +515,18 @@ const BlindRecommendPage = () => {
                 </li>
               ))}
             </ul>
-          </div>
-          <div className="mt-8 pt-6 border-t border-slate-100 text-center">
-            <button
-              onClick={() => setPhase("result")}
-              className="w-full py-4 rounded-2xl bg-[#6d5efc]/10 text-[#6d5efc] font-black text-sm hover:bg-[#6d5efc] hover:text-white transition-all"
-            >
-              결과 페이지로 가기 🏁
-            </button>
-          </div>
-        </aside>
-      )}
+          )}
+        </div>
+
+        <div className="mt-8 pt-6 border-t border-slate-100 text-center">
+          <button
+            onClick={() => setPhase("result")}
+            className="w-full py-4 rounded-2xl bg-[#6d5efc]/10 text-[#6d5efc] font-black text-sm hover:bg-[#6d5efc] hover:text-white transition-all"
+          >
+            결과 페이지로 가기 🏁
+          </button>
+        </div>
+      </aside>
     </div>
   );
 };
