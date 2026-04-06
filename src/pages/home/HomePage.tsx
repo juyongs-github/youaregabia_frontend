@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "../../styles/HomePage.css";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 import {
   FaPlus,
   FaChevronLeft,
@@ -43,6 +45,7 @@ import AddToPlaylistModal from "../../components/ui/AddToPlaylistModal";
 import FallbackCoverArt from "../../components/ui/FallbackCoverArt";
 
 function HomePage() {
+  const { toast, showToast, closeToast } = useToast();
   const [data, setData] = useState<Playlist[]>([]);
   const baseURL: string = import.meta.env.VITE_API_BASE_URL ?? "";
   const [collaboPlaylists, setCollaboPlaylists] = useState<CollaboPlaylist[]>([]);
@@ -258,12 +261,21 @@ function HomePage() {
   });
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
     <div className={`home${selectSong ? " player-open" : ""}`}>
       <Header showSearch={false} />
 
       {/* ===== 중앙 영역 ===== */}
       <div className="center-area">
-        <h1 className="main-title">GAP MUSIC</h1>
+        <div className="hero-copy">
+          <h1 className="main-title">
+            당신을 위한 음악 추천, 여기서 시작하세요.
+          </h1>
+          <p className="main-subtitle">
+            취향 분석부터 맞춤 추천, 그리고 사람들과의 공유까지 하나의 플랫폼에서 모두 경험하세요.
+          </p>
+        </div>
 
         <div className={`search-bar${isDropdownOpen ? " dropdown-open" : ""}`} ref={searchRef}>
           <div className="search-bar-input-wrap">
@@ -276,7 +288,7 @@ function HomePage() {
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   if (!searchValue.trim()) {
-                    alert("검색어를 입력 해주세요.");
+                    showToast("검색어를 입력해주세요.", "info");
                     return;
                   }
                   setIsDropdownOpen(false);
@@ -822,6 +834,7 @@ function HomePage() {
         />
       )}
     </div>
+    </>
   );
 }
 

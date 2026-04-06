@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import Toast from "./Toast";
+import { useToast } from "../../hooks/useToast";
 
 interface Props {
   onChange: (html: string) => void;
@@ -7,6 +9,7 @@ interface Props {
 }
 
 const CustomEditor = ({ onChange, placeholder, initialValue }: Props) => {
+  const { toast, showToast, closeToast } = useToast();
   const editorRef = useRef<HTMLDivElement>(null);
   const selectionRef = useRef<Range | null>(null);
 
@@ -64,14 +67,16 @@ const CustomEditor = ({ onChange, placeholder, initialValue }: Props) => {
       exec("insertHTML", imgHtml);
     } catch (error) {
       console.error("이미지 업로드 실패:", error);
-      alert("이미지 업로드에 실패했습니다.");
+      showToast("이미지 업로드에 실패했습니다.", "error");
     } finally {
       e.target.value = ""; // 동일 파일 재선택 가능하도록 초기화
     }
   };
 
   return (
-    <div className="rounded-[24px] border border-white/80 bg-white/50 backdrop-blur-xl overflow-hidden shadow-sm transition-all focus-within:shadow-md focus-within:border-[#6d5efc]/30">
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <div className="rounded-[24px] border border-white/80 bg-white/50 backdrop-blur-xl overflow-hidden shadow-sm transition-all focus-within:shadow-md focus-within:border-[#6d5efc]/30">
       {/* 툴바 영역 */}
       <div className="flex items-center gap-2 px-4 py-3 bg-white/60 border-b border-white/80">
         <button
@@ -138,7 +143,8 @@ const CustomEditor = ({ onChange, placeholder, initialValue }: Props) => {
           cursor: text;
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -6,6 +6,8 @@ import type { RootState } from "../../store";
 import "../../styles/CriticWrite.kfandom.css";
 import CriticSongSelectModal from "../../components/ui/CriticSongSelectModal";
 import CustomEditor from "../../components/ui/CustomEditor";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 interface SelectedSong {
   id: number;
@@ -23,6 +25,7 @@ const extractFirstImageFromHtml = (html: string) => {
 };
 
 const CriticWrite = () => {
+  const { toast, showToast, closeToast } = useToast();
   const location = useLocation();
   const state = location.state as {
     songId?: number;
@@ -55,7 +58,7 @@ const CriticWrite = () => {
 
   useEffect(() => {
     if (userRole && userRole !== "CRITIC") {
-      alert("평론 작성 권한이 없습니다.");
+      showToast("평론 작성 권한이 없습니다.", "error");
       navigate(-1);
     }
   }, [userRole]);
@@ -66,15 +69,15 @@ const CriticWrite = () => {
     console.log("content trim:", content.trim());
     if (!userEmail) return;
     if (!title.trim()) {
-      alert("제목을 입력해주세요.");
+      showToast("제목을 입력해주세요.", "info");
       return;
     }
     if (!content.trim()) {
-      alert("내용을 입력해주세요.");
+      showToast("내용을 입력해주세요.", "info");
       return;
     }
     if (!selectedSong) {
-      alert("평론할 곡을 선택해주세요.");
+      showToast("평론할 곡을 선택해주세요.", "info");
       return;
     }
 
@@ -89,6 +92,8 @@ const CriticWrite = () => {
   };
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
     <div className="kf-expansion-page kf-critic-write">
       <div className="max-w-6xl mx-auto p-6">
         <h2 className="mb-8 text-2xl font-bold" style={{ color: "var(--kf-brand)" }}>
@@ -186,6 +191,7 @@ const CriticWrite = () => {
         />
       )}
     </div>
+    </>
   );
 };
 

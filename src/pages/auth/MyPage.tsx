@@ -8,6 +8,10 @@ import { FaBell } from "react-icons/fa";
 import api from "../../api/axios";
 import { cartUtils } from "../../api/goodsApi";
 import "../../styles/mypage-kfandom.css";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
+import ConfirmToast from "../../components/ui/ConfirmToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
 
 interface NotificationItem {
   id: number;
@@ -39,6 +43,8 @@ interface MyReply {
 }
 
 function MyPage() {
+  const { toast, showToast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -90,20 +96,20 @@ function MyPage() {
   };
 
   const handleWithdraw = async () => {
-    const confirmed = window.confirm(
+    const confirmed = await confirm(
       "정말 탈퇴하시겠습니까?\n탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다."
     );
     if (!confirmed) return;
     try {
       const res = await api.delete("/api/auth/withdraw");
       if (res.status === 200) {
-        alert("회원탈퇴가 완료됐습니다.");
+        showToast("회원탈퇴가 완료됐습니다.", "success");
         cartUtils.clear();
         dispatch(logout());
         navigate("/login", { replace: true });
       }
     } catch {
-      alert("탈퇴 처리 중 오류가 발생했습니다.");
+      showToast("탈퇴 처리 중 오류가 발생했습니다.", "error");
     }
   };
 
@@ -111,6 +117,9 @@ function MyPage() {
     user?.role === "ADMIN" ? "관리자" : user?.role === "CRITIC" ? "평론가" : "일반 회원";
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
     <div className="kf-my-page">
       {/* 프로필 헤더 */}
       <div className="kf-my-hero">
@@ -286,6 +295,7 @@ function MyPage() {
         </div>
       )}
     </div>
+    </>
   );
 }
 

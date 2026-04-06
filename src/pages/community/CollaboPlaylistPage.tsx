@@ -9,8 +9,11 @@ import Spinner from "../../components/ui/Spinner";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import "../../styles/collabo-playlist-page-kfandom.css";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 function CollaboPlaylistPage() {
+  const { toast, showToast, closeToast } = useToast();
   const user = useSelector((state: RootState) => state.auth.user);
   const [tab, setTab] = useState<"all" | "popular" | "recent">("all");
   const [filter, setFilter] = useState("");
@@ -32,7 +35,7 @@ function CollaboPlaylistPage() {
   };
 
   const handleLike = async (playlist: CollaboPlaylist) => {
-    if (!user?.email) { alert("로그인이 필요합니다."); return; }
+    if (!user?.email) { showToast("로그인이 필요합니다.", "info"); return; }
     try {
       if (playlist.hasLiked) {
         await playlistApi.unlikeCollabo(playlist.id);
@@ -47,7 +50,7 @@ function CollaboPlaylistPage() {
         )
       );
     } catch (e: any) {
-      alert(e?.response?.data?.message ?? "좋아요에 실패했습니다.");
+      showToast(e?.response?.data?.message ?? "좋아요에 실패했습니다.", "error");
     }
   };
 
@@ -77,6 +80,7 @@ function CollaboPlaylistPage() {
     <div className="kf-community-page kf-collabo-page">
       <div className="kf-community-page__shell">
         <div style={{ padding: 24 }}>
+          {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
           {/* 헤더 */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">

@@ -1,8 +1,12 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { replyApi } from "../../api/replyApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import type { Reply } from "../../types/board";
+import Toast from "./Toast";
+import { useToast } from "../../hooks/useToast";
+import ConfirmToast from "./ConfirmToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
 
 interface Props {
   reply: Reply;
@@ -33,6 +37,8 @@ function timeAgo(dateStr: string): string {
 }
 
 const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = false }: Props) => {
+  const { toast, showToast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const [isEdit, setIsEdit] = useState(false);
   const [content, setContent] = useState(reply.content);
   const [showReplyForm, setShowReplyForm] = useState(false);
@@ -44,11 +50,11 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
 
   const update = async () => {
     if (!userEmail) {
-      alert("로그인이 필요합니다.");
+      showToast("로그인이 필요합니다.", "info");
       return;
     }
     if (!content.trim()) {
-      alert("댓글 내용을 입력해주세요.");
+      showToast("댓글 내용을 입력해주세요.", "info");
       return;
     }
     await replyApi.updateReply(reply.replyId, { content });
@@ -58,17 +64,18 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
 
   const remove = async () => {
     if (!userEmail) {
-      alert("로그인이 필요합니다.");
+      showToast("로그인이 필요합니다.", "info");
       return;
     }
-    if (!confirm("댓글을 삭제할까요?")) return;
+    const confirmed = await confirm("댓글을 삭제할까요?");
+    if (!confirmed) return;
     await replyApi.deleteReply(reply.replyId);
     onRefresh();
   };
 
   const toggleLike = async () => {
     if (!userEmail) {
-      alert("로그인이 필요합니다.");
+      showToast("로그인이 필요합니다.", "info");
       return;
     }
     try {
@@ -81,7 +88,7 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
 
   const createChild = async () => {
     if (!userEmail) {
-      alert("로그인이 필요합니다.");
+      showToast("로그인이 필요합니다.", "info");
       return;
     }
     if (!childContent.trim()) return;
@@ -96,6 +103,9 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
 
   if (reply.deleted) {
     return (
+      <>
+        {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+        <ConfirmToast state={confirmToast} onClose={closeConfirm} />
       <li className={`kf-reply-deleted ${isChild ? "kf-reply-child" : ""}`}>
         {isChild && <span className="kf-reply-indent">ㄴ</span>}
         삭제된 댓글입니다.
@@ -114,10 +124,14 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
           </ul>
         )}
       </li>
+      </>
     );
   }
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
     <li className={`kf-reply-card ${isChild ? "kf-reply-child" : ""}`}>
       {isEdit ? (
         <div className="kf-reply-edit">
@@ -239,6 +253,7 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
         </div>
       )}
     </li>
+    </>
   );
 };
 

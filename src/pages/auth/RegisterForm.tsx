@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import "../../styles/auth-kfandom-core.css";
 import { register, checkEmailDuplicate } from "../../api/auth";
 import { useNavigate, useLocation } from "react-router-dom";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 interface RegisterFormValues {
   email: string;
@@ -23,6 +25,7 @@ const PW_CONDITIONS = [
 ];
 
 function RegisterForm() {
+  const { toast, showToast, closeToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -35,7 +38,7 @@ function RegisterForm() {
 
   useEffect(() => {
     if (!ci) {
-      alert("잘못된 접근입니다. 본인인증을 다시 진행해주세요.");
+      showToast("잘못된 접근입니다. 본인인증을 다시 진행해주세요.", "info");
       navigate("/auth/ci");
     }
   }, [ci, navigate]);
@@ -168,16 +171,18 @@ function RegisterForm() {
         addressDetail: form.detailAddress,
         phoneNumber: form.phone,
       });
-      alert("회원가입이 완료되었습니다.");
+      showToast("회원가입이 완료되었습니다.", "success");
       navigate("/login");
     } catch {
-      alert("회원가입 중 오류가 발생했습니다.");
+      showToast("회원가입 중 오류가 발생했습니다.", "error");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
     <div className="auth-container">
       <form className="auth-box" onSubmit={handleSubmit}>
         <h1>회원가입</h1>
@@ -307,6 +312,7 @@ function RegisterForm() {
         </button>
       </form>
     </div>
+    </>
   );
 }
 

@@ -4,6 +4,10 @@ import { Navigate } from "react-router-dom";
 import { FaBox, FaEdit, FaPlus, FaTrash } from "react-icons/fa";
 import type { RootState } from "../../store";
 import api from "../../api/axios";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
+import ConfirmToast from "../../components/ui/ConfirmToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
 
 interface UserRow {
   id: number;
@@ -98,6 +102,8 @@ type Tab = "users" | "loginLogs" | "activityLogs" | "goods" | "orders";
 const EMPTY_FORM: GoodsForm = { name: "", description: "", price: "", stock: "", category: "CLOTHING", imageFile: null };
 
 function AdminPage() {
+  const { toast, showToast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const user = useSelector((state: RootState) => state.auth.user);
   const [activeTab, setActiveTab] = useState<Tab>("users");
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -117,7 +123,7 @@ function AdminPage() {
     api
       .get("/admin/users")
       .then((res) => setUsers(res.data))
-      .catch(() => alert("유저 목록을 불러오는데 실패했습니다."))
+      .catch(() => showToast("유저 목록을 불러오는데 실패했습니다.", "error"))
       .finally(() => setLoading(false));
   }, [user?.role]);
 
@@ -142,7 +148,7 @@ function AdminPage() {
       await api.patch(`/api/admin/orders/${orderId}/status`, { status });
       setOrders((prev) => prev.map((o) => o.orderId === orderId ? { ...o, status } : o));
     } catch {
-      alert("상태 변경에 실패했습니다.");
+      showToast("상태 변경에 실패했습니다.", "error");
     }
   };
 
@@ -158,7 +164,7 @@ function AdminPage() {
         : o));
       setTrackingEdit(null);
     } catch {
-      alert("운송장 등록에 실패했습니다.");
+      showToast("운송장 등록에 실패했습니다.", "error");
     }
   };
 
@@ -176,19 +182,20 @@ function AdminPage() {
   };
 
   const handleGoodsDelete = async (goodsId: number) => {
-    if (!confirm("상품을 삭제하시겠습니까?")) return;
+    const confirmed = await confirm("상품을 삭제하시겠습니까?");
+    if (!confirmed) return;
     try {
       await api.delete(`/api/goods/${goodsId}`);
       loadGoods();
     } catch {
-      alert("삭제에 실패했습니다.");
+      showToast("삭제에 실패했습니다.", "error");
     }
   };
 
   const handleGoodsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!goodsForm.name.trim() || !goodsForm.price || !goodsForm.stock) {
-      alert("이름, 가격, 재고를 입력해주세요.");
+      showToast("이름, 가격, 재고를 입력해주세요.", "info");
       return;
     }
     setGoodsLoading(true);
@@ -212,7 +219,7 @@ function AdminPage() {
       setGoodsForm(EMPTY_FORM);
       loadGoods();
     } catch {
-      alert("저장에 실패했습니다.");
+      showToast("저장에 실패했습니다.", "error");
     } finally {
       setGoodsLoading(false);
     }
@@ -223,7 +230,7 @@ function AdminPage() {
       await api.patch(`/api/admin/users/${id}/role`, { role });
       setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role } : u)));
     } catch {
-      alert("권한 변경에 실패했습니다.");
+      showToast("권한 변경에 실패했습니다.", "error");
     }
   };
 
@@ -253,6 +260,8 @@ function AdminPage() {
 
   return (
     <div className="min-h-screen p-6 md:p-10 text-white">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
       <h1 className="text-3xl md:text-4xl font-bold mb-2">관리자 페이지</h1>
       <p className="text-gray-400 text-base mb-6">전체 회원 목록 및 권한 관리</p>
 

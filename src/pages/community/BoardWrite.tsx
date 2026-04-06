@@ -7,6 +7,8 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { refreshPoint } from "../../components/ui/refreshPoint";
 import CustomEditor from "../../components/ui/CustomEditor";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 interface PlaylistSong {
   id: number;
@@ -22,6 +24,7 @@ interface SelectedPlaylist {
 }
 
 const BoardWrite = () => {
+  const { toast, showToast, closeToast } = useToast();
   const location = useLocation();
   const state = location.state as { playlistId?: number; playlistTitle?: string } | null;
 
@@ -73,12 +76,12 @@ const BoardWrite = () => {
     const submit = async () => {
     if (!userEmail) return;
     if (!title.trim()) {
-      alert("제목을 입력해주세요.");
+      showToast("제목을 입력해주세요.", "info");
       refreshPoint();
       return;
     }
     if (!selectedPlaylist || selectedPlaylist.songs.length === 0) {
-      alert("플레이리스트를 선택해주세요. (곡이 1곡 이상 있어야 합니다)");
+      showToast("플레이리스트를 선택해주세요. (곡이 1곡 이상 있어야 합니다)", "info");
       return;
     }
 
@@ -94,6 +97,8 @@ const BoardWrite = () => {
   };
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
     <div className="kf-community-page kf-board-write">
       <div className="kf-community-page__shell">
       <div className="mx-auto max-w-2xl p-6">
@@ -208,6 +213,7 @@ const BoardWrite = () => {
     </div>
       </div>
     </div>
+    </>
   );
 };
 

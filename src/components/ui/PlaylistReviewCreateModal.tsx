@@ -4,6 +4,8 @@ import { FaRegStar, FaStar, FaTimes } from "react-icons/fa";
 import { reviewApi } from "../../api/reviewApi";
 import { useSelector } from "react-redux";
 import "../../styles/PlaylistReviewCreateModal.kfandom.css";
+import Toast from "./Toast";
+import { useToast } from "../../hooks/useToast";
 
 interface Props {
   onClose: () => void;
@@ -12,6 +14,7 @@ interface Props {
 }
 
 function PlaylistReviewCreateModal({ onClose, playlistId, onSuccess }: Props) {
+  const { toast, showToast, closeToast } = useToast();
   const [rating, setRating] = useState<number | null>(0);
   const [review, setReview] = useState<string>("");
 
@@ -19,19 +22,19 @@ function PlaylistReviewCreateModal({ onClose, playlistId, onSuccess }: Props) {
 
   const handleSubmit = () => {
     if (!rating) {
-      alert("별점을 선택해주세요.");
+      showToast("별점을 선택해주세요.", "info");
       return;
     }
     if (!review.trim()) {
-      alert("한줄평을 작성해주세요.");
+      showToast("한줄평을 작성해주세요.", "info");
       return;
     }
     if (!user?.email) {
-      alert("로그인이 필요합니다.");
+      showToast("로그인이 필요합니다.", "info");
       return;
     }
     if (!playlistId) {
-      alert("플레이리스트 ID가 필요합니다.");
+      showToast("플레이리스트 ID가 필요합니다.", "error");
       return;
     }
 
@@ -44,15 +47,15 @@ function PlaylistReviewCreateModal({ onClose, playlistId, onSuccess }: Props) {
       })
       .then((res) => {
         if (res.status === 200 || res.status === 201) {
-          alert("리뷰가 등록되었습니다.");
+          showToast("리뷰가 등록되었습니다.", "success");
           onSuccess?.();
         } else {
-          alert("리뷰 등록 중 문제가 발생했습니다.");
+          showToast("리뷰 등록 중 문제가 발생했습니다.", "error");
         }
       })
       .catch((err) => {
         console.error(err);
-        alert("리뷰 등록에 실패했습니다.");
+        showToast("리뷰 등록에 실패했습니다.", "error");
       })
       .finally(() => {
         onClose();
@@ -61,6 +64,7 @@ function PlaylistReviewCreateModal({ onClose, playlistId, onSuccess }: Props) {
 
   return (
     <div className="kf-expansion-modal modal-overlay">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       <div className="prc-modal">
         {/* 헤더 */}
         <div className="prc-header">

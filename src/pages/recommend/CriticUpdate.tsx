@@ -6,6 +6,10 @@ import type { RootState } from "../../store";
 import "../../styles/CriticWrite.kfandom.css";
 import CriticSongSelectModal from "../../components/ui/CriticSongSelectModal";
 import CustomEditor from "../../components/ui/CustomEditor";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
+import ConfirmToast from "../../components/ui/ConfirmToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
 
 interface SelectedSong {
   id: number;
@@ -23,6 +27,8 @@ const extractFirstImageFromHtml = (html: string) => {
 };
 
 const CriticUpdate = () => {
+  const { toast, showToast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const { boardId } = useParams<{ boardId: string }>();
   const navigate = useNavigate();
 
@@ -39,7 +45,7 @@ const CriticUpdate = () => {
 
   useEffect(() => {
     if (userRole && userRole !== "CRITIC") {
-      alert("평론 수정 권한이 없습니다.");
+      showToast("평론 수정 권한이 없습니다.", "error");
       navigate(-1);
     }
   }, [userRole]);
@@ -64,22 +70,22 @@ const CriticUpdate = () => {
         setIsLoading(false);
       })
       .catch(() => {
-        alert("게시글을 불러올 수 없습니다.");
+        showToast("게시글을 불러올 수 없습니다.", "error");
         navigate(-1);
       });
   }, [boardId, userEmail]);
 
   const update = async () => {
     if (!title.trim()) {
-      alert("제목을 입력해주세요.");
+      showToast("제목을 입력해주세요.", "info");
       return;
     }
     if (!content.trim()) {
-      alert("내용을 입력해주세요.");
+      showToast("내용을 입력해주세요.", "info");
       return;
     }
     if (!selectedSong) {
-      alert("평론할 곡을 선택해주세요.");
+      showToast("평론할 곡을 선택해주세요.", "info");
       return;
     }
 
@@ -90,21 +96,23 @@ const CriticUpdate = () => {
         content,
         boardGenre: "FREE",
       });
-      alert("수정되었습니다.");
+      showToast("수정되었습니다.", "success");
       navigate(`/recommend/critic/${boardId}`);
     } catch {
-      alert("수정 중 오류가 발생했습니다.");
+      showToast("수정 중 오류가 발생했습니다.", "error");
     }
   };
 
   const remove = async () => {
-    if (!boardId || !window.confirm("정말 삭제하시겠습니까?")) return;
+    if (!boardId) return;
+    const confirmed = await confirm("정말 삭제하시겠습니까?");
+    if (!confirmed) return;
     try {
       await boardApi.deleteBoard(Number(boardId));
-      alert("삭제되었습니다.");
+      showToast("삭제되었습니다.", "success");
       navigate("/recommend/critic");
     } catch {
-      alert("삭제 중 오류가 발생했습니다.");
+      showToast("삭제 중 오류가 발생했습니다.", "error");
     }
   };
 
@@ -117,6 +125,9 @@ const CriticUpdate = () => {
   }
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
     <div className="kf-expansion-page kf-critic-write">
       <div className="max-w-6xl mx-auto p-6">
         <h2 className="mb-8 text-2xl font-bold" style={{ color: "var(--kf-brand)" }}>
@@ -247,6 +258,7 @@ const CriticUpdate = () => {
         />
       )}
     </div>
+    </>
   );
 };
 

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 interface UserPointRow {
   userId: number;
@@ -28,6 +30,7 @@ const GRADE_LABEL: Record<string, { text: string; color: string }> = {
 };
 
 export default function AdminPointsPage() {
+  const { toast, showToast, closeToast } = useToast();
   const [tab, setTab] = useState<"manage" | "logs">("manage");
   const [rows, setRows] = useState<UserPointRow[]>([]);
   const [logs, setLogs] = useState<PointLog[]>([]);
@@ -46,21 +49,21 @@ export default function AdminPointsPage() {
   const fetchPoints = () => {
     api.get<UserPointRow[]>("/api/admin/points")
       .then((res) => setRows(res.data))
-      .catch(() => alert("포인트 목록을 불러오는데 실패했습니다."))
+      .catch(() => showToast("포인트 목록을 불러오는데 실패했습니다.", "error"))
       .finally(() => setLoading(false));
   };
 
   const fetchLogs = () => {
     api.get<PointLog[]>("/api/admin/points/logs")
       .then((res) => setLogs(res.data))
-      .catch(() => alert("로그를 불러오는데 실패했습니다."));
+      .catch(() => showToast("로그를 불러오는데 실패했습니다.", "error"));
   };
 
   const handleAdjust = async (userId: number, type: "grant" | "deduct") => {
     const raw = adjustInputs[userId];
     const value = parseInt(raw || "0", 10);
     if (!value || isNaN(value) || value <= 0) {
-      alert("포인트를 1 이상 입력해주세요.");
+      showToast("포인트를 1 이상 입력해주세요.", "info");
       return;
     }
     const amount = type === "grant" ? value : -value;
@@ -70,7 +73,7 @@ export default function AdminPointsPage() {
       setAdjustInputs((prev) => ({ ...prev, [userId]: "" }));
       fetchPoints();
     } catch {
-      alert("포인트 조정에 실패했습니다.");
+      showToast("포인트 조정에 실패했습니다.", "error");
     } finally {
       setProcessing(null);
     }
@@ -80,6 +83,7 @@ export default function AdminPointsPage() {
 
   return (
     <div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       <div className="mb-6">
         <h1 className="text-2xl font-bold">포인트 관리</h1>
         <p className="text-sm mt-1" style={{color:"#4b5563"}}>총 {rows.length}명</p>

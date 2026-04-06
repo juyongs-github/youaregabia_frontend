@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
+import ConfirmToast from "../../components/ui/ConfirmToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
 
 interface ActivityLog {
   type: string;
@@ -11,6 +15,8 @@ interface ActivityLog {
 }
 
 export default function AdminActivityLogsPage() {
+  const { toast, showToast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +28,8 @@ export default function AdminActivityLogsPage() {
 
   const handleDelete = async (log: ActivityLog) => {
     const label = log.type === "게시글" ? "게시글" : "댓글";
-    if (!confirm(`이 ${label}을 삭제하시겠습니까?`)) return;
+    const confirmed = await confirm(`이 ${label}을 삭제하시겠습니까?`);
+    if (!confirmed) return;
     const endpoint = log.type === "게시글"
       ? `/api/admin/boards/${log.targetId}`
       : `/api/admin/replies/${log.targetId}`;
@@ -30,7 +37,7 @@ export default function AdminActivityLogsPage() {
       await api.delete(endpoint);
       setLogs((prev) => prev.filter((l) => !(l.type === log.type && l.targetId === log.targetId)));
     } catch {
-      alert("삭제에 실패했습니다.");
+      showToast("삭제에 실패했습니다.", "error");
     }
   };
 
@@ -38,6 +45,8 @@ export default function AdminActivityLogsPage() {
 
   return (
     <div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
       <div className="mb-6">
         <h1 className="text-2xl font-bold">활동 로그</h1>
         <p className="text-sm mt-1" style={{color:"#4b5563"}}>최근 {logs.length}건</p>

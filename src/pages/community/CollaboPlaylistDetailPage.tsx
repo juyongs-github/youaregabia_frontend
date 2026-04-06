@@ -1,5 +1,7 @@
 import "../../styles/collabo-playlist-detail-kfandom.css";
 import { useEffect, useState } from "react";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 import { createPortal } from "react-dom";
 import {
   FaCalendarAlt,
@@ -40,6 +42,9 @@ import MusicPlayer from "../../components/layout/MusicPlayer";
 import Spinner from "../../components/ui/Spinner";
 import api from "../../api/axios";
 import FallbackCoverArt from "../../components/ui/FallbackCoverArt";
+import ConfirmToast from "../../components/ui/ConfirmToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
+import { isCollaboImported, markCollaboImported } from "../../utils/collaboImportTracker";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 
@@ -61,6 +66,8 @@ function timeAgo(dateStr?: string): string {
 }
 
 function CollaboPlaylistDetailPage() {
+  const { toast, showToast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const user = useSelector((state: RootState) => state.auth.user);
@@ -158,17 +165,17 @@ function CollaboPlaylistDetailPage() {
   // 곡 제안 (유저당 최대 5곡)
   const handleSuggestSong = async (song: Song, reason: string) => {
     if (!id || !user?.email) {
-      alert("로그인이 필요합니다.");
+      showToast("로그인이 필요합니다.", "info");
       return;
     }
 
     try {
       await playlistSongApi.suggestSong(Number(id), song.id, reason || undefined);
-      alert("곡이 추가되었습니다.");
+      showToast("곡이 추가되었습니다.", "success");
       setAddedSongIds((prev) => new Set(prev).add(song.id));
       fetchSongs();
     } catch (e: any) {
-      alert(e?.response?.data ?? "곡 추가에 실패했습니다.");
+      showToast(e?.response?.data ?? "곡 추가에 실패했습니다.", "error");
     }
   };
 
@@ -176,7 +183,7 @@ function CollaboPlaylistDetailPage() {
   const handleUpdateReason = async (playlistSongId: number) => {
     if (!user?.email) return;
     if (editingReasonText.length > 50) {
-      alert("추가 이유는 최대 50자까지 입력할 수 있습니다.");
+      showToast("추가 이유는 최대 50자까지 입력할 수 있습니다.", "info");
       return;
     }
     try {
@@ -188,26 +195,27 @@ function CollaboPlaylistDetailPage() {
       );
       setEditingReasonId(null);
     } catch (e) {
-      alert("추가 이유 수정에 실패했습니다.");
+      showToast("추가 이유 수정에 실패했습니다.", "error");
     }
   };
 
   // 곡 삭제 (작성자 or 등록자)
   const handleRemoveSong = async (playlistSongId: number) => {
     if (!user?.email) return;
-    if (!window.confirm("이 곡을 삭제하시겠습니까?")) return;
+    const confirmed = await confirm("이 곡을 삭제하시겠습니까?");
+    if (!confirmed) return;
     try {
       await playlistSongApi.removeSongFromPlaylist(playlistSongId);
       fetchSongs();
     } catch (e) {
-      alert("곡 삭제에 실패했습니다.");
+      showToast("곡 삭제에 실패했습니다.", "error");
     }
   };
 
   // 투표 / 투표 취소
   const handleVote = async (song: CollaboSong) => {
     if (!id || !user?.email) {
-      alert("로그인이 필요합니다.");
+      showToast("로그인이 필요합니다.", "info");
       return;
     }
     try {
@@ -224,12 +232,14 @@ function CollaboPlaylistDetailPage() {
         )
       );
     } catch (e: any) {
-      alert(e?.response?.data ?? "투표에 실패했습니다.");
+      showToast(e?.response?.data ?? "투표에 실패했습니다.", "error");
     }
   };
 
   const handleEarlyClose = async () => {
-    if (!playlist || !window.confirm("지금 바로 마감하시겠습니까?")) return;
+    if (!playlist) return;
+    const confirmed = await confirm("지금 바로 마감하시겠습니까?");
+    if (!confirmed) return;
 
     const now = new Date();
     const deadline = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}T${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
@@ -247,23 +257,25 @@ function CollaboPlaylistDetailPage() {
       await playlistApi.updatePlaylist(Number(id), formData);
       fetchPlaylist();
     } catch (e) {
-      alert("마감 처리에 실패했습니다.");
+      showToast("마감 처리에 실패했습니다.", "error");
     }
   };
 
   const handleDeletePlaylist = async () => {
-    if (!id || !window.confirm("플레이리스트를 삭제하시겠습니까?")) return;
+    if (!id) return;
+    const confirmed = await confirm("플레이리스트를 삭제하시겠습니까?");
+    if (!confirmed) return;
     try {
       await playlistApi.deletePlaylist(Number(id));
       navigate("/community/collabo");
     } catch (e) {
-      alert("삭제에 실패했습니다.");
+      showToast("삭제에 실패했습니다.", "error");
     }
   };
 
   const handleLike = async () => {
     if (!id || !user?.email) {
-      alert("로그인이 필요합니다.");
+      showToast("로그인이 필요합니다.", "info");
       return;
     }
     try {
@@ -282,7 +294,7 @@ function CollaboPlaylistDetailPage() {
           : prev
       );
     } catch (e: any) {
-      alert(e?.response?.data?.message ?? "좋아요에 실패했습니다.");
+      showToast(e?.response?.data?.message ?? "좋아요에 실패했습니다.", "error");
     }
   };
 
@@ -300,11 +312,11 @@ function CollaboPlaylistDetailPage() {
 
   const handleReopen = async () => {
     if (!id || !user?.email) {
-      alert("로그인이 필요합니다.");
+      showToast("로그인이 필요합니다.", "info");
       return;
     }
     if (!reopenDeadlineDate) {
-      alert("새 마감일을 설정해주세요.");
+      showToast("새 마감일을 설정해주세요.", "info");
       return;
     }
     const d = reopenDeadlineDate;
@@ -315,7 +327,7 @@ function CollaboPlaylistDetailPage() {
       setReopenDeadlineDate(null);
       fetchPlaylist();
     } catch (e: any) {
-      alert(e?.response?.data ?? "참여 재개에 실패했습니다.");
+      showToast(e?.response?.data ?? "참여 재개에 실패했습니다.", "error");
     }
   };
 
@@ -328,11 +340,12 @@ function CollaboPlaylistDetailPage() {
     if (!id || !user?.email) return;
     setIsImporting(true);
     try {
-      await playlistApi.importCollabo(Number(id));
+      const res = await playlistApi.importCollabo(Number(id));
+      markCollaboImported(Number(id), res.data?.id);
       setPlaylist((prev) => (prev ? { ...prev, hasImported: true } : prev));
-      alert("내 플레이리스트로 가져왔습니다.");
+      showToast("내 플레이리스트로 가져왔습니다.", "success");
     } catch (e) {
-      alert((e as { response?: { data?: string } })?.response?.data ?? "가져오기에 실패했습니다.");
+      showToast((e as { response?: { data?: string } })?.response?.data ?? "가져오기에 실패했습니다.", "error");
     } finally {
       setIsImporting(false);
     }
@@ -341,8 +354,14 @@ function CollaboPlaylistDetailPage() {
   const canDelete = (song: CollaboSong) =>
     !!user?.email && (isCreator || song.suggestedByEmail === user.email);
   const modalRoot = typeof document !== "undefined" ? document.body : null;
+  const collaboId = id ? Number(id) : null;
+  const hasImportedPlaylist =
+    collaboId !== null && isCollaboImported(collaboId, playlist?.hasImported);
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
     <div className="kf-community-page kf-collabo-detail">
       <div className="kf-community-page__shell">
       <div className="flex flex-col w-full gap-8" style={{ padding: 24 }}>
@@ -490,7 +509,7 @@ function CollaboPlaylistDetailPage() {
             >
               <FaHeart size={12} />{playlist?.likeCount ?? 0}
             </button>
-            {isClosed && user && !playlist?.hasImported && (
+            {isClosed && user && !hasImportedPlaylist && (
               <button
                 onClick={handleImport}
                 disabled={isImporting}
@@ -1023,7 +1042,7 @@ function CollaboPlaylistDetailPage() {
               </button>
               <button
                 onClick={() => {
-                  if (suggestReason.length > 50) { alert("추가 이유는 최대 50자까지 입력할 수 있습니다."); return; }
+                  if (suggestReason.length > 50) { showToast("추가 이유는 최대 50자까지 입력할 수 있습니다.", "info"); return; }
                   handleSuggestSong(suggestTarget, suggestReason);
                   setSuggestTarget(null);
                 }}
@@ -1059,6 +1078,7 @@ function CollaboPlaylistDetailPage() {
     </div>
       </div>
     </div>
+    </>
   );
 }
 

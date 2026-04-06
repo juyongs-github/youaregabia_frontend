@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { FaBox, FaEdit, FaPlus, FaTrash } from "react-icons/fa";
 import api from "../../api/axios";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
+import ConfirmToast from "../../components/ui/ConfirmToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
 
 interface GoodsRow {
   goodsId: number;
@@ -32,6 +36,8 @@ const categoryLabel: Record<string, string> = { CLOTHING: "의류", ACCESSORIES:
 const EMPTY_FORM: GoodsForm = { name: "", description: "", price: "", stock: "", category: "CLOTHING", imageFile: null };
 
 export default function AdminGoodsPage() {
+  const { toast, showToast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const [goodsList, setGoodsList] = useState<GoodsRow[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<GoodsForm>(EMPTY_FORM);
@@ -54,19 +60,20 @@ export default function AdminGoodsPage() {
   };
 
   const handleDelete = async (goodsId: number) => {
-    if (!confirm("상품을 삭제하시겠습니까?")) return;
+    const confirmed = await confirm("상품을 삭제하시겠습니까?");
+    if (!confirmed) return;
     try {
       await api.delete(`/api/goods/${goodsId}`);
       loadGoods();
     } catch {
-      alert("삭제에 실패했습니다.");
+      showToast("삭제에 실패했습니다.", "error");
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.price || !form.stock) {
-      alert("이름, 가격, 재고를 입력해주세요.");
+      showToast("이름, 가격, 재고를 입력해주세요.", "info");
       return;
     }
     setFormLoading(true);
@@ -90,7 +97,7 @@ export default function AdminGoodsPage() {
       setForm(EMPTY_FORM);
       loadGoods();
     } catch {
-      alert("저장에 실패했습니다.");
+      showToast("저장에 실패했습니다.", "error");
     } finally {
       setFormLoading(false);
     }
@@ -98,6 +105,8 @@ export default function AdminGoodsPage() {
 
   return (
     <div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">굿즈 관리</h1>

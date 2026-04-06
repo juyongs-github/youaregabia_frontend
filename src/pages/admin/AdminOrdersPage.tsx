@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
+import ConfirmToast from "../../components/ui/ConfirmToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
 
 interface OrderRow {
   orderId: number;
@@ -34,6 +38,8 @@ const orderStatusLabel: Record<string, { text: string; color: string }> = {
 };
 
 export default function AdminOrdersPage() {
+  const { toast, showToast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [trackingEdit, setTrackingEdit] = useState<{ orderId: number; carrierId: string; trackingNumber: string } | null>(null);
@@ -52,17 +58,18 @@ export default function AdminOrdersPage() {
       await api.patch(`/api/admin/orders/${orderId}/status`, { status });
       setOrders((prev) => prev.map((o) => o.orderId === orderId ? { ...o, status } : o));
     } catch {
-      alert("상태 변경에 실패했습니다.");
+      showToast("상태 변경에 실패했습니다.", "error");
     }
   };
 
   const handleDeleteOrder = async (orderId: number) => {
-    if (!confirm(`주문 #${orderId}을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) return;
+    const confirmed = await confirm(`주문 #${orderId}을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`);
+    if (!confirmed) return;
     try {
       await api.delete(`/api/admin/orders/${orderId}`);
       setOrders((prev) => prev.filter((o) => o.orderId !== orderId));
     } catch {
-      alert("주문 삭제에 실패했습니다.");
+      showToast("주문 삭제에 실패했습니다.", "error");
     }
   };
 
@@ -78,7 +85,7 @@ export default function AdminOrdersPage() {
         : o));
       setTrackingEdit(null);
     } catch {
-      alert("운송장 등록에 실패했습니다.");
+      showToast("운송장 등록에 실패했습니다.", "error");
     }
   };
 
@@ -86,6 +93,8 @@ export default function AdminOrdersPage() {
 
   return (
     <div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">결제 내역</h1>

@@ -9,6 +9,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from "date-fns/locale";
 import "../../styles/modal.css";
+import Toast from "./Toast";
+import { useToast } from "../../hooks/useToast";
 
 interface Props {
   onClose: () => void;
@@ -16,6 +18,7 @@ interface Props {
 }
 
 function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
+  const { toast, showToast, closeToast } = useToast();
   const user = useSelector((state: RootState) => state.auth.user);
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -33,6 +36,7 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
 
   const modal = (
     <div className="modal-overlay">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       <form
         className="modal-container"
         onClick={(e) => e.stopPropagation()}
@@ -40,22 +44,22 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
           e.preventDefault();
 
           if (!user?.email) {
-            alert("로그인이 필요합니다.");
+            showToast("로그인이 필요합니다.", "info");
             return;
           }
 
           if (!title.trim()) {
-            alert("제목을 입력해주세요.");
+            showToast("제목을 입력해주세요.", "info");
             return;
           }
 
           if (!deadlineDate) {
-            alert("마감일을 입력해주세요.");
+            showToast("마감일을 입력해주세요.", "info");
             return;
           }
 
           if (description.length > 100) {
-            alert("요청 내용은 최대 100자까지 입력할 수 있습니다.");
+            showToast("요청 내용은 최대 100자까지 입력할 수 있습니다.", "info");
             return;
           }
 
@@ -75,13 +79,13 @@ function CollaboPlaylistCreateModal({ onClose, onCreated }: Props) {
             .createPlaylist(formData)
             .then((res) => {
               if (res.data) {
-                alert("플레이리스트가 생성되었습니다.");
+                showToast("플레이리스트가 생성되었습니다.", "success");
                 onCreated?.();
                 onClose();
               }
             })
             .catch((error) => {
-              alert("플레이리스트 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
+              showToast("플레이리스트 생성에 실패했습니다. 잠시 후 다시 시도해주세요.", "error");
               if (axios.isAxiosError(error)) {
                 console.error("[CollaboCreate] createPlaylist failed", {
                   status: error.response?.status,

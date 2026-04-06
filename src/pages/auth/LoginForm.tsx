@@ -4,8 +4,11 @@ import "../../styles/auth-kfandom.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../store/authSlice";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 function LoginForm() {
+  const { toast, showToast, closeToast } = useToast();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [form, setForm] = useState({ email: "", password: "" });
@@ -37,7 +40,7 @@ function LoginForm() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!form.email || !form.password) {
-      alert("이메일과 비밀번호를 입력하세요.");
+      showToast("이메일과 비밀번호를 입력하세요.", "info");
       return;
     }
 
@@ -57,14 +60,14 @@ function LoginForm() {
         })
       );
 
-      alert("로그인 성공");
+      showToast("로그인 성공", "success");
       if (response.data.role === "ADMIN") {
-        navigate("/admin");
+        setTimeout(() => navigate("/admin"), 350);
       } else {
-        navigate("/home");
+        setTimeout(() => navigate("/home"), 350);
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || "로그인 정보가 올바르지 않습니다.");
+      showToast(error.response?.data?.message || "로그인 정보가 올바르지 않습니다.", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -72,6 +75,7 @@ function LoginForm() {
 
   return (
     <div className="kf-auth-page">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       <header className="kf-auth-header">
         <Link to="/" className="kf-brand" aria-label="GAP Music 홈으로 이동">
           <span className="kf-brand__logo">G</span>

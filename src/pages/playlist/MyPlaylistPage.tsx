@@ -8,9 +8,16 @@ import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
 import "../../styles/MyplaylistPage.css";
 import api from "../../api/axios";
 import FallbackCoverArt from "../../components/ui/FallbackCoverArt";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
+import ConfirmToast from "../../components/ui/ConfirmToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
+import { clearImportedPlaylist } from "../../utils/collaboImportTracker";
 
 
 function MyPlaylistPage() {
+  const { toast, showToast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const navigate = useNavigate();
 
   // 플레이리스트 정보
@@ -50,14 +57,16 @@ function MyPlaylistPage() {
   const handleDelete = async (e: React.MouseEvent, playlistId: number) => {
     e.stopPropagation();
 
-    if (!window.confirm("정말로 삭제하시겠습니까?")) return;
+    const confirmed = await confirm("정말로 삭제하시겠습니까?");
+    if (!confirmed) return;
 
     try {
       await playlistApi.deletePlaylist(playlistId);
+      clearImportedPlaylist(playlistId);
       setData((prev) => prev.filter((p) => p.id !== playlistId));
     } catch (error) {
       console.error(error);
-      alert("삭제에 실패하였습니다.");
+      showToast("삭제에 실패하였습니다.", "error");
     }
   };
 
@@ -83,6 +92,9 @@ function MyPlaylistPage() {
   });
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
     <div>
       <div className="flex justify-between items-center py-3">
         <h1 className="page-title">내 플레이리스트</h1>
@@ -151,6 +163,7 @@ function MyPlaylistPage() {
         )}
       </div>
     </div>
+    </>
   );
 }
 

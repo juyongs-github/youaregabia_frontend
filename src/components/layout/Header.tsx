@@ -13,6 +13,8 @@ import { logout } from "../../store/authSlice";
 import api from "../../api/axios";
 import { usePoint } from "../../store/usePoint";
 import "../../styles/header-kfandom.css";
+import Toast from "../ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 interface NotificationItem {
   id: number;
@@ -23,6 +25,7 @@ interface NotificationItem {
 }
 
 function Header({ showSearch = true, onMenuClick }: { showSearch?: boolean; onMenuClick?: () => void }) {
+  const { toast, showToast, closeToast } = useToast();
   const isLogin = useSelector((state: RootState) => state.auth.isLoggedIn);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -103,6 +106,8 @@ function Header({ showSearch = true, onMenuClick }: { showSearch?: boolean; onMe
   };
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
     <div className="kf-header-wrap">
       <header className="kf-header">
         {/* 햄버거 버튼 (모바일) */}
@@ -133,7 +138,7 @@ function Header({ showSearch = true, onMenuClick }: { showSearch?: boolean; onMe
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   if (!searchValue.trim()) {
-                    alert("검색어를 입력해주세요.");
+                    showToast("검색어를 입력해주세요.", "info");
                     return;
                   }
                   const url = `/search?q=${encodeURIComponent(searchValue)}`;
@@ -329,6 +334,7 @@ function Header({ showSearch = true, onMenuClick }: { showSearch?: boolean; onMe
         </div>
       </header>
     </div>
+    </>
   );
 }
 

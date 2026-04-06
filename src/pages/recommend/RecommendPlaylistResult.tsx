@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import type { AxiosError } from "axios";
 import type { Song } from "../../components/ui/SongListItem";
 import api from "../../api/axios";
 import { FaHeadphones, FaMusic, FaSave } from "react-icons/fa";
@@ -190,11 +189,11 @@ function RecommendPlaylistResult() {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      alert("이미지 파일만 선택할 수 있습니다.");
+      showToast("이미지 파일만 선택할 수 있습니다.", "info");
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      alert("파일 크기는 10MB 이하여야 합니다.");
+      showToast("파일 크기는 10MB 이하여야 합니다.", "info");
       return;
     }
     setSelectedImageFile(file);
@@ -234,8 +233,9 @@ function RecommendPlaylistResult() {
         const playlistId = res.data?.id || res.data?.playlistId;
         if (playlistId) { setSavedPlaylistId(playlistId); showToast("플레이리스트가 저장되었습니다.", "success"); }
       }
-    } catch (error: AxiosError) {
-      if (error?.response?.status === 409) showToast("같은 제목의 플레이리스트가 이미 존재합니다.", "error");
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { status?: number } };
+      if (axiosError.response?.status === 409) showToast("같은 제목의 플레이리스트가 이미 존재합니다.", "error");
       else showToast("플레이리스트 저장에 실패했습니다.", "error");
     } finally {
       setIsSaving(false);

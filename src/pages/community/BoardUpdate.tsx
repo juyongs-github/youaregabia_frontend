@@ -5,8 +5,14 @@ import { useSelector } from "react-redux";
 import { boardApi } from "../../api/boardApi";
 import type { RootState } from "../../store";
 import CustomEditor from "../../components/ui/CustomEditor";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
+import ConfirmToast from "../../components/ui/ConfirmToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
 
 const BoardUpdate = () => {
+  const { toast, showToast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const { boardId } = useParams<{ boardId: string }>();
   const navigate = useNavigate();
 
@@ -36,7 +42,7 @@ const BoardUpdate = () => {
       })
       .catch((err) => {
         console.error("데이터 로딩 실패:", err);
-        alert("게시글을 불러올 수 없습니다.");
+        showToast("게시글을 불러올 수 없습니다.", "error");
         navigate(-1);
       });
   }, [boardId, userEmail, navigate]);
@@ -44,7 +50,7 @@ const BoardUpdate = () => {
   // 2. 수정 실행
   const update = async () => {
     if (!title.trim()) {
-      alert("제목을 입력해주세요.");
+      showToast("제목을 입력해주세요.", "info");
       return;
     }
 
@@ -55,35 +61,44 @@ const BoardUpdate = () => {
         content,
         boardGenre: genre,
       });
-      alert("수정되었습니다.");
+      showToast("수정되었습니다.", "success");
       navigate(`/community/share/${boardId}`);
     } catch (error) {
-      alert("수정 중 오류가 발생했습니다.");
+      showToast("수정 중 오류가 발생했습니다.", "error");
     }
   };
 
   // 3. 삭제 실행
   const remove = async () => {
-    if (!boardId || !window.confirm("정말 삭제하시겠습니까?")) return;
+    if (!boardId) return;
+    const confirmed = await confirm("정말 삭제하시겠습니까?");
+    if (!confirmed) return;
     try {
       await boardApi.deleteBoard(Number(boardId));
-      alert("삭제되었습니다.");
+      showToast("삭제되었습니다.", "success");
       navigate("/community/share");
     } catch (error) {
-      alert("삭제 중 오류가 발생했습니다.");
+      showToast("삭제 중 오류가 발생했습니다.", "error");
     }
   };
 
   if (isLoading)
     return (
+      <>
+        {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+        <ConfirmToast state={confirmToast} onClose={closeConfirm} />
       <div className="kf-community-page kf-board-update">
         <div className="kf-community-page__shell">
           <div className="kf-community-loading">로딩 중...</div>
         </div>
       </div>
+      </>
     );
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
     <div className="kf-community-page kf-board-update">
       <div className="kf-community-page__shell">
         <div className="max-w-4xl mx-auto p-4">
@@ -173,6 +188,7 @@ const BoardUpdate = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

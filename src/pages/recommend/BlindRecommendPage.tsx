@@ -7,11 +7,14 @@ import { usePlayer } from "../../contexts/PlayerContext";
 import PlaylistCreateModal from "../../components/ui/PlaylistCreateModal";
 import type { Song } from "../../components/ui/SongListItem";
 import GameCountdown from "../../components/ui/GameCountdown";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 type Phase = "intro" | "playing" | "result";
 type TotalMode = 5 | 10 | "infinite";
 
 const BlindRecommendPage = () => {
+  const { toast, showToast, closeToast } = useToast();
   const userEmail = useSelector((state: RootState) => state.auth.user?.email);
 
   // 상태 관리
@@ -59,7 +62,7 @@ const BlindRecommendPage = () => {
         setCurrentIndex(0);
         setStarted(true); // 데이터 로드 완료 후 실제 게임 화면으로 진입
       } else {
-        alert("곡을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+        showToast("곡을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.", "error");
         setPhase("intro"); // 실패 시 인트로로 복구
       }
       setIsLoading(false);
@@ -187,6 +190,8 @@ const BlindRecommendPage = () => {
   // 1. 결과 화면
   if (phase === "result") {
     return (
+      <>
+        {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       <div className="flex flex-col items-center gap-6 py-12 mx-auto max-w-2xl px-8 animate-in fade-in duration-500">
         <div className="bg-white/70 backdrop-blur-[24px] border border-white/80 shadow-2xl rounded-[32px] p-10 w-full flex flex-col items-center">
           <h2 className="text-4xl font-black tracking-tight text-[#2f3863] mb-2">추천 완료!</h2>
@@ -323,6 +328,7 @@ const BlindRecommendPage = () => {
           />
         )}
       </div>
+      </>
     );
   }
 
@@ -395,6 +401,8 @@ const BlindRecommendPage = () => {
 
   // 5. 추천 진행 화면
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
     <div className="mx-auto max-w-6xl px-6 py-12 flex flex-col md:flex-row gap-10 items-start relative min-h-[90vh]">
       <div className="flex-1 w-full max-w-2xl mx-auto flex flex-col items-center">
         <div className="w-full mb-12">
@@ -528,6 +536,7 @@ const BlindRecommendPage = () => {
         </div>
       </aside>
     </div>
+    </>
   );
 };
 

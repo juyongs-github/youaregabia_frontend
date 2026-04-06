@@ -6,6 +6,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from "date-fns/locale";
 import "../../styles/modal.css";
+import Toast from "./Toast";
+import { useToast } from "../../hooks/useToast";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 
@@ -14,7 +16,7 @@ interface Props {
   initialTitle: string;
   initialDescription: string;
   initialDeadline?: string;
-  initialImageUrl?: string;
+  initialImageUrl?: string | null;
   onClose: () => void;
   onUpdated: () => void;
 }
@@ -28,6 +30,7 @@ function CollaboPlaylistEditModal({
   onClose,
   onUpdated,
 }: Props) {
+  const { toast, showToast, closeToast } = useToast();
   const initDate = initialDeadline ? new Date(initialDeadline) : null;
 
   const [image, setImage] = useState<File | null>(null);
@@ -49,23 +52,24 @@ function CollaboPlaylistEditModal({
 
   const modal = (
     <div className="modal-overlay">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       <form
         className="modal-container"
         onClick={(e) => e.stopPropagation()}
         onSubmit={async (e) => {
           e.preventDefault();
           if (!title.trim()) {
-            alert("제목을 입력해주세요.");
+            showToast("제목을 입력해주세요.", "info");
             return;
           }
 
           if (!deadlineDate) {
-            alert("마감일을 입력해주세요.");
+            showToast("마감일을 입력해주세요.", "info");
             return;
           }
 
           if (description.length > 100) {
-            alert("요청 내용은 최대 100자까지 입력할 수 있습니다.");
+            showToast("요청 내용은 최대 100자까지 입력할 수 있습니다.", "info");
             return;
           }
 
@@ -91,11 +95,11 @@ function CollaboPlaylistEditModal({
           setIsSubmitting(true);
           try {
             await playlistApi.updatePlaylist(playlistId, formData);
-            alert("플레이리스트가 수정되었습니다.");
+            showToast("플레이리스트가 수정되었습니다.", "success");
             onUpdated();
             onClose();
           } catch {
-            alert("수정에 실패했습니다.");
+            showToast("수정에 실패했습니다.", "error");
           } finally {
             setIsSubmitting(false);
           }

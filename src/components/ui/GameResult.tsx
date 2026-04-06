@@ -202,7 +202,6 @@ const GameResult = ({
           {songs.map((song) => {
             const isAdded = addedSongIds.has(song.id);
             const isInPlaylist = playlistSongIds.has(song.id);
-            const isDisabled = isAdded || isInPlaylist;
             const isCorrect = correctSongIds?.has(song.id);
             const isWrong = wrongSongIds?.has(song.id);
 

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaBoxOpen, FaTruck } from "react-icons/fa";
 import api from "../../api/axios";
 import "../../styles/OrderHistoryPage.kfandom.css";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 interface OrderItem {
   goodsId: number;
@@ -50,6 +52,7 @@ const CARRIER_LABEL: Record<string, string> = {
 };
 
 export default function OrderHistoryPage() {
+  const { toast, showToast, closeToast } = useToast();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,7 +62,7 @@ export default function OrderHistoryPage() {
   useEffect(() => {
     api.get<Order[]>("/api/orders/me")
       .then((res) => setOrders(res.data))
-      .catch(() => alert("주문 내역을 불러오는데 실패했습니다."))
+      .catch(() => showToast("주문 내역을 불러오는데 실패했습니다.", "error"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -82,9 +85,9 @@ export default function OrderHistoryPage() {
     } catch (e: unknown) {
       const status = (e as { response?: { status: number } })?.response?.status;
       if (status === 404) {
-        alert("아직 배송 정보가 등록되지 않았습니다.\n운송장 번호를 확인해주세요.");
+        showToast("아직 배송 정보가 등록되지 않았습니다. 운송장 번호를 확인해주세요.", "info");
       } else {
-        alert("배송 조회에 실패했습니다. 잠시 후 다시 시도해주세요.");
+        showToast("배송 조회에 실패했습니다. 잠시 후 다시 시도해주세요.", "error");
       }
       setTrackingData((prev) => ({ ...prev, [order.orderId]: null }));
     } finally {
@@ -95,6 +98,8 @@ export default function OrderHistoryPage() {
   if (loading) return <div className="text-white text-center mt-20">로딩 중...</div>;
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
     <div className="kf-expansion-page kf-order-history">
       <div className="flex items-center gap-4 mb-8">
         <button onClick={() => navigate("/goods")} className="text-gray-400 hover:text-white transition-colors">
@@ -202,5 +207,6 @@ export default function OrderHistoryPage() {
         </div>
       )}
     </div>
+    </>
   );
 }

@@ -6,6 +6,10 @@ import type { RootState } from "../../store";
 import { reviewApi } from "../../api/reviewApi";
 import "../../styles/PlaylistReviewPage.kfandom.css";
 import type { Song } from "../../components/ui/SongListItem";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
+import ConfirmToast from "../../components/ui/ConfirmToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
 import Rating from "@mui/material/Rating";
 import {
   FaStar,
@@ -44,6 +48,8 @@ interface Review {
 type TabType = "all" | "mine";
 
 function PlaylistReviewPage() {
+  const { toast, showToast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const user = useSelector((state: RootState) => state.auth.user);
   const location = useLocation();
   const locationState = (location.state as any) ?? {};
@@ -160,7 +166,8 @@ function PlaylistReviewPage() {
   };
 
   const handleUpdate = async (reviewId: number) => {
-    if (!confirm("리뷰를 수정하시겠습니까?")) return;
+    const confirmed = await confirm("리뷰를 수정하시겠습니까?");
+    if (!confirmed) return;
     try {
       await reviewApi.updateReview(reviewId, {
         rating: String(editRating),
@@ -174,18 +181,19 @@ function PlaylistReviewPage() {
       setEditingReviewId(null);
     } catch (e) {
       console.error(e);
-      alert("리뷰 수정에 실패했습니다.");
+      showToast("리뷰 수정에 실패했습니다.", "error");
     }
   };
 
   const handleDelete = async (reviewId: number) => {
-    if (!confirm("리뷰를 삭제하시겠습니까?")) return;
+    const confirmed = await confirm("리뷰를 삭제하시겠습니까?");
+    if (!confirmed) return;
     try {
       await reviewApi.deleteReview(reviewId);
       setMyReviews((prev) => prev.filter((r) => r.id !== reviewId));
     } catch (e) {
       console.error(e);
-      alert("리뷰 삭제에 실패했습니다.");
+      showToast("리뷰 삭제에 실패했습니다.", "error");
     }
   };
 
@@ -213,6 +221,9 @@ function PlaylistReviewPage() {
   const currentReviews = getFilteredReviews(activeTab === "all" ? allReviews : myReviews);
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
     <div
       className="kf-expansion-page kf-playlist-review"
       style={{ paddingBottom: isPlayerVisible ? "160px" : undefined }}
@@ -555,6 +566,7 @@ function PlaylistReviewPage() {
           document.body
         )}
     </div>
+    </>
   );
 }
 

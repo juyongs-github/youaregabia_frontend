@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import api from "../../api/axios";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
+import ConfirmToast from "../../components/ui/ConfirmToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
 
 interface Inquiry {
   id: number;
@@ -25,6 +29,8 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 export default function AdminInquiriesPage() {
+  const { toast, showToast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<number | null>(null);
@@ -41,7 +47,7 @@ export default function AdminInquiriesPage() {
 
 const handleSaveAnswer = async (id: number) => {
     const answer = answerDraft[id]?.trim();
-    if (!answer) { alert("답변 내용을 입력해주세요."); return; }
+    if (!answer) { showToast("답변 내용을 입력해주세요.", "info"); return; }
     setSaving(id);
     try {
       const res = await api.put(`/api/admin/inquiries/${id}/answer`, { answer });
@@ -51,14 +57,15 @@ const handleSaveAnswer = async (id: number) => {
       setAnswerEditing(null);
       setAnswerDraft((prev) => { const next = { ...prev }; delete next[id]; return next; });
     } catch {
-      alert("답변 저장에 실패했습니다.");
+      showToast("답변 저장에 실패했습니다.", "error");
     } finally {
       setSaving(null);
     }
   };
 
   const handleDeleteAnswer = async (id: number) => {
-    if (!confirm("답변을 삭제하시겠습니까?")) return;
+    const confirmed = await confirm("답변을 삭제하시겠습니까?");
+    if (!confirmed) return;
     try {
       const res = await api.delete(`/api/admin/inquiries/${id}/answer`);
       setInquiries((prev) =>
@@ -67,18 +74,19 @@ const handleSaveAnswer = async (id: number) => {
       setAnswerEditing(null);
       setAnswerDraft((prev) => { const next = { ...prev }; delete next[id]; return next; });
     } catch {
-      alert("답변 삭제에 실패했습니다.");
+      showToast("답변 삭제에 실패했습니다.", "error");
     }
   };
 
   const handleDeleteInquiry = async (id: number) => {
-    if (!confirm("이 문의를 삭제하시겠습니까? 복구할 수 없습니다.")) return;
+    const confirmed = await confirm("이 문의를 삭제하시겠습니까? 복구할 수 없습니다.");
+    if (!confirmed) return;
     try {
       await api.delete(`/api/admin/inquiries/${id}`);
       setInquiries((prev) => prev.filter((q) => q.id !== id));
       if (expanded === id) setExpanded(null);
     } catch {
-      alert("문의 삭제에 실패했습니다.");
+      showToast("문의 삭제에 실패했습니다.", "error");
     }
   };
 
@@ -101,6 +109,9 @@ const handleSaveAnswer = async (id: number) => {
   if (loading) return <div className="text-center mt-20" style={{ color: "#64748b" }}>로딩 중...</div>;
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -309,5 +320,6 @@ const handleSaveAnswer = async (id: number) => {
         </div>
       )}
     </div>
+    </>
   );
 }

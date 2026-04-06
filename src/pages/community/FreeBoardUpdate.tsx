@@ -5,8 +5,14 @@ import { boardApi } from "../../api/boardApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import CustomEditor from "../../components/ui/CustomEditor";
+import Toast from "../../components/ui/Toast";
+import ConfirmToast from "../../components/ui/ConfirmToast";
+import { useToast } from "../../hooks/useToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
 
 const FreeBoardUpdate = () => {
+  const { toast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const { boardId } = useParams<{ boardId: string }>();
   const navigate = useNavigate();
   const userEmail = useSelector((state: RootState) => state.auth.user?.email);
@@ -43,13 +49,17 @@ const FreeBoardUpdate = () => {
   const remove = async () => {
     if (!boardId || !userEmail) return;
 
-    if (!confirm("정말 삭제할까요?")) return;
+    const confirmed = await confirm("정말 삭제할까요?");
+    if (!confirmed) return;
 
     await boardApi.deleteBoard(Number(boardId));
     navigate("/community/free");
   };
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
     <div className="kf-community-page kf-free-board-update">
       <div className="kf-community-page__shell">
       <div>
@@ -91,6 +101,7 @@ const FreeBoardUpdate = () => {
     </div>
       </div>
     </div>
+    </>
   );
 };
 

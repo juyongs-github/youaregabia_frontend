@@ -6,9 +6,15 @@ import { sendSmsCode, verifySmsCode } from "../../api/sms";
 import { verifyCiMock } from "../../api/auth";
 import "../../styles/auth-kfandom-core.css";
 import "../../styles/ci-auth-kfandom.css";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
+import ConfirmToast from "../../components/ui/ConfirmToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
 
 // 신규 소셜 유저가 본인인증 후 회원가입을 완료하는 페이지
 function SocialRegisterPage() {
+  const { toast, showToast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -110,7 +116,7 @@ function SocialRegisterPage() {
 
       if (ciRes.exists) {
         // 기존 회원 → 사용자에게 연동 여부 확인
-        const confirmed = window.confirm(
+        const confirmed = await confirm(
           "이미 가입된 회원입니다.\n소셜 계정을 기존 계정에 연동하시겠습니까?\n\n확인: 연동 후 로그인 페이지로 이동\n취소: 연동 안 함"
         );
 
@@ -130,8 +136,8 @@ function SocialRegisterPage() {
           return;
         }
 
-        alert("소셜 계정이 기존 계정에 연동되었습니다.\n로그인 페이지에서 직접 로그인해 주세요.");
-        navigate("/login", { replace: true });
+        showToast("소셜 계정이 기존 계정에 연동되었습니다. 로그인 페이지에서 직접 로그인해 주세요.", "success");
+        setTimeout(() => navigate("/login", { replace: true }), 500);
         return;
       }
 
@@ -180,6 +186,8 @@ function SocialRegisterPage() {
 
   return (
     <div className="ci-page">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
       <div className="ci-card">
         <h1 className="ci-title">본인인증</h1>
         <p className="ci-desc">소셜 계정 연동을 위해 본인 정보를 입력해 주세요.</p>

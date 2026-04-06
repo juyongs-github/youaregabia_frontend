@@ -2,6 +2,8 @@ import { useState } from "react";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import api from "../../api/axios";
 import "../../styles/AddSongsModal.css";
+import Toast from "./Toast";
+import { useToast } from "../../hooks/useToast";
 
 interface Song {
   id: number;
@@ -19,6 +21,7 @@ interface Props {
 }
 
 function AddSongsModal({ playlistId, onClose, onAdded, existingSongs }: Props) {
+  const { toast, showToast, closeToast } = useToast();
   const [keyword, setKeyword] = useState("");
   const [results, setResults] = useState<Song[]>([]);
   const [selected, setSelected] = useState<Song[]>([]);
@@ -53,12 +56,13 @@ function AddSongsModal({ playlistId, onClose, onAdded, existingSongs }: Props) {
       onClose();
     } catch (e: any) {
       console.error("곡 추가 실패:", e?.response?.data);
-      alert(`곡 추가 실패: ${e?.response?.data?.message || e.message}`);
+      showToast(`곡 추가 실패: ${e?.response?.data?.message || e.message}`, "error");
     }
   };
 
   return (
     <div className="modal-overlay">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       <div className="add-song-modal">
         {/* 헤더 */}
         <div className="modal-header">

@@ -5,6 +5,8 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { goodsApi, cartUtils, type Goods } from "../../api/goodsApi";
 import "../../styles/GoodsListPage.kfandom.css";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 const CATEGORIES = [
   { key: "", label: "전체" },
@@ -28,6 +30,7 @@ const categoryLabel: Record<string, string> = {
 };
 
 export default function GoodsListPage() {
+  const { toast, showToast, closeToast } = useToast();
   const navigate = useNavigate();
   const userRole = useSelector((state: RootState) => state.auth.user?.role);
   const isAdmin = userRole === "ADMIN";
@@ -60,11 +63,12 @@ export default function GoodsListPage() {
     if (item.stock === 0) return;
     cartUtils.addItem({ ...item, quantity: 1 });
     setCartCount(cartUtils.count());
-    alert(`"${item.name}"을(를) 장바구니에 담았습니다.`);
+    showToast(`"${item.name}"을(를) 장바구니에 담았습니다.`, "success");
   };
 
   return (
     <div className="kf-expansion-page kf-goods-list">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-8">
         <div>

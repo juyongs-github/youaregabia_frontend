@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 interface UserRow {
   id: number;
@@ -20,13 +22,14 @@ const roleLabel = (role: string) => {
 };
 
 export default function AdminUsersPage() {
+  const { toast, showToast, closeToast } = useToast();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     api.get("/api/admin/users")
       .then((res) => setUsers(res.data))
-      .catch(() => alert("유저 목록을 불러오는데 실패했습니다."))
+      .catch(() => showToast("유저 목록을 불러오는데 실패했습니다.", "error"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -35,7 +38,7 @@ export default function AdminUsersPage() {
       await api.patch(`/api/admin/users/${id}/role`, { role });
       setUsers((prev) => prev.map((u) => u.id === id ? { ...u, role } : u));
     } catch {
-      alert("권한 변경에 실패했습니다.");
+      showToast("권한 변경에 실패했습니다.", "error");
     }
   };
 
@@ -43,6 +46,7 @@ export default function AdminUsersPage() {
 
   return (
     <div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       <div className="mb-6">
         <h1 className="text-2xl font-bold">회원 관리</h1>
         <p className="text-sm mt-1" style={{color:"#4b5563"}}>총 {users.length}명</p>

@@ -6,6 +6,10 @@ import type { RootState } from "../../store";
 import type { BoardSong } from "../../types/board";
 import type { Song } from "./SongListItem";
 import PlaylistCreateModal from "./PlaylistCreateModal";
+import Toast from "./Toast";
+import { useToast } from "../../hooks/useToast";
+import ConfirmToast from "./ConfirmToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
 
 type Props = {
   songs: BoardSong[];
@@ -14,6 +18,8 @@ type Props = {
 };
 
 function BoardSongList({ songs, isMyBoard }: Props) {
+  const { toast, showToast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const { play, song: currentSong } = usePlayer();
   const userEmail = useSelector((state: RootState) => state.auth.user?.email);
 
@@ -88,11 +94,11 @@ function BoardSongList({ songs, isMyBoard }: Props) {
 
   const handleAddSelectedSongs = async () => {
     if (!selectedPlaylistId) {
-      alert("추가할 플레이리스트를 선택해주세요.");
+      showToast("추가할 플레이리스트를 선택해주세요.", "info");
       return;
     }
     if (selectedSongIds.size === 0) {
-      alert("선택된 곡이 없습니다.");
+      showToast("선택된 곡이 없습니다.", "info");
       return;
     }
     try {
@@ -104,7 +110,7 @@ function BoardSongList({ songs, isMyBoard }: Props) {
       const duplicateCount = selectedArray.length - songsToAdd.length;
 
       if (songsToAdd.length === 0) {
-        alert("선택하신 곡이 이미 플레이리스트에 모두 존재합니다.");
+        showToast("선택하신 곡이 이미 플레이리스트에 모두 존재합니다.", "info");
         return;
       }
 
@@ -113,17 +119,17 @@ function BoardSongList({ songs, isMyBoard }: Props) {
           ? `중복된 ${duplicateCount}곡을 제외하고 ${songsToAdd.length}곡을 추가하시겠습니까?`
           : `${songsToAdd.length}곡을 플레이리스트에 추가하시겠습니까?`;
 
-      if (window.confirm(confirmMsg)) {
-        await Promise.all(
-          songsToAdd.map((songId) => playlistApi.addSongToPlaylist(selectedPlaylistId, songId))
-        );
-        alert("성공적으로 추가되었습니다.");
-        setAddedSongIds((prev) => new Set([...prev, ...songsToAdd]));
-        setPlaylistSongIds((prev) => new Set([...prev, ...songsToAdd]));
-        setSelectedSongIds(new Set());
-      }
+      const confirmed = await confirm(confirmMsg);
+      if (!confirmed) return;
+      await Promise.all(
+        songsToAdd.map((songId) => playlistApi.addSongToPlaylist(selectedPlaylistId, songId))
+      );
+      showToast("성공적으로 추가되었습니다.", "success");
+      setAddedSongIds((prev) => new Set([...prev, ...songsToAdd]));
+      setPlaylistSongIds((prev) => new Set([...prev, ...songsToAdd]));
+      setSelectedSongIds(new Set());
     } catch {
-      alert("곡을 추가하는 중 오류가 발생했습니다.");
+      showToast("곡을 추가하는 중 오류가 발생했습니다.", "error");
     } finally {
       setChecking(false);
     }
@@ -133,6 +139,8 @@ function BoardSongList({ songs, isMyBoard }: Props) {
 
   return (
     <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
       <div
         className="rounded-xl overflow-hidden"
         style={{

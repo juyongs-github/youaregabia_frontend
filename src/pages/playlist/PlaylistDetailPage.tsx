@@ -12,8 +12,15 @@ import type { Song } from "../../components/ui/SongListItem";
 import { usePlayer } from "../../contexts/PlayerContext";
 import AddSongsModal from "../../components/ui/AddSongsModal";
 import FallbackCoverArt from "../../components/ui/FallbackCoverArt";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
+import ConfirmToast from "../../components/ui/ConfirmToast";
+import { useConfirmToast } from "../../hooks/useConfirmToast";
+import { clearImportedPlaylist } from "../../utils/collaboImportTracker";
 
 function PlaylistDetailPage() {
+  const { toast, showToast, closeToast } = useToast();
+  const { confirmToast, confirm, closeConfirm } = useConfirmToast();
   const navigate = useNavigate();
   const { playlistId } = useParams<string>();
 
@@ -75,32 +82,33 @@ function PlaylistDetailPage() {
 
       await playlistApi.updatePlaylist(Number(playlistId), formData);
 
-      alert("수정 완료");
+      showToast("수정 완료", "success");
 
       setIsEditMode(false);
 
       fetchData();
     } catch (e) {
-      alert("수정 실패");
+      showToast("수정 실패", "error");
     }
   };
 
   // 플레이리스트 삭제
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!playlistId) return;
 
-    const ok = window.confirm("정말로 삭제하시겠습니까?");
-    if (!ok) return;
+    const confirmed = await confirm("정말로 삭제하시겠습니까?");
+    if (!confirmed) return;
 
     playlistApi
       .deletePlaylist(Number(playlistId))
       .then(() => {
-        alert("삭제되었습니다.");
+        clearImportedPlaylist(Number(playlistId));
+        showToast("삭제되었습니다.", "success");
         navigate("/playlist/me");
       })
       .catch((error) => {
         console.error(error);
-        alert("삭제에 실패하였습니다.");
+        showToast("삭제에 실패하였습니다.", "error");
       });
   };
 
@@ -108,13 +116,13 @@ function PlaylistDetailPage() {
   const handleRemoveSong = async (playlistSongId: number) => {
     if (!playlistId) return;
 
-    const ok = window.confirm("곡을 삭제하시겠습니까?");
-    if (!ok) return;
+    const confirmed = await confirm("곡을 삭제하시겠습니까?");
+    if (!confirmed) return;
 
     try {
       await playlistApi.removeSongFromPlaylist(Number(playlistSongId));
 
-      alert("곡이 삭제되었습니다.");
+      showToast("곡이 삭제되었습니다.", "success");
 
       if (selectSong && songs.find((s) => s.playlistSongId === playlistSongId)?.id === selectSong.id) {
         setIsPlayerVisible(false);
@@ -124,7 +132,7 @@ function PlaylistDetailPage() {
 
       setSongs((prev) => prev.filter((song) => song.playlistSongId !== playlistSongId));
     } catch (e) {
-      alert("삭제 실패");
+      showToast("삭제 실패", "error");
     }
   };
 
@@ -132,8 +140,8 @@ function PlaylistDetailPage() {
   const handleRemoveSelectedSongs = async () => {
     if (selectedSongs.size === 0) return;
 
-    const ok = window.confirm(`선택한 ${selectedSongs.size}곡을 삭제하시겠습니까?`);
-    if (!ok) return;
+    const confirmed = await confirm(`선택한 ${selectedSongs.size}곡을 삭제하시겠습니까?`);
+    if (!confirmed) return;
 
     try {
       await Promise.all(
@@ -149,9 +157,9 @@ function PlaylistDetailPage() {
       setSongs((prev) => prev.filter((song) => !selectedSongs.has(song.playlistSongId)));
       setSelectedSongs(new Set());
       setIsSelectMode(false);
-      alert("선택한 곡이 삭제되었습니다.");
+      showToast("선택한 곡이 삭제되었습니다.", "success");
     } catch (e) {
-      alert("삭제 실패");
+      showToast("삭제 실패", "error");
     }
   };
 
@@ -213,8 +221,9 @@ function PlaylistDetailPage() {
     }
   }, [isEditMode]);
   // 플레이리스트 공유
-  const handleShare = () => {
-    if (!confirm("플레이리스트 공유하시겠습니까?")) return;
+  const handleShare = async () => {
+    const confirmed = await confirm("플레이리스트 공유하시겠습니까?");
+    if (!confirmed) return;
 
     navigate("/community/share/new", {
       state: {
@@ -225,6 +234,9 @@ function PlaylistDetailPage() {
   };
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <ConfirmToast state={confirmToast} onClose={closeConfirm} />
     <div className="playlist-detail-page">
       {/* ================= 왼쪽 패널 ================= */}
       <aside className="playlist-left">
@@ -578,6 +590,7 @@ function PlaylistDetailPage() {
         />
       )}
     </div>
+    </>
   );
 }
 

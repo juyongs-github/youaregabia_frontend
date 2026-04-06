@@ -6,8 +6,11 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { refreshPoint } from "../../components/ui/refreshPoint";
 import CustomEditor from "../../components/ui/CustomEditor";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 const FreeBoardCreatePage = () => {
+  const { toast, showToast, closeToast } = useToast();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const navigate = useNavigate();
@@ -17,11 +20,11 @@ const FreeBoardCreatePage = () => {
   const submit = async () => {
     if (!userEmail) return;
     if (!title.trim()) {
-      alert("제목을 입력해주세요.");
+      showToast("제목을 입력해주세요.", "info");
       return;
     }
     if (!content.trim() || content === "<br>" || content === "<p><br></p>") {
-      alert("내용을 입력해주세요.");
+      showToast("내용을 입력해주세요.", "info");
       return;
     }
     const boardId = await boardApi.createBoard({
@@ -35,6 +38,8 @@ const FreeBoardCreatePage = () => {
   };
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
     <div className="kf-community-page kf-free-board-create">
       <div className="kf-community-page__shell">
         <div>
@@ -59,6 +64,7 @@ const FreeBoardCreatePage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

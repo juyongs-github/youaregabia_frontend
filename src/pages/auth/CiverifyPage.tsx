@@ -5,8 +5,11 @@ import "../../styles/ci-auth-kfandom.css";
 
 import { sendSmsCode, verifySmsCode } from "../../api/sms";
 import { verifyCiMock } from "../../api/auth";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 export default function CiVerifyPage() {
+  const { toast, showToast, closeToast } = useToast();
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
@@ -113,8 +116,8 @@ export default function CiVerifyPage() {
       const res = await verifyCiMock({ name, birthDate: birth, phoneNumber: phone });
 
       if (res.exists) {
-        alert("이미 가입된 사용자입니다.\n로그인 페이지로 이동합니다.");
-        navigate("/login");
+        showToast("이미 가입된 사용자입니다. 로그인 페이지로 이동합니다.", "info");
+        setTimeout(() => navigate("/login"), 500);
         return;
       }
 
@@ -140,6 +143,7 @@ export default function CiVerifyPage() {
 
   return (
     <div className="ci-page">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       <div className="ci-card">
         <div className="ci-badge-wrap">
           <span className="ci-badge">가입 전 마지막 확인 단계</span>

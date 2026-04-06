@@ -8,6 +8,8 @@ import { cartUtils, goodsApi, type CartItem } from "../../api/goodsApi";
 import api from "../../api/axios";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 const DELIVERY_FEE = 3000;
 const FREE_DELIVERY_THRESHOLD = 50000;
@@ -32,6 +34,7 @@ const formatPhone = (value: string) => {
 const isValidPhone = (value: string) => /^01[0-9]-\d{3,4}-\d{4}$/.test(value);
 
 export default function OrderPage() {
+  const { toast, showToast, closeToast } = useToast();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -126,7 +129,7 @@ export default function OrderPage() {
   const handleOrder = async () => {
     setPhoneTouched(true);
     if (!form.receiverName.trim() || !phoneValid || !form.deliveryAddress.trim()) {
-      alert("배송 정보를 모두 올바르게 입력해주세요.");
+      showToast("배송 정보를 모두 올바르게 입력해주세요.", "info");
       return;
     }
     setLoading(true);
@@ -160,12 +163,14 @@ export default function OrderPage() {
       setLoading(false);
       const err = e as { code?: string };
       if (err?.code !== "USER_CANCEL") {
-        alert("결제 중 오류가 발생했습니다. 다시 시도해주세요.");
+        showToast("결제 중 오류가 발생했습니다. 다시 시도해주세요.", "error");
       }
     }
   };
 
   return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
     <div className="kf-expansion-page kf-order-page">
       <div className="flex items-center gap-4 mb-8">
         <button onClick={() => navigate("/goods/cart")} className="text-gray-400 hover:text-white transition-colors">
@@ -366,5 +371,6 @@ export default function OrderPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

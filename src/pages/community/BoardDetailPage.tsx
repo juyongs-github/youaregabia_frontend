@@ -3,15 +3,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import { boardApi } from "../../api/boardApi";
 import type { Board } from "../../types/board";
 import { replyApi } from "../../api/replyApi";
-import ReplyItem from "../../Components/ui/replyItem";
-import Pagination from "../../Components/ui/Pagination";
+import ReplyItem from "../../components/ui/replyItem";
+import Pagination from "../../components/ui/Pagination";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import DOMPurify from "dompurify";
-import { refreshPoint } from "../../Components/ui/refreshPoint";
+import { refreshPoint } from "../../components/ui/refreshPoint";
 import "../../styles/board-detail-kfandom.css";
 import BoardSidePanel from "../../components/ui/BoardSidePanel";
 import ReplyForm from "../../components/ui/ReplyForm";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 const BoardDetailPage = () => {
   const { boardId } = useParams<{ boardId: string }>();
@@ -24,6 +26,7 @@ const BoardDetailPage = () => {
   const isFirstRender = useRef(true);
   const hasFetched = useRef(false);
   const navigate = useNavigate();
+  const { toast, showToast, closeToast } = useToast();
 
   const loadBoard = async (page: number = 1, sort: "latest" | "likes" = sortBy) => {
     if (!boardId) return;
@@ -73,7 +76,7 @@ const BoardDetailPage = () => {
   };
 
   const handleLike = async () => {
-    if (!userEmail) { alert("로그인이 필요합니다."); return; }
+    if (!userEmail) { showToast("로그인이 필요합니다.", "info"); return; }
     const res = await boardApi.toggleBoardLike(Number(boardId));
     setLikeCount(res.likeCount);
     setLikedByMe(res.likedByMe);
@@ -90,7 +93,9 @@ const BoardDetailPage = () => {
     board.boardType === "CRITIC";
 
   return (
-    <div className="kf-community-page kf-board-detail">
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <div className="kf-community-page kf-board-detail">
       <div className="kf-community-page__shell">
         <div className="max-w-6xl mx-auto p-6">
           <header className="mb-8 pb-6" style={{ borderBottom: "1px solid var(--kf-border)" }}>
@@ -243,6 +248,7 @@ const BoardDetailPage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

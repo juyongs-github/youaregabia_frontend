@@ -3,12 +3,15 @@ import { useParams, useNavigate } from "react-router-dom";
 import { FaBox, FaShoppingCart, FaMinus, FaPlus } from "react-icons/fa";
 import { goodsApi, cartUtils, type Goods } from "../../api/goodsApi";
 import "../../styles/GoodsDetailPage.kfandom.css";
+import Toast from "../../components/ui/Toast";
+import { useToast } from "../../hooks/useToast";
 
 const categoryLabel: Record<string, string> = {
   CLOTHING: "의류", ACCESSORIES: "악세사리", ALBUM: "앨범", ETC: "기타",
 };
 
 export default function GoodsDetailPage() {
+  const { toast, showToast, closeToast } = useToast();
   const { goodsId } = useParams<{ goodsId: string }>();
   const navigate = useNavigate();
   const [goods, setGoods] = useState<Goods | null>(null);
@@ -43,7 +46,7 @@ export default function GoodsDetailPage() {
     if (!goods) return;
     cartUtils.addItem({ ...goods, quantity });
     setCartCount(cartUtils.count());
-    alert(`"${goods.name}"을(를) 장바구니에 담았습니다.`);
+    showToast(`"${goods.name}"을(를) 장바구니에 담았습니다.`, "success");
   };
 
   const handleBuyNow = () => {
@@ -62,6 +65,7 @@ export default function GoodsDetailPage() {
 
   return (
     <div className="kf-expansion-page kf-goods-detail">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       {/* 상단 네비 */}
       <div className="flex items-center justify-between mb-8">
         <button onClick={() => navigate("/goods")} className="text-gray-400 hover:text-white text-sm transition-colors">
