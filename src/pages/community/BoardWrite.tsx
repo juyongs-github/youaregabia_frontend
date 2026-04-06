@@ -70,11 +70,15 @@ const BoardWrite = () => {
     }
   }, [userEmail]);
 
-  const submit = async () => {
+    const submit = async () => {
     if (!userEmail) return;
     if (!title.trim()) {
       alert("제목을 입력해주세요.");
       refreshPoint();
+      return;
+    }
+    if (!selectedPlaylist || selectedPlaylist.songs.length === 0) {
+      alert("플레이리스트를 선택해주세요. (곡이 1곡 이상 있어야 합니다)");
       return;
     }
 
@@ -160,6 +164,8 @@ const BoardWrite = () => {
 
           {isLoadingPlaylist ? (
             <p className="px-4 py-3 text-gray-400 text-sm">불러오는 중...</p>
+          ) : selectedPlaylist.songs.length === 0 ? (
+            <p className="px-4 py-3 text-red-400 text-sm font-medium">플레이리스트에 곡이 없습니다.</p>
           ) : (
             <ul className="divide-y divide-neutral-800">
               {selectedPlaylist.songs.map((song) => (
@@ -189,8 +195,13 @@ const BoardWrite = () => {
       </div>
 
       <button
-        className="rounded bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500 w-full"
+        className={`rounded px-6 py-3 font-semibold text-white w-full transition-colors ${
+          selectedPlaylist && selectedPlaylist.songs.length > 0
+            ? "bg-indigo-600 hover:bg-indigo-500 cursor-pointer"
+            : "bg-neutral-700 text-gray-500 cursor-not-allowed"
+        }`}
         onClick={submit}
+        disabled={!selectedPlaylist || selectedPlaylist.songs.length === 0}
       >
         등록
       </button>

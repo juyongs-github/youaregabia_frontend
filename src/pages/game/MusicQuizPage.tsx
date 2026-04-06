@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "../../api/axios";
 import { usePlayer } from "../../contexts/PlayerContext";
 import type { Song } from "../../components/ui/SongListItem";
@@ -21,7 +21,7 @@ const MusicQuizPage = () => {
   const [wrongSongIds, setWrongSongIds] = useState<Set<number>>(new Set());
   const [started, setStarted] = useState(false);
   const [timer, setTimer] = useState(0);
-
+  const inputRef = useRef<HTMLInputElement>(null);
   const { play, stop } = usePlayer();
 
   const loadSongs = async () => {
@@ -52,7 +52,7 @@ const MusicQuizPage = () => {
     loadSongs();
   }, []);
 
-  // ✅ 페이지 이탈 시 플레이어 종료
+  //  페이지 이탈 시 플레이어 종료
   useEffect(() => {
     return () => {
       stop();
@@ -61,7 +61,7 @@ const MusicQuizPage = () => {
 
   const currentSong = songs[currentIndex];
 
-  // ✅ 첫 곡 버그 수정: songs 배열이 실제로 채워진 뒤에만 play 호출
+  //  첫 곡 버그 수정: songs 배열이 실제로 채워진 뒤에만 play 호출
   useEffect(() => {
     if (!started || isLoading || songs.length === 0 || phase !== "playing") return;
 
@@ -173,6 +173,12 @@ const MusicQuizPage = () => {
     };
   }, [currentIndex, songs, started, isLoading, phase]);
 
+  // 정답 오토포커싱
+  useEffect(() => {
+  if (!feedback && started) {
+    inputRef.current?.focus();
+  }
+}, [feedback, started]);
   const handleEnter = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSubmit();
   };
@@ -323,7 +329,7 @@ const MusicQuizPage = () => {
         <input
           type="text"
           value={input}
-          autoFocus
+          ref={inputRef}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleEnter}
           placeholder="곡 제목을 입력하세요..."

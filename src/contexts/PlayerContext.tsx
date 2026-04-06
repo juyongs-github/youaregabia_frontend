@@ -26,6 +26,7 @@ interface PlayerContextValue {
   stop: () => void;
   setExternalPaused: (paused: boolean) => void;
   setSongIndex: (index: number) => void;
+  changeSong: (index: number) => void;
 }
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
@@ -64,12 +65,34 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setOnClose(undefined);
   }, []);
 
+  const changeSong = useCallback((index: number) => {
+    setSongIndex(index);
+    setSongs((prev) => {
+      const next = prev[index];
+      if (next) setSong(next);
+      return prev;
+    });
+  }, []);
+
   return (
-    <PlayerContext.Provider value={{
-      song, songs, songIndex, blind, externalPaused, playKey,
-      onSongEnd, onSongChange, onClose,
-      play, stop, setExternalPaused, setSongIndex,
-    }}>
+    <PlayerContext.Provider
+      value={{
+        song,
+        songs,
+        songIndex,
+        blind,
+        externalPaused,
+        playKey,
+        onSongEnd,
+        onSongChange,
+        onClose,
+        play,
+        stop,
+        setExternalPaused,
+        setSongIndex,
+        changeSong,
+      }}
+    >
       {children}
     </PlayerContext.Provider>
   );

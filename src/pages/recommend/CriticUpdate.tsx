@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { boardApi } from "../../api/boardApi";
+import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { boardApi } from "../../api/boardApi";
 import type { RootState } from "../../store";
 import "../../styles/CriticWrite.kfandom.css";
 import CriticSongSelectModal from "../../components/ui/CriticSongSelectModal";
@@ -22,49 +22,54 @@ const extractFirstImageFromHtml = (html: string) => {
   return firstImg?.getAttribute("src") ?? null;
 };
 
-const CriticWrite = () => {
-  const location = useLocation();
-  const state = location.state as {
-    songId?: number;
-    songName?: string;
-    artistName?: string;
-    imgUrl?: string;
-  } | null;
+const CriticUpdate = () => {
+  const { boardId } = useParams<{ boardId: string }>();
+  const navigate = useNavigate();
+
+  const userEmail = useSelector((state: RootState) => state.auth.user?.email);
+  const userRole = useSelector((state: RootState) => state.auth.user?.role);
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [boardType] = useState("CRITIC");
-  const [boardGenre] = useState("FREE");
-  const [selectedSong, setSelectedSong] = useState<SelectedSong | null>(
-    state?.songId
-      ? {
-          id: state.songId,
-          trackName: state.songName ?? "",
-          artistName: state.artistName ?? "",
-          imgUrl: state.imgUrl ?? "",
-        }
-      : null
-  );
+  const [selectedSong, setSelectedSong] = useState<SelectedSong | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const navigate = useNavigate();
-  const userEmail = useSelector((state: RootState) => state.auth.user?.email);
-  const userRole = useSelector((state: RootState) => state.auth.user?.role);
+  const [isLoading, setIsLoading] = useState(true);
 
   const previewImageUrl = extractFirstImageFromHtml(content);
 
   useEffect(() => {
     if (userRole && userRole !== "CRITIC") {
-      alert("평론 작성 권한이 없습니다.");
+      alert("평론 수정 권한이 없습니다.");
       navigate(-1);
     }
   }, [userRole]);
 
-  const submit = async () => {
-    console.log("content:", content);
-    console.log("content length:", content.length);
-    console.log("content trim:", content.trim());
-    if (!userEmail) return;
+  useEffect(() => {
+    if (!boardId || !userEmail) return;
+
+    boardApi
+      .getBoardDetail(Number(boardId))
+      .then((board) => {
+        setTitle(board.title);
+        setContent(board.content ?? "");
+        if (board.songs && board.songs.length > 0) {
+          const s = board.songs[0];
+          setSelectedSong({
+            id: s.songId,
+            trackName: s.trackName,
+            artistName: s.artistName,
+            imgUrl: s.imgUrl,
+          });
+        }
+        setIsLoading(false);
+      })
+      .catch(() => {
+        alert("게시글을 불러올 수 없습니다.");
+        navigate(-1);
+      });
+  }, [boardId, userEmail]);
+
+  const update = async () => {
     if (!title.trim()) {
       alert("제목을 입력해주세요.");
       return;
@@ -78,21 +83,44 @@ const CriticWrite = () => {
       return;
     }
 
-    const boardId = await boardApi.createBoard({
-      title,
-      content,
-      boardType,
-      boardGenre,
-      songIds: [selectedSong.id],
-    });
-    navigate(`/recommend/critic/${boardId}`);
+    try {
+      if (!boardId) return;
+      await boardApi.updateBoard(Number(boardId), {
+        title,
+        content,
+        boardGenre: "FREE",
+      });
+      alert("수정되었습니다.");
+      navigate(`/recommend/critic/${boardId}`);
+    } catch {
+      alert("수정 중 오류가 발생했습니다.");
+    }
   };
+
+  const remove = async () => {
+    if (!boardId || !window.confirm("정말 삭제하시겠습니까?")) return;
+    try {
+      await boardApi.deleteBoard(Number(boardId));
+      alert("삭제되었습니다.");
+      navigate("/recommend/critic");
+    } catch {
+      alert("삭제 중 오류가 발생했습니다.");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="kf-expansion-page kf-critic-write">
+        <div className="max-w-6xl mx-auto p-6">로딩 중...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="kf-expansion-page kf-critic-write">
       <div className="max-w-6xl mx-auto p-6">
         <h2 className="mb-8 text-2xl font-bold" style={{ color: "var(--kf-brand)" }}>
-          평론 작성
+          평론 수정
         </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -143,12 +171,45 @@ const CriticWrite = () => {
               />
             </div>
 
-            <button
-              className="rounded bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500 w-full"
-              onClick={submit}
+            {/* 버튼 영역 */}
+            <div
+              className="flex justify-end gap-3 pt-4"
+              style={{ borderTop: "1px solid var(--kf-border)" }}
             >
-              등록
-            </button>
+              <button
+                onClick={() => navigate(-1)}
+                className="rounded-full px-6 py-2 font-semibold transition-all"
+                style={{
+                  background: "rgba(255,255,255,0.72)",
+                  color: "var(--kf-text-sub)",
+                  border: "1px solid var(--kf-border-strong)",
+                }}
+              >
+                취소
+              </button>
+              <button
+                onClick={remove}
+                className="rounded-full px-6 py-2 font-semibold transition-all"
+                style={{
+                  background: "rgba(255,102,122,0.08)",
+                  color: "var(--kf-danger)",
+                  border: "1px solid rgba(255,102,122,0.28)",
+                }}
+              >
+                삭제하기
+              </button>
+              <button
+                onClick={update}
+                className="rounded-full px-8 py-2 font-semibold text-white transition-all"
+                style={{
+                  background: "linear-gradient(135deg, var(--kf-brand), var(--kf-brand-pink))",
+                  boxShadow: "0 8px 20px rgba(109,94,252,0.24)",
+                  border: "none",
+                }}
+              >
+                수정 완료
+              </button>
+            </div>
           </div>
 
           {/* 우측: content 첫 이미지 미리보기 */}
@@ -189,4 +250,4 @@ const CriticWrite = () => {
   );
 };
 
-export default CriticWrite;
+export default CriticUpdate;

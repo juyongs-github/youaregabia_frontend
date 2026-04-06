@@ -61,6 +61,7 @@ import RateLimitToast from "./components/ui/RateLimitToast";
 import ChatbotButton from "./components/ui/ChatbotButton";
 import { useAttendance } from "./components/ui/useAttendance";
 import AttendancePage from "./pages/auth/AttendancePage";
+import CriticUpdate from "./pages/recommend/CriticUpdate";
 
 interface RateLimitInfo {
   message: string;
@@ -80,6 +81,7 @@ function GlobalMusicPlayer() {
     onClose,
     stop,
     setSongIndex,
+    changeSong,
   } = usePlayer();
   if (!song) return null;
   const currentSong = songs.length > 0 ? (songs[songIndex] ?? song) : song;
@@ -96,6 +98,7 @@ function GlobalMusicPlayer() {
         onSongChange={(index) => {
           setSongIndex(index);
           onSongChange?.(index);
+          changeSong(index);
         }}
         setIsPlayerVisible={() => {
           onClose?.();
@@ -172,6 +175,7 @@ function App() {
           <Route path="/community/free/:boardId" element={<FreeBoardDetailPage />} />
           <Route path="/community/free/new" element={<FreeBoardCreatePage />} />
           <Route path="/community/free/:boardId/update" element={<FreeBoardUpdate />} />
+          <Route path="/recommend/critic/:boardId/update" element={<CriticUpdate />} />
           <Route path="/profile/me" element={<MyPage />} />
           <Route path="/profile/points" element={<PointHistoryPage />} />
           <Route path="/profile/check" element={<AttendancePage />} />

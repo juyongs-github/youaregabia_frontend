@@ -1,7 +1,7 @@
 @import "./expansion-kfandom-core.css";
 
 .kf-critic-write {
-  max-width: 1080px;
+  /* max-width: 1080px; 제거 */
   padding: 28px !important;
 }
 
