@@ -211,6 +211,8 @@ const PointHistoryPage = () => {
             </p>
             <p className="text-2xl font-black text-indigo-400 mt-1">
               {(user?.totalPoint ?? 0).toLocaleString()}{" "}
+              <span className="text-sm font-normal text-gray-500"> / </span>
+              {(user?.accumulatedPoint ?? 0).toLocaleString()}{" "}
               <span className="text-sm font-normal text-gray-500">P</span>
             </p>
           </div>
