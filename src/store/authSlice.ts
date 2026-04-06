@@ -10,7 +10,7 @@ interface UserInfo {
   token?: string;
   role?: string; // "USER" | "CRITIC" | "ADMIN"
   totalPoint?: number; // 유저 포인트
-  accumulatedPoint: number;
+  accumulatedPoint?: number;
   grade?: string; // 유저 등급
   rememberMe?: boolean;
 }
@@ -57,9 +57,13 @@ const authSlice = createSlice({
         state.user = { ...state.user, ...action.payload };
       }
     },
-    updatePoint: (state, action: PayloadAction<{ totalPoint: number; grade: string }>) => {
+    updatePoint: (
+      state,
+      action: PayloadAction<{ totalPoint: number; accumulatedPoint: number; grade: string }>
+    ) => {
       if (state.user) {
         state.user.totalPoint = action.payload.totalPoint;
+        state.user.accumulatedPoint = action.payload.accumulatedPoint; // 추가
         state.user.grade = action.payload.grade;
       }
     },

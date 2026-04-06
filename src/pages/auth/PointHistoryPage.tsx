@@ -30,7 +30,7 @@ const POINT_TYPE_LABEL: Record<string, string> = {
 const GRADE_BADGE: Record<string, string> = {
   ENSEMBLE: "text-gray-400",
   SESSION: "text-amber-600",
-  SOLOIST: "text-gray-300",
+  SOLOIST: "text-red-300",
   MAESTRO: "text-yellow-400",
   LEGEND: "text-cyan-400",
 };
