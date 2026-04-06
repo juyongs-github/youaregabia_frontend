@@ -10,6 +10,7 @@ interface UserInfo {
   token?: string;
   role?: string; // "USER" | "CRITIC" | "ADMIN"
   totalPoint?: number; // 유저 포인트
+  accumulatedPoint: number;
   grade?: string; // 유저 등급
   rememberMe?: boolean;
 }

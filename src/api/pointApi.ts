@@ -3,7 +3,9 @@ import api from "./axios";
 
 export const pointApi = {
   getMyPoint: () =>
-    api.get<{ totalPoint: number; grade: string }>("/api/points/me").then((res) => res.data),
+    api
+      .get<{ totalPoint: number; accumulatedPoint: number; grade: string }>("/api/points/me")
+      .then((res) => res.data),
 
   getHistory: (params: { page: number; size: number; filter?: string }) =>
     api.get<PageResult<PointHistoryDto>>("/api/points/history", { params }).then((res) => res.data),

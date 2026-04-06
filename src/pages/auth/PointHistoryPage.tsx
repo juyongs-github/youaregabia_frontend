@@ -149,7 +149,7 @@ const PointHistoryPage = () => {
   }, []);
 
   const progressInfo = useMemo(() => {
-    const currentPoint = user?.totalPoint ?? 0;
+    const accPoint = user?.accumulatedPoint ?? 0; // totalPoint → accumulatedPoint
     const grade = user?.grade ?? "ENSEMBLE";
     const config = GRADE_CONFIG[grade];
     if (grade === "LEGEND") return { percent: 100, remaining: 0 };
@@ -158,10 +158,10 @@ const PointHistoryPage = () => {
     const currentIndex = grades.indexOf(grade);
     const prevThreshold = currentIndex > 0 ? GRADE_CONFIG[grades[currentIndex - 1]].next : 0;
     const range = config.next - prevThreshold;
-    const currentInRange = currentPoint - prevThreshold;
+    const currentInRange = accPoint - prevThreshold;
     const percent = Math.min(Math.max((currentInRange / range) * 100, 0), 100);
 
-    return { percent, remaining: config.next - currentPoint };
+    return { percent, remaining: config.next - accPoint };
   }, [user]);
 
   const dtoList = pageData?.dtoList ?? [];
@@ -221,11 +221,11 @@ const PointHistoryPage = () => {
           <div className="mt-5 pt-5 border-t border-neutral-800 space-y-2 text-[11px] text-gray-400 animate-fadeIn">
             <p className="font-bold text-gray-400 mb-3 px-1">등급 구간 안내 (누적 포인트)</p>
             {[
-              { grade: "ENSEMBLE", range: "0 ~ 999 P" },
-              { grade: "SESSION", range: "1,000 ~ 4,999 P" },
-              { grade: "SOLOIST", range: "5,000 ~ 9,999 P" },
-              { grade: "MAESTRO", range: "10,000 ~ 19,999 P" },
-              { grade: "LEGEND", range: "20,000 P 이상" },
+              { grade: "ENSEMBLE", range: "0 ~ 9,999 P" },
+              { grade: "SESSION", range: "10,000 ~ 49,999 P" },
+              { grade: "SOLOIST", range: "50,000 ~ 99,999 P" },
+              { grade: "MAESTRO", range: "100,000 ~ 199,999 P" },
+              { grade: "LEGEND", range: "200,000 P 이상" },
             ].map(({ grade, range }) => {
               const isCurrentGrade = user?.grade === grade;
               return (
