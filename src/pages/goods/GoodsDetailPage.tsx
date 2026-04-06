@@ -134,18 +134,24 @@ export default function GoodsDetailPage() {
             <button
               onClick={handleAddCart}
               disabled={goods.stock === 0}
-              className={`flex-1 py-3 rounded-xl font-semibold transition-colors ${
-                goods.stock === 0 ? "bg-gray-700 text-gray-500 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-600 text-white"
-              }`}
+              className="flex-1 py-3 rounded-xl font-semibold transition-all"
+              style={
+                goods.stock === 0
+                  ? { background: "rgba(92,103,151,0.1)", color: "#6b7280", cursor: "not-allowed", border: "1px solid rgba(92,103,151,0.15)" }
+                  : { background: "rgba(109,94,252,0.15)", color: "#a89cff", border: "1px solid rgba(109,94,252,0.35)" }
+              }
             >
               장바구니 담기
             </button>
             <button
               onClick={handleBuyNow}
               disabled={goods.stock === 0}
-              className={`flex-1 py-3 rounded-xl font-semibold transition-colors ${
-                goods.stock === 0 ? "bg-gray-700 text-gray-500 cursor-not-allowed" : "bg-red-600 hover:bg-red-700 text-white"
-              }`}
+              className="flex-1 py-3 rounded-xl font-semibold transition-all"
+              style={
+                goods.stock === 0
+                  ? { background: "rgba(92,103,151,0.1)", color: "#6b7280", cursor: "not-allowed", border: "1px solid rgba(92,103,151,0.15)" }
+                  : { background: "linear-gradient(135deg, #6d5efc, #ff5ca8)", color: "#fff" }
+              }
             >
               바로 구매
             </button>
