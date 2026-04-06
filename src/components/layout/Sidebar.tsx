@@ -37,8 +37,6 @@ function Sidebar({ isOpen = false, onClose }: { isOpen?: boolean; onClose?: () =
   const isActivePrefix = (prefix: string) => location.pathname.startsWith(prefix);
 
   const profileInitial = user?.name?.trim()?.slice(0, 1) || "G";
-  const roleLabel =
-    userRole === "ADMIN" ? "Admin Hub" : userRole === "CRITIC" ? "Critic Mode" : "Fan Mode";
 
   return (
     <aside className={`kf-side-shell${isOpen ? " kf-sidebar-open" : ""}`}>
@@ -56,7 +54,10 @@ function Sidebar({ isOpen = false, onClose }: { isOpen?: boolean; onClose?: () =
           </div>
           <div className="kf-side-brand__copy">
             <strong>{user?.name || "GAP Music"}</strong>
-            <span>{roleLabel}</span>
+            {user?.email
+              ? <span className="kf-side-brand__email">{user.email}</span>
+              : <span className="kf-side-brand__guest">음악을 함께 즐겨보세요</span>
+            }
           </div>
         </div>
 
