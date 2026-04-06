@@ -3,7 +3,6 @@
 // ============================================================
 
 // 백엔드 SongDTO (iTunes 기준)
-// ※ Spotify API로 교체 시 이 인터페이스와 normalizeSongDTO()만 수정
 export interface SongDTO {
   id: number;
   trackName: string;

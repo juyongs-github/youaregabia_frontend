@@ -19,7 +19,6 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // ============================================================
 // NORMALIZER — SongDTO → Song
-// ※ Spotify API 교체 시 이 함수와 SongDTO 타입만 수정하면 됨
 // ============================================================
 function normalizeSongDTO(dto: SongDTO): Song {
   return {
