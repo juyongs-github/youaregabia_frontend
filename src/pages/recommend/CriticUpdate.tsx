@@ -164,10 +164,10 @@ const CriticUpdate = () => {
             />
 
             <div>
+              <style>{`.kf-critic-write [contenteditable] img { display: none; }`}</style>
               <CustomEditor
-                initialValue={content}
                 onChange={(html) => setContent(html)}
-                placeholder="평론 내용을 수정하세요..."
+                placeholder="평론 내용을 입력하세요..."
               />
             </div>
 

@@ -136,6 +136,7 @@ const CriticWrite = () => {
             />
 
             <div>
+              <style>{`.kf-critic-write [contenteditable] img { display: none; }`}</style>
               <CustomEditor
                 onChange={(html) => setContent(html)}
                 placeholder="평론 내용을 입력하세요..."
