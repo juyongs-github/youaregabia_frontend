@@ -50,6 +50,9 @@ function RegisterForm() {
   const latestEmailRef = useRef("");
 
   const detailAddressRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const passwordCheckRef = useRef<HTMLInputElement>(null);
+  const addressBtnRef = useRef<HTMLButtonElement>(null);
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState<RegisterFormValues>({
@@ -82,6 +85,26 @@ function RegisterForm() {
   const isPasswordValid = pwConditionResults.every(Boolean);
   const isPasswordMatch = form.password && form.password === form.passwordcheck;
   const isEmailValid = emailStatus === "valid";
+
+  // 자동 포커스: 각 조건 충족 시 다음 input으로 이동
+  const prevEmailValid = useRef(false);
+  const prevPasswordValid = useRef(false);
+  const prevPasswordMatch = useRef(false);
+
+  useEffect(() => {
+    if (isEmailValid && !prevEmailValid.current) passwordRef.current?.focus();
+    prevEmailValid.current = isEmailValid;
+  }, [isEmailValid]);
+
+  useEffect(() => {
+    if (isPasswordValid && !prevPasswordValid.current) passwordCheckRef.current?.focus();
+    prevPasswordValid.current = isPasswordValid;
+  }, [isPasswordValid]);
+
+  useEffect(() => {
+    if (isPasswordMatch && !prevPasswordMatch.current) addressBtnRef.current?.focus();
+    prevPasswordMatch.current = !!isPasswordMatch;
+  }, [isPasswordMatch]);
 
   const isFormValid =
     isEmailValid &&
@@ -233,6 +256,7 @@ function RegisterForm() {
         <div className="auth-field">
           <label>비밀번호</label>
           <input
+            ref={passwordRef}
             name="password"
             type="password"
             value={form.password}
@@ -253,6 +277,7 @@ function RegisterForm() {
         <div className="auth-field">
           <label>비밀번호 확인</label>
           <input
+            ref={passwordCheckRef}
             name="passwordcheck"
             type="password"
             value={form.passwordcheck}
@@ -288,7 +313,7 @@ function RegisterForm() {
               placeholder="주소"
               className={form.address ? "input-success" : ""}
             />
-            <button type="button" className="sub-button" onClick={openAddressSearch}>
+            <button ref={addressBtnRef} type="button" className="sub-button" onClick={openAddressSearch}>
               주소검색
             </button>
           </div>

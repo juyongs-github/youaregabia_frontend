@@ -1,10 +1,12 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/auth-kfandom-core.css";
 import "../../styles/ci-auth-kfandom.css";
 
 import { sendSmsCode, verifySmsCode } from "../../api/sms";
 import { verifyCiMock } from "../../api/auth";
+
+const SMS_TIMEOUT = 180; // 3분
 
 export default function CiVerifyPage() {
   const navigate = useNavigate();
@@ -22,6 +24,27 @@ export default function CiVerifyPage() {
   const [ciError, setCiError] = useState<string | null>(null);
   const [loadingSms, setLoadingSms] = useState(false);
   const [loadingCi, setLoadingCi] = useState(false);
+
+  const [timer, setTimer] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const smsCodeInputRef = useRef<HTMLInputElement>(null);
+
+  function startTimer() {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setTimer(SMS_TIMEOUT);
+    timerRef.current = setInterval(() => {
+      setTimer((t) => {
+        if (t <= 1) { clearInterval(timerRef.current!); return 0; }
+        return t - 1;
+      });
+    }, 1000);
+  }
+
+  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+
+  function formatTimer(s: number) {
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  }
 
   const isNameValid = /^[가-힣]{2,10}$/.test(name.trim());
   const isNameError = name.length > 0 && !isNameValid;
@@ -74,11 +97,14 @@ export default function CiVerifyPage() {
   async function onSendSms() {
     setSmsError(null);
     setSmsMsg(null);
+    setSmsCode("");
     try {
       setLoadingSms(true);
       const res = await sendSmsCode(phone);
       setSmsSent(true);
       setSmsMsg(res.message || "인증번호가 발송되었습니다.");
+      startTimer();
+      setTimeout(() => smsCodeInputRef.current?.focus(), 100);
     } catch (e: any) {
       setSmsError(e.message || "인증번호 요청 실패");
     } finally {
@@ -189,13 +215,14 @@ export default function CiVerifyPage() {
               disabled={!canRequestSms}
               onClick={!smsVerified ? onSendSms : undefined}
             >
-              {smsVerified ? "인증완료" : loadingSms && !smsSent ? "전송 중..." : "인증번호 요청"}
+              {smsVerified ? "인증완료" : loadingSms && !smsSent ? "전송 중..." : smsSent ? "재요청" : "인증번호 요청"}
             </button>
           </div>
 
           {smsSent && !smsVerified && (
             <div className="ci-sms-row" style={{ marginTop: "15px" }}>
               <input
+                ref={smsCodeInputRef}
                 value={smsCode}
                 onChange={(e) => setSmsCode(e.target.value.slice(0, 6))}
                 placeholder="6자리 인증번호"
@@ -207,7 +234,7 @@ export default function CiVerifyPage() {
                 disabled={!canVerifySms}
                 onClick={onVerifySms}
               >
-                {loadingSms ? "확인 중..." : "인증하기"}
+                {loadingSms ? "확인 중..." : timer > 0 ? `인증하기 (${formatTimer(timer)})` : "인증하기"}
               </button>
             </div>
           )}
