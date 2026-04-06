@@ -51,17 +51,24 @@ export const goodsApi = {
     api.post<void>("/api/payments/confirm", data).then((r) => r.data),
 };
 
-// 장바구니 localStorage 유틸
+// 장바구니 localStorage 유틸 (유저별 분리)
+let _cartKey = "cart_anonymous";
+
+/** 로그인/로그아웃 시 호출 — 유저별 장바구니 키를 설정 */
+export const initCart = (email?: string) => {
+  _cartKey = email ? `cart_${email}` : "cart_anonymous";
+};
+
 export const cartUtils = {
   getCart: (): CartItem[] => {
     try {
-      return JSON.parse(localStorage.getItem("cart") || "[]");
+      return JSON.parse(localStorage.getItem(_cartKey) || "[]");
     } catch {
       return [];
     }
   },
   saveCart: (cart: CartItem[]) => {
-    localStorage.setItem("cart", JSON.stringify(cart));
+    localStorage.setItem(_cartKey, JSON.stringify(cart));
   },
   addItem: (item: CartItem) => {
     const cart = cartUtils.getCart();
@@ -82,6 +89,6 @@ export const cartUtils = {
     );
     cartUtils.saveCart(cart);
   },
-  clear: () => localStorage.removeItem("cart"),
+  clear: () => localStorage.removeItem(_cartKey),
   count: () => cartUtils.getCart().reduce((sum, c) => sum + c.quantity, 0),
 };

@@ -1,5 +1,6 @@
 import "./App.css";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { initCart } from "./api/goodsApi";
 import { PlayerProvider, usePlayer } from "./contexts/PlayerContext";
 import MusicPlayer from "./components/layout/MusicPlayer";
 import { useSelector, useDispatch } from "react-redux";
@@ -113,8 +114,14 @@ function App() {
   const dispatch = useDispatch();
   // 2. Redux Store에서 로그인 여부 가져오기
   const isLogin = useSelector((state: RootState) => state.auth.isLoggedIn);
+  const userEmail = useSelector((state: RootState) => state.auth.user?.email);
   const userRole = useSelector((state: RootState) => state.auth.user?.role);
   const loginRedirect = userRole === "ADMIN" ? "/admin" : "/home";
+
+  // 유저별 장바구니 키 초기화 (로그인/로그아웃 시 자동 전환)
+  useEffect(() => {
+    initCart(userEmail);
+  }, [userEmail]);
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith("/admin");
   // 매크로 방지 alert

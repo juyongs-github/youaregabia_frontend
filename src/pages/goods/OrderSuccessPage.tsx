@@ -87,13 +87,15 @@ export default function OrderSuccessPage() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={() => navigate("/goods")}
-            className="px-6 py-3 bg-red-600 hover:bg-red-700 rounded-xl font-semibold transition-colors"
+            className="px-6 py-3 rounded-xl font-semibold transition-colors"
+            style={{ background: "linear-gradient(135deg, #6d5efc, #ff5ca8)", color: "#fff" }}
           >
             굿즈샵으로 이동
           </button>
           <button
             onClick={() => navigate("/home")}
-            className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl font-semibold transition-colors"
+            className="px-6 py-3 rounded-xl font-semibold transition-colors"
+            style={{ background: "rgba(92,103,151,0.12)", color: "#4b5563", border: "1px solid rgba(92,103,151,0.2)" }}
           >
             홈으로 이동
           </button>
