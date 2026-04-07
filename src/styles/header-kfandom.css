@@ -35,18 +35,14 @@
 }
 
 .kf-header__brandMark {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  background: linear-gradient(135deg, #ff5ca8, #6d5efc);
-  color: #fff;
-  font-size: 16px;
-  font-weight: 800;
-  line-height: 1;
-  box-shadow: 0 10px 24px rgba(109, 94, 252, 0.24);
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(109, 94, 252, 0.30);
 }
 
 .kf-header__brandCopy {

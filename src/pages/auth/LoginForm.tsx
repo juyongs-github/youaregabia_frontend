@@ -78,7 +78,7 @@ function LoginForm() {
       {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       <header className="kf-auth-header">
         <Link to="/" className="kf-brand" aria-label="GAP Music 홈으로 이동">
-          <span className="kf-brand__logo">G</span>
+          <span className="kf-brand__logo"><img src="/favicon.svg" alt="GAP Music" width="38" height="38" style={{ borderRadius: "12px" }} /></span>
           <span className="kf-brand__text">GAP Music</span>
         </Link>
         <div className="kf-auth-header__actions">

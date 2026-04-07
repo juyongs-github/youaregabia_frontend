@@ -120,7 +120,9 @@ function Header({ showSearch = true, onMenuClick }: { showSearch?: boolean; onMe
           className="kf-header__brand"
           onClick={() => goPage(user?.role === "ADMIN" ? "/admin" : "/home")}
         >
-          <span className="kf-header__brandMark">G</span>
+          <span className="kf-header__brandMark">
+            <img src="/favicon.svg" alt="GAP Music" width="38" height="38" />
+          </span>
           <span className="kf-header__brandCopy">
             <strong className="kf-header__brandTitle">GAP Music</strong>
             <span className="kf-header__brandSub">모두가 소통하는 음악커뮤니티</span>
