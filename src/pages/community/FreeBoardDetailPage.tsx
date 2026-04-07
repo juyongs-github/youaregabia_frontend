@@ -71,6 +71,10 @@ const FreeBoardDetailPage = () => {
 
   const isMyBoard = !!(userEmail && board.writerEmail === userEmail);
 
+  console.log("userEmail:", userEmail);
+  console.log("writerEmail:", board?.writerEmail);
+  console.log("isMyBoard:", isMyBoard);
+
   return (
     <div className="kf-community-page kf-board-detail">
       {" "}

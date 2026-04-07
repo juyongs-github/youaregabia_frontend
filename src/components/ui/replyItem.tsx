@@ -140,7 +140,7 @@ const ReplyItem = ({ reply, boardId, onRefresh, isChild = false, isAnonymous = f
           {isChild && <span className="kf-reply-indent">ㄴ</span>}
 
           <div className="kf-reply-avatar">
-            {reply.imgUrl ? (
+            {!isAnonymous && reply.imgUrl ? (
               <img
                 src={`${import.meta.env.VITE_API_BASE_URL ?? ""}${reply.imgUrl}`}
                 alt={displayName}
