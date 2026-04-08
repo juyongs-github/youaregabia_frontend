@@ -4,6 +4,8 @@ import { FaBox, FaMinus, FaPlus, FaTrash, FaArrowLeft } from "react-icons/fa";
 import { cartUtils, type CartItem } from "../../api/goodsApi";
 import "../../styles/CartPage.kfandom.css";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+
 const DELIVERY_FEE = 3000;
 const FREE_DELIVERY_THRESHOLD = 50000;
 
@@ -61,7 +63,7 @@ export default function CartPage() {
                 <div className="w-20 h-20 bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {item.imageUrl ? (
                     <img
-                      src={`http://localhost:8080${item.imageUrl}`}
+                      src={`${API_BASE_URL}${item.imageUrl}`}
                       alt={item.name}
                       className="w-full h-full object-cover"
                     />
